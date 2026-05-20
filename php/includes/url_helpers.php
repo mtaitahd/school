@@ -12,6 +12,7 @@ function app_in_role_folder(string $role): bool {
 
 function app_web_path(string $path): string {
     $path = ltrim(str_replace('\\', '/', $path), '/');
+    $path = preg_replace('/\.php(?=[?#]|$)/', '', $path);
     $dir = app_script_dir();
 
     if (preg_match('#^(learner|teacher|parent|admin)/(.+)$#', $path, $m)) {
@@ -38,6 +39,7 @@ function app_site_url(string $path = ''): string {
 
 function app_learner_url(string $page, array $query = []): string {
     $page = ltrim($page, '/');
+    $page = preg_replace('/\.php(?=[?#]|$)/', '', $page);
     if (app_in_role_folder('learner')) {
         $url = $page;
     } else {

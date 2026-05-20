@@ -12,6 +12,7 @@ $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https'
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $base_url = $protocol . '://' . $host;
 $script = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+$script = preg_replace('/\.php$/', '', $script);
 $canonical = $canonical_path ?? $base_url . $script;
 if (!empty($_GET['lang'])) {
     $canonical .= (strpos($canonical, '?') !== false ? '&' : '?') . 'lang=' . urlencode($_GET['lang']);
