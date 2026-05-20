@@ -303,6 +303,49 @@ $activity_assignments = $database->fetchAll("
         </div>
         <?php endif; ?>
 
+        <!-- Activity Assignments (direct activity assignments to the learner) -->
+        <?php if (!empty($activity_assignments)): ?>
+            <div class="dashboard-card mb-30">
+                <div class="dashboard-card-header">
+                    <div class="dashboard-card-icon" style="background: var(--primary-blue);">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <h3 class="dashboard-card-title">Activity Assignments</h3>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--background-light);">
+                                <th style="padding: 12px; text-align: left;">Activity</th>
+                                <th style="padding: 12px; text-align: left;">Module</th>
+                                <th style="padding: 12px; text-align: left;">Assigned At</th>
+                                <th style="padding: 12px; text-align: left;">Status</th>
+                                <th style="padding: 12px; text-align: left;">Due</th>
+                                <th style="padding: 12px; text-align: left;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($activity_assignments as $aa): ?>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 12px;"><?php echo htmlspecialchars($aa['activity_name']); ?></td>
+                                    <td style="padding: 12px;"><?php echo htmlspecialchars($aa['module_name'] ?? '—'); ?></td>
+                                    <td style="padding: 12px;"><?php echo date('M d, Y H:i', strtotime($aa['assigned_at'])); ?></td>
+                                    <td style="padding: 12px;"><span style="background: var(--primary-blue); color:#fff; padding:4px 10px; border-radius:10px; font-size:0.8rem;"><?php echo htmlspecialchars(ucfirst($aa['status'])); ?></span></td>
+                                    <td style="padding: 12px;"><?php echo !empty($aa['due_date']) ? date('M d, Y', strtotime($aa['due_date'])) : '—'; ?></td>
+                                    <td style="padding: 12px;">
+                                        <a href="activity-preview.php?activity_id=<?php echo (int) $aa['activity_id']; ?>&child_id=<?php echo $child_id; ?>" 
+                                           class="btn-child btn-child-primary" style="min-height:35px;min-width:35px;font-size:0.85rem;padding:8px 12px;display:inline-block;text-decoration:none;">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Module Progress -->
         <?php if (!empty($module_progress)): ?>
             <div class="dashboard-card mb-30">
