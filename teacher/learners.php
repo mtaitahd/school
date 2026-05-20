@@ -147,6 +147,14 @@ if (isset($_GET['edit'])) {
         <script>setTimeout(function(){ document.querySelector('.alert-danger')?.remove(); }, 5000);</script>
     <?php endif; ?>
 
+    <?php if (isset($_GET['sms_error'])): ?>
+        <div class="alert alert-warning alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 9999; max-width: 420px;" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($_GET['sms_error']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <script>setTimeout(function(){ document.querySelector('.alert-warning')?.remove(); }, 7000);</script>
+    <?php endif; ?>
+
     <?php if (isset($success)): ?>
         <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 9999; max-width: 400px;" role="alert">
             <i class="fas fa-check-circle me-2"></i><?php echo htmlspecialchars($success); ?>

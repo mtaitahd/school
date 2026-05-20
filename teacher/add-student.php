@@ -82,9 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     try {
                         $smsService = new SmsService();
                         $message = "Kona Ya Hisabati: Your child account has been created. Use this claim code to connect your child to your parent dashboard: $claim_code";
-                        $smsService->sendSMS($parent_phone, $message, 'parent_link', 'parent', $student_id);
+                        $smsResult = $smsService->sendSMS($parent_phone, $message, 'parent_link', 'parent', $student_id);
+                        if (!$smsResult['success']) {
+                            $results[] = "Row " . ($index + 1) . ": SMS failed to parent " . $parent_phone . " - " . $smsResult['message'];
+                        }
                     } catch (Exception $e) {
                         error_log("SMS sending failed: " . $e->getMessage());
+                        $results[] = "Row " . ($index + 1) . ": SMS sending failed - " . $e->getMessage();
                     }
                 }
                 
@@ -152,18 +156,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     // Send SMS to parent with claim code if parent phone provided
                     $sms_sent = false;
+                    $sms_error_message = '';
                     if (!empty($parent_phone)) {
                         try {
                             $smsService = new SmsService();
                             $message = "Kona Ya Hisabati: Your child account has been created. Use this claim code to connect your child to your parent dashboard: $claim_code";
                             $smsResult = $smsService->sendSMS($parent_phone, $message, 'parent_link', 'parent', $student_id);
                             $sms_sent = $smsResult['success'];
+                            if (!$sms_sent) {
+                                $sms_error_message = ' SMS failed: ' . $smsResult['message'];
+                            }
                         } catch (Exception $e) {
                             error_log("SMS sending failed: " . $e->getMessage());
+                            $sms_error_message = ' SMS failed: ' . $e->getMessage();
                         }
                     }
                     
-                    $success = "Student created successfully! Claim Code: $claim_code" . ($sms_sent ? " (SMS sent to parent)" : "");
+                    $success = "Student created successfully! Claim Code: $claim_code" . ($sms_sent ? " (SMS sent to parent)" : "") . $sms_error_message;
                     
                     // Clear form
                     $_POST = [];
