@@ -85,7 +85,7 @@ foreach ($module_progress as &$module) {
 }
 
 $assignments = $database->fetchAll(
-    "SELECT a.title, a.description, a.due_date, a.assignment_type, sa.status, sa.grade, act.activity_id, act.activity_name, m.module_name, m.module_color
+    "SELECT a.title, a.description, a.due_date, a.assignment_type, sa.status, act.activity_id, act.activity_name, m.module_name, m.module_color
      FROM student_assignments sa
      JOIN assignments a ON sa.assignment_id = a.assignment_id
      LEFT JOIN activities act ON a.activity_id = act.activity_id
