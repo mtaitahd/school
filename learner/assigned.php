@@ -12,19 +12,8 @@ $dashboard_role = 'learner';
 $sidebar_active = 'assigned';
 $lang_page = 'assigned.php';
 
-// Debug: Check learner_id
-error_log("Learner ID: " . $learner_id);
-
-// Debug: Check if learner has any student_assignments
-$check_assignments = $database->fetchAll(
-    "SELECT * FROM student_assignments WHERE student_id = ?",
-    [$learner_id]
-);
-error_log("Student assignments count: " . count($check_assignments));
-error_log("Student assignments data: " . print_r($check_assignments, true));
-
 $assignments = $database->fetchAll(
-    "SELECT a.*, sa.status, sa.grade, sa.student_assignment_id, act.activity_id, act.activity_name, act.activity_type, m.module_name, m.module_color,
+    "SELECT a.*, sa.status, sa.student_assignment_id, act.activity_id, act.activity_name, act.activity_type, m.module_name, m.module_color,
             u.first_name AS teacher_first
      FROM student_assignments sa
      JOIN assignments a ON sa.assignment_id = a.assignment_id
@@ -35,9 +24,6 @@ $assignments = $database->fetchAll(
      ORDER BY sa.status ASC, a.due_date ASC, a.created_at DESC",
     [$learner_id]
 );
-
-error_log("Final assignments count: " . count($assignments));
-error_log("Final assignments data: " . print_r($assignments, true));
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang; ?>">
