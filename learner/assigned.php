@@ -52,7 +52,7 @@ $assignments = $database->fetchAll(
             <div class="row-child">
                 <?php foreach ($assignments as $a): ?>
                 <div class="col-child-3 mb-20">
-                    <article class="dashboard-card" style="border-left:6px solid <?php echo htmlspecialchars($a['module_color'] ?? 'var(--primary-blue)'); ?>;">
+                    <article class="dashboard-card assigned-card" style="border-left:6px solid <?php echo htmlspecialchars($a['module_color'] ?? 'var(--primary-blue)'); ?>;">
                         <h3><?php echo htmlspecialchars($a['title']); ?></h3>
                         <?php if ($a['activity_name']): ?>
                             <p style="color:var(--text-light);"><?php echo htmlspecialchars($a['activity_name']); ?></p>

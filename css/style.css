@@ -610,6 +610,41 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: var(--shadow-hover);
 }
 
+/* Compact variant used for the Assigned Activities list (smaller cards) */
+.assigned-card {
+    padding: 16px;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 8px;
+}
+.assigned-card h3 {
+    font-size: 1.05rem;
+    margin: 0 0 6px 0;
+}
+.assigned-card p {
+    font-size: 0.9rem;
+    margin: 0;
+    color: var(--text-light);
+}
+.assigned-card small {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+.assigned-card .badge {
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    border-radius: 10px;
+}
+.assigned-card .btn-child {
+    padding: 8px 12px;
+    font-size: 0.92rem;
+    min-height: 40px;
+    min-width: 100px;
+    border-radius: 10px;
+}
+
 .dashboard-card-header {
     display: flex;
     align-items: center;
@@ -727,6 +762,12 @@ h1, h2, h3, h4, h5, h6 {
     .module-card {
         min-height: 200px;
         padding: 20px;
+    }
+
+    /* make assigned cards even more compact on small screens */
+    .assigned-card {
+        padding: 12px;
+        min-height: 120px;
     }
     
     .module-card-icon {
