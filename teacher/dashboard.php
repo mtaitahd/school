@@ -70,9 +70,79 @@ $lang_page = 'dashboard.php';
                 <a href="learners.php" class="btn-child btn-child-secondary btn-child-large" style="text-decoration: none;">
                     <i class="fas fa-users" style="margin-right: 8px;"></i>Manage Learners
                 </a>
-                <a href="create-class.php" class="btn-child btn-child-info btn-child-large" style="text-decoration: none;">
+                <button type="button" class="btn-child btn-child-info btn-child-large" data-bs-toggle="modal" data-bs-target="#createClassModal">
                     <i class="fas fa-plus-circle" style="margin-right: 8px;"></i>Create Class
-                </a>
+                </button>
+            </div>
+        <?php if (isset($_GET['success']) && $_GET['success'] === 'class_created'): ?>
+            <div class="alert alert-success mx-auto" style="max-width: 700px;">
+                Class created successfully.
+            </div>
+        <?php endif; ?>
+
+        <!-- Create Class Modal -->
+        <div class="modal fade" id="createClassModal" tabindex="-1" aria-labelledby="createClassModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createClassModalLabel">Create a New Class</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="POST" action="create-class.php">
+                        <div class="modal-body">
+                            <div class="form-group-child">
+                                <label for="class_name" class="form-label-child">
+                                    <i class="fas fa-users me-2"></i>Class Name
+                                </label>
+                                <input type="text"
+                                       class="form-control-child"
+                                       id="class_name"
+                                       name="class_name"
+                                       placeholder="e.g. Standard One A"
+                                       required>
+                                <small style="color: var(--text-light);">Example: Standard One A, Standard Two B, etc.</small>
+                            </div>
+
+                            <div class="form-group-child">
+                                <label for="grade_level" class="form-label-child">
+                                    <i class="fas fa-layer-group me-2"></i>Select Grade Level
+                                </label>
+                                <select class="form-control-child"
+                                        id="grade_level"
+                                        name="grade_level"
+                                        required>
+                                    <option value="">-- Select Grade Level --</option>
+                                    <option value="Pre-Primary 1">Pre-Primary 1</option>
+                                    <option value="Pre-Primary 2">Pre-Primary 2</option>
+                                    <option value="Standard 1">Standard 1</option>
+                                    <option value="Standard 2">Standard 2</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group-child">
+                                <label for="academic_year" class="form-label-child">
+                                    <i class="fas fa-calendar me-2"></i>Academic Year
+                                </label>
+                                <input type="number"
+                                       class="form-control-child"
+                                       id="academic_year"
+                                       name="academic_year"
+                                       value="2026"
+                                       min="2024"
+                                       max="2030"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn-child btn-child-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                            <button type="submit" class="btn-child btn-child-primary">
+                                <i class="fas fa-plus-circle me-2"></i>Create Class
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
