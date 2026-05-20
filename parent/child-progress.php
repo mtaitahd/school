@@ -96,10 +96,11 @@ $assignments = $database->fetchAll(
 );
 
 $activity_assignments = $database->fetchAll("
-    SELECT aa.*, act.activity_name, m.module_name
+    SELECT aa.*, act.activity_name, m.module_name, aa.teacher_id, t.first_name AS teacher_first, t.last_name AS teacher_last
     FROM activity_assignments aa
     JOIN activities act ON aa.activity_id = act.activity_id
     JOIN modules m ON act.module_id = m.module_id
+    LEFT JOIN users t ON aa.teacher_id = t.user_id
     WHERE aa.learner_id = ?
     ORDER BY aa.assigned_at DESC
 ", [$child_id]);
@@ -318,6 +319,7 @@ $activity_assignments = $database->fetchAll("
                             <tr style="background: var(--background-light);">
                                 <th style="padding: 12px; text-align: left;">Activity</th>
                                 <th style="padding: 12px; text-align: left;">Module</th>
+                                <th style="padding: 12px; text-align: left;">Teacher</th>
                                 <th style="padding: 12px; text-align: left;">Assigned At</th>
                                 <th style="padding: 12px; text-align: left;">Status</th>
                                 <th style="padding: 12px; text-align: left;">Due</th>
@@ -327,17 +329,25 @@ $activity_assignments = $database->fetchAll("
                         <tbody>
                             <?php foreach ($activity_assignments as $aa): ?>
                                 <tr style="border-bottom: 1px solid #eee;">
-                                    <td style="padding: 12px;"><?php echo htmlspecialchars($aa['activity_name']); ?></td>
-                                    <td style="padding: 12px;"><?php echo htmlspecialchars($aa['module_name'] ?? '—'); ?></td>
-                                    <td style="padding: 12px;"><?php echo date('M d, Y H:i', strtotime($aa['assigned_at'])); ?></td>
-                                    <td style="padding: 12px;"><span style="background: var(--primary-blue); color:#fff; padding:4px 10px; border-radius:10px; font-size:0.8rem;"><?php echo htmlspecialchars(ucfirst($aa['status'])); ?></span></td>
-                                    <td style="padding: 12px;"><?php echo !empty($aa['due_date']) ? date('M d, Y', strtotime($aa['due_date'])) : '—'; ?></td>
-                                    <td style="padding: 12px;">
-                                        <a href="activity-preview.php?activity_id=<?php echo (int) $aa['activity_id']; ?>&child_id=<?php echo $child_id; ?>" 
-                                           class="btn-child btn-child-primary" style="min-height:35px;min-width:35px;font-size:0.85rem;padding:8px 12px;display:inline-block;text-decoration:none;">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                    </td>
+                                <td style="padding: 12px;"><?php echo htmlspecialchars($aa['activity_name']); ?></td>
+                                <td style="padding: 12px;"><?php echo htmlspecialchars($aa['module_name'] ?? '—'); ?></td>
+                                <td style="padding: 12px;">
+                                    <?php echo htmlspecialchars(trim(($aa['teacher_first'] ?? '') . ' ' . ($aa['teacher_last'] ?? '')) ?: '—'); ?>
+                                </td>
+                                <td style="padding: 12px;"><?php echo date('M d, Y H:i', strtotime($aa['assigned_at'])); ?></td>
+                                <td style="padding: 12px;"><span style="background: var(--primary-blue); color:#fff; padding:4px 10px; border-radius:10px; font-size:0.8rem;"><?php echo htmlspecialchars(ucfirst($aa['status'])); ?></span></td>
+                                <td style="padding: 12px;"><?php echo !empty($aa['due_date']) ? date('M d, Y', strtotime($aa['due_date'])) : '—'; ?></td>
+                                <td style="padding: 12px;">
+                                    <a href="activity-preview.php?activity_id=<?php echo (int) $aa['activity_id']; ?>&child_id=<?php echo $child_id; ?>" 
+                                       class="btn-child btn-child-primary" style="min-height:35px;min-width:35px;font-size:0.85rem;padding:8px 12px;display:inline-block;text-decoration:none;">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <?php if (!empty($aa['teacher_id'])): ?>
+                                        <button class="btn-child btn-child-secondary" style="min-height:35px;min-width:35px;font-size:0.85rem;padding:8px 12px;margin-left:8px;" onclick="openSendNoteModal(<?php echo (int)$aa['teacher_id']; ?>, <?php echo (int)$aa['activity_id']; ?>, '<?php echo htmlspecialchars(addslashes(trim(($aa['teacher_first'] ?? '') . ' ' . ($aa['teacher_last'] ?? '')))); ?>')">
+                                            <i class="fas fa-envelope"></i> Send Note
+                                        </button>
+                                    <?php endif; ?>
+                                </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -439,6 +449,45 @@ $activity_assignments = $database->fetchAll("
             </div>
         <?php endif; ?>
     </div>
+
+    <!-- Send Note Modal -->
+    <div id="sendNoteModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div class="activity-container" style="max-width: 600px; position: relative;">
+            <button onclick="hideSendNoteModal()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer;"><i class="fas fa-times"></i></button>
+            <h2 class="activity-title text-center">Send Note to Teacher</h2>
+            <p class="activity-instruction text-center" id="sendNoteTeacherLabel"></p>
+            <form method="POST" action="send-note.php">
+                <input type="hidden" name="child_id" id="note_child_id" value="<?php echo $child_id; ?>">
+                <input type="hidden" name="teacher_id" id="note_teacher_id" value="">
+                <input type="hidden" name="activity_id" id="note_activity_id" value="">
+                <div class="form-group-child">
+                    <label class="form-label-child">Message</label>
+                    <textarea name="message" id="note_message" class="form-control-child" rows="4" required placeholder="Write a short note to the teacher (e.g. I need support with question 2)"></textarea>
+                </div>
+                <div class="text-center mt-30">
+                    <button type="submit" class="btn-child btn-child-primary">Send Note</button>
+                    <button type="button" class="btn-child btn-child-secondary" onclick="hideSendNoteModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openSendNoteModal(teacherId, activityId, teacherName) {
+            document.getElementById('note_teacher_id').value = teacherId || '';
+            document.getElementById('note_activity_id').value = activityId || '';
+            document.getElementById('sendNoteTeacherLabel').textContent = teacherName ? ('To: ' + teacherName) : '';
+            document.getElementById('note_message').value = '';
+            const modal = document.getElementById('sendNoteModal');
+            modal.style.display = 'flex';
+            modal.classList.add('is-open');
+        }
+        function hideSendNoteModal() {
+            const modal = document.getElementById('sendNoteModal');
+            modal.style.display = 'none';
+            modal.classList.remove('is-open');
+        }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/main.js"></script>
