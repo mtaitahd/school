@@ -54,16 +54,22 @@ if ($student_id) {
     if ($class_id) {
         $database->insert('INSERT INTO class_enrollments (class_id, student_id) VALUES (?, ?)', [$class_id, $student_id]);
     }
+    $smsErrorParam = '';
     if ($parent_phone !== '') {
         try {
             $sms = new SmsService();
             $msg = "Kona Ya Hisabati: Your child account has been created. Username: $username, Claim Code: $claim_code. Use these to link your child on your parent dashboard.";
-            $sms->sendSMS($parent_phone, $msg, 'parent_link', 'parent', $student_id);
+            $smsResult = $sms->sendSMS($parent_phone, $msg, 'parent_link', 'parent', $student_id);
+            if (!$smsResult['success']) {
+                error_log('SMS: ' . $smsResult['message']);
+                $smsErrorParam = '&sms_error=' . urlencode($smsResult['message']);
+            }
         } catch (Exception $e) {
             error_log('SMS: ' . $e->getMessage());
+            $smsErrorParam = '&sms_error=' . urlencode($e->getMessage());
         }
     }
-    header('Location: ' . $redirect . '?success=1&code=' . urlencode($claim_code));
+    header('Location: ' . $redirect . '?success=1&code=' . urlencode($claim_code) . $smsErrorParam);
 } else {
     header('Location: ' . $redirect . '?error=create_failed');
 }
