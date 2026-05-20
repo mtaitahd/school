@@ -128,6 +128,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$selected_learner = $_POST['learner_id'] ?? '';
+$selected_activity = $_POST['activity_id'] ?? '';
+$selected_due_date = $_POST['due_date'] ?? '';
+$notes_value = trim($_POST['notes'] ?? '');
+
 $assignments = $database->fetchAll(
     "SELECT a.*, u.first_name, u.last_name, sa.status
      FROM assignments a
@@ -163,44 +168,69 @@ $assignments = $database->fetchAll(
         <?php endif; ?>
 
         <div class="dashboard-card mb-30">
-            <form method="POST" action="">
-                <div class="row-child">
-                    <div class="col-child-3 form-group-child">
-                        <label class="form-label-child">Learner</label>
-                        <select name="learner_id" class="form-control-child" required>
-                            <option value="">Select learner</option>
-                            <option value="all">All Registered Students</option>
-                            <?php foreach ($learners as $l): ?>
-                                <option value="<?php echo (int) $l['user_id']; ?>">
-                                    <?php echo htmlspecialchars($l['first_name'] . ' ' . $l['last_name']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-child-3 form-group-child">
-                        <label class="form-label-child">Activity</label>
-                        <select name="activity_id" class="form-control-child" required>
-                            <option value="">Select activity</option>
-                            <?php foreach ($activities as $a): ?>
-                                <option value="<?php echo (int) $a['activity_id']; ?>">
-                                    <?php echo htmlspecialchars($a['module_name'] . ' — ' . $a['activity_name']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-child-3 form-group-child">
-                        <label class="form-label-child">Due date (optional)</label>
-                        <input type="date" name="due_date" class="form-control-child">
-                    </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="dashboard-card-title">Assign Activity</h3>
+                    <p class="activity-instruction mb-0">Open the form to assign an activity to a learner or all students.</p>
                 </div>
-                <div class="form-group-child">
-                    <label class="form-label-child">Notes for learner/parent</label>
-                    <textarea name="notes" class="form-control-child" rows="2" placeholder="e.g. Practice before Friday"></textarea>
-                </div>
-                <button type="submit" class="btn-child btn-child-primary btn-child-large mt-20">
-                    <i class="fas fa-paper-plane me-2"></i>Assign Activity
+                <button type="button" class="btn-child btn-child-primary" data-bs-toggle="modal" data-bs-target="#assignActivityModal">
+                    <i class="fas fa-plus me-2"></i>Assign Activity
                 </button>
-            </form>
+            </div>
+        </div>
+
+        <div class="modal fade" id="assignActivityModal" tabindex="-1" aria-labelledby="assignActivityModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="assignActivityModalLabel">Assign Activity</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="POST" action="">
+                        <div class="modal-body">
+                            <div class="row-child">
+                                <div class="col-child-3 form-group-child">
+                                    <label class="form-label-child">Learner</label>
+                                    <select name="learner_id" class="form-control-child" required>
+                                        <option value="">Select learner</option>
+                                        <option value="all"<?php echo $selected_learner === 'all' ? ' selected' : ''; ?>>All Registered Students</option>
+                                        <?php foreach ($learners as $l): ?>
+                                            <option value="<?php echo (int) $l['user_id']; ?>"<?php echo $selected_learner === (string) $l['user_id'] ? ' selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($l['first_name'] . ' ' . $l['last_name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-child-3 form-group-child">
+                                    <label class="form-label-child">Activity</label>
+                                    <select name="activity_id" class="form-control-child" required>
+                                        <option value="">Select activity</option>
+                                        <?php foreach ($activities as $a): ?>
+                                            <option value="<?php echo (int) $a['activity_id']; ?>"<?php echo $selected_activity === (string) $a['activity_id'] ? ' selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($a['module_name'] . ' — ' . $a['activity_name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-child-3 form-group-child">
+                                    <label class="form-label-child">Due date (optional)</label>
+                                    <input type="date" name="due_date" class="form-control-child" value="<?php echo htmlspecialchars($selected_due_date); ?>">
+                                </div>
+                            </div>
+                            <div class="form-group-child">
+                                <label class="form-label-child">Notes for learner/parent</label>
+                                <textarea name="notes" class="form-control-child" rows="2" placeholder="e.g. Practice before Friday"><?php echo htmlspecialchars($notes_value); ?></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn-child btn-child-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Assign Activity
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <div class="dashboard-card">
@@ -235,6 +265,12 @@ $assignments = $database->fetchAll(
 
 <?php include '../php/includes/dashboard-end.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<?php if ($error && $_SERVER['REQUEST_METHOD'] === 'POST'): ?>
+<script>
+    var assignModal = new bootstrap.Modal(document.getElementById('assignActivityModal'));
+    assignModal.show();
+</script>
+<?php endif; ?>
 <script src="../js/main.js"></script>
 <script src="../js/dashboard.js"></script>
 </body>
