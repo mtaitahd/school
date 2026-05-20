@@ -63,6 +63,8 @@ if ($student_id) {
             if (!$smsResult['success']) {
                 error_log('SMS: ' . $smsResult['message']);
                 $smsErrorParam = '&sms_error=' . urlencode($smsResult['message']);
+            } elseif (!empty($smsResult['queued'])) {
+                $smsErrorParam = '&sms_error=' . urlencode('SMS request accepted; delivery pending. Please verify the parent phone number.');
             }
         } catch (Exception $e) {
             error_log('SMS: ' . $e->getMessage());

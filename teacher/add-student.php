@@ -162,9 +162,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $smsService = new SmsService();
                             $message = "Kona Ya Hisabati: Your child account has been created. Use this claim code to connect your child to your parent dashboard: $claim_code";
                             $smsResult = $smsService->sendSMS($parent_phone, $message, 'parent_link', 'parent', $student_id);
-                            $sms_sent = $smsResult['success'];
-                            if (!$sms_sent) {
+                            $sms_sent = $smsResult['success'] && empty($smsResult['queued']);
+                            if (!$smsResult['success']) {
                                 $sms_error_message = ' SMS failed: ' . $smsResult['message'];
+                            } elseif (!empty($smsResult['queued'])) {
+                                $sms_error_message = ' SMS request accepted; delivery pending. Please verify the parent phone number.';
                             }
                         } catch (Exception $e) {
                             error_log("SMS sending failed: " . $e->getMessage());

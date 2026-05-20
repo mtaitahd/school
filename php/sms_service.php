@@ -374,12 +374,28 @@ class SmsService {
                         }
                     }
 
-                    if (!empty($messageId) || $successStatus) {
+                    if (!empty($messageId)) {
                         $this->updateSMSLog($smsLogId, 'sent', $response);
 
                         return [
                             'success' => true,
+                            'queued' => false,
                             'message' => $successMessage,
+                            'response' => $responseData,
+                            'sms_log_id' => $smsLogId
+                        ];
+                    }
+
+                    if ($successStatus) {
+                        $pendingReason = 'Provider accepted request; awaiting delivery report';
+                        if (!empty($response) && !is_array($responseData)) {
+                            $pendingReason = 'Provider returned unparsed response; awaiting delivery report';
+                        }
+                        $this->updateSMSLog($smsLogId, 'pending', $response, $pendingReason);
+                        return [
+                            'success' => true,
+                            'queued' => true,
+                            'message' => 'SMS queued; awaiting delivery report',
                             'response' => $responseData,
                             'sms_log_id' => $smsLogId
                         ];
@@ -393,6 +409,7 @@ class SmsService {
                     $this->updateSMSLog($smsLogId, 'pending', $response, $pendingReason);
                     return [
                         'success' => true,
+                        'queued' => true,
                         'message' => 'SMS queued; awaiting delivery report',
                         'response' => $responseData,
                         'sms_log_id' => $smsLogId

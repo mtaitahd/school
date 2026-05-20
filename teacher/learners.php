@@ -66,7 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $smsResult = $smsService->sendSMS($student['parent_phone'], $message, 'parent_link', 'parent', $student_id);
             
             if ($smsResult['success']) {
-                $success = "SMS sent successfully to parent";
+                if (!empty($smsResult['queued'])) {
+                    $success = "SMS request accepted; delivery pending. Please verify the parent phone number.";
+                } else {
+                    $success = "SMS sent successfully to parent";
+                }
             } else {
                 $error = "Failed to send SMS: " . $smsResult['message'];
             }
