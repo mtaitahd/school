@@ -22,13 +22,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (!empty($title) && !empty($assignment_type)) {
         // Insert new assignment into database
-        $result = $database->execute(
+        $assignment_id = $database->insert(
             "INSERT INTO assignments (teacher_id, class_id, title, description, assignment_type, due_date, points, is_published, created_at) 
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())",
             [$teacher_id, $class_id, $title, $description, $assignment_type, $due_date, $points, $is_published]
         );
         
-        if ($result) {
+        if ($assignment_id) {
+            // Link assignment to students in the selected class
+            if ($class_id) {
+                $students = $database->fetchAll(
+                    "SELECT student_id FROM class_enrollments WHERE class_id = ?",
+                    [$class_id]
+                );
+                foreach ($students as $student) {
+                    $database->insert(
+                        "INSERT INTO student_assignments (assignment_id, student_id) VALUES (?, ?)",
+                        [$assignment_id, $student['student_id']]
+                    );
+                }
+            }
             header('Location: dashboard.php?success=assignment_created');
             exit;
         } else {
