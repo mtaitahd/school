@@ -1,0 +1,116 @@
+<?php
+/**
+ * Bilingual UI strings (English / Kiswahili)
+ */
+if (!isset($current_lang)) {
+    $current_lang = isset($_GET['lang']) ? $_GET['lang'] : ($_SESSION['lang'] ?? 'en');
+}
+if (session_status() === PHP_SESSION_ACTIVE && isset($current_lang)) {
+    $_SESSION['lang'] = $current_lang;
+}
+
+$ui = [
+    'en' => [
+        'brand_sub' => 'Learn • Enjoy • Succeed',
+        'nav_home' => 'Home',
+        'nav_start' => 'Start Learning',
+        'nav_learner' => 'Start Learning',
+        'nav_learner_login' => 'Learner Login',
+        'nav_teacher' => 'Teacher Dashboard',
+        'nav_teacher_login' => 'Teacher Login',
+        'nav_teacher_dashboard' => 'Teacher Dashboard',
+        'nav_parent' => 'Parent Guide',
+        'nav_parent_login' => 'Parent Login',
+        'nav_parent_dashboard' => 'Parent Dashboard',
+        'nav_logout' => 'Logout',
+        'nav_login' => 'Login',
+        'nav_about' => 'About',
+        'nav_contact' => 'Contact',
+        'sb_teacher_dashboard' => 'Dashboard',
+        'sb_teacher_assign' => 'Assign Activity',
+        'sb_teacher_progress' => 'Learner Progress',
+        'sb_teacher_activities' => 'Activity Library',
+        'sb_parent_dashboard' => 'Dashboard',
+        'sb_parent_add_child' => 'Add Child',
+        'sb_parent_claim' => 'Claim Child',
+        'nav_teacher_learners' => 'Learners',
+        'sb_learner_home' => 'My Corner',
+        'sb_learner_assigned' => 'Assigned Activities',
+        'sb_admin_dashboard' => 'Dashboard',
+        'sb_admin_upload' => 'Upload Content',
+        'sb_admin_users' => 'Manage Users',
+        'sb_admin_modules' => 'Modules',
+        'hero_title' => 'Welcome to Kona Ya Hisabati!',
+        'hero_sub' => 'Digital Mathematics Learning Corner for Pre-Primary learners in Tanzania',
+        'btn_start' => 'Start Learning',
+        'btn_teacher' => 'Teacher Dashboard',
+        'btn_parent' => 'Parent Guide',
+        'btn_about' => 'About Kona Ya Hisabati',
+        'audio_welcome' => 'Touch here to start learning!',
+        'categories_title' => 'Choose a Math Activity',
+        'categories_sub' => 'Tap a colourful picture to begin',
+        'activity_home' => 'Home',
+        'activity_back' => 'Back',
+        'activity_audio' => 'Listen',
+        'activity_next' => 'Next Activity',
+        'footer_about' => 'About',
+        'footer_contact' => 'Contact',
+        'footer_terms' => 'Terms',
+        'footer_tagline' => 'Interactive numeracy for Tanzanian early grade learners.',
+    ],
+    'sw' => [
+        'brand_sub' => 'Jifunze • Furahia • Fanikiwa',
+        'nav_home' => 'Nyumbani',
+        'nav_start' => 'Anza Kujifunza',
+        'nav_learner' => 'Anza Kujifunza',
+        'nav_learner_login' => 'Ingia Mwanafunzi',
+        'nav_teacher' => 'Dashibodi ya Mwalimu',
+        'nav_teacher_login' => 'Ingia Mwalimu',
+        'nav_teacher_dashboard' => 'Dashibodi ya Mwalimu',
+        'nav_parent' => 'Mwongozo wa Mzazi',
+        'nav_parent_login' => 'Ingia Mzazi',
+        'nav_parent_dashboard' => 'Dashibodi ya Mzazi',
+        'nav_logout' => 'Toka',
+        'nav_login' => 'Ingia',
+        'nav_about' => 'Kuhusu',
+        'nav_contact' => 'Wasiliana',
+        'sb_teacher_dashboard' => 'Dashibodi',
+        'sb_teacher_assign' => 'Panga Shughuli',
+        'sb_teacher_progress' => 'Maendeleo',
+        'sb_teacher_activities' => 'Shughuli',
+        'sb_parent_dashboard' => 'Dashibodi',
+        'sb_parent_add_child' => 'Ongeza Mtoto',
+        'sb_parent_claim' => 'Dai Mtoto',
+        'nav_teacher_learners' => 'Wanafunzi',
+        'sb_learner_home' => 'Kona Yangu',
+        'sb_learner_assigned' => 'Shughuli Zilizopangwa',
+        'sb_admin_dashboard' => 'Dashibodi',
+        'sb_admin_upload' => 'Pakia Maudhui',
+        'sb_admin_users' => 'Watumiaji',
+        'sb_admin_modules' => 'Moduli',
+        'hero_title' => 'Karibu Kona Ya Hisabati!',
+        'hero_sub' => 'Kona ya Kujifunza Hisabati kwa watoto wa Awali (Pre-Primary) Tanzania',
+        'btn_start' => 'Anza Kujifunza',
+        'btn_teacher' => 'Dashibodi ya Mwalimu',
+        'btn_parent' => 'Mwongozo wa Mzazi',
+        'btn_about' => 'Kuhusu Kona Ya Hisabati',
+        'audio_welcome' => 'Gusa hapa kuanza kujifunza!',
+        'categories_title' => 'Chagua Shughuli ya Hisabati',
+        'categories_sub' => 'Gusa picha ili kuanza',
+        'activity_home' => 'Nyumbani',
+        'activity_back' => 'Rudi',
+        'activity_audio' => 'Sikiliza',
+        'activity_next' => 'Shughuli Inayofuata',
+        'footer_about' => 'Kuhusu',
+        'footer_contact' => 'Wasiliana',
+        'footer_terms' => 'Masharti',
+        'footer_tagline' => 'Hisabati shirikishi kwa watoto wa awali Tanzania.',
+    ],
+];
+
+$t = $ui[$current_lang === 'sw' ? 'sw' : 'en'];
+
+function ui_lang_url($page, $lang) {
+    $sep = (strpos($page, '?') !== false) ? '&' : '?';
+    return $page . $sep . 'lang=' . urlencode($lang);
+}

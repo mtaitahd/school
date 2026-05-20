@@ -1,0 +1,13 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard layout verify</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="../css/style.css">
+<style>body.dashboard-body::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:#f00;z-index:9999;pointer-events:none;}</style>
+</head>
+<body class="dashboard-body"><div class="dashboard-shell" id="dashboardShell"><aside class="dashboard-sidebar" id="dashboardSidebar"><nav class="sidebar-nav"><ul class="sidebar-menu"><li class="sidebar-item active"><a href="#" class="sidebar-link"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li></ul></nav></aside><div class="dashboard-right"><header class="dashboard-topbar"><button type="button" class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button><div class="dashboard-topbar-leading"><h1 class="dashboard-page-title">Layout Verify</h1></div></header><main class="dashboard-main"><p class="activity-instruction">Red line = viewport top. Topbar should touch it.</p></main></div></div><div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div><script src="../js/dashboard.js"></script><script src="dashboard-layout-debug.js"></script></body>
+</html>
