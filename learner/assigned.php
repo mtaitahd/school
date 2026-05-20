@@ -62,15 +62,24 @@ $assignments = $database->fetchAll(
                         <?php endif; ?>
                         <p><small><?php echo $current_lang === 'sw' ? 'Mwalimu' : 'Teacher'; ?>: <?php echo htmlspecialchars($a['teacher_first'] ?? 'N/A'); ?></small></p>
                         <?php if ($a['due_date']): ?><p><small><?php echo $current_lang === 'sw' ? 'Tarehe' : 'Due'; ?>: <?php echo htmlspecialchars(date('M d, Y', strtotime($a['due_date']))); ?></small></p><?php endif; ?>
-                        <span class="badge" style="background:var(--primary-yellow);padding:4px 10px;border-radius:12px;"><?php echo htmlspecialchars(ucfirst($a['status'])); ?></span>
-                        <?php if ($a['activity_id']): ?>
-                            <a href="activity.php?activity_id=<?php echo (int) $a['activity_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-20" style="display:inline-block;">
-                                <i class="fas fa-play me-2"></i><?php echo $current_lang === 'sw' ? 'Anza' : 'Start'; ?>
-                            </a>
+                        <?php
+                            $status_text = htmlspecialchars(ucfirst($a['status']));
+                            $status_bg = 'var(--primary-yellow)';
+                            if (($a['status'] ?? '') === 'completed') { $status_bg = 'var(--primary-green)'; }
+                        ?>
+                        <span class="badge" style="background:<?php echo $status_bg; ?>;padding:4px 10px;border-radius:12px;"><?php echo $status_text; ?></span>
+                        <?php if (($a['status'] ?? '') === 'completed'): ?>
+                            <span class="btn-child btn-child-secondary mt-20" style="display:inline-block; cursor:default; opacity:0.9;"><?php echo $current_lang === 'sw' ? 'Imefanyika' : 'Done'; ?></span>
                         <?php else: ?>
-                            <a href="categories.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-20" style="display:inline-block;">
-                                <i class="fas fa-play me-2"></i><?php echo $current_lang === 'sw' ? 'Anza Kujifunza' : 'Start Learning'; ?>
-                            </a>
+                            <?php if ($a['activity_id']): ?>
+                                <a href="activity.php?activity_id=<?php echo (int) $a['activity_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-20" style="display:inline-block;">
+                                    <i class="fas fa-play me-2"></i><?php echo $current_lang === 'sw' ? 'Anza' : 'Start'; ?>
+                                </a>
+                            <?php else: ?>
+                                <a href="categories.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-20" style="display:inline-block;">
+                                    <i class="fas fa-play me-2"></i><?php echo $current_lang === 'sw' ? 'Anza Kujifunza' : 'Start Learning'; ?>
+                                </a>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </article>
                 </div>
