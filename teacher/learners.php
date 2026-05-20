@@ -33,10 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Handle update learner action
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_learner') {
     $student_id = intval($_POST['student_id']);
-    $first_name = trim($_POST['first_name']);
-    $last_name = trim($_POST['last_name']);
-    $phone = trim($_POST['phone']);
-    $parent_phone = trim($_POST['parent_phone']);
+    $first_name = trim($_POST['first_name'] ?? '');
+    $last_name = trim($_POST['last_name'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $parent_phone = trim($_POST['parent_phone'] ?? '');
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     
     if (!empty($first_name) && !empty($last_name)) {
@@ -246,6 +246,7 @@ if (isset($_GET['edit'])) {
                                                     '<?php echo htmlspecialchars($learner['first_name'], ENT_QUOTES); ?>', 
                                                     '<?php echo htmlspecialchars($learner['last_name'], ENT_QUOTES); ?>', 
                                                     '<?php echo htmlspecialchars($learner['username'], ENT_QUOTES); ?>', 
+                                                    '<?php echo htmlspecialchars($learner['phone'] ?? '', ENT_QUOTES); ?>', 
                                                     '<?php echo htmlspecialchars($learner['parent_phone'] ?? '', ENT_QUOTES); ?>', 
                                                     <?php echo $learner['is_active'] ? 'true' : 'false'; ?>)" 
                                                 title="Edit Learner">
@@ -375,6 +376,10 @@ if (isset($_GET['edit'])) {
                         <small style="color: var(--text-light);">Username cannot be changed</small>
                     </div>
                     <div class="form-group-child">
+                        <label class="form-label-child">Phone Number</label>
+                        <input type="text" class="form-control-child" name="phone" id="edit_phone" placeholder="+255XXXXXXXXX">
+                    </div>
+                    <div class="form-group-child">
                         <label class="form-label-child">Parent Phone Number</label>
                         <input type="text" class="form-control-child" name="parent_phone" id="edit_parent_phone" placeholder="+255XXXXXXXXX">
                     </div>
@@ -413,11 +418,12 @@ if (isset($_GET['edit'])) {
             });
         }
 
-        function openEditLearnerModal(studentId, firstName, lastName, username, parentPhone, isActive) {
+        function openEditLearnerModal(studentId, firstName, lastName, username, phone, parentPhone, isActive) {
             document.getElementById('edit_student_id').value = studentId;
             document.getElementById('edit_first_name').value = firstName;
             document.getElementById('edit_last_name').value = lastName;
             document.getElementById('edit_username').value = username;
+            document.getElementById('edit_phone').value = phone;
             document.getElementById('edit_parent_phone').value = parentPhone;
             document.getElementById('edit_is_active').checked = isActive;
             openModal('editLearnerModal');
