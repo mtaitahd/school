@@ -51,6 +51,15 @@ if ($completed) {
          WHERE learner_id = ? AND activity_id = ? AND status != 'completed'",
         [$user_id, $activity_id]
     );
+
+    // Also mark any related student_assignments (assignment entries that reference this activity) as completed
+    $database->execute(
+        "UPDATE student_assignments sa
+         JOIN assignments a ON sa.assignment_id = a.assignment_id
+         SET sa.status = 'completed'
+         WHERE sa.student_id = ? AND a.activity_id = ? AND sa.status != 'completed'",
+        [$user_id, $activity_id]
+    );
 }
 
 echo json_encode(['ok' => true, 'score' => $score, 'stars' => $stars, 'completed' => (bool) $completed]);
