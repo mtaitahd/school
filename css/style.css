@@ -337,13 +337,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .activity-title {
-    font-size: 2.5rem;
+    font-size: 3rem;
     color: var(--primary-blue);
     margin-bottom: 10px;
 }
 
 .activity-instruction {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     color: var(--text-light);
 }
 
@@ -847,9 +847,9 @@ body > nav.navbar-modern:first-of-type {
 }
 
 .navbar-logo {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
     background: transparent;
     padding: 0;
     object-fit: contain;
@@ -2289,15 +2289,15 @@ header.dashboard-topbar {
 }
 
 .dashboard-topbar .navbar-logo {
-    width: 40px;
-    height: 40px;
-    padding: 3px;
+    width: 60px;
+    height: 60px;
+    padding: 4px;
     flex-shrink: 0;
 }
 
 .dashboard-topbar-brand .brand-main {
     font-family: 'Poppins', sans-serif;
-    font-size: 1.15rem;
+    font-size: 1.3rem;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
