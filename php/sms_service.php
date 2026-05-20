@@ -219,6 +219,17 @@ class SmsService {
     }
 
     /**
+     * Normalize phone number for API payload (digits only, no leading +)
+     * 
+     * @param string $phone - Phone number to normalize
+     * @return string - API-friendly phone number
+     */
+    private function formatPhoneForApi($phone) {
+        $normalized = $this->normalizePhone($phone);
+        return ltrim($normalized, '+');
+    }
+
+    /**
      * Log SMS to database
      * 
      * @param string $phone - Phone number
@@ -351,9 +362,19 @@ class SmsService {
                     }
 
                 } else {
+                    // Accept explicit success statuses if returned by provider.
+                    $successStatus = false;
+                    if (is_array($responseData)) {
+                        $lowerKeys = array_change_key_case($responseData, CASE_LOWER);
+                        if (isset($lowerKeys['success']) && ($lowerKeys['success'] === true || $lowerKeys['success'] === 'true')) {
+                            $successStatus = true;
+                        }
+                        if (isset($lowerKeys['status']) && in_array(strtolower((string)$lowerKeys['status']), ['success', 'accepted', 'queued', 'sent'], true)) {
+                            $successStatus = true;
+                        }
+                    }
 
-                    // If message_id exists => provider accepted => mark as sent/queued (not delivered)
-                    if (!empty($messageId)) {
+                    if (!empty($messageId) || $successStatus) {
                         $this->updateSMSLog($smsLogId, 'sent', $response);
 
                         return [
@@ -364,8 +385,12 @@ class SmsService {
                         ];
                     }
 
-                    // No message_id => keep it pending for later DLR sync
-                    $this->updateSMSLog($smsLogId, 'pending', $response, 'Provider accepted but no message_id returned; awaiting delivery report');
+                    // No message_id or explicit success state => keep it pending for later DLR sync
+                    $pendingReason = 'Provider accepted but no message_id returned; awaiting delivery report';
+                    if (!empty($response) && !is_array($responseData)) {
+                        $pendingReason = 'Provider returned unparsed response; awaiting delivery report';
+                    }
+                    $this->updateSMSLog($smsLogId, 'pending', $response, $pendingReason);
                     return [
                         'success' => true,
                         'message' => 'SMS queued; awaiting delivery report',
@@ -429,8 +454,9 @@ class SmsService {
         // Prepare POST data for Webline API endpoint
         // Webline Africa v3 API JSON format
         $postData = [
-            'recipient' => $phone,
+            'recipient' => $this->formatPhoneForApi($phone),
             'sender_id' => $this->senderId,
+            'sender' => $this->senderId,
             'message' => $message
         ];
         
