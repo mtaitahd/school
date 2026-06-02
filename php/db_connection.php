@@ -113,4 +113,4 @@ class Database {
 
 // Create global database instance
 $database = new Database();
-<script src="sweetalert.min.js"></script>
+
