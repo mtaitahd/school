@@ -1,1 +1,3 @@
-.gitignore
+error_log
+uploads/
+.cpanel.yml
