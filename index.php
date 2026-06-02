@@ -1,6 +1,7 @@
 <?php
 require_once 'php/db_connection.php';
 require_once 'php/includes/lang.php';
+require_once 'php/includes/announcements-data.php';
 
 $current_lang = isset($_GET['lang']) ? $_GET['lang'] : 'en';
 $base_path = '';
@@ -22,6 +23,20 @@ $page_description = 'Kona Ya Hisabati — interactive Pre-Primary mathematics fo
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="page-child">
+    <?php if ($kyh_urgent): ?>
+    <div class="kyh-topbar-wrap" id="kyhTopbar">
+        <div class="kyh-topbar-inner">
+            <span class="kyh-topbar-icon"><i class="fas fa-bullhorn"></i></span>
+            <span class="kyh-topbar-text">
+                <strong><?php echo $current_lang === 'sw' ? 'TANGAZO LA DAWA' : 'ANNOUNCEMENT'; ?>:</strong>
+                <?php echo htmlspecialchars($kyh_urgent['title']); ?>
+            </span>
+            <button type="button" class="kyh-topbar-close" onclick="document.getElementById('kyhTopbar').style.display='none'" aria-label="Close announcement">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <?php endif; ?>
     <?php include 'php/includes/header.php'; ?>
     <section class="hero-section" aria-labelledby="heroTitle">
         <div class="hero-background">
@@ -148,6 +163,51 @@ $page_description = 'Kona Ya Hisabati — interactive Pre-Primary mathematics fo
         </div>
     </section>
 
+    <?php if (!empty($kyh_standard)): ?>
+    <section class="kyh-board-section">
+        <div class="container-child">
+            <div class="kyh-board-header">
+                <div class="title-underline"></div>
+                <h2 class="kyh-board-title"><?php echo $current_lang === 'sw' ? 'Mabao ya Matangazo' : 'Notice Board'; ?></h2>
+                <p class="kyh-board-subtitle"><?php echo $current_lang === 'sw' ? 'Habari na masasisho ya hivi punde kutoka kwa Kona Ya Hisabati' : 'Latest news and updates from Kona Ya Hisabati'; ?></p>
+            </div>
+            <div class="kyh-board-grid">
+                <?php foreach ($kyh_standard as $i => $note): ?>
+                <article class="kyh-board-card" style="animation:cardFadeIn 0.5s ease forwards;animation-delay:<?php echo $i * 0.1; ?>s;opacity:0;">
+                    <div class="kyh-board-card-date">
+                        <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                        <?php echo date('F j, Y', strtotime($note['created_at'])); ?>
+                    </div>
+                    <h3 class="kyh-board-card-title"><?php echo htmlspecialchars($note['title']); ?></h3>
+                    <p class="kyh-board-card-excerpt"><?php echo htmlspecialchars(mb_strimwidth(strip_tags($note['content']), 0, 150, '...')); ?></p>
+                    <button type="button" class="kyh-board-card-btn" onclick="kyhOpenModal(<?php echo $note['announcement_id']; ?>)">
+                        <?php echo $current_lang === 'sw' ? 'Soma Zaidi' : 'Read More'; ?> <i class="fas fa-arrow-right"></i>
+                    </button>
+                </article>
+
+                <div class="kyh-modal-overlay" id="kyhModal<?php echo $note['announcement_id']; ?>">
+                    <div class="kyh-modal" role="dialog" aria-modal="true">
+                        <div class="kyh-modal-header">
+                            <h3><?php echo htmlspecialchars($note['title']); ?></h3>
+                            <button type="button" class="kyh-modal-close" onclick="kyhCloseModal(<?php echo $note['announcement_id']; ?>)">&times;</button>
+                        </div>
+                        <div class="kyh-modal-body">
+                            <div class="kyh-modal-date">
+                                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                                <?php echo date('F j, Y', strtotime($note['created_at'])); ?>
+                            </div>
+                            <?php echo nl2br(htmlspecialchars($note['content'])); ?>
+                        </div>
+                        <div class="kyh-modal-footer">
+                            <button type="button" class="kyh-board-card-btn" onclick="kyhCloseModal(<?php echo $note['announcement_id']; ?>)"><?php echo $current_lang === 'sw' ? 'Funga' : 'Close'; ?></button>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
     <?php include 'php/includes/footer.php'; ?>
 
     <div class="a11y-toolbar" role="group" aria-label="Accessibility options">
@@ -158,5 +218,27 @@ $page_description = 'Kona Ya Hisabati — interactive Pre-Primary mathematics fo
     <audio id="audioPlayer" preload="auto"></audio>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
+    <script>
+    function kyhOpenModal(id) {
+        var el = document.getElementById('kyhModal' + id);
+        if (el) el.classList.add('active');
+    }
+    function kyhCloseModal(id) {
+        var el = document.getElementById('kyhModal' + id);
+        if (el) el.classList.remove('active');
+    }
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('kyh-modal-overlay')) {
+            e.target.classList.remove('active');
+        }
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.kyh-modal-overlay.active').forEach(function(m) {
+                m.classList.remove('active');
+            });
+        }
+    });
+    </script>
 </body>
 </html>

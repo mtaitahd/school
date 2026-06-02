@@ -35,6 +35,7 @@ $menus = [
     ],
     'admin' => [
         ['id' => 'dashboard', 'href' => 'dashboard.php', 'icon' => 'fa-tachometer-alt', 'label' => $t['sb_admin_dashboard'] ?? 'Dashboard'],
+        ['id' => 'announcements', 'href' => 'announcements.php', 'icon' => 'fa-bullhorn', 'label' => $t['sb_admin_announcements'] ?? 'Announcements'],
         ['id' => 'users', 'href' => 'users.php', 'icon' => 'fa-users-cog', 'label' => $t['sb_admin_users'] ?? 'Manage Users'],
         ['id' => 'modules', 'href' => 'modules.php', 'icon' => 'fa-cubes', 'label' => $t['sb_admin_modules'] ?? 'Modules'],
         ['id' => 'upload', 'href' => 'upload-content.php', 'icon' => 'fa-cloud-upload-alt', 'label' => $t['sb_admin_upload'] ?? 'Upload Content'],

@@ -5716,3 +5716,341 @@ body {
         font-size: 1rem;
     }
 }
+
+/* =====================================================
+   ANNOUNCEMENTS — Top Bar (kyh-topbar-*) & Notice Board (kyh-board-*)
+   ===================================================== */
+
+/* --- Top Urgent Announcement Bar --- */
+.kyh-topbar-wrap {
+    background: linear-gradient(90deg, var(--primary-red) 0%, #e55555 100%);
+    color: #fff;
+    padding: 0;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 1001;
+    overflow: hidden;
+}
+
+.kyh-topbar-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.kyh-topbar-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    animation: kyhPulse 2s ease-in-out infinite;
+}
+
+@keyframes kyhPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.kyh-topbar-text {
+    font-weight: 600;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.kyh-topbar-text strong {
+    margin-right: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.kyh-topbar-close {
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.kyh-topbar-close:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* --- Notice Board Section --- */
+.kyh-board-section {
+    padding: 48px 0 32px;
+    background: var(--background-light);
+}
+
+.kyh-board-header {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.kyh-board-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--navbar-dark);
+    margin: 0 0 8px;
+}
+
+.kyh-board-subtitle {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin: 0;
+}
+
+.kyh-board-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.kyh-board-card {
+    background: var(--background-white);
+    border-radius: var(--border-radius-lg);
+    padding: 28px 24px 24px;
+    box-shadow: var(--shadow-soft);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.kyh-board-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--primary-yellow);
+}
+
+.kyh-board-card-date {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.kyh-board-card-date i {
+    color: var(--primary-blue);
+    font-size: 0.75rem;
+}
+
+.kyh-board-card-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--navbar-dark);
+    margin: 0 0 10px;
+    line-height: 1.35;
+}
+
+.kyh-board-card-excerpt {
+    font-size: 0.92rem;
+    color: var(--text-light);
+    line-height: 1.6;
+    margin: 0 0 18px;
+    flex: 1;
+}
+
+.kyh-board-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: var(--primary-blue);
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    align-self: flex-start;
+}
+
+.kyh-board-card-btn:hover {
+    background: var(--primary-blue-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.35);
+}
+
+.kyh-board-card-btn i {
+    font-size: 0.75rem;
+    transition: transform 0.2s;
+}
+
+.kyh-board-card-btn:hover i {
+    transform: translateX(3px);
+}
+
+.kyh-board-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-light);
+}
+
+.kyh-board-empty i {
+    font-size: 2.5rem;
+    color: var(--primary-blue);
+    opacity: 0.4;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.kyh-board-empty p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Notice Board Read More Modal */
+.kyh-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.kyh-modal-overlay.active {
+    display: flex;
+}
+
+.kyh-modal {
+    background: #fff;
+    border-radius: var(--border-radius-lg);
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: kyhModalIn 0.3s ease;
+}
+
+@keyframes kyhModalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.kyh-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.kyh-modal-header h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.2rem;
+    margin: 0;
+    color: var(--navbar-dark);
+}
+
+.kyh-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-light);
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.kyh-modal-close:hover {
+    color: var(--primary-red);
+}
+
+.kyh-modal-body {
+    padding: 20px 24px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-dark);
+}
+
+.kyh-modal-date {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.kyh-modal-footer {
+    padding: 16px 24px 20px;
+    border-top: 1px solid #eee;
+    text-align: right;
+}
+
+.kyh-modal-footer .kyh-board-card-btn {
+    align-self: auto;
+}
+
+/* --- Responsive --- */
+@media (max-width: 992px) {
+    .kyh-board-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .kyh-topbar-inner {
+        padding: 8px 16px;
+        font-size: 0.82rem;
+        gap: 8px;
+    }
+
+    .kyh-topbar-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+
+    .kyh-board-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .kyh-board-section {
+        padding: 32px 0 24px;
+    }
+
+    .kyh-board-card {
+        padding: 20px 18px 18px;
+    }
+
+    .kyh-modal {
+        max-width: 100%;
+        margin: 10px;
+        max-height: 90vh;
+    }
+}
