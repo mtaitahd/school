@@ -267,7 +267,7 @@ include '../php/includes/dashboard-start.php';
             </button>
             <h2 class="activity-title text-center">Claim Child</h2>
             <p class="activity-instruction text-center">Enter the claim code provided by the teacher</p>
-            <form method="POST" action="claim-child.php">
+            <form method="POST" action="claim-child">
                 <div class="form-group-child">
                     <label class="form-label-child">Claim Code</label>
                     <input type="text" class="form-control-child" name="claim_code" required

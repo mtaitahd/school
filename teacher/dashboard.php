@@ -67,7 +67,7 @@ $lang_page = 'dashboard.php';
                 <a href="learners.php?add=1" class="btn-child btn-child-primary" style="text-decoration: none;">
                     <i class="fas fa-user-plus me-2"></i>Add Student
                 </a>
-                <a href="learners.php" class="btn-child btn-child-secondary btn-child-large" style="text-decoration: none;">
+                <a href="learners" class="btn-child btn-child-secondary btn-child-large" style="text-decoration: none;">
                     <i class="fas fa-users" style="margin-right: 8px;"></i>Manage Learners
                 </a>
                 <button type="button" class="btn-child btn-child-info btn-child-large" data-bs-toggle="modal" data-bs-target="#createClassModal">
@@ -88,7 +88,7 @@ $lang_page = 'dashboard.php';
                         <h5 class="modal-title" id="createClassModalLabel">Create a New Class</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="POST" action="create-class.php">
+                    <form method="POST" action="create-class">
                         <div class="modal-body">
                             <div class="form-group-child">
                                 <label for="class_name" class="form-label-child">

@@ -77,7 +77,7 @@ $page_description = 'Kona Ya Hisabati — interactive Pre-Primary mathematics fo
                         <div class="feature-card-icon"><i class="fas fa-child"></i></div>
                         <h3 class="feature-card-title"><?php echo $current_lang === 'sw' ? 'Wanafunzi' : 'Learners'; ?></h3>
                         <p class="feature-card-description"><?php echo $current_lang === 'sw' ? 'Shughuli za hisabati zenye michezo na sauti.' : 'Interactive numeracy with games, audio, and rewards.'; ?></p>
-                        <a href="learner/login.php" class="feature-card-link"><?php echo $current_lang === 'sw' ? 'Ingia' : 'Learner Login'; ?> &rarr;</a>
+                        <a href="learner/login" class="feature-card-link"><?php echo $current_lang === 'sw' ? 'Ingia' : 'Learner Login'; ?> &rarr;</a>
                     </div>
                 </div>
                 
@@ -86,7 +86,7 @@ $page_description = 'Kona Ya Hisabati — interactive Pre-Primary mathematics fo
                         <div class="feature-card-icon"><i class="fas fa-chalkboard-teacher"></i></div>
                         <h3 class="feature-card-title"><?php echo $current_lang === 'sw' ? 'Walimu' : 'Teachers'; ?></h3>
                         <p class="feature-card-description"><?php echo $current_lang === 'sw' ? 'Ongeza wanafunzi, panga masomo, fuatilia maendeleo.' : 'Add students, lesson plans, assignments, and progress.'; ?></p>
-                        <a href="teacher/login.php" class="feature-card-link"><?php echo $current_lang === 'sw' ? 'Ingia Mwalimu' : 'Teacher Login'; ?> &rarr;</a>
+                        <a href="teacher/login" class="feature-card-link"><?php echo $current_lang === 'sw' ? 'Ingia Mwalimu' : 'Teacher Login'; ?> &rarr;</a>
                     </div>
                 </div>
                 <div class="col-child-3">
@@ -94,7 +94,7 @@ $page_description = 'Kona Ya Hisabati — interactive Pre-Primary mathematics fo
                         <div class="feature-card-icon"><i class="fas fa-users"></i></div>
                         <h3 class="feature-card-title"><?php echo $current_lang === 'sw' ? 'Wazazi' : 'Parents'; ?></h3>
                         <p class="feature-card-description"><?php echo $current_lang === 'sw' ? 'Unganisha mtoto kwa msimbo kutoka mwalimu.' : 'Link your child with a claim code from the teacher.'; ?></p>
-                        <a href="parent/login.php" class="feature-card-link"><?php echo $current_lang === 'sw' ? 'Ingia Mzazi' : 'Parent Login'; ?> &rarr;</a>
+                        <a href="parent/login" class="feature-card-link"><?php echo $current_lang === 'sw' ? 'Ingia Mzazi' : 'Parent Login'; ?> &rarr;</a>
                     </div>
                 </div>
                 <div class="col-child-3">

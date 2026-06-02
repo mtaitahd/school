@@ -1,4 +1,4 @@
-ï»¿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 require_once '../php/claim_code_generator.php';
@@ -135,7 +135,7 @@ if (isset($_GET['edit'])) {
 
     <?php if (isset($_GET['success'])): ?>
         <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 9999; max-width: 400px;" role="alert">
-            <i class="fas fa-check-circle me-2"></i>Student created! Claim code: <strong><?php echo htmlspecialchars($_GET['code'] ?? ''); ?></strong> â€” share with parent.
+            <i class="fas fa-check-circle me-2"></i>Student created! Claim code: <strong><?php echo htmlspecialchars($_GET['code'] ?? ''); ?></strong> — share with parent.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <script>setTimeout(function(){ document.querySelector('.alert-success')?.remove(); }, 5000);</script>
@@ -293,7 +293,7 @@ if (isset($_GET['edit'])) {
                 <h3 id="addStudentTitle"><i class="fas fa-user-plus me-2"></i>Add Student</h3>
                 <button type="button" class="kona-modal-close" data-modal-close aria-label="Close">&times;</button>
             </div>
-            <form method="POST" action="student-actions.php">
+            <form method="POST" action="student-actions">
                 <input type="hidden" name="action" value="add_student">
                 <input type="hidden" name="redirect" value="learners.php">
                 <div class="kona-modal-body">
@@ -334,7 +334,7 @@ if (isset($_GET['edit'])) {
                     <div class="form-group-child">
                         <label class="form-label-child">Parent phone (for claim code SMS)</label>
                         <input type="text" class="form-control-child" name="parent_phone" placeholder="+255XXXXXXXXX">
-                        <small style="color:var(--text-light);">Parent uses claim code on their dashboard â€” no direct add.</small>
+                        <small style="color:var(--text-light);">Parent uses claim code on their dashboard — no direct add.</small>
                     </div>
                 </div>
                 <div class="kona-modal-footer">

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 
@@ -215,7 +215,7 @@ $children = $database->fetchAll("
     <?php endif; ?>
 
     <div class="text-center mt-30">
-        <a href="dashboard.php" class="btn-child btn-child-secondary btn-child-large">
+        <a href="dashboard" class="btn-child btn-child-secondary btn-child-large">
             <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
         </a>
     </div>

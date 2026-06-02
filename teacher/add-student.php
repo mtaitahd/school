@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
     header('Location: login.php');
@@ -314,7 +314,7 @@ $classes = $database->fetchAll("
     </div>
 
     <div class="text-center mt-30">
-        <a href="dashboard.php" class="btn-child btn-child-secondary btn-child-large">
+        <a href="dashboard" class="btn-child btn-child-secondary btn-child-large">
             <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
         </a>
     </div>

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 
@@ -209,7 +209,7 @@ function generateAccessCode() {
     <?php endif; ?>
 
     <div class="text-center mt-30">
-        <a href="manage-classes.php" class="btn-child btn-child-secondary btn-child-large">
+        <a href="manage-classes" class="btn-child btn-child-secondary btn-child-large">
             <i class="fas fa-arrow-left me-2"></i>Back to Classes
         </a>
     </div>

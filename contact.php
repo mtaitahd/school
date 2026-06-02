@@ -25,19 +25,19 @@
                 <!-- Center Menu -->
                 <ul class="navbar-menu">
                     <li class="navbar-item">
-                        <a href="index.php" class="navbar-link">
+                        <a href="index" class="navbar-link">
                             <i class="fas fa-home"></i>
                             <span>Home</span>
                         </a>
                     </li>
                     <li class="navbar-item">
-                        <a href="about.php" class="navbar-link">
+                        <a href="about" class="navbar-link">
                             <i class="fas fa-info-circle"></i>
                             <span>About</span>
                         </a>
                     </li>
                     <li class="navbar-item active">
-                        <a href="contact.php" class="navbar-link">
+                        <a href="contact" class="navbar-link">
                             <i class="fas fa-question-circle"></i>
                             <span>Help</span>
                         </a>
@@ -137,7 +137,7 @@
             </div>
 
             <div class="text-center mt-30">
-                <a href="index.php" class="btn-child btn-child-yellow">
+                <a href="index" class="btn-child btn-child-yellow">
                     <i class="fas fa-arrow-left me-2"></i>Back to Home
                 </a>
             </div>

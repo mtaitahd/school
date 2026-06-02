@@ -26,19 +26,19 @@
                 <!-- Center Menu -->
                 <ul class="navbar-menu">
                     <li class="navbar-item">
-                        <a href="index.php" class="navbar-link">
+                        <a href="index" class="navbar-link">
                             <i class="fas fa-home"></i>
                             <span>Home</span>
                         </a>
                     </li>
                     <li class="navbar-item">
-                        <a href="about.php" class="navbar-link">
+                        <a href="about" class="navbar-link">
                             <i class="fas fa-info-circle"></i>
                             <span>About</span>
                         </a>
                     </li>
                     <li class="navbar-item">
-                        <a href="contact.php" class="navbar-link">
+                        <a href="contact" class="navbar-link">
                             <i class="fas fa-question-circle"></i>
                             <span>Help</span>
                         </a>
@@ -48,7 +48,7 @@
                 <!-- Right Side -->
                 <div class="navbar-right">
                     <!-- Teacher Login Button -->
-                    <a href="login.php" class="teacher-login-btn">
+                    <a href="login" class="teacher-login-btn">
                         <i class="fas fa-chalkboard-teacher"></i>
                         <span>Teacher Login</span>
                     </a>
@@ -145,7 +145,7 @@
             </div>
 
             <div class="text-center mt-30">
-                <a href="index.php" class="btn-child btn-child-primary btn-child-large">
+                <a href="index" class="btn-child btn-child-primary btn-child-large">
                     <i class="fas fa-arrow-left me-2"></i>Back to Home
                 </a>
             </div>

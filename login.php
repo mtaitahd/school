@@ -147,8 +147,8 @@ include 'php/includes/auth-split-start.php';
             </form>
 
             <footer class="auth-form-footer">
-                <p>Don't have an account? <a href="register.php">Register here</a></p>
-                <a href="index.php" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                <p>Don't have an account? <a href="register">Register here</a></p>
+                <a href="index" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Home</a>
             </footer>
 <?php include 'php/includes/auth-split-end.php'; ?>
 

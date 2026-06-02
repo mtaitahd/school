@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 
@@ -314,7 +314,7 @@ if (isset($_GET['edit'])) {
                         <?php echo $editing_activity ? 'Update Activity' : 'Create Activity'; ?>
                     </button>
                     <?php if ($editing_activity): ?>
-                        <a href="activity-library.php" class="btn-child btn-child-secondary btn-child-large" style="margin-left: 10px;">
+                        <a href="activity-library" class="btn-child btn-child-secondary btn-child-large" style="margin-left: 10px;">
                             <i class="fas fa-times me-2"></i>Cancel
                         </a>
                     <?php endif; ?>
@@ -331,7 +331,7 @@ if (isset($_GET['edit'])) {
                 <h3 class="dashboard-card-title">Activity Management</h3>
             </div>
             <p style="color: var(--text-light); margin-bottom: 20px;">
-                Use the button below to create new activities. To view or edit existing activities, visit the <a href="all-activities.php" style="color: var(--primary-blue);">All Activities</a> page.
+                Use the button below to create new activities. To view or edit existing activities, visit the <a href="all-activities" style="color: var(--primary-blue);">All Activities</a> page.
             </p>
             <button type="button" class="btn-child btn-child-primary" onclick="openModal('createActivityModal')">
                 <i class="fas fa-plus-circle me-2"></i>Create New Activity

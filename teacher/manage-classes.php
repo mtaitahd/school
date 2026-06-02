@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 
@@ -180,7 +180,7 @@ if (isset($_GET['edit'])) {
                     <?php echo $editing_class ? 'Update Class' : 'Create Class'; ?>
                 </button>
                 <?php if ($editing_class): ?>
-                    <a href="manage-classes.php" class="btn-child btn-child-secondary btn-child-large" style="margin-left: 10px;">
+                    <a href="manage-classes" class="btn-child btn-child-secondary btn-child-large" style="margin-left: 10px;">
                         <i class="fas fa-times me-2"></i>Cancel
                     </a>
                 <?php endif; ?>

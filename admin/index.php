@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 
@@ -62,7 +62,7 @@ include '../php/includes/auth-split-start.php';
 ?>
             <header class="auth-form-header">
                 <h1 class="auth-form-title">Admin Login</h1>
-                <p class="auth-form-subtitle">System administration — enter your credentials to access the admin dashboard</p>
+                <p class="auth-form-subtitle">System administration � enter your credentials to access the admin dashboard</p>
             </header>
 
             <?php if ($error): ?>
@@ -110,7 +110,7 @@ include '../php/includes/auth-split-start.php';
             </form>
 
             <footer class="auth-form-footer">
-                <a href="../index.php" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                <a href="../index" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Home</a>
             </footer>
 <?php include '../php/includes/auth-split-end.php'; ?>
 

@@ -108,7 +108,7 @@ $game_count = count(array_filter($activities, fn($a) => $a['activity_type'] === 
                                    class="btn-child btn-child-warning" style="min-height: 35px; min-width: 35px; font-size: 0.8rem; padding: 0 10px; display: inline-block; text-decoration: none;">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form method="POST" action="activity-library.php" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this activity?');">
+                                <form method="POST" action="activity-library" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this activity?');">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="activity_id" value="<?php echo $activity['activity_id']; ?>">
                                     <button type="submit" class="btn-child btn-child-danger" style="min-height: 35px; min-width: 35px; font-size: 0.8rem; padding: 0 10px; margin-left: 5px;">

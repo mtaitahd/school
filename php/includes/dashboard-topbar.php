@@ -29,7 +29,7 @@ if (isset($database) && auth_role() === 'parent') {
         <?php if ($dashboard_page_title !== ''): ?>
             <h1 class="dashboard-page-title"><?php echo htmlspecialchars($dashboard_page_title); ?></h1>
         <?php else: ?>
-            <a href="<?php echo $base; ?>index.php?lang=<?php echo $lang; ?>" class="dashboard-topbar-brand">
+            <a href="<?php echo $base; ?>index?lang=<?php echo $lang; ?>" class="dashboard-topbar-brand">
                 <img src="<?php echo htmlspecialchars($logo_src); ?>" alt="" class="navbar-logo" width="40" height="40">
                 <span class="brand-main">Kona Ya Hisabati</span>
             </a>
@@ -65,7 +65,7 @@ if (isset($database) && auth_role() === 'parent') {
                             </div>
                         <?php endforeach; ?>
                         <div class="dashboard-notification-footer">
-                            <a href="<?php echo $base; ?>parent/notifications.php">View All Notifications</a>
+                            <a href="<?php echo $base; ?>parent/notifications">View All Notifications</a>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -94,7 +94,7 @@ if (isset($database) && auth_role() === 'parent') {
 <div id="manageAccountModal" class="kona-modal-overlay" aria-hidden="true">
     <div class="kona-modal" role="dialog">
         <div class="kona-modal-header"><h3>Manage Account</h3><button type="button" class="kona-modal-close" data-modal-close>&times;</button></div>
-        <form id="manageAccountForm" action="<?php echo $base; ?>update-profile.php" method="POST" enctype="multipart/form-data">
+        <form id="manageAccountForm" action="<?php echo $base; ?>update-profile" method="POST" enctype="multipart/form-data">
             <div class="kona-modal-body">
                 <div class="form-group-child">
                     <label class="form-label-child">Profile Picture</label>
@@ -146,7 +146,7 @@ document.addEventListener('click', function(e) {
 });
 
 function markAsRead(notificationId) {
-    fetch('<?php echo $base; ?>parent/mark-notification-read.php', {
+    fetch('<?php echo $base; ?>parent/mark-notification-read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'notification_id=' + notificationId

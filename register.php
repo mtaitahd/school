@@ -95,7 +95,7 @@ include 'php/includes/auth-split-start.php';
                     <i class="fas fa-check-circle me-2"></i><?php echo htmlspecialchars($success); ?>
                 </div>
                 <div class="auth-form-footer">
-                    <a href="login.php" class="btn-child btn-child-primary auth-submit-btn">
+                    <a href="login" class="btn-child btn-child-primary auth-submit-btn">
                         <span class="auth-btn-text"><i class="fas fa-sign-in-alt me-2"></i>Go to Login</span>
                     </a>
                 </div>
@@ -213,8 +213,8 @@ include 'php/includes/auth-split-start.php';
                 </form>
 
                 <footer class="auth-form-footer">
-                    <p>Already have an account? <a href="login.php">Sign in</a></p>
-                    <a href="index.php" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                    <p>Already have an account? <a href="login">Sign in</a></p>
+                    <a href="index" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Home</a>
                 </footer>
             <?php endif; ?>
 <?php include 'php/includes/auth-split-end.php'; ?>

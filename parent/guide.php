@@ -1,4 +1,4 @@
-ï»¿<?php
+<?php
 session_start();
 require_once '../php/includes/lang.php';
 $current_lang = isset($_GET['lang']) ? $_GET['lang'] : 'en';
@@ -28,26 +28,26 @@ $logged_in = isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'paren
                     <img src="../assets/images/logo.png" alt="Kona Ya Hisabati Logo" class="navbar-logo">
                     <div class="navbar-brand-text">
                         <span class="brand-main">Kona Ya Hisabati</span>
-                        <span class="brand-subtitle">Jifunze â€¢ Furahia â€¢ Fanikiwa</span>
+                        <span class="brand-subtitle">Jifunze • Furahia • Fanikiwa</span>
                     </div>
                 </div>
 
                 <!-- Center Menu -->
                 <ul class="navbar-menu">
                     <li class="navbar-item">
-                        <a href="../index.php" class="navbar-link">
+                        <a href="../index" class="navbar-link">
                             <i class="fas fa-home"></i>
                             <span>Home</span>
                         </a>
                     </li>
                     <li class="navbar-item">
-                        <a href="dashboard.php" class="navbar-link">
+                        <a href="dashboard" class="navbar-link">
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
                     <li class="navbar-item active">
-                        <a href="guide.php" class="navbar-link">
+                        <a href="guide" class="navbar-link">
                             <i class="fas fa-book"></i>
                             <span>Guide</span>
                         </a>
@@ -59,7 +59,7 @@ $logged_in = isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'paren
                     <span style="color: white; font-weight: 600; margin-right: 15px;">
                         <?php echo htmlspecialchars($_SESSION['first_name'] ?? ''); ?>
                     </span>
-                    <a href="../logout.php" class="teacher-login-btn" style="background: var(--primary-red);">
+                    <a href="../logout" class="teacher-login-btn" style="background: var(--primary-red);">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Logout</span>
                     </a>
@@ -299,7 +299,7 @@ $logged_in = isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'paren
         <!-- Login to Dashboard -->
         <div class="text-center mt-30">
             <p class="activity-instruction mb-20">Want to track your child's progress?</p>
-            <a href="login.php" class="btn-child btn-child-primary btn-child-large">
+            <a href="login" class="btn-child btn-child-primary btn-child-large">
                 <i class="fas fa-sign-in-alt me-2"></i>Login to Parent Dashboard
             </a>
         </div>

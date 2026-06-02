@@ -141,7 +141,7 @@ $lang_page = 'users.php';
     <script>
         function postUser(action, data) {
             data.append('action', action);
-            return fetch('user-actions.php', { method: 'POST', body: data }).then(r => r.json());
+            return fetch('user-actions', { method: 'POST', body: data }).then(r => r.json());
         }
         document.getElementById('addUserForm').addEventListener('submit', function(e) {
             e.preventDefault();

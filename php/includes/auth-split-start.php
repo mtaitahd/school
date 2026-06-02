@@ -14,7 +14,7 @@ $auth_logo = $auth_base . 'assets/images/logo.png';
             <div class="auth-split-visual-bg" style="background-image: url('<?php echo htmlspecialchars($auth_image); ?>');"></div>
             <div class="auth-split-visual-overlay"></div>
             <div class="auth-split-visual-content">
-                <a href="<?php echo htmlspecialchars($auth_base); ?>index.php" class="auth-split-brand">
+                <a href="<?php echo htmlspecialchars($auth_base); ?>index" class="auth-split-brand">
                     <img src="<?php echo htmlspecialchars($auth_logo); ?>" alt="" class="auth-split-brand-logo" width="48" height="48">
                     <span class="auth-split-brand-name">Kona Ya Hisabati</span>
                 </a>
@@ -23,9 +23,9 @@ $auth_logo = $auth_base . 'assets/images/logo.png';
                 <div class="auth-split-social">
                     <span class="auth-split-social-label">Connect with us</span>
                     <div class="auth-split-social-links">
-                        <a href="<?php echo htmlspecialchars($auth_base); ?>index.php" class="auth-split-social-link" aria-label="Home"><i class="fas fa-home" aria-hidden="true"></i></a>
-                        <a href="<?php echo htmlspecialchars($auth_base); ?>about.php" class="auth-split-social-link" aria-label="About"><i class="fas fa-info-circle" aria-hidden="true"></i></a>
-                        <a href="<?php echo htmlspecialchars($auth_base); ?>contact.php" class="auth-split-social-link" aria-label="Help"><i class="fas fa-question-circle" aria-hidden="true"></i></a>
+                        <a href="<?php echo htmlspecialchars($auth_base); ?>index" class="auth-split-social-link" aria-label="Home"><i class="fas fa-home" aria-hidden="true"></i></a>
+                        <a href="<?php echo htmlspecialchars($auth_base); ?>about" class="auth-split-social-link" aria-label="About"><i class="fas fa-info-circle" aria-hidden="true"></i></a>
+                        <a href="<?php echo htmlspecialchars($auth_base); ?>contact" class="auth-split-social-link" aria-label="Help"><i class="fas fa-question-circle" aria-hidden="true"></i></a>
                     </div>
                 </div>
             </div>

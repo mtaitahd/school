@@ -75,13 +75,13 @@ $activity_data = json_decode($activity['activity_data'], true) ?: [];
                 <!-- Center Menu -->
                 <ul class="navbar-menu">
                     <li class="navbar-item">
-                        <a href="../index.php" class="navbar-link">
+                        <a href="../index" class="navbar-link">
                             <i class="fas fa-home"></i>
                             <span>Home</span>
                         </a>
                     </li>
                     <li class="navbar-item">
-                        <a href="dashboard.php" class="navbar-link">
+                        <a href="dashboard" class="navbar-link">
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </a>
@@ -99,7 +99,7 @@ $activity_data = json_decode($activity['activity_data'], true) ?: [];
                     <span style="color: white; font-weight: 600; margin-right: 15px;">
                         <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?>
                     </span>
-                    <a href="../logout.php" class="teacher-login-btn" style="background: var(--primary-red);">
+                    <a href="../logout" class="teacher-login-btn" style="background: var(--primary-red);">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Logout</span>
                     </a>

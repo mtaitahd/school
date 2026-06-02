@@ -93,7 +93,7 @@ include '../php/includes/auth-split-start.php';
                     <i class="fas fa-info-circle me-1"></i>
                     Ask your parent or teacher if you don't know your username
                 </p>
-                <a href="../index.php" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                <a href="../index" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Home</a>
             </footer>
 <?php include '../php/includes/auth-split-end.php'; ?>
 

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 
@@ -191,7 +191,7 @@ if (isset($_GET['edit'])) {
                     <?php echo $editing_module ? 'Update Module' : 'Create Module'; ?>
                 </button>
                 <?php if ($editing_module): ?>
-                    <a href="manage-modules.php" class="btn-child btn-child-secondary btn-child-large" style="margin-left: 10px;">
+                    <a href="manage-modules" class="btn-child btn-child-secondary btn-child-large" style="margin-left: 10px;">
                         <i class="fas fa-times me-2"></i>Cancel
                     </a>
                 <?php endif; ?>
