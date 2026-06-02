@@ -34,7 +34,7 @@ $page_description = 'Kona Ya Hisabati — interactive Pre-Primary mathematics fo
             <div class="container-child">
                 <div class="text-center page-enter">
                     <p class="hero-badge" style="display:inline-block;background:rgba(255,215,0,0.9);color:#0b2d89;padding:6px 16px;border-radius:999px;font-weight:700;font-size:0.85rem;margin-bottom:16px;">
-                        Pppppre-Primary • Tanzania
+                        Pre-Primary • Tanzania
                     </p>
                     <h1 id="heroTitle" class="activity-title" style="color:#fff;font-weight:800;text-shadow:0 4px 20px rgba(0,0,0,0.5);font-size:clamp(1.75rem,5vw,2.75rem);">
                         <?php echo htmlspecialchars($t['hero_title']); ?>
