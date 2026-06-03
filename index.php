@@ -111,7 +111,7 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
                             </div>
                         </div>
                         <div class="hero-actions" style="margin-top:28px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                            <a href="learner/categories.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-yellow" style="text-decoration:none;min-height:52px;font-size:1.05rem;">
+                            <a href="learner/categories.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-yellow" style="text-decoration:none;min-height:52px;font-size:1.05rem;border-radius:50px;">
                                 <i class="fas fa-play-circle" aria-hidden="true"></i>
                                 <?php echo htmlspecialchars($t['btn_start']); ?>
                             </a>
@@ -451,6 +451,21 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
             el.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
         }
     }
+
+    // Color & font cycler
+    (function() {
+        var colors = ['#007bff', '#28a745', '#dc3545', '#6f42c1', '#fd7e14'];
+        var fonts = ['Poppins, sans-serif', 'Arial, sans-serif', 'Georgia, serif', '"Courier New", monospace', '"Times New Roman", serif'];
+        var ci = 0, fi = 0;
+        document.getElementById('cycleColor').addEventListener('click', function() {
+            ci = (ci + 1) % colors.length;
+            document.querySelector('.hero-section .display-3').style.color = colors[ci];
+        });
+        document.getElementById('cycleFont').addEventListener('click', function() {
+            fi = (fi + 1) % fonts.length;
+            document.querySelector('.hero-section .display-3').style.fontFamily = fonts[fi];
+        });
+    })();
     </script>
 </body>
 </html>
