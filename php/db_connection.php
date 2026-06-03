@@ -5,9 +5,9 @@
  */
 class Database {
 	private $host = 'localhost';
-	private $db_name = 'kona_hisabati';
-	private $username = 'root';
-	private $password = '';
+	private $db_name = 'smartmat_kona_hisabati';
+	private $username = 'smartmat_kona';
+	private $password = 'kona2026$';
 	private $charset = 'utf8mb4';
 	private $pdo;
 

@@ -29,7 +29,6 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="page-child">
-    <?php if ($kyh_urgent): ?>
     <div class="kyh-topbar-wrap" id="kyhTopbar">
         <div class="kyh-topbar-inner">
             <span class="kyh-topbar-icon"><i class="fas fa-bullhorn"></i></span>
@@ -42,10 +41,8 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
             </button>
         </div>
     </div>
-    <?php endif; ?>
     <?php include 'php/includes/header.php'; ?>
 
-    <?php if (!empty($kyh_ticker_items)): ?>
     <div class="kyh-ticker-wrap">
         <div class="kyh-ticker-inner">
             <div class="kyh-ticker-track">
@@ -72,8 +69,6 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
             </div>
         </div>
     </div>
-    <?php endif; ?>
-    <?php if (!empty($kyh_hero_slides)): ?>
     <section class="hero-section" aria-labelledby="heroTitle">
         <div class="hero-background">
             <?php foreach ($kyh_hero_slides as $si => $slide): ?>
@@ -123,15 +118,12 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
         <button type="button" class="slider-arrow slider-arrow-left" onclick="heroSlide(-1)" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
         <button type="button" class="slider-arrow slider-arrow-right" onclick="heroSlide(1)" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
     </section>
-    <?php endif; ?>
 
-    <?php if (!empty($kyh_notes) || !empty($kyh_events)): ?>
     <section class="kyh-notevents-section">
         <div class="container-child">
             <div class="kyh-notevents-row">
                 <!-- Notes Board -->
                 <div class="kyh-notevents-left">
-                    <?php if (!empty($kyh_notes)): ?>
                     <div class="kyh-notes-header">
                         <h3 class="kyh-section-title"><?php echo $current_lang === 'sw' ? 'Maelezo' : 'Notes Board'; ?></h3>
                     </div>
@@ -168,12 +160,10 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
                     <a href="notes.php" class="kyh-board-card-btn">
                         <?php echo $current_lang === 'sw' ? 'Maelezo Yote' : 'All Notes'; ?> <i class="fas fa-arrow-right"></i>
                     </a>
-                    <?php endif; ?>
                 </div>
 
                 <!-- Events Calendar -->
                 <div class="kyh-notevents-right">
-                    <?php if (!empty($kyh_events)): ?>
                     <div class="kyh-events-header">
                         <h3 class="kyh-section-title"><?php echo $current_lang === 'sw' ? 'Matukio' : 'Events Calendar'; ?></h3>
                     </div>
@@ -201,12 +191,10 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
                     <a href="events.php" class="kyh-board-card-btn">
                         <?php echo $current_lang === 'sw' ? 'Matukio Yote' : 'All Events'; ?> <i class="fas fa-arrow-right"></i>
                     </a>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </section>
-    <?php endif; ?>
 
     <section class="why-choose-section py-16" style="background:#fff;">
         <div class="container-child">
@@ -247,8 +235,7 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
         </div>
     </section>
 
-    <?php if (!empty($kyh_governance)): ?>
-    <?php $gov_count = count($kyh_governance); ?>
+    <?php $gov_count = !empty($kyh_governance) ? count($kyh_governance) : 0; ?>
     <section class="container text-center" style="padding-top:2rem;padding-bottom:1rem;">
         <h3 class="text-primary fw-bold mb-0" style="font-size:1.75rem;">
             <?php echo $current_lang === 'sw' ? 'Usimamizi na Walimu' : 'Management & Teachers'; ?>
@@ -318,7 +305,6 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
         </div>
         <?php endif; ?>
     </section>
-    <?php endif; ?>
 
     <!-- View All Governance Modal -->
     <div class="modal fade" id="governanceAllModal" tabindex="-1" aria-hidden="true">
