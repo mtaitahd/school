@@ -6627,7 +6627,8 @@ body {
     font-weight: 700;
     padding: 1rem;
     color: var(--text-dark);
-    background: rgba(0, 0, 0, 0.03);
+    background: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .sidebar-brand .sidebar-brand-icon img {
