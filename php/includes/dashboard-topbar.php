@@ -24,6 +24,14 @@ if (isset($database) && auth_role() === 'parent') {
         <i class="fa fa-bars"></i>
     </button>
 
+    <div class="topbar-search">
+        <i class="fas fa-search topbar-search-icon"></i>
+        <input type="text" class="topbar-search-input" id="pageSearch" placeholder="Search this page..." oninput="filterPage(this.value)">
+        <?php if ($dashboard_page_title !== ''): ?>
+        <span class="topbar-search-shortcut">Ctrl+K</span>
+        <?php endif; ?>
+    </div>
+
     <?php if ($dashboard_page_title !== ''): ?>
     <div class="d-sm-flex align-items-center justify-content-between mb-0" style="flex:1;">
         <h4 class="mb-0" style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--text-dark);"><?php echo htmlspecialchars($dashboard_page_title); ?></h4>
@@ -158,4 +166,62 @@ function previewProfile(input) {
         reader.readAsDataURL(input.files[0]);
     }
 }
+
+function filterPage(query) {
+    var q = query.toLowerCase().trim();
+    var rows = document.querySelectorAll('table tbody tr, [data-search-row]');
+    var items = document.querySelectorAll('.dashboard-card, .card, [data-search-item]');
+    var noResult = document.getElementById('searchNoResult');
+
+    var hasVisible = false;
+
+    rows.forEach(function(row) {
+        if (q === '') {
+            row.style.display = '';
+            hasVisible = true;
+            return;
+        }
+        var text = row.textContent.toLowerCase();
+        if (text.indexOf(q) !== -1) {
+            row.style.display = '';
+            hasVisible = true;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    items.forEach(function(item) {
+        if (q === '') {
+            item.style.display = '';
+            return;
+        }
+        var text = item.textContent.toLowerCase();
+        if (text.indexOf(q) === -1) {
+            item.style.display = 'none';
+        } else {
+            item.style.display = '';
+            hasVisible = true;
+        }
+    });
+
+    if (!noResult) {
+        noResult = document.createElement('div');
+        noResult.id = 'searchNoResult';
+        noResult.style.cssText = 'display:none;text-align:center;padding:40px 20px;color:var(--text-light);font-size:1rem;';
+        noResult.innerHTML = '<i class="fas fa-search" style="font-size:2rem;display:block;margin-bottom:12px;opacity:0.4;"></i>No results found for "<span id="searchNoResultQuery"></span>"';
+        var container = document.querySelector('#content .container-fluid') || document.querySelector('#content');
+        if (container) container.appendChild(noResult);
+    }
+
+    noResult.style.display = (q !== '' && !hasVisible) ? '' : 'none';
+    document.getElementById('searchNoResultQuery').textContent = query;
+}
+
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        var input = document.getElementById('pageSearch');
+        if (input) input.focus();
+    }
+});
 </script>
