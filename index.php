@@ -29,18 +29,6 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="page-child">
-    <div class="kyh-topbar-wrap" id="kyhTopbar">
-        <div class="kyh-topbar-inner">
-            <span class="kyh-topbar-icon"><i class="fas fa-bullhorn"></i></span>
-            <span class="kyh-topbar-text">
-                <strong><?php echo $current_lang === 'sw' ? 'TANGAZO LA DAWA' : 'ANNOUNCEMENT'; ?>:</strong>
-                <?php echo htmlspecialchars($kyh_urgent['title']); ?>
-            </span>
-            <button type="button" class="kyh-topbar-close" onclick="document.getElementById('kyhTopbar').style.display='none'" aria-label="Close announcement">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    </div>
     <?php include 'php/includes/header.php'; ?>
 
     <div class="kyh-ticker-wrap">
