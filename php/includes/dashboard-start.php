@@ -8,18 +8,18 @@ if (empty($dashboard_role)) {
 
 $allowed = ['teacher', 'parent', 'learner', 'admin'];
 if (!in_array($dashboard_role, $allowed, true)) {
-    header('Location: ' . ($base_path ?? '') . 'index.php');
+    header('Location: ' . ($base_path ?? '') . 'index');
     exit;
 }
 
 if (auth_role() !== $dashboard_role) {
     $login_map = [
-        'teacher' => ($base_path ?? '') . 'teacher/login.php',
-        'parent' => ($base_path ?? '') . 'parent/login.php',
-        'learner' => ($base_path ?? '') . 'learner/login.php',
-        'admin' => ($base_path ?? '') . 'admin/index.php',
+        'teacher' => ($base_path ?? '') . 'teacher/login',
+        'parent' => ($base_path ?? '') . 'parent/login',
+        'learner' => ($base_path ?? '') . 'learner/login',
+        'admin' => ($base_path ?? '') . 'admin/index',
     ];
-    header('Location: ' . ($login_map[$dashboard_role] ?? 'index.php'));
+    header('Location: ' . ($login_map[$dashboard_role] ?? 'index'));
     exit;
 }
 
@@ -28,4 +28,13 @@ if (isset($database)) {
 }
 
 $layout = 'dashboard';
-?><div class="dashboard-shell" id="dashboardShell"><?php include __DIR__ . '/sidebar.php'; ?><div class="dashboard-right"><?php include __DIR__ . '/dashboard-topbar.php'; ?><main class="dashboard-main">
+$base = $base_path ?? '';
+$asset_base = $base . 'assets/';
+?><div id="wrapper">
+<link rel="stylesheet" href="<?php echo $asset_base; ?>css/ruang-admin.min.css">
+<link rel="stylesheet" href="<?php echo $base; ?>css/style.css">
+    <?php include __DIR__ . '/sidebar.php'; ?>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <?php include __DIR__ . '/dashboard-topbar.php'; ?>
+            <div class="container-fluid" id="container-wrapper">

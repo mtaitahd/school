@@ -91,14 +91,23 @@ $dashboard_page_title = 'Parent Dashboard';
 include '../php/includes/dashboard-start.php';
 ?>
 
-        <!-- Claim Child Button -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <h1 class="h3 mb-0 text-gray-800" style="font-family:'Poppins',sans-serif;font-weight:700;">Parent Dashboard</h1>
+            <?php if (!empty($children)): ?>
+                <button class="btn btn-primary" style="background:var(--primary-blue);border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;" onclick="showClaimChildModal()">
+                    <i class="fas fa-key me-2"></i>Claim Child
+                </button>
+            <?php endif; ?>
+        </div>
+
+        <!-- Claim Child Alert -->
         <?php if (empty($children)): ?>
-            <div class="text-center mb-30">
-                <div class="alert-child alert-child-info">
+            <div class="text-center mb-4">
+                <div class="alert alert-info py-3 px-4 text-center" style="border-radius:10px;font-size:0.9rem;border:none;">
                     <i class="fas fa-info-circle me-2"></i>
                     No children linked to your account yet. Use the claim code provided by the teacher to link your child!
                 </div>
-                <button class="btn-child btn-child-primary btn-child-large" onclick="showClaimChildModal()">
+                <button class="btn btn-primary btn-lg" style="background:var(--primary-blue);border:none;border-radius:50px;padding:12px 30px;font-family:'Poppins',sans-serif;font-weight:600;font-size:1rem;" onclick="showClaimChildModal()">
                     <i class="fas fa-key me-2"></i>Claim Child
                 </button>
             </div>
@@ -106,54 +115,40 @@ include '../php/includes/dashboard-start.php';
 
         <!-- Children Cards -->
         <?php if (!empty($children)): ?>
-            <div class="row-child mb-30">
+            <div class="row g-4 mb-4">
                 <?php foreach ($children as $child): ?>
-                    <div class="col-child-3">
-                        <div class="dashboard-card">
-                            <div class="text-center mb-20">
-                                <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-blue); display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                                    <i class="fas fa-child"></i>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card h-100 py-2" style="border-left:4px solid var(--primary-blue);">
+                            <div class="card-body text-center">
+                                <div class="icon-circle mb-3" style="background:var(--primary-blue);width:72px;height:72px;font-size:1.8rem;margin:0 auto;">
+                                    <i class="fas fa-child text-white"></i>
                                 </div>
-                                <h3 style="font-size: 1.5rem; margin-top: 15px;">
-                                    <?php echo htmlspecialchars($child['first_name']); ?>
-                                </h3>
+                                <h5 class="fw-bold mb-2"><?php echo htmlspecialchars($child['first_name']); ?></h5>
+                                <p class="mb-1"><i class="fas fa-check-circle me-1" style="color:var(--primary-green);"></i> Activities: <?php echo $child['completed_activities']; ?></p>
+                                <p class="mb-2"><i class="fas fa-star me-1" style="color:var(--primary-yellow);"></i> Stars: <?php echo $child['total_stars']; ?></p>
+                                <?php if (isset($badges[$child['user_id']]) && !empty($badges[$child['user_id']])): ?>
+                                    <div class="d-flex justify-content-center gap-2 mb-2">
+                                        <?php foreach ($badges[$child['user_id']] as $badge): ?>
+                                            <span class="badge" style="background:<?php echo $badge['badge_color']; ?>;width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1rem;" title="<?php echo htmlspecialchars($badge['badge_name']); ?>">
+                                                <i class="fas <?php echo $badge['badge_icon']; ?> text-white"></i>
+                                            </span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                                <button class="btn btn-primary btn-sm mt-2" style="background:var(--primary-blue);border:none;border-radius:50px;padding:6px 18px;font-size:0.85rem;font-weight:600;" onclick="viewChildProgress(<?php echo $child['user_id']; ?>)">
+                                    <i class="fas fa-chart-line me-1"></i> View Progress
+                                </button>
                             </div>
-                            
-                            <div style="text-align: center; margin-bottom: 20px;">
-                                <p style="margin: 10px 0; font-size: 1.1rem;">
-                                    <i class="fas fa-check-circle me-2" style="color: var(--primary-green);"></i>
-                                    Activities: <?php echo $child['completed_activities']; ?>
-                                </p>
-                                <p style="margin: 10px 0; font-size: 1.1rem;">
-                                    <i class="fas fa-star me-2" style="color: var(--primary-yellow);"></i>
-                                    Stars: <?php echo $child['total_stars']; ?>
-                                </p>
-                            </div>
-
-                            <!-- Badges -->
-                            <?php if (isset($badges[$child['user_id']]) && !empty($badges[$child['user_id']])): ?>
-                                <div class="badge-container" style="margin-bottom: 20px;">
-                                    <?php foreach ($badges[$child['user_id']] as $badge): ?>
-                                        <div class="badge" style="background: <?php echo $badge['badge_color']; ?>;" title="<?php echo htmlspecialchars($badge['badge_name']); ?>">
-                                            <i class="fas <?php echo $badge['badge_icon']; ?>"></i>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php endif; ?>
-
-                            <button class="btn-child btn-child-primary" style="min-height: 40px; min-width: 40px; font-size: 0.9rem;" onclick="viewChildProgress(<?php echo $child['user_id']; ?>)">
-                                <i class="fas fa-chart-line"></i>
-                            </button>
                         </div>
                     </div>
                 <?php endforeach; ?>
-                
-                <!-- Claim Another Child Card -->
-                <div class="col-child-3">
-                    <div class="dashboard-card" style="display: flex; align-items: center; justify-content: center; min-height: 300px; cursor: pointer; border: 3px dashed var(--primary-blue);" onclick="showClaimChildModal()">
-                        <div class="text-center">
-                            <i class="fas fa-key" style="font-size: 4rem; color: var(--primary-blue);"></i>
-                            <h3 style="margin-top: 20px; color: var(--primary-blue);">Claim Another Child</h3>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card h-100 py-2" style="border:3px dashed var(--primary-blue);cursor:pointer;" onclick="showClaimChildModal()">
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <div class="text-center">
+                                <i class="fas fa-key" style="font-size:3rem;color:var(--primary-blue);"></i>
+                                <h5 class="mt-2" style="color:var(--primary-blue);">Claim Another Child</h5>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -162,34 +157,22 @@ include '../php/includes/dashboard-start.php';
 
         <!-- Recent Activity -->
         <?php if (!empty($recent_activity)): ?>
-            <div class="dashboard-card">
-                <div class="dashboard-card-header">
-                    <div class="dashboard-card-icon" style="background: var(--primary-orange);">
-                        <i class="fas fa-history"></i>
-                    </div>
-                    <h3 class="dashboard-card-title">Recent Activity</h3>
+            <div class="card mb-4">
+                <div class="card-header py-3 d-flex align-items-center">
+                    <div class="icon-circle me-3" style="background:var(--primary-orange);width:40px;height:40px;font-size:1rem;"><i class="fas fa-history text-white"></i></div>
+                    <h6 class="m-0 font-weight-bold" style="color:var(--navbar-dark);">Recent Activity</h6>
                 </div>
-                <div>
+                <div class="card-body p-0">
                     <?php foreach ($recent_activity as $activity): ?>
-                        <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px;">
-                            <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-green); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
-                                <i class="fas fa-child"></i>
+                        <div class="d-flex align-items-center p-3 border-bottom">
+                            <div class="icon-circle me-3" style="background:var(--primary-green);width:44px;height:44px;font-size:1.1rem;"><i class="fas fa-child text-white"></i></div>
+                            <div class="flex-grow-1">
+                                <p class="mb-0 fw-semibold"><?php echo htmlspecialchars($activity['first_name']); ?></p>
+                                <p class="mb-0 text-muted small">Completed: <?php echo htmlspecialchars($activity['activity_name']); ?> (<?php echo htmlspecialchars($activity['module_name']); ?>)</p>
                             </div>
-                            <div style="flex: 1;">
-                                <p style="margin: 0; font-weight: 600;">
-                                    <?php echo htmlspecialchars($activity['first_name']); ?>
-                                </p>
-                                <p style="margin: 5px 0 0 0; color: var(--text-light); font-size: 0.9rem;">
-                                    Completed: <?php echo htmlspecialchars($activity['activity_name']); ?> (<?php echo htmlspecialchars($activity['module_name']); ?>)
-                                </p>
-                            </div>
-                            <div style="text-align: right;">
-                                <span style="background: var(--primary-green); color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.9rem;">
-                                    <?php echo $activity['score']; ?>%
-                                </span>
-                                <p style="margin: 5px 0 0 0; color: var(--text-light); font-size: 0.8rem;">
-                                    <?php echo date('M d, H:i', strtotime($activity['last_attempt_at'])); ?>
-                                </p>
+                            <div class="text-end flex-shrink-0">
+                                <span class="badge" style="background:var(--primary-green);padding:5px 12px;"><?php echo $activity['score']; ?>%</span>
+                                <p class="mb-0 text-muted small mt-1"><?php echo date('M d, H:i', strtotime($activity['last_attempt_at'])); ?></p>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -199,106 +182,88 @@ include '../php/includes/dashboard-start.php';
 
         <!-- Teacher Assignments -->
         <?php if (!empty($assignments)): ?>
-            <div class="dashboard-card">
-                <div class="dashboard-card-header">
-                    <div class="dashboard-card-icon" style="background: var(--primary-blue);">
-                        <i class="fas fa-clipboard-list"></i>
-                    </div>
-                    <h3 class="dashboard-card-title">Teacher Assignments</h3>
+            <div class="card mb-4">
+                <div class="card-header py-3 d-flex align-items-center">
+                    <div class="icon-circle me-3" style="background:var(--primary-blue);width:40px;height:40px;font-size:1rem;"><i class="fas fa-clipboard-list text-white"></i></div>
+                    <h6 class="m-0 font-weight-bold" style="color:var(--navbar-dark);">Teacher Assignments</h6>
                 </div>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: var(--background-light);">
-                                <th style="padding: 12px; text-align: left;">Child</th>
-                                <th style="padding: 12px; text-align: left;">Assignment</th>
-                                <th style="padding: 12px; text-align: left;">Type</th>
-                                <th style="padding: 12px; text-align: left;">Status</th>
-                                <th style="padding: 12px; text-align: left;">Due Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($assignments as $assignment): ?>
-                                <tr style="border-bottom: 1px solid #eee;">
-                                    <td style="padding: 12px;">
-                                        <?php echo htmlspecialchars($assignment['first_name'] . ' ' . $assignment['last_name']); ?>
-                                    </td>
-                                    <td style="padding: 12px;">
-                                        <div style="font-weight: 600;"><?php echo htmlspecialchars($assignment['title']); ?></div>
-                                        <?php if ($assignment['activity_name']): ?>
-                                            <small style="color: var(--text-light);"><?php echo htmlspecialchars($assignment['activity_name']); ?></small>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td style="padding: 12px;">
-                                        <span style="background: var(--primary-purple); color: white; padding: 4px 10px; border-radius: 10px; font-size: 0.85rem;">
-                                            <?php echo htmlspecialchars(ucfirst($assignment['assignment_type'])); ?>
-                                        </span>
-                                    </td>
-                                    <td style="padding: 12px;">
-                                        <span style="background: 
-                                            <?php 
-                                                echo match($assignment['status']) {
-                                                    'completed' => 'var(--primary-green)',
-                                                    'in_progress' => 'var(--primary-blue)',
-                                                    'overdue' => 'var(--primary-red)',
-                                                    default => 'var(--primary-yellow)'
-                                                }; 
-                                            ?>; 
-                                            color: white; padding: 4px 10px; border-radius: 10px; font-size: 0.85rem;">
-                                            <?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $assignment['status']))); ?>
-                                        </span>
-                                    </td>
-                                    <td style="padding: 12px;">
-                                        <?php echo $assignment['due_date'] ? date('M d, Y', strtotime($assignment['due_date'])) : '—'; ?>
-                                    </td>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Child</th>
+                                    <th>Assignment</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Due Date</th>
                                 </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($assignments as $assignment): ?>
+                                    <tr>
+                                        <td class="fw-semibold"><?php echo htmlspecialchars($assignment['first_name'] . ' ' . $assignment['last_name']); ?></td>
+                                        <td>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($assignment['title']); ?></div>
+                                            <?php if ($assignment['activity_name']): ?>
+                                                <small class="text-muted"><?php echo htmlspecialchars($assignment['activity_name']); ?></small>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><span class="badge" style="background:var(--primary-purple);padding:4px 10px;"><?php echo htmlspecialchars(ucfirst($assignment['assignment_type'])); ?></span></td>
+                                        <td>
+                                            <span class="badge" style="background:<?php echo match($assignment['status']) { 'completed' => 'var(--primary-green)', 'in_progress' => 'var(--primary-blue)', 'overdue' => 'var(--primary-red)', default => '#e6a800' }; ?>;padding:4px 10px;">
+                                                <?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $assignment['status']))); ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-muted"><?php echo $assignment['due_date'] ? date('M d, Y', strtotime($assignment['due_date'])) : '—'; ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         <?php endif; ?>
 <?php include '../php/includes/dashboard-end.php'; ?>
-<!-- Claim Child Modal -->
-    <div id="claimChildModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
-        <div class="activity-container" style="max-width: 500px; position: relative;">
-            <button onclick="hideClaimChildModal()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">
-                <i class="fas fa-times"></i>
-            </button>
-            <h2 class="activity-title text-center">Claim Child</h2>
-            <p class="activity-instruction text-center">Enter the claim code provided by the teacher</p>
-            <form method="POST" action="claim-child">
-                <div class="form-group-child">
-                    <label class="form-label-child">Claim Code</label>
-                    <input type="text" class="form-control-child" name="claim_code" required
-                           placeholder="KH-XXXXXX" maxlength="9"
-                           style="text-transform: uppercase; letter-spacing: 2px; font-size: 1.2rem; text-align: center;">
-                    <small style="color: var(--text-light);">Format: KH-XXXXXX (e.g., KH-7F92K1)</small>
+    <!-- Claim Child Modal -->
+    <div class="modal fade" id="claimChildModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border:none;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+                <div class="modal-header">
+                    <h5 class="modal-title">Claim Child</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="text-center mt-30">
-                    <button type="submit" class="btn-child btn-child-primary btn-child-large">
-                        <i class="fas fa-key me-2"></i>Claim Child
-                    </button>
-                </div>
-            </form>
+                <form method="POST" action="claim-child">
+                    <div class="modal-body">
+                        <p class="text-muted mb-3">Enter the claim code provided by the teacher</p>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;">Claim Code</label>
+                            <input type="text" class="form-control" name="claim_code" required
+                                   placeholder="KH-XXXXXX" maxlength="9"
+                                   style="text-transform:uppercase;letter-spacing:2px;font-size:1.2rem;text-align:center;">
+                            <small class="text-muted">Format: KH-XXXXXX (e.g., KH-7F92K1)</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="background:var(--primary-blue);border:none;font-weight:600;">
+                            <i class="fas fa-key me-2"></i>Claim Child
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/dashboard.js"></script>
-    <script src="../js/modals.js"></script>
     <script>
         <?php if (!empty($_GET['claim'])): ?>
-        document.addEventListener('DOMContentLoaded', function(){ showClaimChildModal(); });
+        document.addEventListener('DOMContentLoaded', function(){ $('#claimChildModal').modal('show'); });
         <?php endif; ?>
         function showClaimChildModal() {
-            document.getElementById('claimChildModal').style.display = 'flex';
-            document.getElementById('claimChildModal').classList.add('is-open');
-        }
-
-        function hideClaimChildModal() {
-            document.getElementById('claimChildModal').style.display = 'none';
+            $('#claimChildModal').modal('show');
         }
 
         function viewChildProgress(childId) {

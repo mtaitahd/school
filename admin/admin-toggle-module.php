@@ -1,9 +1,9 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 require_once '../php/includes/auth.php';
 
-auth_require_role(['admin'], 'login.php');
+auth_require_role(['admin'], 'index');
 
 $module_id = (int) ($_GET['module_id'] ?? 0);
 if ($module_id > 0) {
@@ -13,7 +13,7 @@ if ($module_id > 0) {
         $database->execute("UPDATE modules SET is_active = ? WHERE module_id = ?", [$new_status, $module_id]);
     }
 }
-header('Location: dashboard.php');
+header('Location: dashboard');
 exit;
 
 

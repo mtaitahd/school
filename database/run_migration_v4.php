@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Database Migration Runner for v4 Claim Code System
  * Run this file in your browser to execute the migration

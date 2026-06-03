@@ -4,7 +4,7 @@ require_once '../php/db_connection.php';
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: login.php');
+    header('Location: index');
     exit;
 }
 
@@ -40,80 +40,122 @@ $lang_page = 'dashboard.php';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="dashboard-body">
-<?php include '../php/includes/dashboard-start.php'; ?>
+<body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>
 
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-30 gap-3">
-            <button type="button" class="btn-child btn-child-primary" onclick="openModal('addUserModal')">
-                <i class="fas fa-user-plus me-2"></i>Add User
-            </button>
-        </div>
-        
-        <div class="row-child mb-30">
-            <div class="col-child-3">
-                <div class="dashboard-card">
-                    <div class="dashboard-card-header">
-                        <div class="dashboard-card-icon" style="background: var(--primary-blue);"><i class="fas fa-users"></i></div>
-                        <h3 class="dashboard-card-title">Total Users</h3>
-                    </div>
-                    <p style="font-size: 2.5rem; font-weight: 700; color: var(--primary-blue); margin: 0;"><?php echo $stats['users']; ?></p>
-                </div>
-            </div>
-            <div class="col-child-3">
-                <div class="dashboard-card">
-                    <div class="dashboard-card-header">
-                        <div class="dashboard-card-icon" style="background: var(--primary-green);"><i class="fas fa-child"></i></div>
-                        <h3 class="dashboard-card-title">Learners</h3>
-                    </div>
-                    <p style="font-size: 2.5rem; font-weight: 700; color: var(--primary-green); margin: 0;"><?php echo $stats['learners']; ?></p>
-                </div>
-            </div>
-            <div class="col-child-3">
-                <div class="dashboard-card">
-                    <div class="dashboard-card-header">
-                        <div class="dashboard-card-icon" style="background: var(--primary-yellow);"><i class="fas fa-chalkboard-teacher"></i></div>
-                        <h3 class="dashboard-card-title">Teachers</h3>
-                    </div>
-                    <p style="font-size: 2.5rem; font-weight: 700; color: var(--primary-yellow); margin: 0;"><?php echo $stats['teachers']; ?></p>
-                </div>
-            </div>
-            <div class="col-child-3">
-                <div class="dashboard-card">
-                    <div class="dashboard-card-header">
-                        <div class="dashboard-card-icon" style="background: var(--primary-purple);"><i class="fas fa-user-friends"></i></div>
-                        <h3 class="dashboard-card-title">Parents</h3>
-                    </div>
-                    <p style="font-size: 2.5rem; font-weight: 700; color: var(--primary-purple); margin: 0;"><?php echo $stats['parents']; ?></p>
-                </div>
-            </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <h1 class="h3 mb-0 text-gray-800" style="font-family:'Poppins',sans-serif;font-weight:700;">Dashboard</h1>
+            <a href="users" class="btn btn-primary" style="background:var(--primary-blue);border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;text-decoration:none;">
+                <i class="fas fa-user-plus me-2"></i>Manage Users
+            </a>
         </div>
 
-        <div class="row-child mb-30">
-            <div class="col-child-3">
-                <div class="dashboard-card">
-                    <div class="dashboard-card-header">
-                        <div class="dashboard-card-icon" style="background: var(--primary-orange);"><i class="fas fa-cubes"></i></div>
-                        <h3 class="dashboard-card-title">Modules</h3>
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2" style="border-left:4px solid var(--primary-blue);">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-uppercase mb-1" style="color:var(--primary-blue);">Total Users</div>
+                                <div class="h3 mb-0 fw-bold" style="color:var(--primary-blue);"><?php echo $stats['users']; ?></div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon-circle" style="background:var(--primary-blue);"><i class="fas fa-users text-white"></i></div>
+                            </div>
+                        </div>
                     </div>
-                    <p style="font-size: 2.5rem; font-weight: 700; color: var(--primary-orange); margin: 0;"><?php echo $stats['modules']; ?></p>
                 </div>
             </div>
-            <div class="col-child-3">
-                <div class="dashboard-card">
-                    <div class="dashboard-card-header">
-                        <div class="dashboard-card-icon" style="background: var(--primary-red);"><i class="fas fa-tasks"></i></div>
-                        <h3 class="dashboard-card-title">Activities</h3>
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2" style="border-left:4px solid var(--primary-green);">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-uppercase mb-1" style="color:var(--primary-green);">Learners</div>
+                                <div class="h3 mb-0 fw-bold" style="color:var(--primary-green);"><?php echo $stats['learners']; ?></div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon-circle" style="background:var(--primary-green);"><i class="fas fa-child text-white"></i></div>
+                            </div>
+                        </div>
                     </div>
-                    <p style="font-size: 2.5rem; font-weight: 700; color: var(--primary-red); margin: 0;"><?php echo $stats['activities']; ?></p>
                 </div>
             </div>
-            <div class="col-child-3">
-                <div class="dashboard-card">
-                    <div class="dashboard-card-header">
-                        <div class="dashboard-card-icon" style="background: var(--primary-green);"><i class="fas fa-check-circle"></i></div>
-                        <h3 class="dashboard-card-title">Completed</h3>
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2" style="border-left:4px solid #e6a800;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-uppercase mb-1" style="color:#e6a800;">Teachers</div>
+                                <div class="h3 mb-0 fw-bold" style="color:#e6a800;"><?php echo $stats['teachers']; ?></div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon-circle" style="background:#e6a800;"><i class="fas fa-chalkboard-teacher text-white"></i></div>
+                            </div>
+                        </div>
                     </div>
-                    <p style="font-size: 2.5rem; font-weight: 700; color: var(--primary-green); margin: 0;"><?php echo $stats['completed']; ?></p>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2" style="border-left:4px solid var(--primary-purple);">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-uppercase mb-1" style="color:var(--primary-purple);">Parents</div>
+                                <div class="h3 mb-0 fw-bold" style="color:var(--primary-purple);"><?php echo $stats['parents']; ?></div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon-circle" style="background:var(--primary-purple);"><i class="fas fa-user-friends text-white"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2" style="border-left:4px solid var(--primary-orange);">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-uppercase mb-1" style="color:var(--primary-orange);">Modules</div>
+                                <div class="h3 mb-0 fw-bold" style="color:var(--primary-orange);"><?php echo $stats['modules']; ?></div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon-circle" style="background:var(--primary-orange);"><i class="fas fa-cubes text-white"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2" style="border-left:4px solid var(--primary-red);">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-uppercase mb-1" style="color:var(--primary-red);">Activities</div>
+                                <div class="h3 mb-0 fw-bold" style="color:var(--primary-red);"><?php echo $stats['activities']; ?></div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon-circle" style="background:var(--primary-red);"><i class="fas fa-tasks text-white"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2" style="border-left:4px solid var(--primary-green);">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-uppercase mb-1" style="color:var(--primary-green);">Completed</div>
+                                <div class="h3 mb-0 fw-bold" style="color:var(--primary-green);"><?php echo $stats['completed']; ?></div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon-circle" style="background:var(--primary-green);"><i class="fas fa-check-circle text-white"></i></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

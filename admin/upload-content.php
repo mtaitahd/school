@@ -1,10 +1,10 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 require_once '../php/includes/lang.php';
 require_once '../php/includes/auth.php';
 
-auth_require_role(['admin'], 'login.php');
+auth_require_role(['admin'], 'index');
 
 $admin_id = auth_user_id();
 $base_path = '../';
@@ -115,66 +115,120 @@ $uploads = $database->fetchAll(
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="dashboard-body">
-<?php include '../php/includes/dashboard-start.php'; ?>
+<body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>
 
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-30 gap-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <div>
-                <h1 class="activity-title mb-0">Upload & Manage Content</h1>
-                <p class="activity-instruction mb-0">Add modules, activities, and media files</p>
+                <h1 class="h3 mb-1 text-gray-800" style="font-family:'Poppins',sans-serif;font-weight:700;">Upload & Manage Content</h1>
+                <p class="text-muted mb-0" style="font-size:0.9rem;">Add modules, activities, and media files</p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
-                <button type="button" class="btn-child btn-child-primary" onclick="openModal('moduleModal')"><i class="fas fa-cubes me-1"></i>Module</button>
-                <button type="button" class="btn-child btn-child-green" onclick="openModal('activityModal')"><i class="fas fa-tasks me-1"></i>Activity</button>
-                <button type="button" class="btn-child btn-child-yellow" onclick="openModal('uploadModal')"><i class="fas fa-upload me-1"></i>File</button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#moduleModal" style="background:var(--primary-blue);border:none;border-radius:50px;padding:8px 20px;font-size:0.85rem;font-weight:600;"><i class="fas fa-cubes me-1"></i>Module</button>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#activityModal" style="background:var(--primary-green);border:none;border-radius:50px;padding:8px 20px;font-size:0.85rem;font-weight:600;"><i class="fas fa-tasks me-1"></i>Activity</button>
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#uploadModal" style="background:#e6a800;border:none;border-radius:50px;padding:8px 20px;font-size:0.85rem;font-weight:600;color:#fff;"><i class="fas fa-upload me-1"></i>File</button>
             </div>
         </div>
 
-        <?php if ($message): ?><div class="alert-child alert-child-success mb-20"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
-        <?php if ($error): ?><div class="alert-child alert-child-error mb-20"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+        <?php if ($message): ?>
+            <div class="alert alert-success py-2 px-3 mb-4 text-center" style="border:none;border-radius:10px;font-size:0.9rem;"><?php echo htmlspecialchars($message); ?></div>
+        <?php endif; ?>
+        <?php if ($error): ?>
+            <div class="alert alert-danger py-2 px-3 mb-4 text-center" style="border:none;border-radius:10px;font-size:0.9rem;"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
 
-        <div class="row-child mb-30" style="display:none;" aria-hidden="true">
-            <div class="col-child-3">
-                <div class="dashboard-card">
-                    <h3 class="dashboard-card-title mb-20"><i class="fas fa-cubes me-2"></i>New Module</h3>
-                    <form method="POST" id="moduleFormLegacy">
-                        <input type="hidden" name="action" value="module">
-                        <div class="form-group-child">
-                            <label class="form-label-child">Name</label>
-                            <input type="text" name="module_name" class="form-control-child" required>
-                        </div>
-                        <div class="form-group-child">
-                            <label class="form-label-child">Icon (Font Awesome)</label>
-                            <input type="text" name="module_icon" class="form-control-child" value="fa-star" placeholder="fa-calculator">
-                        </div>
-                        <div class="form-group-child">
-                            <label class="form-label-child">Color</label>
-                            <input type="color" name="module_color" class="form-control-child" value="#4A90E2">
-                        </div>
-                        <button type="submit" class="btn-child btn-child-primary mt-20">Create Module</button>
-                    </form>
-                </div>
+        <div class="card mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold" style="color:var(--primary-blue);">Recent Uploads</h6>
             </div>
-            <div class="col-child-3">
-                <div class="dashboard-card">
-                    <h3 class="dashboard-card-title mb-20"><i class="fas fa-tasks me-2"></i>New Activity</h3>
-                    <form method="POST">
-                        <input type="hidden" name="action" value="activity">
-                        <div class="form-group-child">
-                            <label class="form-label-child">Module</label>
-                            <select name="module_id" class="form-control-child" required>
+            <div class="card-body">
+                <?php if (empty($uploads)): ?>
+                    <p class="text-muted mb-0" style="font-size:0.9rem;">No files uploaded yet.</p>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Type</th>
+                                    <th>By</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($uploads as $u): ?>
+                                <tr>
+                                    <td><a href="../<?php echo htmlspecialchars($u['file_path']); ?>" target="_blank" style="color:var(--primary-blue);text-decoration:none;font-weight:600;"><?php echo htmlspecialchars($u['file_name']); ?></a></td>
+                                    <td><?php echo htmlspecialchars($u['related_type']); ?></td>
+                                    <td><?php echo htmlspecialchars($u['first_name']); ?></td>
+                                    <td style="color:var(--text-light);"><?php echo date('M d, Y', strtotime($u['created_at'])); ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+    <!-- New Module Modal -->
+    <div class="modal fade" id="moduleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border:none;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="border-bottom:1px solid #f0f0f0;padding:20px 24px 16px;">
+                    <h5 class="modal-title" style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--navbar-dark);"><i class="fas fa-cubes me-2" style="color:var(--primary-blue);"></i>New Module</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST">
+                    <input type="hidden" name="action" value="module">
+                    <div class="modal-body" style="padding:20px 24px;">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;color:var(--text-dark);">Name *</label>
+                            <input type="text" name="module_name" class="form-control" required style="border-radius:10px;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;color:var(--text-dark);">Icon (Font Awesome class)</label>
+                            <input type="text" name="module_icon" class="form-control" value="fa-star" placeholder="fa-calculator" style="border-radius:10px;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;color:var(--text-dark);">Color</label>
+                            <input type="color" name="module_color" class="form-control form-control-color" value="#4A90E2" style="border-radius:10px;padding:4px;height:40px;">
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid #f0f0f0;padding:16px 24px 20px;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:50px;padding:8px 20px;font-size:0.85rem;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="background:var(--primary-blue);border:none;border-radius:50px;padding:8px 24px;font-size:0.85rem;font-weight:600;">Create Module</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Activity Modal -->
+    <div class="modal fade" id="activityModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border:none;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="border-bottom:1px solid #f0f0f0;padding:20px 24px 16px;">
+                    <h5 class="modal-title" style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--navbar-dark);"><i class="fas fa-tasks me-2" style="color:var(--primary-green);"></i>New Activity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST">
+                    <input type="hidden" name="action" value="activity">
+                    <div class="modal-body" style="padding:20px 24px;">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;color:var(--text-dark);">Module *</label>
+                            <select name="module_id" class="form-select" required style="border-radius:10px;">
                                 <?php foreach ($modules as $m): ?>
-                                    <option value="<?php echo (int) $m['module_id']; ?>"><?php echo htmlspecialchars($m['module_name']); ?></option>
+                                    <option value="<?php echo (int)$m['module_id']; ?>"><?php echo htmlspecialchars($m['module_name']); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="form-group-child">
-                            <label class="form-label-child">Activity name</label>
-                            <input type="text" name="activity_name" class="form-control-child" required>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;color:var(--text-dark);">Activity Name *</label>
+                            <input type="text" name="activity_name" class="form-control" required style="border-radius:10px;">
                         </div>
-                        <div class="form-group-child">
-                            <label class="form-label-child">Type</label>
-                            <select name="activity_type" class="form-control-child">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;color:var(--text-dark);">Type</label>
+                            <select name="activity_type" class="form-select" style="border-radius:10px;">
                                 <option value="counting">Counting</option>
                                 <option value="shapes">Shapes</option>
                                 <option value="addition">Addition</option>
@@ -184,134 +238,58 @@ $uploads = $database->fetchAll(
                                 <option value="quiz">Quiz</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn-child btn-child-green mt-20">Create Activity</button>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid #f0f0f0;padding:16px 24px 20px;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:50px;padding:8px 20px;font-size:0.85rem;">Cancel</button>
+                        <button type="submit" class="btn btn-success" style="background:var(--primary-green);border:none;border-radius:50px;padding:8px 24px;font-size:0.85rem;font-weight:600;">Create Activity</button>
+                    </div>
+                </form>
             </div>
-            <div class="col-child-3">
-                <div class="dashboard-card">
-                    <h3 class="dashboard-card-title mb-20"><i class="fas fa-cloud-upload-alt me-2"></i>Upload File</h3>
-                    <form method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="action" value="upload">
-                        <div class="form-group-child">
-                            <label class="form-label-child">File (image, audio, PDF)</label>
-                            <input type="file" name="content_file" class="form-control-child" accept=".jpg,.jpeg,.png,.gif,.webp,.mp3,.wav,.pdf" required>
+        </div>
+    </div>
+
+    <!-- Upload File Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border:none;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="border-bottom:1px solid #f0f0f0;padding:20px 24px 16px;">
+                    <h5 class="modal-title" style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--navbar-dark);"><i class="fas fa-cloud-upload-alt me-2" style="color:#e6a800;"></i>Upload File</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="upload">
+                    <div class="modal-body" style="padding:20px 24px;">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;color:var(--text-dark);">File (image, audio, PDF) *</label>
+                            <input type="file" name="content_file" class="form-control" required accept=".jpg,.jpeg,.png,.gif,.webp,.mp3,.wav,.pdf" style="border-radius:10px;">
                         </div>
-                        <div class="form-group-child">
-                            <label class="form-label-child">Content type</label>
-                            <select name="related_type" class="form-control-child">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;color:var(--text-dark);">Content Type</label>
+                            <select name="related_type" class="form-select" style="border-radius:10px;">
                                 <option value="image">Image</option>
                                 <option value="audio">Audio</option>
                                 <option value="worksheet">Worksheet (PDF)</option>
                                 <option value="activity">Activity asset</option>
                             </select>
                         </div>
-                        <div class="form-group-child">
-                            <label class="form-label-child">Description</label>
-                            <input type="text" name="description" class="form-control-child">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;color:var(--text-dark);">Description</label>
+                            <input type="text" name="description" class="form-control" style="border-radius:10px;">
                         </div>
-                        <button type="submit" class="btn-child btn-child-yellow mt-20">Upload</button>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid #f0f0f0;padding:16px 24px 20px;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:50px;padding:8px 20px;font-size:0.85rem;">Cancel</button>
+                        <button type="submit" class="btn btn-warning" style="background:#e6a800;border:none;border-radius:50px;padding:8px 24px;font-size:0.85rem;font-weight:600;color:#fff;">Upload</button>
+                    </div>
+                </form>
             </div>
-        </div>
-
-        <div class="dashboard-card">
-            <h3 class="dashboard-card-title mb-20">Recent Uploads</h3>
-            <?php if (empty($uploads)): ?>
-                <p class="activity-instruction">No files uploaded yet.</p>
-            <?php else: ?>
-                <div style="overflow-x:auto;">
-                    <table style="width:100%;border-collapse:collapse;">
-                        <thead>
-                            <tr style="background:var(--background-light);">
-                                <th style="padding:12px;text-align:left;">File</th>
-                                <th style="padding:12px;text-align:left;">Type</th>
-                                <th style="padding:12px;text-align:left;">By</th>
-                                <th style="padding:12px;text-align:left;">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($uploads as $u): ?>
-                            <tr style="border-bottom:1px solid #eee;">
-                                <td style="padding:12px;"><a href="../<?php echo htmlspecialchars($u['file_path']); ?>" target="_blank"><?php echo htmlspecialchars($u['file_name']); ?></a></td>
-                                <td style="padding:12px;"><?php echo htmlspecialchars($u['related_type']); ?></td>
-                                <td style="padding:12px;"><?php echo htmlspecialchars($u['first_name']); ?></td>
-                                <td style="padding:12px;"><?php echo date('M d, Y', strtotime($u['created_at'])); ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
-        </div>
-
-    <div id="moduleModal" class="kona-modal-overlay" aria-hidden="true">
-        <div class="kona-modal" role="dialog">
-            <div class="kona-modal-header"><h3>New Module</h3><button type="button" class="kona-modal-close" data-modal-close>&times;</button></div>
-            <form method="POST">
-                <input type="hidden" name="action" value="module">
-                <div class="kona-modal-body">
-                    <div class="form-group-child"><label class="form-label-child">Name *</label><input type="text" name="module_name" class="form-control-child" required></div>
-                    
-                    <div class="form-group-child"><label class="form-label-child">Icon</label><input type="text" name="module_icon" class="form-control-child" value="fa-star"></div>
-                    <div class="form-group-child"><label class="form-label-child">Color</label><input type="color" name="module_color" class="form-control-child" value="#4A90E2"></div>
-                </div>
-                <div class="kona-modal-footer">
-                    <button type="button" class="btn-child btn-child-secondary" data-modal-close>Cancel</button>
-                    <button type="submit" class="btn-child btn-child-primary">Create</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="activityModal" class="kona-modal-overlay" aria-hidden="true">
-        <div class="kona-modal" role="dialog">
-            <div class="kona-modal-header"><h3>New Activity</h3><button type="button" class="kona-modal-close" data-modal-close>&times;</button></div>
-            <form method="POST">
-                <input type="hidden" name="action" value="activity">
-                <div class="kona-modal-body">
-                    <div class="form-group-child"><label class="form-label-child">Module *</label>
-                        <select name="module_id" class="form-control-child" required>
-                            <?php foreach ($modules as $m): ?><option value="<?php echo (int)$m['module_id']; ?>"><?php echo htmlspecialchars($m['module_name']); ?></option><?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group-child"><label class="form-label-child">Name *</label><input type="text" name="activity_name" class="form-control-child" required></div>
-                    <div class="form-group-child"><label class="form-label-child">Type</label>
-                        <select name="activity_type" class="form-control-child"><option value="counting">Counting</option><option value="game">Game</option><option value="quiz">Quiz</option></select>
-                    </div>
-                </div>
-                <div class="kona-modal-footer">
-                    <button type="button" class="btn-child btn-child-secondary" data-modal-close>Cancel</button>
-                    <button type="submit" class="btn-child btn-child-green">Create</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="uploadModal" class="kona-modal-overlay" aria-hidden="true">
-        <div class="kona-modal" role="dialog">
-            <div class="kona-modal-header"><h3>Upload File</h3><button type="button" class="kona-modal-close" data-modal-close>&times;</button></div>
-            <form method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="upload">
-                <div class="kona-modal-body">
-                    <div class="form-group-child"><label class="form-label-child">File *</label><input type="file" name="content_file" class="form-control-child" required accept=".jpg,.jpeg,.png,.gif,.webp,.mp3,.wav,.pdf"></div>
-                    <div class="form-group-child"><label class="form-label-child">Type</label>
-                        <select name="related_type" class="form-control-child"><option value="image">Image</option><option value="audio">Audio</option><option value="worksheet">PDF</option></select>
-                    </div>
-                    <div class="form-group-child"><label class="form-label-child">Description</label><input type="text" name="description" class="form-control-child"></div>
-                </div>
-                
-                <div class="kona-modal-footer">
-                    <button type="button" class="btn-child btn-child-secondary" data-modal-close>Cancel</button>
-                    <button type="submit" class="btn-child btn-child-yellow">Upload</button>
-                </div>
-            </form>
         </div>
     </div>
 
 <?php include '../php/includes/dashboard-end.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../js/main.js"></script>
-<script src="../js/modals.js"></script>
+
 <script src="../js/dashboard.js"></script>
 </body>
 </html>

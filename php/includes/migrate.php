@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Ensures v2 tables exist (safe to call on each dashboard load)
  */
@@ -41,18 +41,115 @@ function ensure_schema_v2($database): void {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
 
+    // Enhanced announcements table (v3)
     $database->execute("
         CREATE TABLE IF NOT EXISTS announcements (
             announcement_id INT AUTO_INCREMENT PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) NOT NULL UNIQUE,
+            short_description VARCHAR(300) NULL,
             content TEXT NOT NULL,
+            image VARCHAR(500) NULL,
+            event_date DATE NULL,
+            status ENUM('draft', 'published') DEFAULT 'published',
             is_urgent TINYINT(1) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    // Migrate old announcements: add columns silently if missing
+    $cols = $database->fetchAll("SHOW COLUMNS FROM announcements");
+    $has = array_column($cols, 'Field');
+    if (!in_array('slug', $has)) {
+        $database->execute("ALTER TABLE announcements ADD COLUMN slug VARCHAR(255) NOT NULL DEFAULT '' AFTER title");
+    }
+    if (!in_array('short_description', $has)) {
+        $database->execute("ALTER TABLE announcements ADD COLUMN short_description VARCHAR(300) NULL AFTER slug");
+    }
+    if (!in_array('image', $has)) {
+        $database->execute("ALTER TABLE announcements ADD COLUMN image VARCHAR(500) NULL AFTER content");
+    }
+    if (!in_array('event_date', $has)) {
+        $database->execute("ALTER TABLE announcements ADD COLUMN event_date DATE NULL AFTER image");
+    }
+    if (!in_array('status', $has)) {
+        $database->execute("ALTER TABLE announcements ADD COLUMN status ENUM('draft','published') DEFAULT 'published' AFTER event_date");
+    }
+    if (!in_array('updated_at', $has)) {
+        $database->execute("ALTER TABLE announcements ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at");
+    }
+
+    // Announcement Ticker table
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS announcement_ticker (
+            ticker_id INT AUTO_INCREMENT PRIMARY KEY,
+            message VARCHAR(500) NOT NULL,
+            url VARCHAR(500) NULL,
+            is_active TINYINT(1) DEFAULT 1,
+            sort_order INT DEFAULT 0,
+            start_date DATE NULL,
+            end_date DATE NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    // Hero Slides table
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS hero_slides (
+            slide_id INT AUTO_INCREMENT PRIMARY KEY,
+            image VARCHAR(500) NOT NULL,
+            title VARCHAR(255) NULL,
+            subtitle VARCHAR(500) NULL,
+            link VARCHAR(500) NULL,
+            btn_text VARCHAR(100) DEFAULT 'Learn More',
+            sort_order INT DEFAULT 0,
+            is_active TINYINT(1) DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    // Notes Board table
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS notes (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) NOT NULL UNIQUE,
+            featured_image VARCHAR(500) NULL,
+            short_description TEXT NULL,
+            full_content TEXT NULL,
+            publish_date DATE NULL,
+            status ENUM('draft','published') DEFAULT 'published',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    // Events Calendar table
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS events (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            event_title VARCHAR(255) NOT NULL,
+            event_date DATE NOT NULL,
+            event_time VARCHAR(100) NULL,
+            event_description TEXT NULL,
+            status ENUM('draft','published') DEFAULT 'published',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    // Governance & Leadership table
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS governance (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            image_path VARCHAR(500) NULL,
+            profile_link VARCHAR(500) NULL,
+            border_color VARCHAR(50) DEFAULT 'blue',
+            sort_order INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
 
     $done = true;
 }
-
-
-

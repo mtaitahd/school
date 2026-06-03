@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KONA YA HISABATI - Claim Code Generator
  * Generates unique, secure claim codes for parent-student linking

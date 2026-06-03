@@ -18,8 +18,7 @@ $logged_in = isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'paren
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="page-child">
-    <?php include '../php/includes/header.php'; ?>
+<body class="page-child"><?php include '../php/includes/header.php'; ?>
     <?php if (false): ?><nav class="navbar-modern">
         <div class="container-modern">
             <div class="navbar-content">
@@ -28,7 +27,7 @@ $logged_in = isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'paren
                     <img src="../assets/images/logo.png" alt="Kona Ya Hisabati Logo" class="navbar-logo">
                     <div class="navbar-brand-text">
                         <span class="brand-main">Kona Ya Hisabati</span>
-                        <span class="brand-subtitle">Jifunze • Furahia • Fanikiwa</span>
+                        <span class="brand-subtitle">Jifunze ï¿½ Furahia ï¿½ Fanikiwa</span>
                     </div>
                 </div>
 

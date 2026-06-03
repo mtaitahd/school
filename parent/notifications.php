@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 
@@ -53,8 +53,7 @@ $lang_page = 'notifications.php';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="dashboard-body">
-    <?php
+<body class="dashboard-body"><?php
     include '../php/includes/dashboard-start.php';
     ?>
 

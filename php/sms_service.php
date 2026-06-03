@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KONA YA HISABATI - SMS Service Class
  * Webline Africa SMS API Integration

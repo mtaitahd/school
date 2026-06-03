@@ -75,15 +75,6 @@ $classes = $database->fetchAll("
     WHERE c.teacher_id = ?
     ORDER BY c.created_at DESC
 ", [$teacher_id]);
-
-// Fetch class details if editing
-$editing_class = null;
-if (isset($_GET['edit'])) {
-    $class_id = intval($_GET['edit']);
-    $editing_class = $database->fetchOne("
-        SELECT * FROM classes WHERE class_id = ? AND teacher_id = ?
-    ", [$class_id, $teacher_id]);
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -106,86 +97,72 @@ if (isset($_GET['edit'])) {
     include '../php/includes/dashboard-start.php';
     ?>
 
-    <div class="text-center mb-30">
-        <h1 class="activity-title">Manage Classes</h1>
-        <p class="activity-instruction">Create and manage your classes</p>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800" style="font-family:'Poppins',sans-serif;font-weight:700;">Manage Classes</h1>
+            <p class="text-muted mb-0" style="font-size:0.9rem;">Create and manage your classes</p>
+        </div>
+        <button class="btn btn-primary" style="background:var(--primary-blue);border:none;font-weight:600;padding:10px 24px;" onclick="openCreateModal()">
+            <i class="fas fa-plus-circle me-2"></i>Create Class
+        </button>
     </div>
 
     <?php if (isset($success)): ?>
-        <div class="alert-child alert-child-success mb-30">
+        <div class="alert alert-success py-2 px-3" style="border:none;border-radius:0;font-size:0.9rem;">
             <i class="fas fa-check-circle me-2"></i><?php echo htmlspecialchars($success); ?>
         </div>
     <?php endif; ?>
 
     <?php if (isset($error)): ?>
-        <div class="alert-child alert-child-error mb-30">
+        <div class="alert alert-danger py-2 px-3" style="border:none;border-radius:0;font-size:0.9rem;">
             <i class="fas fa-exclamation-circle me-2"></i><?php echo htmlspecialchars($error); ?>
         </div>
     <?php endif; ?>
 
-    <!-- Create/Edit Class Form -->
-    <div class="dashboard-card mb-30">
-        <div class="dashboard-card-header">
-            <div class="dashboard-card-icon" style="background: var(--primary-blue);">
-                <i class="fas fa-<?php echo $editing_class ? 'edit' : 'plus'; ?>"></i>
+    <!-- Create/Edit Class Modal -->
+    <div class="modal fade" id="classModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border:none;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="classModalLabel">Create New Class</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="">
+                    <input type="hidden" name="action" id="classFormAction" value="create">
+                    <input type="hidden" name="class_id" id="classFormId" value="">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="class_name" class="form-label fw-semibold" style="font-size:0.85rem;">Class Name</label>
+                            <input type="text" class="form-control" id="class_name" name="class_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="class_description" class="form-label fw-semibold" style="font-size:0.85rem;">Description</label>
+                            <textarea class="form-control" id="class_description" name="class_description" rows="3"></textarea>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="grade_level" class="form-label fw-semibold" style="font-size:0.85rem;">Grade Level</label>
+                                <input type="text" class="form-control" id="grade_level" name="grade_level" placeholder="e.g. Standard 1">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="academic_year" class="form-label fw-semibold" style="font-size:0.85rem;">Academic Year</label>
+                                <input type="text" class="form-control" id="academic_year" name="academic_year" value="<?php echo date('Y'); ?>">
+                            </div>
+                        </div>
+                        <div class="mt-3 form-check" id="isActiveWrapper" style="display:none;">
+                            <input type="checkbox" class="form-check-input" id="is_active" name="is_active" checked>
+                            <label class="form-check-label fw-semibold" for="is_active" style="font-size:0.85rem;">Active Class</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="background:var(--primary-blue);border:none;font-weight:600;" id="classSubmitBtn">
+                            <i class="fas fa-plus-circle me-2" id="classSubmitIcon"></i><span id="classSubmitText">Create Class</span>
+                        </button>
+                    </div>
+                </form>
             </div>
-            <h3 class="dashboard-card-title"><?php echo $editing_class ? 'Edit Class' : 'Create New Class'; ?></h3>
         </div>
-        <form method="POST" action="">
-            <input type="hidden" name="action" value="<?php echo $editing_class ? 'update' : 'create'; ?>">
-            <?php if ($editing_class): ?>
-                <input type="hidden" name="class_id" value="<?php echo $editing_class['class_id']; ?>">
-            <?php endif; ?>
-            
-            <div class="form-group-child">
-                <label class="form-label-child">Class Name</label>
-                <input type="text" class="form-control-child" name="class_name" 
-                       value="<?php echo $editing_class ? htmlspecialchars($editing_class['class_name']) : ''; ?>" required>
-            </div>
-            
-            <div class="form-group-child">
-                <label class="form-label-child">Description</label>
-                <textarea class="form-control-child" name="class_description" rows="3"><?php echo $editing_class ? htmlspecialchars($editing_class['class_description']) : ''; ?></textarea>
-            </div>
-            
-            <div class="row-child">
-                <div class="col-child-2">
-                    <div class="form-group-child">
-                        <label class="form-label-child">Grade Level</label>
-                        <input type="text" class="form-control-child" name="grade_level" 
-                               value="<?php echo $editing_class ? htmlspecialchars($editing_class['grade_level']) : ''; ?>">
-                    </div>
-                </div>
-                <div class="col-child-2">
-                    <div class="form-group-child">
-                        <label class="form-label-child">Academic Year</label>
-                        <input type="text" class="form-control-child" name="academic_year" 
-                               value="<?php echo $editing_class ? htmlspecialchars($editing_class['academic_year']) : date('Y'); ?>">
-                    </div>
-                </div>
-            </div>
-            
-            <?php if ($editing_class): ?>
-                <div class="form-group-child">
-                    <label class="form-label-child">
-                        <input type="checkbox" name="is_active" <?php echo $editing_class['is_active'] ? 'checked' : ''; ?>>
-                        Active Class
-                    </label>
-                </div>
-            <?php endif; ?>
-            
-            <div class="text-center mt-30">
-                <button type="submit" class="btn-child btn-child-primary btn-child-large">
-                    <i class="fas fa-<?php echo $editing_class ? 'save' : 'plus-circle'; ?> me-2"></i>
-                    <?php echo $editing_class ? 'Update Class' : 'Create Class'; ?>
-                </button>
-                <?php if ($editing_class): ?>
-                    <a href="manage-classes" class="btn-child btn-child-secondary btn-child-large" style="margin-left: 10px;">
-                        <i class="fas fa-times me-2"></i>Cancel
-                    </a>
-                <?php endif; ?>
-            </div>
-        </form>
     </div>
 
     <!-- Classes List -->
@@ -205,7 +182,7 @@ if (isset($_GET['edit'])) {
                                 <h4 style="margin: 0 0 10px 0;">
                                     <?php echo htmlspecialchars($class['class_name']); ?>
                                     <?php if (!$class['is_active']): ?>
-                                        <span style="background: var(--primary-red); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">Inactive</span>
+                                        <span style="background: var(--primary-red); color: white; padding: 2px 8px; font-size: 0.8rem;">Inactive</span>
                                     <?php endif; ?>
                                 </h4>
                                 <p style="margin: 5px 0; color: var(--text-light);">
@@ -227,8 +204,8 @@ if (isset($_GET['edit'])) {
                                    class="btn-child btn-child-info" style="min-height: 40px; min-width: 40px;">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="manage-classes.php?edit=<?php echo $class['class_id']; ?>" 
-                                   class="btn-child btn-child-warning" style="min-height: 40px; min-width: 40px;">
+                                <a href="javascript:void(0)" class="btn-child btn-child-warning" style="min-height: 40px; min-width: 40px;"
+                                   onclick="openEditModal(<?php echo $class['class_id']; ?>, '<?php echo htmlspecialchars(addslashes($class['class_name'])); ?>', '<?php echo htmlspecialchars(addslashes($class['class_description'])); ?>', '<?php echo htmlspecialchars(addslashes($class['grade_level'])); ?>', '<?php echo htmlspecialchars(addslashes($class['academic_year'])); ?>', <?php echo $class['is_active'] ? 'true' : 'false'; ?>)">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form method="POST" action="" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this class?');">
@@ -257,6 +234,36 @@ if (isset($_GET['edit'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/dashboard.js"></script>
+    <script>
+        function openCreateModal() {
+            document.getElementById('classModalLabel').textContent = 'Create New Class';
+            document.getElementById('classFormAction').value = 'create';
+            document.getElementById('classFormId').value = '';
+            document.getElementById('class_name').value = '';
+            document.getElementById('class_description').value = '';
+            document.getElementById('grade_level').value = '';
+            document.getElementById('academic_year').value = '<?php echo date('Y'); ?>';
+            document.getElementById('isActiveWrapper').style.display = 'none';
+            document.getElementById('classSubmitIcon').className = 'fas fa-plus-circle me-2';
+            document.getElementById('classSubmitText').textContent = 'Create Class';
+            new bootstrap.Modal(document.getElementById('classModal')).show();
+        }
+
+        function openEditModal(id, name, description, grade, year, active) {
+            document.getElementById('classModalLabel').textContent = 'Edit Class';
+            document.getElementById('classFormAction').value = 'update';
+            document.getElementById('classFormId').value = id;
+            document.getElementById('class_name').value = name;
+            document.getElementById('class_description').value = description;
+            document.getElementById('grade_level').value = grade;
+            document.getElementById('academic_year').value = year;
+            document.getElementById('isActiveWrapper').style.display = 'block';
+            document.getElementById('is_active').checked = active;
+            document.getElementById('classSubmitIcon').className = 'fas fa-save me-2';
+            document.getElementById('classSubmitText').textContent = 'Update Class';
+            new bootstrap.Modal(document.getElementById('classModal')).show();
+        }
+    </script>
 </body>
 </html>
 

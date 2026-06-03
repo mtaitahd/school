@@ -32,44 +32,53 @@ $stats = $database->fetchOne(
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="dashboard-body">
-<?php include '../php/includes/dashboard-start.php'; ?>
+<body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>
 
-        <div class="row-child mb-30">
-            <div class="col-child-3">
-                <div class="dashboard-card text-center">
-                    <div class="dashboard-card-icon" style="background:var(--primary-green);margin:0 auto 12px;"><i class="fas fa-check"></i></div>
-                    <p style="font-size:2rem;font-weight:700;margin:0;"><?php echo (int) $stats['completed']; ?></p>
-                    <p><?php echo $current_lang === 'sw' ? 'Zimekamilika' : 'Completed'; ?></p>
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2 text-center">
+                    <div class="card-body">
+                        <div class="icon-circle mb-3" style="background:var(--primary-green);width:56px;height:56px;font-size:1.5rem;margin:0 auto;"><i class="fas fa-check text-white"></i></div>
+                        <p style="font-size:2rem;font-weight:700;margin:0;color:var(--text-dark);"><?php echo (int) $stats['completed']; ?></p>
+                        <p class="text-muted mb-0"><?php echo $current_lang === 'sw' ? 'Zimekamilika' : 'Completed'; ?></p>
+                    </div>
                 </div>
             </div>
-            <div class="col-child-3">
-                <div class="dashboard-card text-center">
-                    <div class="dashboard-card-icon" style="background:var(--primary-yellow);margin:0 auto 12px;"><i class="fas fa-star"></i></div>
-                    <p style="font-size:2rem;font-weight:700;margin:0;"><?php echo (int) $stats['stars']; ?></p>
-                    <p><?php echo $current_lang === 'sw' ? 'Nyota' : 'Stars'; ?></p>
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2 text-center">
+                    <div class="card-body">
+                        <div class="icon-circle mb-3" style="background:var(--primary-yellow);width:56px;height:56px;font-size:1.5rem;margin:0 auto;"><i class="fas fa-star text-white"></i></div>
+                        <p style="font-size:2rem;font-weight:700;margin:0;color:var(--text-dark);"><?php echo (int) $stats['stars']; ?></p>
+                        <p class="text-muted mb-0"><?php echo $current_lang === 'sw' ? 'Nyota' : 'Stars'; ?></p>
+                    </div>
                 </div>
             </div>
-            <div class="col-child-3">
-                <div class="dashboard-card text-center">
-                    <div class="dashboard-card-icon" style="background:var(--primary-blue);margin:0 auto 12px;"><i class="fas fa-clipboard-list"></i></div>
-                    <p style="font-size:2rem;font-weight:700;margin:0;"><?php echo (int) $stats['pending_assignments']; ?></p>
-                    <p><?php echo $current_lang === 'sw' ? 'Zilizopangwa' : 'Assigned'; ?></p>
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2 text-center">
+                    <div class="card-body">
+                        <div class="icon-circle mb-3" style="background:var(--primary-blue);width:56px;height:56px;font-size:1.5rem;margin:0 auto;"><i class="fas fa-clipboard-list text-white"></i></div>
+                        <p style="font-size:2rem;font-weight:700;margin:0;color:var(--text-dark);"><?php echo (int) $stats['pending_assignments']; ?></p>
+                        <p class="text-muted mb-0"><?php echo $current_lang === 'sw' ? 'Zilizopangwa' : 'Assigned'; ?></p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="row-child">
-            <div class="col-child-3">
-                <a href="categories.php?lang=<?php echo $current_lang; ?>" class="dashboard-card parent-card" style="display:block;text-decoration:none;text-align:center;">
-                    <i class="fas fa-play-circle" style="font-size:3rem;color:var(--primary-green);"></i>
-                    <h3 class="mt-20"><?php echo htmlspecialchars($t['nav_start'] ?? 'Start Learning'); ?></h3>
+        <div class="row g-4">
+            <div class="col-xl-3 col-md-6">
+                <a href="categories.php?lang=<?php echo $current_lang; ?>" class="card h-100 py-2 text-center text-decoration-none" style="display:block;">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                        <i class="fas fa-play-circle mb-3" style="font-size:3rem;color:var(--primary-green);"></i>
+                        <h5 class="fw-bold mb-0" style="color:var(--text-dark);"><?php echo htmlspecialchars($t['nav_start'] ?? 'Start Learning'); ?></h5>
+                    </div>
                 </a>
             </div>
-            <div class="col-child-3">
-                <a href="assigned.php?lang=<?php echo $current_lang; ?>" class="dashboard-card parent-card" style="display:block;text-decoration:none;text-align:center;">
-                    <i class="fas fa-tasks" style="font-size:3rem;color:var(--primary-blue);"></i>
-                    <h3 class="mt-20"><?php echo htmlspecialchars($t['sb_learner_assigned'] ?? 'Assigned Activities'); ?></h3>
+            <div class="col-xl-3 col-md-6">
+                <a href="assigned.php?lang=<?php echo $current_lang; ?>" class="card h-100 py-2 text-center text-decoration-none" style="display:block;">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                        <i class="fas fa-tasks mb-3" style="font-size:3rem;color:var(--primary-blue);"></i>
+                        <h5 class="fw-bold mb-0" style="color:var(--text-dark);"><?php echo htmlspecialchars($t['sb_learner_assigned'] ?? 'Assigned Activities'); ?></h5>
+                    </div>
                 </a>
             </div>
         </div>

@@ -1,116 +1,87 @@
 <?php
 /**
- * KONA YA HISABATI - Database Connection
- * Secure PDO Database Connection
+ * Minimal Database wrapper — only implements what's needed for admin login.
+ * Provides `query()` and `fetchOne()` used by admin pages.
  */
-
 class Database {
-    private $host = 'localhost';
-    private $db_name = 'kona_hisabati';
-    private $username = 'root';
-    private $password = '';
-    private $charset = 'utf8mb4';
-    private $pdo;
+	private $host = 'localhost';
+	private $db_name = 'kona_hisabati';
+	private $username = 'root';
+	private $password = '';
+	private $charset = 'utf8mb4';
+	private $pdo;
 
-    /**
-     * Get PDO instance
-     */
-    public function getConnection() {
-        if ($this->pdo === null) {
-            try {
-                $dsn = "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=" . $this->charset;
-                $options = [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                    PDO::ATTR_PERSISTENT => false
-                ];
-                
-                $this->pdo = new PDO($dsn, $this->username, $this->password, $options);
-            } catch (PDOException $e) {
-                error_log("Database Connection Error: " . $e->getMessage());
-                die("Database connection failed. Please try again later.");
-            }
-        }
+	private function getConnection() {
+		if ($this->pdo === null) {
+			try {
+				$dsn = "mysql:host={$this->host};dbname={$this->db_name};charset={$this->charset}";
+				$options = [
+					PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+					PDO::ATTR_EMULATE_PREPARES => false,
+				];
+				$this->pdo = new PDO($dsn, $this->username, $this->password, $options);
+			} catch (PDOException $e) {
+				error_log('DB connect error: '.$e->getMessage());
+				$this->pdo = null;
+			}
+		}
+		return $this->pdo;
+	}
 
-        return $this->pdo;
-    }
+	public function query($sql, $params = []) {
+		$pdo = $this->getConnection();
+		if (!$pdo) return false;
+		try {
+			$stmt = $pdo->prepare($sql);
+			$stmt->execute($params);
+			return $stmt;
+		} catch (PDOException $e) {
+			error_log('DB query error: '.$e->getMessage());
+			return false;
+		}
+	}
 
-    /**
-     * Execute a prepared statement
-     */
-    public function query($sql, $params = []) {
-        try {
-            $stmt = $this->getConnection()->prepare($sql);
-            $stmt->execute($params);
-            return $stmt;
-        } catch (PDOException $e) {
-            error_log("Query Error: " . $e->getMessage());
-            return false;
-        }
-    }
+	public function fetchOne($sql, $params = []) {
+		$stmt = $this->query($sql, $params);
+		return $stmt ? $stmt->fetch() : null;
+	}
 
-    /**
-     * Fetch all rows
-     */
-    public function fetchAll($sql, $params = []) {
-        $stmt = $this->query($sql, $params);
-        return $stmt ? $stmt->fetchAll() : [];
-    }
+	public function fetchAll($sql, $params = []) {
+		$stmt = $this->query($sql, $params);
+		return $stmt ? $stmt->fetchAll() : [];
+	}
 
-    /**
-     * Fetch single row
-     */
-    public function fetchOne($sql, $params = []) {
-        $stmt = $this->query($sql, $params);
-        return $stmt ? $stmt->fetch() : null;
-    }
+	public function execute($sql, $params = []) {
+		$pdo = $this->getConnection();
+		if (!$pdo) return false;
+		try {
+			$stmt = $pdo->prepare($sql);
+			return $stmt->execute($params);
+		} catch (PDOException $e) {
+			error_log('DB execute error: '.$e->getMessage());
+			return false;
+		}
+	}
 
-    /**
-     * Insert data and return last insert ID
-     */
-    public function insert($sql, $params = []) {
-        $stmt = $this->query($sql, $params);
-        return $stmt ? $this->getConnection()->lastInsertId() : false;
-    }
+	public function insert($sql, $params = []) {
+		$pdo = $this->getConnection();
+		if (!$pdo) return false;
+		try {
+			$stmt = $pdo->prepare($sql);
+			$stmt->execute($params);
+			return $pdo->lastInsertId();
+		} catch (PDOException $e) {
+			error_log('DB insert error: '.$e->getMessage());
+			return false;
+		}
+	}
 
-    /**
-     * Update or delete data
-     */
-    public function execute($sql, $params = []) {
-        $stmt = $this->query($sql, $params);
-        return $stmt !== false;
-    }
-
-    /**
-     * Begin transaction
-     */
-    public function beginTransaction() {
-        return $this->getConnection()->beginTransaction();
-    }
-
-    /**
-     * Commit transaction
-     */
-    public function commit() {
-        return $this->getConnection()->commit();
-    }
-
-    /**
-     * Rollback transaction
-     */
-    public function rollback() {
-        return $this->getConnection()->rollBack();
-    }
-
-    /**
-     * Close connection
-     */
-    public function close() {
-        $this->pdo = null;
-    }
+	public function getPdo() {
+		return $this->getConnection();
+	}
 }
 
-// Create global database instance
+// Provide global `$database` for existing code.
 $database = new Database();
 

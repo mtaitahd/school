@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once '../php/db_connection.php';
 require_once '../php/includes/lang.php';
 require_once '../php/includes/learner-session.php';

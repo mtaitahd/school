@@ -1,9 +1,9 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 require_once '../php/includes/auth.php';
 
-auth_require_role(['admin'], 'index.php');
+auth_require_role(['admin'], 'index');
 
 header('Content-Type: application/json');
 

@@ -1,9 +1,9 @@
-﻿<?php
+<?php
 session_start();
 require_once '../php/db_connection.php';
 require_once '../php/includes/auth.php';
 
-auth_require_role(['admin'], 'login.php');
+auth_require_role(['admin'], 'index');
 
 $user_id = (int) ($_GET['user_id'] ?? 0);
 if ($user_id > 0 && $user_id !== auth_user_id()) {
@@ -13,7 +13,7 @@ if ($user_id > 0 && $user_id !== auth_user_id()) {
         $database->execute("UPDATE users SET is_active = ? WHERE user_id = ?", [$new_status, $user_id]);
     }
 }
-header('Location: dashboard.php');
+header('Location: dashboard');
 exit;
 
 

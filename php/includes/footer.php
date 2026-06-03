@@ -14,6 +14,12 @@ if (!isset($nav_items)) {
             <div class="col-child-3 footer-col">
                 <h3 class="footer-heading">Kona Ya Hisabati</h3>
                 <p class="footer-text"><?php echo htmlspecialchars($t['footer_tagline'] ?? 'Interactive numeracy for Tanzanian early grade learners.'); ?></p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
             </div>
             <div class="col-child-3 footer-col">
                 <h3 class="footer-heading">Quick Links</h3>
@@ -33,8 +39,9 @@ if (!isset($nav_items)) {
             </div>
             <div class="col-child-3 footer-col">
                 <h3 class="footer-heading">Contact</h3>
-                <p class="footer-text"><i class="fas fa-envelope me-2" aria-hidden="true"></i>info@konahisabati.com</p>
-                <p class="footer-text"><i class="fas fa-phone me-2" aria-hidden="true"></i>+255 XXX XXX XXX</p>
+                <p class="footer-text"><i class="fas fa-envelope" style="width:18px;"></i> info@konahisabati.com</p>
+                <p class="footer-text"><i class="fas fa-phone" style="width:18px;"></i> +255 XXX XXX XXX</p>
+                <p class="footer-text"><i class="fas fa-map-marker-alt" style="width:18px;"></i> Tanzania</p>
             </div>
         </div>
         <div class="footer-bottom">

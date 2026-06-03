@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once 'php/db_connection.php';
 
 $sql = "

@@ -6,9 +6,9 @@ require_once '../php/db_connection.php';
 if (isset($_SESSION['user_id'])) {
     $role = $_SESSION['role'];
     if ($role === 'admin') {
-        header('Location: dashboard.php');
+        header('Location: dashboard');
     } else {
-        header('Location: ../index.php');
+        header('Location: ../index');
     }
     exit;
 }
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['first_name'] = $user['first_name'];
             $_SESSION['last_name'] = $user['last_name'];
             
-            header('Location: dashboard.php');
+            header('Location: dashboard');
             exit;
         } else {
             $error = 'Invalid username or password.';
@@ -62,7 +62,7 @@ include '../php/includes/auth-split-start.php';
 ?>
             <header class="auth-form-header">
                 <h1 class="auth-form-title">Admin Login</h1>
-                <p class="auth-form-subtitle">System administration — enter your credentials to access the admin dashboard</p>
+                <p class="auth-form-subtitle">System administration ï¿½ enter your credentials to access the admin dashboard</p>
             </header>
 
             <?php if ($error): ?>
