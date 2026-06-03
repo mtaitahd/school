@@ -32,15 +32,9 @@ if (isset($database) && auth_role() === 'parent') {
         <?php endif; ?>
     </div>
 
-    <?php if ($dashboard_page_title !== ''): ?>
-    <div class="d-sm-flex align-items-center justify-content-between mb-0" style="flex:1;">
-        <h4 class="mb-0" style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--text-dark);"><?php echo htmlspecialchars($dashboard_page_title); ?></h4>
-    </div>
-    <?php else: ?>
     <a href="<?php echo $base; ?>index?lang=<?php echo $lang; ?>" class="d-flex align-items-center gap-2 text-decoration-none" style="flex:1;color:var(--text-dark);">
         <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1rem;">Kona Ya Hisabati</span>
     </a>
-    <?php endif; ?>
 
     <ul class="navbar-nav ml-auto">
         <?php if (auth_role() === 'parent'): ?>
