@@ -3521,17 +3521,18 @@ body.dashboard-body .dashboard-main .container-child {
 }
 
 .leadership-card .image-frame {
-    background-color: #9ca3af;
+    background-color: #f3f4f6;
     overflow: hidden;
     text-align: center;
 }
 
 .leadership-card .image-frame img {
-    width: auto;
+    width: 100%;
     height: 220px;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
     margin: 0 auto;
+    padding: 8px;
 }
 
 .leadership-card .image-frame .fallback-icon {
