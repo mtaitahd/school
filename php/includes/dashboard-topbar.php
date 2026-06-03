@@ -26,10 +26,10 @@ if (isset($database) && auth_role() === 'parent') {
 
     <?php if ($dashboard_page_title !== ''): ?>
     <div class="d-sm-flex align-items-center justify-content-between mb-0" style="flex:1;">
-        <h4 class="mb-0 text-white" style="font-family:'Poppins',sans-serif;font-weight:700;"><?php echo htmlspecialchars($dashboard_page_title); ?></h4>
+        <h4 class="mb-0" style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--text-dark);"><?php echo htmlspecialchars($dashboard_page_title); ?></h4>
     </div>
     <?php else: ?>
-    <a href="<?php echo $base; ?>index?lang=<?php echo $lang; ?>" class="d-flex align-items-center gap-2 text-white text-decoration-none" style="flex:1;">
+    <a href="<?php echo $base; ?>index?lang=<?php echo $lang; ?>" class="d-flex align-items-center gap-2 text-decoration-none" style="flex:1;color:var(--text-dark);">
         <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1rem;">Kona Ya Hisabati</span>
     </a>
     <?php endif; ?>
@@ -67,9 +67,9 @@ if (isset($database) && auth_role() === 'parent') {
 
         <li class="nav-item dropdown no-arrow">
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-white small"><?php echo htmlspecialchars($display_name); ?></span>
-                <div class="img-profile rounded-circle" style="width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.2);">
-                    <i class="fas fa-user text-white" style="font-size:0.85rem;"></i>
+                <span class="mr-2 d-none d-lg-inline small" style="color:var(--text-dark);"><?php echo htmlspecialchars($display_name); ?></span>
+                <div class="img-profile rounded-circle" style="width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;                    background:rgba(0,0,0,0.05);">
+                    <i class="fas fa-user" style="font-size:0.85rem;color:var(--text-dark);"></i>
                 </div>
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">

@@ -2377,7 +2377,7 @@ body.dashboard-body > .dashboard-shell {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background: linear-gradient(180deg, var(--navbar-dark) 0%, var(--primary-blue) 100%);
+    background: #fff;
     overflow-x: hidden;
     overflow-y: auto;
     transition: width 0.28s ease;
@@ -2391,7 +2391,7 @@ body.dashboard-body > .dashboard-shell {
 .sidebar-logo {
     padding: 20px;
     text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     margin-bottom: 10px;
 }
 
@@ -2417,7 +2417,7 @@ body.dashboard-body > .dashboard-shell {
     align-items: center;
     gap: 12px;
     padding: 12px 0;
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--text-dark);
     text-decoration: none;
     border-radius: var(--border-radius-md);
     font-weight: 600;
@@ -2433,8 +2433,8 @@ body.dashboard-body > .dashboard-shell {
 
 .sidebar-link:hover,
 .sidebar-item.active .sidebar-link {
-    background: rgba(255, 255, 255, 0.15);
-    color: var(--primary-yellow);
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--primary-blue);
 }
 
 .sidebar-item.active .sidebar-link {
@@ -2496,8 +2496,8 @@ body.dashboard-body > .sidebar-backdrop {
     min-height: var(--dashboard-topbar-height);
     margin: 0;
     padding: 0 12px;
-    background: linear-gradient(90deg, var(--navbar-dark) 0%, var(--primary-blue) 100%);
-    color: #fff;
+    background: #fff;
+    color: var(--text-dark);
     z-index: 1001;
     border-radius: 0;
     box-shadow: none;
@@ -6567,7 +6567,8 @@ body {
 .sidebar {
     width: 6.5rem;
     min-height: 100vh;
-    background: linear-gradient(180deg, var(--primary-blue) 0%, var(--navbar-dark) 100%);
+    background: #fff;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
     transition: width 0.25s ease;
     z-index: 1050;
 }
@@ -6580,7 +6581,7 @@ body {
     display: flex;
     align-items: center;
     padding: 0.9rem 1rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-dark);
     font-weight: 500;
     font-size: 0.9rem;
     text-decoration: none;
@@ -6597,12 +6598,12 @@ body {
 }
 
 .sidebar .nav-item .nav-link:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.1);
+    color: var(--primary-blue);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .sidebar .nav-item.active .nav-link {
-    color: var(--primary-yellow);
+    color: var(--primary-blue);
     font-weight: 600;
 }
 
@@ -6614,7 +6615,7 @@ body {
     transform: translateY(-50%);
     width: 3px;
     height: 60%;
-    background: var(--primary-yellow);
+    background: var(--primary-blue);
     border-radius: 2px 0 0 2px;
 }
 
@@ -6625,8 +6626,8 @@ body {
     font-size: 1rem;
     font-weight: 700;
     padding: 1rem;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.15);
+    color: var(--text-dark);
+    background: rgba(0, 0, 0, 0.03);
 }
 
 .sidebar-brand .sidebar-brand-icon img {
@@ -6641,7 +6642,7 @@ body {
 
 /* Sidebar Divider */
 .sidebar-divider {
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
     margin: 0.5rem 0;
 }
 
@@ -6652,7 +6653,7 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(0, 0, 0, 0.4);
 }
 
 /* Sidebar Toggled State */
@@ -6684,9 +6685,9 @@ body {
     font-size: 1.2rem;
 }
 
-/* Sidebar Light Override (keeps our dark theme) */
+/* Sidebar Light Override */
 .sidebar-light {
-    background: linear-gradient(180deg, var(--primary-blue) 0%, var(--navbar-dark) 100%);
+    background: #fff;
 }
 
 /* Version */
@@ -6694,12 +6695,12 @@ body {
     padding: 1rem;
     text-align: center;
     font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(0, 0, 0, 0.3);
 }
 
 /* Topbar */
 .bg-navbar {
-    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--navbar-dark) 100%) !important;
+    background: #fff !important;
 }
 
 .topbar {
@@ -6708,7 +6709,7 @@ body {
 }
 
 .topbar #sidebarToggleTop {
-    color: #fff;
+    color: var(--text-dark);
     font-size: 1.2rem;
     padding: 0.25rem 0.5rem;
     text-decoration: none;
@@ -6722,13 +6723,13 @@ body {
 }
 
 .topbar .nav-item .nav-link {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: var(--text-dark) !important;
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
 }
 
 .topbar .nav-item .nav-link:hover {
-    color: #fff !important;
+    color: var(--primary-blue) !important;
 }
 
 .topbar .badge-counter {
@@ -6746,7 +6747,7 @@ body {
 
 .topbar-divider {
     width: 0;
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: 1px solid rgba(0, 0, 0, 0.15);
     height: 2rem;
     margin: auto 0.5rem;
 }
