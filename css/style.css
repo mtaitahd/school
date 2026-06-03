@@ -582,7 +582,6 @@ h1, h2, h3, h4, h5, h6 {
     background: linear-gradient(145deg, var(--background-white) 0%, #f8f9fa 100%);
     border-radius: 0;
     padding: 30px;
-    box-shadow: var(--shadow-soft);
     margin-bottom: 20px;
     border: 2px solid transparent;
     transition: all 0.3s ease;
@@ -613,7 +612,6 @@ h1, h2, h3, h4, h5, h6 {
 .dashboard-card:hover {
     border-color: var(--primary-yellow);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
 }
 
 /* Compact variant used for the Assigned Activities list (smaller cards) */
@@ -6568,7 +6566,6 @@ body {
     width: 6.5rem;
     min-height: 100vh;
     background: #fff;
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
     transition: width 0.25s ease;
     z-index: 1050;
 }
@@ -6895,12 +6892,7 @@ body {
 .dashboard-body .card {
     border: none;
     border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-soft);
     transition: all 0.3s ease;
-}
-
-.dashboard-body .card:hover {
-    box-shadow: var(--shadow-hover);
 }
 
 .dashboard-body .card-header {
