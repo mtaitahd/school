@@ -26,7 +26,7 @@ class SmsService {
         
         // Load from environment, .env file, or parameters
         $this->apiToken = $apiToken ?? ($envConfig['SMS_API_TOKEN'] ?? '');
-        $this->senderId = $senderId ?? ($envConfig['SMS_SENDER_ID'] ?? 'KONA YA HISABATI');
+        $this->senderId = $senderId ?? ($envConfig['SMS_SENDER_ID'] ?? 'TAARIFA');
         $this->baseUrl = $baseUrl ?? ($envConfig['SMS_BASE_URL'] ?? 'https://sms.webline.co.tz/api/send');
         
         // Initialize database connection
