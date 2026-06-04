@@ -27,6 +27,7 @@ switch ($role) {
         $items = [
             ['id' => 'dashboard', 'href' => 'dashboard.php', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
             ['id' => 'claim', 'href' => 'dashboard.php?claim=1', 'icon' => 'fa-key', 'label' => 'Claim Child'],
+            ['id' => 'topup', 'href' => app_in_role_folder($role) ? '../topup.php' : 'topup.php', 'icon' => 'fa-wallet', 'label' => 'Topup'],
             ['id' => 'guide', 'href' => 'guide.php?lang=' . urlencode($lang), 'icon' => 'fa-book-open', 'label' => 'Parent Guide'],
         ];
         break;
