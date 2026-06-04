@@ -1,7 +1,10 @@
 <?php
 /**
  * Snippe Payment Webhook Handler
- * Called by Snippe API after payment completion
+ * 
+ * Endpoint: https://yourdomain.com/webhooks/snippe
+ * This is the ONLY trusted source of payment confirmation.
+ * NEVER trust frontend payment success alone.
  */
 
 require_once __DIR__ . '/../php/includes/session.php';

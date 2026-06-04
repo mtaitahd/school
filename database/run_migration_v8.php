@@ -52,8 +52,8 @@ try {
             `subscription_id` INT UNSIGNED DEFAULT NULL,
             `amount` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
             `currency` VARCHAR(10) NOT NULL DEFAULT 'TZS',
-            `method` ENUM('snippe','manual') NOT NULL,
-            `payment_type` ENUM('subscription','topup') NOT NULL DEFAULT 'subscription',
+            `method` ENUM('snippe','snippe_card','manual') NOT NULL,
+            `payment_type` ENUM('subscription','wallet_topup') NOT NULL DEFAULT 'subscription',
             `phone` VARCHAR(20) DEFAULT NULL,
             `email` VARCHAR(100) DEFAULT NULL,
             `transaction_id` VARCHAR(100) DEFAULT NULL,
@@ -111,7 +111,7 @@ try {
     // Update sms_logs enum to include payment types
     echo "<p>Updating sms_logs sms_type enum...</p>";
     try {
-        $database->execute("ALTER TABLE `sms_logs` MODIFY COLUMN `sms_type` ENUM('assignment','performance','parent_link','fee_payment','general','payment_success','subscription_reminder') NOT NULL DEFAULT 'general'");
+        $database->execute("ALTER TABLE `sms_logs` MODIFY COLUMN `sms_type` ENUM('assignment','performance','parent_link','fee_payment','general','payment_success','subscription_reminder','trial_ending','overdue') NOT NULL DEFAULT 'general'");
         echo "<p style='color: green;'>✓ sms_logs sms_type updated</p>";
     } catch (Exception $e) {
         echo "<p style='color: orange;'>- Could not update sms_logs enum: " . $e->getMessage() . "</p>";

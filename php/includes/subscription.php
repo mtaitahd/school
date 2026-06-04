@@ -202,3 +202,61 @@ function sub_is_trial_expired(int $parentId): bool {
     $status = sub_get_status($parentId);
     return $status['status'] === 'trial' && !$status['is_active'];
 }
+
+function sub_check_trial_ending_notifications(): void {
+    global $database;
+
+    $parents = $database->fetchAll("
+        SELECT u.user_id, u.phone, u.first_name, s.trial_end
+        FROM `users` u
+        JOIN `subscriptions` s ON s.parent_id = u.user_id
+        WHERE u.role = 'parent'
+          AND s.status = 'trial'
+          AND s.trial_end IS NOT NULL
+          AND s.trial_end > NOW()
+          AND s.trial_end <= DATE_ADD(NOW(), INTERVAL 2 DAY)
+    ");
+
+    if (empty($parents)) return;
+
+    try {
+        require_once __DIR__ . '/sms_service.php';
+        $sms = new SmsService();
+
+        foreach ($parents as $parent) {
+            $daysLeft = max(1, floor((strtotime($parent['trial_end']) - time()) / 86400));
+            $msg = "Smart Math Corner: Majaribio yako yanaisha ndani ya siku $daysLeft. Lipa 1,500 TZS kuendelea. Tembelea tovuti yetu au tuma 1,500 kwa 440783070 (Smart Math Corner).";
+            $sms->sendSMS($parent['phone'], $msg, 'trial_ending', 'parent', (int) $parent['user_id']);
+        }
+    } catch (Exception $e) {
+        error_log('Trial ending SMS error: ' . $e->getMessage());
+    }
+}
+
+function sub_check_overdue_notifications(): void {
+    global $database;
+
+    $parents = $database->fetchAll("
+        SELECT u.user_id, u.phone, u.first_name
+        FROM `users` u
+        JOIN `subscriptions` s ON s.parent_id = u.user_id
+        WHERE u.role = 'parent'
+          AND s.status = 'expired'
+          AND s.current_period_end IS NOT NULL
+          AND s.current_period_end <= DATE_SUB(NOW(), INTERVAL 2 DAY)
+    ");
+
+    if (empty($parents)) return;
+
+    try {
+        require_once __DIR__ . '/sms_service.php';
+        $sms = new SmsService();
+
+        foreach ($parents as $parent) {
+            $msg = "Smart Math Corner: Uanachama wako umeisha. Lipa 1,500 TZS kurejesha huduma kwa mtoto wako. Tuma kwa 440783070 (Smart Math Corner) au tembelea tovuti yetu.";
+            $sms->sendSMS($parent['phone'], $msg, 'overdue', 'parent', (int) $parent['user_id']);
+        }
+    } catch (Exception $e) {
+        error_log('Overdue SMS error: ' . $e->getMessage());
+    }
+}

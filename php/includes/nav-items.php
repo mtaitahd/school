@@ -37,9 +37,10 @@ switch ($logged_role) {
 
     case 'parent':
         $nav_items = [
-            ['id' => 'home', 'href' => $home_href, 'icon' => 'fa-home', 'label' => $t['nav_home'] ?? 'Home'],
-            ['id' => 'parent_dashboard', 'href' => app_web_path('parent/dashboard.php'), 'icon' => 'fa-tachometer-alt', 'label' => $t['nav_parent_dashboard'] ?? 'Parent Dashboard'],
-            ['id' => 'parent', 'href' => app_web_path('parent/guide.php?lang=' . urlencode($lang)), 'icon' => 'fa-book-open', 'label' => $t['nav_parent'] ?? 'Parent Guide'],
+            ['id' => 'home', 'href' => $home_href, 'icon' => 'fa-home', 'label' => 'Home'],
+            ['id' => 'parent_dashboard', 'href' => app_web_path('parent/dashboard.php'), 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
+            ['id' => 'students', 'href' => app_web_path('parent/dashboard.php'), 'icon' => 'fa-users', 'label' => 'Students'],
+            ['id' => 'reports', 'href' => app_web_path('parent/dashboard.php'), 'icon' => 'fa-chart-line', 'label' => 'Reports'],
             ['id' => 'topup', 'href' => app_web_path('topup.php'), 'icon' => 'fa-wallet', 'label' => 'Topup'],
         ];
         break;
