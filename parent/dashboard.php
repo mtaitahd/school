@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '__DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/db_connection.php';
 
 // Check if user is logged in and is a parent
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
@@ -66,7 +66,7 @@ if (!empty($child_ids)) {
     ", $child_ids);
 }
 
-require_once '__DIR__ . '/../php/includes/lang.php';
+require_once __DIR__ . '/../php/includes/lang.php';
 $current_lang = $_SESSION['lang'] ?? 'en';
 $base_path = '../';
 $active_nav = 'parent_dashboard';

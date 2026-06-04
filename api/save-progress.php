@@ -1,9 +1,9 @@
 <?php
-require_once '__DIR__ . '/../php/includes/session.php';
-require_once '__DIR__ . '/../php/includes/security.php';
-require_once '__DIR__ . '/../php/includes/csrf.php';
-require_once '__DIR__ . '/../php/db_connection.php';
-require_once '__DIR__ . '/../php/includes/migrate.php';
+require_once __DIR__ . '/../php/includes/session.php';
+require_once __DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/includes/csrf.php';
+require_once __DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/migrate.php';
 
 header('Content-Type: application/json');
 sec_send_headers();

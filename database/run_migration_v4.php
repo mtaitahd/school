@@ -4,7 +4,7 @@
  * Run this file in your browser to execute the migration
  */
 
-require_once '__DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/db_connection.php';
 
 echo "<h1>Kona Ya Hisabati - Database Migration v4</h1>";
 echo "<h2>Parent Claim Code System</h2>";

@@ -1,8 +1,8 @@
 <?php
-require_once '__DIR__ . '/../php/includes/session.php';
-require_once '__DIR__ . '/../php/includes/security.php';
-require_once '__DIR__ . '/../php/includes/csrf.php';
-require_once '__DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/session.php';
+require_once __DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/includes/csrf.php';
+require_once __DIR__ . '/../php/db_connection.php';
 
 sec_require_rate_limit();
 
@@ -87,7 +87,7 @@ if (isset($_GET['edit'])) {
     $edit_ticker = $database->fetchOne("SELECT * FROM announcement_ticker WHERE ticker_id = ?", [(int) $_GET['edit']]);
 }
 
-require_once '__DIR__ . '/../php/includes/lang.php';
+require_once __DIR__ . '/../php/includes/lang.php';
 $base_path = '../';
 $dashboard_role = 'admin';
 $sidebar_active = 'announcement-ticker';

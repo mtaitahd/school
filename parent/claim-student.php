@@ -1,8 +1,8 @@
 <?php
-require_once '__DIR__ . '/../php/includes/session.php';
-require_once '__DIR__ . '/../php/includes/security.php';
-require_once '__DIR__ . '/../php/includes/csrf.php';
-require_once '__DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/session.php';
+require_once __DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/includes/csrf.php';
+require_once __DIR__ . '/../php/db_connection.php';
 
 sec_require_rate_limit();
 
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['access_code'])) {
                         // Send SMS confirmation if parent has phone number
                         $parent = $database->fetchOne("SELECT phone FROM users WHERE user_id = ?", [$parent_id]);
                         if ($parent && $parent['phone']) {
-                            require_once '__DIR__ . '/../php/sms_service.php';
+                            require_once __DIR__ . '/../php/sms_service.php';
                             $smsService = new SmsService();
                             $smsService->sendParentLinkingConfirmation(
                                 $parent['phone'],
@@ -131,7 +131,7 @@ $children = $database->fetchAll("
 </head>
 <body class="dashboard-body">
     <?php
-    require_once '__DIR__ . '/../php/includes/lang.php';
+    require_once __DIR__ . '/../php/includes/lang.php';
     $base_path = '../';
     $dashboard_role = 'parent';
     $sidebar_active = 'claim';

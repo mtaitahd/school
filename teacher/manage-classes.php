@@ -1,8 +1,8 @@
 <?php
-require_once '__DIR__ . '/../php/includes/session.php';
-require_once '__DIR__ . '/../php/includes/security.php';
-require_once '__DIR__ . '/../php/includes/csrf.php';
-require_once '__DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/session.php';
+require_once __DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/includes/csrf.php';
+require_once __DIR__ . '/../php/db_connection.php';
 
 sec_require_rate_limit();
 
@@ -94,7 +94,7 @@ $classes = $database->fetchAll("
 </head>
 <body class="dashboard-body">
     <?php
-    require_once '__DIR__ . '/../php/includes/lang.php';
+    require_once __DIR__ . '/../php/includes/lang.php';
     $base_path = '../';
     $dashboard_role = 'teacher';
     $sidebar_active = 'classes';

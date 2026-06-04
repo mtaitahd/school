@@ -204,7 +204,7 @@ $classes = $database->fetchAll("
 </head>
 <body class="dashboard-body">
     <?php
-    require_once '__DIR__ . '/../php/includes/lang.php';
+    require_once __DIR__ . '/../php/includes/lang.php';
     $base_path = '../';
     $dashboard_role = 'teacher';
     $sidebar_active = 'students';

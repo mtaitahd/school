@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once '__DIR__ . '/../php/db_connection.php';
-require_once '__DIR__ . '/../php/includes/lang.php';
-require_once '__DIR__ . '/../php/includes/auth.php';
+require_once __DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/lang.php';
+require_once __DIR__ . '/../php/includes/auth.php';
 
 auth_require_role(['learner'], 'login.php');
 

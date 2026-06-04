@@ -1,9 +1,9 @@
 <?php
-require_once '__DIR__ . '/../php/includes/session.php';
-require_once '__DIR__ . '/../php/includes/security.php';
-require_once '__DIR__ . '/../php/includes/csrf.php';
-require_once '__DIR__ . '/../php/db_connection.php';
-require_once '__DIR__ . '/../php/includes/auth.php';
+require_once __DIR__ . '/../php/includes/session.php';
+require_once __DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/includes/csrf.php';
+require_once __DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/auth.php';
 
 sec_require_rate_limit();
 auth_require_role(['admin'], 'index');
@@ -109,7 +109,7 @@ $log_dir_path = __DIR__ . '/../logs';
 $log_dir_writable = is_writable($log_dir_path);
 $error_log_writable = !file_exists($error_log_path) || is_writable($error_log_path);
 
-require_once '__DIR__ . '/../php/includes/lang.php';
+require_once __DIR__ . '/../php/includes/lang.php';
 $base_path = '../';
 $dashboard_role = 'admin';
 $sidebar_active = 'logs';

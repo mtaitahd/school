@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '__DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/db_connection.php';
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
@@ -21,7 +21,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
 </head>
 <body class="dashboard-body">
     <?php
-    require_once '__DIR__ . '/../php/includes/lang.php';
+    require_once __DIR__ . '/../php/includes/lang.php';
     $base_path = '../';
     $dashboard_role = 'teacher';
     $sidebar_active = 'downloads';

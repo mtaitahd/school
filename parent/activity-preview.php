@@ -1,11 +1,11 @@
 <?php
-require_once '__DIR__ . '/../php/includes/session.php';
-require_once '__DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/includes/session.php';
+require_once __DIR__ . '/../php/includes/security.php';
 sec_send_headers();
 if (session_status() === PHP_SESSION_NONE) {
     sec_session_start();
 }
-require_once '__DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/db_connection.php';
 
 // Check if user is logged in and is a parent
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
