@@ -2,6 +2,7 @@
 require_once __DIR__ . '/php/includes/session.php';
 require_once __DIR__ . '/php/includes/security.php';
 require_once __DIR__ . '/php/includes/csrf.php';
+require_once __DIR__ . '/php/includes/auth.php';
 require_once __DIR__ . '/php/db_connection.php';
 
 sec_require_rate_limit();
