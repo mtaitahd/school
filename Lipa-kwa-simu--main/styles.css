@@ -1,0 +1,224 @@
+*{
+    margin: 0;
+    padding: 0;
+
+}
+
+body{
+    font-family: 'Poppins', sans-serif;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.575), rgba(0, 0, 0, 0.575)), url(images/Mount-Kilimanjaro-Tanzania.webp);
+    background-size: cover;
+  
+}
+
+.lipia h1{
+    text-align: center;
+    color: white;
+    font-size: 43px;
+    margin-top: 7rem;
+}
+
+.lipia p{
+    color: #ffb400;
+    padding-bottom: 1rem;
+    text-align: center;
+}
+
+.lipia h1 span{
+    color: #ffb400;
+}
+
+.mitandao{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 2rem 4rem 2rem 4rem;
+    gap: 1.5rem;
+}
+
+.voda button{
+
+    border: none;
+}
+
+.airtel button{
+    
+    border: none;
+}
+.voda button a{
+    background-color: red;
+    padding: 1rem 2.2rem 1rem 2.2rem;
+    color: white;
+    text-decoration: none;
+    font-size: 25px;
+    font-weight: bold;
+    border-radius: 7px;
+}
+
+
+.airtel button a{
+    background-color: red;
+    padding: 1rem 2.2rem 1rem 2.2rem;
+    color: white;
+    text-decoration: none;
+    font-size: 25px;
+    font-weight: bold;
+    border-radius: 7px;
+}
+
+.tigo button{
+    border: none;
+}
+
+.tigo button span{
+    color: #ffb400;
+}
+.tigo button a{
+    background-color: #022950;
+    padding: 1rem 2.2rem 1rem 2.2rem;
+    color: white;
+    text-decoration: none;
+    font-size: 25px;
+    font-weight: bold;
+    border-radius: 7px;
+}
+
+.halopesa button{
+    border: none;
+}
+
+.halopesa button a{
+    background-color: orangered;
+    padding: 1rem 2.2rem 1rem 2.2rem;
+    color: white;
+    text-decoration: none;
+    font-size: 25px;
+    font-weight: bold;
+    border-radius: 7px;
+}
+
+
+/*Hover effects for every element */
+
+ .voda button a:hover{
+    background-color: transparent;
+    border: 4px solid red;
+    transition: .3s ease-in-out;
+    color: red;
+}
+
+ .airtel button a:hover{
+    background-color: transparent;
+    border: 4px solid red;
+    transition: .3s ease-in-out;
+    color: red;
+}
+
+ .halopesa button a:hover{
+    background-color: transparent;
+    border: 4px solid orangered;
+    transition: .3s ease-in-out;
+    color: orangered;
+}
+
+.voda button:hover{
+    background-color: transparent;
+}
+
+.tigo button a:hover{
+    background-color: transparent;
+    border: 4px solid #ffb400;
+    transition: .3s ease-in-out;
+ 
+}
+
+.tigo button:hover{
+    background-color: transparent;
+}
+.halopesa button:hover{
+    background-color: transparent;
+}
+.airtel button:hover{
+    background-color: transparent;
+}
+
+.tz h1{
+    text-align: center;
+    color: white;
+   margin: 4rem 0rem 0rem 0rem;
+}
+
+.tz h1 span{
+    color: #ffb400;
+}
+.tanzania{
+    display: flex;
+    justify-content: space-evenly;
+    padding: 1rem 4rem 2rem 4rem;
+    align-items: center;
+    gap: 2.3rem;
+  
+
+}
+
+.tz{
+    padding-top: 2.5rem;
+}
+
+.tz1 h2{
+    color: white;
+}
+
+.tz1 h2 span{
+    color: #ffb400;
+}
+
+.tz2 h2{
+    color: white;
+}
+
+.tz2 h2 span{
+    color: #ffb400;
+}
+
+.tz3 h2{
+    color: white;
+}
+
+.tz3 h2 span{
+    color: #ffb400;
+}
+
+.tz1, .tz2, .tz3{
+    color: white;
+    background-color: #fafafa3a;
+    padding: 2rem 3rem 2rem 3rem;
+    border-radius: 10px;
+}
+
+.tz1:hover, .tz2:hover, .tz3:hover{
+    transform: scale(1.08);
+    transition: .3s ease-out;
+}
+
+@media screen and (max-width:939px) {
+    .mitandao{
+        display: block;
+        padding: 2rem 4rem 2rem 4rem;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .voda button, .halopesa button, .tigo button, .airtel button{
+        margin: 1.5rem;
+    }
+
+    .tanzania{
+        display: block;
+        padding: 2rem;
+    }
+
+    .tz1, .tz2, .tz3{
+        margin: 1.5rem;
+    }
+}

@@ -57,10 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
             }
         } else {
-            if (!preg_match('/^(0|\+?255)?[67]\d{8}$/', preg_replace('/[^0-9]/', '', $phone))) {
+            $normalized = pay_normalize_phone($phone);
+            if (!preg_match('/^255[67]\d{8}$/', $normalized)) {
                 $error = 'Tafadhali ingiza namba halali ya simu (Tanzania)';
             } else {
-                $normalized = '+255' . substr(preg_replace('/[^0-9]/', '', $phone), -9);
                 $result = pay_create_snippe_payment($parentId, $normalized, '', $paymentType);
                 if ($result['success']) {
                     if ($result['payment_url']) {
@@ -76,12 +76,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif ($paymentMethod === 'manual') {
+        $manualPhone = $_POST['phone_manual'] ?? '';
         if (empty($transactionId)) {
             $error = 'Tafadhali ingiza Transaction ID';
-        } elseif (empty($phone)) {
+        } elseif (empty($manualPhone)) {
             $error = 'Tafadhali ingiza namba ya simu uliyotumia';
         } else {
-            $result = pay_create_manual_payment($parentId, $phone, $transactionId);
+            $result = pay_create_manual_payment($parentId, $manualPhone, $transactionId);
             $message = 'Malipo yako yamewasilishwa kwa uhakiki. Utapokea SMS uthibitisho.';
             $success = true;
         }
@@ -126,6 +127,19 @@ $dashboard_page_title = 'Topup';
         .status-stat { background: #f8fafc; border-radius: 12px; padding: 1rem; text-align: center; border: 1px solid #e2e8f0; }
         .status-stat .stat-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
         .status-stat .stat-value { font-size: 1.25rem; font-weight: 700; color: #1e293b; }
+
+        /* Network cards */
+        .network-card { border: 2px solid #e2e8f0; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: #fff; }
+        .network-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .network-card.active { border-width: 3px; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .network-card .net-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.5rem; color: #fff; font-weight: 700; }
+        .network-card .net-name { font-weight: 700; font-size: 0.95rem; color: #1e293b; }
+
+        /* Phone prefix input group */
+        .phone-prefix { display: flex; align-items: center; gap: 0; }
+        .phone-prefix .prefix { background: #f1f5f9; border: 1.5px solid #d1d5db; border-right: none; border-radius: 10px 0 0 10px; padding: 0.75rem 1rem; font-weight: 700; font-size: 1.1rem; color: #334155; }
+        .phone-prefix input { border-radius: 0 10px 10px 0 !important; border-left: none; }
+
         @media (max-width: 576px) {
             .payment-card .card-body { padding: 1.25rem !important; }
             .nav-payments .nav-link { padding: 0.75rem; }
@@ -247,6 +261,7 @@ $dashboard_page_title = 'Topup';
                     <input type="hidden" name="payment_method" id="paymentMethod" value="snippe">
                     <input type="hidden" name="payment_submethod" id="paymentSubmethod" value="mobile">
                     <input type="hidden" name="payment_type" id="paymentType" value="subscription">
+                    <input type="hidden" name="phone" id="phoneInput">
 
                     <!-- Payment Type Selection -->
                     <label class="fw-semibold text-muted small text-uppercase mb-2">Payment Type</label>
@@ -293,22 +308,19 @@ $dashboard_page_title = 'Topup';
                     </div>
 
                     <div class="tab-content">
-                        <!-- Mobile Money -->
+
+                        <!-- === Mobile Money === -->
                         <div class="tab-pane fade show active" id="content-mobile" role="tabpanel">
                             <div class="alert alert-info border-0 rounded-3 py-2 small d-flex align-items-center gap-2 mb-3">
                                 <i class="fas fa-info-circle"></i>
-                                You will receive a USSD push on your phone. Approve the payment to complete.
+                                Chagua mtandao wako na uweke namba ya simu. Utapokea USSD push kwenye simu yako.
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold text-muted small" for="phoneMobile">Phone Number (Tanzania)</label>
-                                <input type="tel" class="form-control form-control-lg" name="phone" id="phoneMobile" placeholder="07XX XXX XXX" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 btn-lg rounded-3">
+                            <button type="button" class="btn btn-primary w-100 btn-lg rounded-3" data-bs-toggle="modal" data-bs-target="#mobileNetworkModal">
                                 <i class="fas fa-mobile-alt me-2"></i> Pay with Mobile Money
                             </button>
                         </div>
 
-                        <!-- Card Payment -->
+                        <!-- === Card Payment === -->
                         <div class="tab-pane fade" id="content-card" role="tabpanel">
                             <div class="alert alert-info border-0 rounded-3 py-2 small d-flex align-items-center gap-2 mb-3">
                                 <i class="fas fa-info-circle"></i>
@@ -323,7 +335,7 @@ $dashboard_page_title = 'Topup';
                             </button>
                         </div>
 
-                        <!-- Manual Payment -->
+                        <!-- === Manual Payment === -->
                         <div class="tab-pane fade" id="content-manual" role="tabpanel">
                             <div class="manual-rice mb-3">
                                 <div class="d-flex align-items-center gap-3">
@@ -351,7 +363,7 @@ $dashboard_page_title = 'Topup';
 
                             <div class="mb-2">
                                 <label class="form-label fw-semibold text-muted small" for="manualPhone">Phone Number Used</label>
-                                <input type="tel" class="form-control form-control-lg" name="phone" id="manualPhone" placeholder="07XX XXX XXX" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
+                                <input type="tel" class="form-control form-control-lg" name="phone_manual" id="manualPhone" placeholder="07XX XXX XXX" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold text-muted small" for="manualTxnId">Transaction ID</label>
@@ -372,11 +384,88 @@ $dashboard_page_title = 'Topup';
     </div>
 </div>
 
+<!-- ====== Mobile Network Selection Modal ====== -->
+<div class="modal fade" id="mobileNetworkModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0" style="padding:1.5rem 1.5rem 0;">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-mobile-alt me-2 text-primary"></i>Chagua Mtandao
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding:1.25rem 1.5rem 1.5rem;">
+                <p class="text-muted small mb-3">Bonyeza mtandao wako kisha ingiza namba ya simu</p>
+
+                <!-- Network cards -->
+                <div class="row g-3 mb-4" id="networkCards">
+                    <div class="col-6">
+                        <div class="network-card" data-network="mpesa" onclick="selectNetwork(this, 'mpesa')">
+                            <div class="net-icon" style="background:linear-gradient(135deg,#4CAF50,#2E7D32);">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="net-name">M-Pesa</div>
+                            <small class="text-muted">Vodacom</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="network-card" data-network="airtel" onclick="selectNetwork(this, 'airtel')">
+                            <div class="net-icon" style="background:linear-gradient(135deg,#E53935,#B71C1C);">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="net-name">Airtel Money</div>
+                            <small class="text-muted">Airtel</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="network-card" data-network="mixx" onclick="selectNetwork(this, 'mixx')">
+                            <div class="net-icon" style="background:linear-gradient(135deg,#FFB300,#F57F17);">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="net-name">Mixx</div>
+                            <small class="text-muted">Tigo / Yas</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="network-card" data-network="halotel" onclick="selectNetwork(this, 'halotel')">
+                            <div class="net-icon" style="background:linear-gradient(135deg,#FF6D00,#E65100);">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="net-name">Halotel</div>
+                            <small class="text-muted">Halotel</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phone input (hidden until network selected) -->
+                <div id="phoneInputSection" style="display:none;">
+                    <hr class="my-3">
+                    <label class="form-label fw-semibold small text-muted mb-2">
+                        <i class="fas fa-phone me-1"></i> Namba ya Simu
+                    </label>
+                    <div class="phone-prefix mb-2">
+                        <span class="prefix">+255</span>
+                        <input type="tel" class="form-control form-control-lg" id="modalPhone" placeholder="7XX XXX XXX" maxlength="9" autocomplete="off">
+                    </div>
+                    <div class="small text-muted mb-3">
+                        <i class="fas fa-info-circle me-1"></i> Weka namba bila <strong>0</strong> au <strong>+255</strong>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100 btn-lg rounded-3" id="payMobileBtn" onclick="submitMobilePayment()">
+                        <i class="fas fa-check-circle me-2"></i> Pay
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php include 'php/includes/dashboard-end.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+let selectedNetwork = '';
+
 function selectType(el, type) {
     document.querySelectorAll('.opt-btn').forEach(o => o.classList.remove('active'));
     el.classList.add('active');
@@ -396,10 +485,43 @@ function switchTab(btn, contentId) {
     document.getElementById(contentId).classList.add('show', 'active');
 }
 
+function selectNetwork(el, network) {
+    document.querySelectorAll('.network-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    selectedNetwork = network;
+    document.getElementById('phoneInputSection').style.display = 'block';
+    document.getElementById('modalPhone').focus();
+}
+
+function submitMobilePayment() {
+    const phoneInput = document.getElementById('modalPhone');
+    const raw = phoneInput.value.replace(/\D/g, '');
+
+    if (raw.length < 9) {
+        phoneInput.classList.add('is-invalid');
+        phoneInput.focus();
+        return;
+    }
+
+    const fullNumber = '+255' + raw.slice(-9);
+    document.getElementById('phoneInput').value = fullNumber;
+    document.getElementById('paymentForm').submit();
+}
+
+// Auto-format phone: only digits, max 9
+document.getElementById('modalPhone').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 9);
+    this.classList.remove('is-invalid');
+
+    // Visual grouping: 7XX XXX XXX
+    const v = this.value;
+    if (v.length > 5) {
+        this.value = v.slice(0, 5) + ' ' + v.slice(5);
+    }
+});
+
 // Restore state on error
 document.addEventListener('DOMContentLoaded', function () {
-    const savedMethod = '<?= htmlspecialchars($_POST['payment_method'] ?? '') ?>';
-    const savedSub = '<?= htmlspecialchars($_POST['payment_submethod'] ?? '') ?>';
     const savedType = '<?= htmlspecialchars($_POST['payment_type'] ?? 'subscription') ?>';
 
     if (savedType === 'wallet_topup') {
@@ -414,6 +536,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('customAmountBox').style.display = 'block';
     }
 
+    const savedMethod = '<?= htmlspecialchars($_POST['payment_method'] ?? '') ?>';
+    const savedSub = '<?= htmlspecialchars($_POST['payment_submethod'] ?? '') ?>';
     if (savedMethod) {
         setMethod(savedMethod, savedSub);
         const tabMap = {
