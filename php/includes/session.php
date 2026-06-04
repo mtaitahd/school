@@ -8,8 +8,8 @@ function sec_session_start(): void {
         $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
             $line = trim($line);
-            if ($line === '' || str_starts_with($line, '#')) continue;
-            if (str_starts_with($line, 'SESSION_LIFETIME=')) {
+            if ($line === '' || substr($line, 0, 1) === '#') continue;
+            if (strpos($line, 'SESSION_LIFETIME=') === 0) {
                 $val = (int) substr($line, strlen('SESSION_LIFETIME='));
                 if ($val > 0) $lifetime = $val;
                 break;

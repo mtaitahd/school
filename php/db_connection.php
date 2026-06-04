@@ -15,8 +15,8 @@ class Database {
             $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
                 $line = trim($line);
-                if ($line === '' || str_starts_with($line, '#')) continue;
-                if (str_contains($line, '=')) {
+                if ($line === '' || substr($line, 0, 1) === '#') continue;
+                if (strpos($line, '=') !== false) {
                     [$k, $v] = explode('=', $line, 2);
                     $env[trim($k)] = trim($v);
                 }

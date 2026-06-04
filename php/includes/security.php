@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
     sec_session_start();
 }
 
-function sec_env(string $key, mixed $default = null): mixed {
+function sec_env(string $key, $default = null) {
     static $env = null;
     if ($env === null) {
         $env = [];
@@ -14,8 +14,8 @@ function sec_env(string $key, mixed $default = null): mixed {
             $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
                 $line = trim($line);
-                if ($line === '' || str_starts_with($line, '#')) continue;
-                if (str_contains($line, '=')) {
+                if ($line === '' || substr($line, 0, 1) === '#') continue;
+                if (strpos($line, '=') !== false) {
                     [$k, $v] = explode('=', $line, 2);
                     $env[trim($k)] = trim($v);
                 }
@@ -125,7 +125,7 @@ function sec_rate_limit_check(string $key, int $maxAttempts, int $windowSeconds)
         }
     }
 
-    $data = array_filter($data, fn($t) => ($now - $t) <= $windowSeconds);
+    $data = array_filter($data, function($t) use ($now, $windowSeconds) { return ($now - $t) <= $windowSeconds; });
     $data = array_values($data);
 
     if (count($data) >= $maxAttempts) {
@@ -183,7 +183,7 @@ function sec_clear_login_rate_limit_all(string $username): void {
         return;
     }
     foreach ($files as $file) {
-        if (str_contains($file, $suffix)) {
+        if (strpos($file, $suffix) !== false) {
             @unlink($file);
         }
     }

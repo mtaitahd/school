@@ -51,7 +51,7 @@ class Validator {
         return $v;
     }
 
-    public static function bool(mixed $value): bool {
+    public static function bool($value): bool {
         return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
