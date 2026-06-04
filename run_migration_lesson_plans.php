@@ -1,5 +1,5 @@
 <?php
-require_once 'php/db_connection.php';
+require_once __DIR__ . '/php/db_connection.php';
 
 $sql = "
 CREATE TABLE IF NOT EXISTS lesson_plans (

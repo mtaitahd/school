@@ -1,7 +1,7 @@
 <?php
-require_once 'php/db_connection.php';
-require_once 'php/includes/lang.php';
-require_once 'php/includes/announcements-data.php';
+require_once __DIR__ . '/php/db_connection.php';
+require_once __DIR__ . '/php/includes/lang.php';
+require_once __DIR__ . '/php/includes/announcements-data.php';
 
 $current_lang = isset($_GET['lang']) ? $_GET['lang'] : 'en';
 $base_path = '';

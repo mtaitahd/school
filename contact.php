@@ -1,6 +1,6 @@
 <?php
-require_once 'php/includes/session.php';
-require_once 'php/includes/security.php';
+require_once __DIR__ . '/php/includes/session.php';
+require_once __DIR__ . '/php/includes/security.php';
 sec_send_headers();
 ?><!DOCTYPE html>
 <html lang="en">
