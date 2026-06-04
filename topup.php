@@ -416,8 +416,11 @@ $dashboard_page_title = 'Topup';
                     <div class="small text-muted mb-3">
                         <i class="fas fa-info-circle me-1"></i> Weka namba bila <strong>0</strong> au <strong>+255</strong>
                     </div>
-                    <button type="button" class="btn btn-primary w-100 btn-lg rounded-3" id="payMobileBtn" onclick="submitMobilePayment()">
+                    <button type="button" class="btn btn-primary w-100 btn-lg rounded-3 mb-2" id="payMobileBtn" onclick="submitMobilePayment()">
                         <i class="fas fa-check-circle me-2"></i> Pay
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary w-100 rounded-3" onclick="cancelMobilePayment()">
+                        <i class="fas fa-times me-2"></i> Cancel
                     </button>
                 </div>
             </div>
@@ -472,6 +475,15 @@ function submitMobilePayment() {
     const fullNumber = '+255' + raw.slice(-9);
     document.getElementById('phoneInput').value = fullNumber;
     document.getElementById('paymentForm').submit();
+}
+
+function cancelMobilePayment() {
+    selectedNetwork = '';
+    document.querySelectorAll('.network-card').forEach(c => c.classList.remove('active'));
+    document.getElementById('phoneInputSection').style.display = 'none';
+    document.getElementById('modalPhone').value = '';
+    document.getElementById('modalPhone').classList.remove('is-invalid');
+    bootstrap.Modal.getInstance(document.getElementById('mobileNetworkModal')).hide();
 }
 
 // Format phone: digits + space grouping (space doesn't count toward the 9-digit limit)

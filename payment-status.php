@@ -38,6 +38,20 @@ if (!$payment) {
     header('Location: topup.php'); exit;
 }
 
+// Handle cancel action before status variables
+$cancelled = $payment['admin_note'] === 'cancelled_by_user';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_payment'])) {
+    csrf_require();
+    if (in_array($payment['status'], ['pending', 'manual_review'])) {
+        $database->execute(
+            "UPDATE `payments` SET status = 'failed', admin_note = 'cancelled_by_user' WHERE id = ? AND parent_id = ?",
+            [$payment['id'], $parentId]
+        );
+        $payment['status'] = 'failed';
+        $cancelled = true;
+    }
+}
+
 $amount = number_format((float) $payment['amount']) . ' ' . $payment['currency'];
 $isMobile = $payment['method'] === 'snippe';
 $isManual = $payment['method'] === 'manual';
@@ -77,13 +91,13 @@ $dashboard_page_title = 'Payment Status';
 
         <div class="card status-card mb-4">
             <!-- Header color changes with status -->
-            <div class="card-header-custom text-white" id="statusHeader" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
+            <div class="card-header-custom text-white" id="statusHeader" style="background:<?= $cancelled ? 'linear-gradient(135deg,#6b7280,#4b5563)' : ($initialStatus === 'completed' ? 'linear-gradient(135deg,#16a34a,#15803d)' : ($initialStatus === 'failed' ? 'linear-gradient(135deg,#dc2626,#b91c1c)' : ($initialStatus === 'manual_review' ? 'linear-gradient(135deg,#f59e0b,#d97706)' : 'linear-gradient(135deg,#2563eb,#1d4ed8)'))) ?>;">
                 <div class="text-center">
                     <div class="status-icon-circle bg-white bg-opacity-25 mx-auto" id="statusIconCircle">
-                        <i class="fas fa-spinner fa-pulse text-white" id="statusIcon"></i>
+                        <i class="fas <?= $cancelled ? 'fa-ban' : ($initialStatus === 'completed' ? 'fa-check-circle' : ($initialStatus === 'failed' ? 'fa-times-circle' : ($initialStatus === 'manual_review' ? 'fa-clock' : 'fa-spinner fa-pulse'))) ?> text-white" id="statusIcon"></i>
                     </div>
-                    <h3 class="fw-bold mb-1" id="statusTitle">Payment Status</h3>
-                    <p class="mb-0 small" style="opacity:0.85;" id="statusSubtitle">Processing your payment...</p>
+                    <h3 class="fw-bold mb-1" id="statusTitle"><?= $cancelled ? 'Payment Cancelled' : ($initialStatus === 'completed' ? 'Payment Successful' : ($initialStatus === 'failed' ? 'Payment Failed' : ($initialStatus === 'manual_review' ? 'Under Review' : 'Payment Status'))) ?></h3>
+                    <p class="mb-0 small" style="opacity:0.85;" id="statusSubtitle"><?= $cancelled ? 'You cancelled the payment.' : ($initialStatus === 'completed' ? 'Your subscription is now active.' : ($initialStatus === 'failed' ? 'The payment could not be completed.' : ($initialStatus === 'manual_review' ? 'Your manual payment is being verified.' : 'Processing your payment...'))) ?></p>
                 </div>
             </div>
             <div class="card-body text-center">
@@ -117,7 +131,9 @@ $dashboard_page_title = 'Payment Status';
                         <div class="d-flex align-items-center gap-2 justify-content-center">
                             <span class="poll-indicator"></span>
                             <span id="statusMessageText">
-                                <?php if ($initialStatus === 'completed'): ?>
+                                <?php if ($cancelled): ?>
+                                    Malipo yameghairiwa. Unaweza kujaribu tena wakati wowote.
+                                <?php elseif ($initialStatus === 'completed'): ?>
                                     Malipo yamefanikiwa.
                                 <?php elseif ($initialStatus === 'failed'): ?>
                                     Malipo hayajakamilika. Tafadhali jaribu tena.
@@ -136,15 +152,22 @@ $dashboard_page_title = 'Payment Status';
                 </div>
 
                 <!-- Action buttons (hidden initially, shown on completion/failure) -->
-                <div id="actionArea" style="display:none;">
+                <div id="actionArea" style="display:<?= ($cancelled || $initialStatus !== 'pending') ? 'block' : 'none' ?>;">
                     <hr class="my-4">
                     <div class="d-flex gap-2 justify-content-center flex-wrap">
                         <a href="parent/dashboard.php" class="btn btn-primary rounded-pill px-4" id="dashboardBtn">
                             <i class="fas fa-tachometer-alt me-2"></i> Go to Dashboard
                         </a>
-                        <a href="topup.php" class="btn btn-outline-secondary rounded-pill px-4" id="retryBtn" style="display:none;">
+                        <a href="topup.php" class="btn btn-outline-secondary rounded-pill px-4" id="retryBtn" style="display:<?= ($cancelled || $initialStatus === 'failed') ? 'inline-block' : 'none' ?>;">
                             <i class="fas fa-redo me-2"></i> Try Again
                         </a>
+                        <form method="post" class="d-inline" id="cancelForm" style="display:<?= ($initialStatus === 'pending' && !$cancelled) ? 'inline-block' : 'none' ?>;">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="cancel_payment" value="1">
+                            <button type="submit" class="btn btn-outline-danger rounded-pill px-4" onclick="return confirm('Una uhakika unataka kughairi malipo haya? / Are you sure you want to cancel this payment?')">
+                                <i class="fas fa-ban me-2"></i> Cancel Payment
+                            </button>
+                        </form>
                     </div>
                 </div>
 
@@ -180,6 +203,7 @@ function updateUI(data) {
     const text = document.getElementById('statusMessageText');
     const actionArea = document.getElementById('actionArea');
     const retryBtn = document.getElementById('retryBtn');
+    const cancelForm = document.getElementById('cancelForm');
 
     // Update icon and colors based on status
     icon.className = 'fas text-white';
@@ -225,6 +249,20 @@ function updateUI(data) {
             stopPolling = true;
             break;
 
+        case 'cancelled':
+            icon.className += ' fa-ban';
+            iconCircle.style.background = 'rgba(255,255,255,0.25)';
+            header.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
+            alert.className += ' alert-secondary';
+            title.textContent = 'Payment Cancelled';
+            subtitle.textContent = 'You cancelled the payment.';
+            text.innerHTML = '<i class="fas fa-ban me-2"></i> Malipo yameghairiwa. Unaweza kujaribu tena wakati wowote.';
+            actionArea.style.display = 'block';
+            retryBtn.style.display = 'inline-block';
+            cancelForm.style.display = 'none';
+            stopPolling = true;
+            break;
+
         default: // pending
             icon.className += ' fa-spinner fa-pulse';
             iconCircle.style.background = 'rgba(255,255,255,0.25)';
@@ -239,7 +277,9 @@ function updateUI(data) {
             } else {
                 text.innerHTML = '<span class="poll-indicator me-2"></span> Tunasubiri uthibitisho wa malipo. Tafadhali kamilisha ombi kwenye simu yako.';
             }
-            actionArea.style.display = 'none';
+            actionArea.style.display = 'block';
+            retryBtn.style.display = 'none';
+            cancelForm.style.display = 'inline-block';
             break;
     }
 

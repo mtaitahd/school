@@ -63,6 +63,12 @@ if ($status === 'pending' && $payment['method'] !== 'manual') {
     }
 }
 
+// Detect cancellation (failed + cancelled_by_user note)
+$cancelled = ($status === 'failed' && $payment['admin_note'] === 'cancelled_by_user');
+if ($cancelled) {
+    $status = 'cancelled';
+}
+
 // Build response
 $response = [
     'status' => $status,
@@ -79,6 +85,10 @@ if ($status === 'completed') {
     $response['message'] = 'Malipo yamefanikiwa.';
     $response['icon'] = 'check-circle';
     $response['color'] = 'success';
+} elseif ($status === 'cancelled') {
+    $response['message'] = 'Malipo yameghairiwa. Unaweza kujaribu tena wakati wowote.';
+    $response['icon'] = 'ban';
+    $response['color'] = 'secondary';
 } elseif ($status === 'failed') {
     $response['message'] = 'Malipo hayajakamilika. Tafadhali jaribu tena.';
     $response['icon'] = 'times-circle';
