@@ -92,8 +92,8 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
             'details' => [
                 'amount' => (int) $amount,
                 'currency' => SUBSCRIPTION_CURRENCY,
-                'redirect_url' => $appUrl . '/topup?status=success',
-                'cancel_url' => $appUrl . '/topup?status=cancelled',
+                'redirect_url' => $appUrl . '/payment-status?ref=' . $reference,
+                'cancel_url' => $appUrl . '/topup?cancelled=1',
             ],
             'phone_number' => $phone ?: null,
             'customer' => [

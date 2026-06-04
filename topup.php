@@ -50,9 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header('Location: ' . $result['payment_url']);
                     exit;
                 }
-                $message = 'Malipo yamepokelewa. Subiri uthibitisho...';
-                $success = true;
-                $subStatus = sub_get_status($parentId);
+                header('Location: payment-status.php?ref=' . urlencode($result['reference']));
+                exit;
             } else {
                 $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
             }
@@ -67,9 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         header('Location: ' . $result['payment_url']);
                         exit;
                     }
-                    $message = 'Malipo yamepokelewa. Subiri uthibitisho...';
-                    $success = true;
-                    $subStatus = sub_get_status($parentId);
+                    header('Location: payment-status.php?ref=' . urlencode($result['reference']));
+                    exit;
                 } else {
                     $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
                 }
@@ -83,8 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Tafadhali ingiza namba ya simu uliyotumia';
         } else {
             $result = pay_create_manual_payment($parentId, $manualPhone, $transactionId);
-            $message = 'Malipo yako yamewasilishwa kwa uhakiki. Utapokea SMS uthibitisho.';
-            $success = true;
+            header('Location: payment-status.php?ref=' . urlencode($result['reference']));
+            exit;
         }
     }
 }
@@ -218,38 +216,6 @@ $dashboard_page_title = 'Topup';
                 </div>
 
                 <?php if ($success): ?>
-                    <div class="text-center py-3">
-                        <div class="mb-3">
-                            <i class="fas fa-check-circle text-success" style="font-size:3rem;"></i>
-                        </div>
-                        <h5 class="fw-bold text-dark">Payment Submitted Successfully!</h5>
-                        <p class="text-muted small">You now have access to all premium features.</p>
-                        <div class="row g-2 mt-3">
-                            <div class="col-6">
-                                <div class="d-flex align-items-center gap-2 text-muted small">
-                                    <i class="fas fa-child text-success"></i> View child progress
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="d-flex align-items-center gap-2 text-muted small">
-                                    <i class="fas fa-star text-success"></i> Results &amp; stars
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="d-flex align-items-center gap-2 text-muted small">
-                                    <i class="fas fa-book text-success"></i> Assignments
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="d-flex align-items-center gap-2 text-muted small">
-                                    <i class="fas fa-chart-line text-success"></i> Performance reports
-                                </div>
-                            </div>
-                        </div>
-                        <a href="parent/dashboard.php" class="btn btn-primary mt-3 px-4 rounded-pill">
-                            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
-                        </a>
-                    </div>
                     <?php include 'php/includes/dashboard-end.php'; ?>
                     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
                     </body></html>
