@@ -40,6 +40,7 @@ switch ($logged_role) {
             ['id' => 'home', 'href' => $home_href, 'icon' => 'fa-home', 'label' => $t['nav_home'] ?? 'Home'],
             ['id' => 'parent_dashboard', 'href' => app_web_path('parent/dashboard.php'), 'icon' => 'fa-tachometer-alt', 'label' => $t['nav_parent_dashboard'] ?? 'Parent Dashboard'],
             ['id' => 'parent', 'href' => app_web_path('parent/guide.php?lang=' . urlencode($lang)), 'icon' => 'fa-book-open', 'label' => $t['nav_parent'] ?? 'Parent Guide'],
+            ['id' => 'topup', 'href' => app_web_path('topup.php'), 'icon' => 'fa-wallet', 'label' => 'Topup'],
         ];
         break;
 

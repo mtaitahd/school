@@ -61,6 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
 
                     if ($user_id) {
+                        // Initialize free trial for parent accounts
+                        if ($role === 'parent') {
+                            require_once __DIR__ . '/php/includes/subscription.php';
+                            sub_init_trial($user_id);
+                        }
                         $success = 'Registration successful! You can now login.';
                         $_POST = [];
                     } else {

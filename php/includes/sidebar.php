@@ -50,6 +50,7 @@ switch ($role) {
             ['id' => 'governance', 'href' => 'governance.php', 'icon' => 'fa-users-cog', 'label' => 'Governance'],
             ['id' => 'users', 'href' => 'users.php', 'icon' => 'fa-users-cog', 'label' => 'Manage Users'],
             ['id' => 'modules', 'href' => 'modules.php', 'icon' => 'fa-cubes', 'label' => 'Modules'],
+            ['id' => 'payments', 'href' => 'payments.php', 'icon' => 'fa-credit-card', 'label' => 'Payments'],
             ['id' => 'upload', 'href' => 'upload-content.php', 'icon' => 'fa-cloud-upload-alt', 'label' => 'Upload Content'],
             ['id' => 'logs', 'href' => 'logs.php', 'icon' => 'fa-clipboard-list', 'label' => 'Error Logs'],
         ];

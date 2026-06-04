@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once __DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/subscription.php';
+require_once __DIR__ . '/../php/includes/payment.php';
 
 // Check if user is logged in and is a parent
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
@@ -9,6 +11,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
 }
 
 $parent_id = $_SESSION['user_id'];
+
+// Subscription access check
+$subStatus = sub_get_status($parent_id);
+$canAccess = $subStatus['is_active'];
+
+if (!$canAccess) {
+    // Allow access to dashboard only if they have children and are redirecting to topup
+    // If they hit a child-progress page, the access control will block them
+}
 
 // Children linked via claim code (parent_student_links) or legacy parent_id
 $children = $database->fetchAll("
@@ -99,6 +110,49 @@ include '../php/includes/dashboard-start.php';
                 </button>
             <?php endif; ?>
         </div>
+
+        <!-- Subscription Status Banner -->
+        <?php if ($subStatus['status'] === 'trial'): ?>
+            <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
+                <div>
+                    <i class="fas fa-clock me-2"></i>
+                    <strong><?= $current_lang === 'sw' ? 'Majaribio ya Bure' : 'Free Trial' ?></strong> —
+                    <?php if ($subStatus['days_remaining'] > 0): ?>
+                        <?= $current_lang === 'sw' ? 'Umesalia siku' : 'You have' ?> <strong><?= $subStatus['days_remaining'] ?></strong> <?= $current_lang === 'sw' ? 'siku za majaribio' : 'trial days remaining' ?>.
+                    <?php else: ?>
+                        <?= $current_lang === 'sw' ? 'Muda wa majaribio umeisha. Tafadhali lipa ili kuendelea.' : 'Trial period has ended. Please subscribe to continue.' ?>
+                    <?php endif; ?>
+                </div>
+                <a href="../topup.php" class="btn btn-warning btn-sm fw-bold px-4" style="border-radius:50px;">
+                    <i class="fas fa-wallet me-1"></i> <?= $current_lang === 'sw' ? 'Lipa Sasa' : 'Subscribe Now' ?> — 1,500 TZS
+                </a>
+            </div>
+        <?php elseif ($subStatus['status'] === 'active'): ?>
+            <div class="alert alert-success d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
+                <div>
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong><?= $current_lang === 'sw' ? 'Uanachama Unatumika' : 'Subscription Active' ?></strong> —
+                    <?= $current_lang === 'sw' ? 'Siku zilizobaki' : 'Days remaining' ?>: <strong><?= $subStatus['days_remaining'] ?></strong>
+                    <?php if ($subStatus['days_remaining'] <= 3): ?>
+                        <span class="ms-2 badge bg-warning text-dark"><?= $current_lang === 'sw' ? 'Itaisha hivi karibuni' : 'Expiring soon' ?></span>
+                    <?php endif; ?>
+                </div>
+                <a href="../topup.php" class="btn btn-outline-success btn-sm fw-bold px-3" style="border-radius:50px;">
+                    <i class="fas fa-wallet me-1"></i> <?= $current_lang === 'sw' ? 'Jaza Salio' : 'Topup' ?>
+                </a>
+            </div>
+        <?php elseif ($subStatus['status'] === 'expired' || !$canAccess): ?>
+            <div class="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
+                <div>
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong><?= $current_lang === 'sw' ? 'Uanachama Umeisha' : 'Subscription Expired' ?></strong> —
+                    <?= $current_lang === 'sw' ? 'Tafadhali lipa 1,500 TZS ili kuendelea kutumia huduma.' : 'Please pay 1,500 TZS to continue accessing the service.' ?>
+                </div>
+                <a href="../topup.php" class="btn btn-danger btn-sm fw-bold px-4" style="border-radius:50px;">
+                    <i class="fas fa-wallet me-1"></i> <?= $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now' ?>
+                </a>
+            </div>
+        <?php endif; ?>
 
         <!-- Claim Child Alert -->
         <?php if (empty($children)): ?>

@@ -64,6 +64,12 @@ $is_guest = ($logged_role === '');
 
             <div class="navbar-right">
                 <?php if ($logged_name !== '' && $logged_role !== ''): ?>
+                    <?php if ($logged_role === 'parent'): ?>
+                    <a href="<?php echo app_web_path('topup.php'); ?>" class="nav-topup-btn" title="Topup / Subscription">
+                        <i class="fas fa-wallet" aria-hidden="true"></i>
+                        <span>Topup</span>
+                    </a>
+                    <?php endif; ?>
                     <span class="navbar-user-name"><?php echo htmlspecialchars($logged_name); ?></span>
                     <a href="<?php echo htmlspecialchars($logout_href); ?>" class="teacher-login-btn navbar-logout-btn">
                         <i class="fas fa-sign-out-alt" aria-hidden="true"></i>

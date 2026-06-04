@@ -15,6 +15,12 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Subscription access control for parent users
+if (($_SESSION['role'] ?? '') === 'parent') {
+    require_once __DIR__ . '/../php/includes/subscription.php';
+    sub_require_access();
+}
+
 $child_id = isset($_GET['child_id']) ? intval($_GET['child_id']) : 0;
 
 if ($child_id === 0) {
