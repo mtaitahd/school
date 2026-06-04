@@ -220,7 +220,7 @@ function sub_check_trial_ending_notifications(): void {
     if (empty($parents)) return;
 
     try {
-        require_once __DIR__ . '/sms_service.php';
+        require_once __DIR__ . '/../sms_service.php';
         $sms = new SmsService();
 
         foreach ($parents as $parent) {
@@ -249,7 +249,7 @@ function sub_check_overdue_notifications(): void {
     if (empty($parents)) return;
 
     try {
-        require_once __DIR__ . '/sms_service.php';
+        require_once __DIR__ . '/../sms_service.php';
         $sms = new SmsService();
 
         foreach ($parents as $parent) {

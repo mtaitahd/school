@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                 }
             }
-            header('Location: dashboard.php?success=assignment_created');
+            header('Location: dashboard?success=assignment_created');
             exit;
         } else {
             $error = "Failed to create assignment. Please try again.";

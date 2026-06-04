@@ -82,6 +82,10 @@ $lang_page = 'dashboard.php';
             <div class="alert alert-success py-2 px-3 mb-4 text-center" style="border-radius:10px;font-size:0.9rem;border:none;max-width:700px;margin:0 auto;">
                 Class created successfully.
             </div>
+        <?php elseif (isset($_GET['success']) && $_GET['success'] === 'assignment_created'): ?>
+            <div class="alert alert-success py-2 px-3 mb-4 text-center" style="border-radius:10px;font-size:0.9rem;border:none;max-width:700px;margin:0 auto;">
+                <i class="fas fa-check-circle me-1"></i> Assignment created successfully and assigned to students.
+            </div>
         <?php endif; ?>
 
         <!-- Statistics Cards -->

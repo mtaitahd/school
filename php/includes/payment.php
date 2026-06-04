@@ -347,7 +347,7 @@ function pay_process_webhook(): void {
         }
 
         try {
-            require_once __DIR__ . '/sms_service.php';
+            require_once __DIR__ . '/../sms_service.php';
             $sms = new SmsService();
             $user = $database->fetchOne("SELECT phone FROM `users` WHERE user_id = ?", [$parentId]);
             if ($user && $user['phone']) {
