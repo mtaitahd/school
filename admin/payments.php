@@ -1,26 +1,16 @@
 <?php
-/**
- * Admin Payments & Subscriptions Management
- */
-
-require_once __DIR__ . '/../php/includes/session.php';
-require_once __DIR__ . '/../php/includes/security.php';
-require_once __DIR__ . '/../php/includes/csrf.php';
+session_start();
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/auth.php';
+require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/includes/payment.php';
 
-sec_require_rate_limit();
-sec_send_headers();
 auth_require_role(['admin'], '../index.php');
-
-$parentId = auth_user_id();
 
 // Handle manual payment approval/rejection
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     csrf_require();
     $paymentId = (int) ($_POST['payment_id'] ?? 0);
-
     if ($_POST['action'] === 'approve' && $paymentId) {
         pay_verify_manual($paymentId, 'approve');
         $_SESSION['flash_message'] = 'Payment approved and subscription activated.';
@@ -28,12 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         pay_verify_manual($paymentId, 'reject');
         $_SESSION['flash_message'] = 'Payment rejected.';
     }
-
     header('Location: payments.php');
     exit;
 }
 
-// Stats
 $stats = [
     'active_subs' => $database->fetchOne("SELECT COUNT(*) as c FROM `subscriptions` WHERE status = 'active'")['c'] ?? 0,
     'trial_subs' => $database->fetchOne("SELECT COUNT(*) as c FROM `subscriptions` WHERE status = 'trial'")['c'] ?? 0,
@@ -43,7 +31,6 @@ $stats = [
     'total_revenue' => $database->fetchOne("SELECT COALESCE(SUM(amount), 0) as c FROM `payments` WHERE status = 'completed'")['c'] ?? 0,
 ];
 
-// Payments
 $payments = $database->fetchAll("
     SELECT p.*, u.first_name, u.last_name, u.username
     FROM `payments` p
@@ -52,7 +39,6 @@ $payments = $database->fetchAll("
     LIMIT 100
 ");
 
-// Subscriptions
 $subscriptions = $database->fetchAll("
     SELECT s.*, u.first_name, u.last_name, u.username
     FROM `subscriptions` s
@@ -64,12 +50,11 @@ $subscriptions = $database->fetchAll("
 $flash = $_SESSION['flash_message'] ?? '';
 unset($_SESSION['flash_message']);
 
-$current_lang = $_SESSION['lang'] ?? 'en';
-$active_nav = 'admin_payments';
-$layout = 'dashboard';
+$base_path = '../';
 $dashboard_role = 'admin';
 $sidebar_active = 'payments';
 $dashboard_page_title = 'Payments';
+$lang_page = 'payments.php';
 require_once __DIR__ . '/../php/includes/lang.php';
 ?>
 <!DOCTYPE html>
@@ -77,7 +62,8 @@ require_once __DIR__ . '/../php/includes/lang.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payments - Admin</title>
+    <title>Payments & Subscriptions - Admin</title>
+    <link rel="icon" type="image/png" href="../assets/images/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
@@ -87,15 +73,13 @@ require_once __DIR__ . '/../php/includes/lang.php';
         .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
         .badge-manual { background: #fef3c7; color: #92400e; }
         .badge-snippe { background: #dbeafe; color: #1e40af; }
-        .table-hover tbody tr { transition: background 0.1s; }
     </style>
 </head>
-<body>
-<?php include '../php/includes/dashboard-start.php'; ?>
+<body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800" style="font-weight:700;">Payments & Subscriptions</h1>
-    </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <h1 class="h3 mb-0 text-gray-800" style="font-family:'Poppins',sans-serif;font-weight:700;">Payments & Subscriptions</h1>
+        </div>
 
     <?php if ($flash): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -104,59 +88,57 @@ require_once __DIR__ . '/../php/includes/lang.php';
         </div>
     <?php endif; ?>
 
-    <!-- Stats -->
     <div class="row g-3 mb-4">
         <div class="col-xl-2 col-md-4 col-6">
-            <div class="card stat-card shadow-sm p-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="stat-icon" style="background:#dbeafe;"><i class="fas fa-check-circle text-primary"></i></div>
-                    <div><div class="text-muted small">Active</div><div class="fw-bold fs-5"><?= $stats['active_subs'] ?></div></div>
+            <div class="card shadow-sm h-100 py-2" style="border-left:4px solid #198754;">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#d1fae5;"><i class="fas fa-check-circle text-success"></i></div>
+                    <div><div class="text-uppercase small fw-bold text-muted">Active</div><div class="h5 mb-0 fw-bold"><?= $stats['active_subs'] ?></div></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6">
-            <div class="card stat-card shadow-sm p-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="stat-icon" style="background:#fef3c7;"><i class="fas fa-clock text-warning"></i></div>
-                    <div><div class="text-muted small">Trial</div><div class="fw-bold fs-5"><?= $stats['trial_subs'] ?></div></div>
+            <div class="card shadow-sm h-100 py-2" style="border-left:4px solid #0dcaf0;">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#cff4fc;"><i class="fas fa-clock text-info"></i></div>
+                    <div><div class="text-uppercase small fw-bold text-muted">Trial</div><div class="h5 mb-0 fw-bold"><?= $stats['trial_subs'] ?></div></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6">
-            <div class="card stat-card shadow-sm p-3">
-                <div class="d-flex align-items-center gap-3">
+            <div class="card shadow-sm h-100 py-2" style="border-left:4px solid #dc3545;">
+                <div class="card-body d-flex align-items-center gap-3">
                     <div class="stat-icon" style="background:#fce4ec;"><i class="fas fa-times-circle text-danger"></i></div>
-                    <div><div class="text-muted small">Expired</div><div class="fw-bold fs-5"><?= $stats['expired_subs'] ?></div></div>
+                    <div><div class="text-uppercase small fw-bold text-muted">Expired</div><div class="h5 mb-0 fw-bold"><?= $stats['expired_subs'] ?></div></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6">
-            <div class="card stat-card shadow-sm p-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="stat-icon" style="background:#e0f2fe;"><i class="fas fa-hourglass-half text-info"></i></div>
-                    <div><div class="text-muted small">Pending</div><div class="fw-bold fs-5"><?= $stats['pending_payments'] ?></div></div>
+            <div class="card shadow-sm h-100 py-2" style="border-left:4px solid #ffc107;">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#fff3cd;"><i class="fas fa-hourglass-half text-warning"></i></div>
+                    <div><div class="text-uppercase small fw-bold text-muted">Pending</div><div class="h5 mb-0 fw-bold"><?= $stats['pending_payments'] ?></div></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6">
-            <div class="card stat-card shadow-sm p-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="stat-icon" style="background:#fff3cd;"><i class="fas fa-search text-warning"></i></div>
-                    <div><div class="text-muted small">Manual Review</div><div class="fw-bold fs-5"><?= $stats['manual_review'] ?></div></div>
+            <div class="card shadow-sm h-100 py-2" style="border-left:4px solid #6f42c1;">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#e8d5f5;"><i class="fas fa-search text-purple"></i></div>
+                    <div><div class="text-uppercase small fw-bold text-muted">Review</div><div class="h5 mb-0 fw-bold"><?= $stats['manual_review'] ?></div></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6">
-            <div class="card stat-card shadow-sm p-3">
-                <div class="d-flex align-items-center gap-3">
+            <div class="card shadow-sm h-100 py-2" style="border-left:4px solid #198754;">
+                <div class="card-body d-flex align-items-center gap-3">
                     <div class="stat-icon" style="background:#d1fae5;"><i class="fas fa-money-bill-wave text-success"></i></div>
-                    <div><div class="text-muted small">Revenue</div><div class="fw-bold fs-5"><?= number_format((float) $stats['total_revenue']) ?> TZS</div></div>
+                    <div><div class="text-uppercase small fw-bold text-muted">Revenue</div><div class="h6 mb-0 fw-bold"><?= number_format((float) $stats['total_revenue']) ?> TZS</div></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Manual Payments Pending Approval -->
     <?php
     $manualPending = array_filter($payments, fn($p) => $p['status'] === 'manual_review');
     if (!empty($manualPending)):
@@ -264,10 +246,9 @@ require_once __DIR__ . '/../php/includes/lang.php';
         </div>
     </div>
 
-    <!-- Subscriptions -->
     <div class="card shadow-sm" style="border-radius:12px;border:none;">
         <div class="card-header bg-white fw-bold py-3" style="border-radius:12px 12px 0 0;border-bottom:2px solid #e2e8f0;">
-            <i class="fas fa-calendar-alt me-2"></i> Active Subscriptions
+            <i class="fas fa-calendar-alt me-2"></i> Subscriptions
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -314,5 +295,8 @@ require_once __DIR__ . '/../php/includes/lang.php';
     </div>
 
 <?php include '../php/includes/dashboard-end.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/dashboard.js"></script>
 </body>
 </html>
