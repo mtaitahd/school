@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/includes/migrate.php';
 require_once __DIR__ . '/../php/includes/subscription.php';
 require_once __DIR__ . '/../php/includes/payment.php';
@@ -15,6 +16,19 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
 }
 
 $parent_id = $_SESSION['user_id'];
+
+// Handle phone number update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_phone') {
+    csrf_require();
+    require_once __DIR__ . '/../php/includes/validator.php';
+    try {
+        $phone = Validator::phone($_POST['phone'] ?? '');
+        $database->execute("UPDATE users SET phone = ? WHERE user_id = ?", [$phone ?: null, $parent_id]);
+        $phone_saved = true;
+    } catch (Exception $e) {
+        $phone_error = $e->getMessage();
+    }
+}
 
 // Subscription access check
 $subStatus = sub_get_status($parent_id);
@@ -80,6 +94,9 @@ if (!empty($child_ids)) {
         ORDER BY a.due_date ASC, a.created_at DESC
     ", $child_ids);
 }
+
+// Fetch current user info for profile
+$current_user = $database->fetchOne("SELECT phone FROM users WHERE user_id = ?", [$parent_id]);
 
 require_once __DIR__ . '/../php/includes/lang.php';
 $current_lang = $_SESSION['lang'] ?? 'en';
@@ -298,6 +315,37 @@ include '../php/includes/dashboard-start.php';
                 </div>
             </div>
         <?php endif; ?>
+
+        <!-- Profile Card -->
+        <div class="dashboard-card mb-4">
+            <div class="dashboard-card-header">
+                <div class="dashboard-card-icon" style="background:var(--primary-blue);">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <h3 class="dashboard-card-title">My Profile</h3>
+            </div>
+            <div class="p-3">
+                <?php if (!empty($phone_saved)): ?>
+                    <div class="alert alert-success py-2 px-3 text-center" style="border-radius:10px;font-size:0.9rem;border:none;">Phone number updated successfully.</div>
+                <?php endif; ?>
+                <?php if (!empty($phone_error)): ?>
+                    <div class="alert alert-danger py-2 px-3 text-center" style="border-radius:10px;font-size:0.9rem;border:none;"><?php echo htmlspecialchars($phone_error); ?></div>
+                <?php endif; ?>
+                <form method="POST" action="" class="d-flex align-items-center gap-3 flex-wrap">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="action" value="update_phone">
+                    <label class="fw-semibold text-nowrap" style="font-size:0.9rem;">Phone Number:</label>
+                    <input type="tel" class="form-control" name="phone" value="<?php echo htmlspecialchars($current_user['phone'] ?? ''); ?>" placeholder="e.g., 0712345678" style="max-width:250px;font-size:0.9rem;">
+                    <button type="submit" class="btn btn-primary btn-sm" style="background:var(--primary-blue);border:none;border-radius:50px;padding:6px 20px;font-size:0.85rem;">
+                        <i class="fas fa-save me-1"></i>Save
+                    </button>
+                </form>
+                <small class="text-muted d-block mt-2">
+                    <i class="fas fa-info-circle me-1"></i>Used for SMS notifications about your child's progress and assignments.
+                </small>
+            </div>
+        </div>
+
 <?php include '../php/includes/dashboard-end.php'; ?>
     <!-- Claim Child Modal -->
     <div class="modal fade" id="claimChildModal" tabindex="-1" aria-hidden="true">

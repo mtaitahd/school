@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $confirm_password = $_POST['confirm_password'] ?? '';
         $first_name = Validator::string($_POST['first_name'] ?? '', 1, 100);
         $last_name = Validator::string($_POST['last_name'] ?? '', 1, 100);
+        $phone = Validator::phone($_POST['phone'] ?? '');
         $role = Validator::inArray($_POST['role'] ?? 'parent', ['teacher', 'parent']);
     } catch (InvalidArgumentException $e) {
         $error = $e->getMessage();
@@ -56,8 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     // Insert new user
                     $user_id = $database->insert(
-                        "INSERT INTO users (username, email, password, role, first_name, last_name) VALUES (?, ?, ?, ?, ?, ?)",
-                        [$username, $email ?: null, $hashed_password, $role, $first_name, $last_name]
+                        "INSERT INTO users (username, email, password, role, first_name, last_name, phone) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        [$username, $email ?: null, $hashed_password, $role, $first_name, $last_name, $phone ?: null]
                     );
 
                     if ($user_id) {
@@ -172,6 +173,23 @@ include 'php/includes/auth-split-start.php';
                                    autocomplete="email"
                                    value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
                         </div>
+                    </div>
+
+                    <div class="form-group-child">
+                        <label class="form-label-child" for="phone">Phone Number <?php echo $_POST['role'] === 'parent' || ($_POST['role'] ?? 'parent') === 'parent' ? '' : '(Optional)'; ?></label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-phone"></i></span>
+                            <input type="tel"
+                                   class="form-control-child auth-input"
+                                   id="phone"
+                                   name="phone"
+                                   placeholder="e.g., 0712345678"
+                                   autocomplete="tel"
+                                   value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>">
+                        </div>
+                        <small style="display:block;margin-top:5px;font-size:0.8rem;color:var(--text-light);">
+                            <i class="fas fa-info-circle me-1"></i>Required for SMS notifications about your child's progress.
+                        </small>
                     </div>
 
                     <div class="form-group-child">
