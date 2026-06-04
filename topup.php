@@ -38,15 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $paymentType = $_POST['payment_type'] ?? 'subscription';
     $submethod = $_POST['payment_submethod'] ?? 'mobile';
     $phone = $_POST['phone'] ?? '';
+    $emailAddr = $_POST['email'] ?? '';
     $transactionId = $_POST['transaction_id'] ?? '';
     $customAmount = (float) ($_POST['amount'] ?? 0);
 
     if ($paymentMethod === 'snippe') {
-        if (!preg_match('/^(0|\+?255)?[67]\d{8}$/', preg_replace('/[^0-9]/', '', $phone))) {
-            $error = 'Tafadhali ingiza namba halali ya simu (Tanzania)';
-        } else {
-            $normalized = '+255' . substr(preg_replace('/[^0-9]/', '', $phone), -9);
-            $result = pay_create_snippe_payment($parentId, $normalized, '', $paymentType);
+        if ($submethod === 'card') {
+            $result = pay_create_snippe_payment($parentId, '', $emailAddr, $paymentType);
             if ($result['success']) {
                 if ($result['payment_url']) {
                     header('Location: ' . $result['payment_url']);
@@ -57,6 +55,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $subStatus = sub_get_status($parentId);
             } else {
                 $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
+            }
+        } else {
+            if (!preg_match('/^(0|\+?255)?[67]\d{8}$/', preg_replace('/[^0-9]/', '', $phone))) {
+                $error = 'Tafadhali ingiza namba halali ya simu (Tanzania)';
+            } else {
+                $normalized = '+255' . substr(preg_replace('/[^0-9]/', '', $phone), -9);
+                $result = pay_create_snippe_payment($parentId, $normalized, '', $paymentType);
+                if ($result['success']) {
+                    if ($result['payment_url']) {
+                        header('Location: ' . $result['payment_url']);
+                        exit;
+                    }
+                    $message = 'Malipo yamepokelewa. Subiri uthibitisho...';
+                    $success = true;
+                    $subStatus = sub_get_status($parentId);
+                } else {
+                    $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
+                }
             }
         }
     } elseif ($paymentMethod === 'manual') {
@@ -82,285 +98,345 @@ $layout = '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Topup - Smart Math Corner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: #f0f4f8; min-height: 100vh; }
-        .container { max-width: 780px; margin: 40px auto; padding: 0 20px; }
-        .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden; }
-        .card-header { background: linear-gradient(135deg, #1e40af, #3b82f6); color: #fff; padding: 28px 32px; }
-        .card-header h1 { font-size: 24px; }
-        .card-header p { opacity: 0.85; font-size: 14px; margin-top: 4px; }
-        .card-body { padding: 28px 32px; }
-        .status-row { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
-        .status-box { flex: 1; min-width: 130px; background: #f8fafc; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #e2e8f0; }
-        .status-box .label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-        .status-box .value { font-size: 20px; font-weight: 700; color: #1e293b; margin-top: 4px; }
-        .status-box .value.green { color: #16a34a; }
-        .status-box .value.red { color: #dc2626; }
-        .status-box .value.blue { color: #2563eb; }
-        .method-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-        .method-tab { flex: 1; min-width: 140px; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fff; }
-        .method-tab:hover { border-color: #93c5fd; }
-        .method-tab.active { border-color: #2563eb; background: #eff6ff; }
-        .method-tab .tab-icon { font-size: 24px; margin-bottom: 6px; }
-        .method-tab .tab-label { font-size: 13px; font-weight: 600; color: #1e293b; }
-        .method-tab .tab-desc { font-size: 11px; color: #64748b; }
-        .method-content { display: none; }
-        .method-content.active { display: block; }
-        .submethod-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .submethod-btn { flex: 1; min-width: 100px; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fff; font-size: 12px; font-weight: 600; }
+        .payment-card { border: none; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden; }
+        .payment-card .card-header { background: linear-gradient(135deg, #1e40af, #3b82f6); padding: 1.75rem 2rem; }
+        .payment-card .card-header h1 { font-size: 1.5rem; }
+        .payment-card .card-body { padding: 2rem; }
+        .pay-icon-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+        .nav-payments .nav-link { border: 2px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.25rem; color: #475569; transition: all 0.2s; cursor: pointer; }
+        .nav-payments .nav-link:hover { border-color: #93c5fd; background: #f8fafc; }
+        .nav-payments .nav-link.active { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
+        .nav-payments .nav-link i { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+        .nav-payments .nav-link small { font-size: 0.75rem; color: #94a3b8; }
+        .nav-payments .nav-link.active small { color: #60a5fa; }
+        .submethod-btn { border: 2px solid #e2e8f0; border-radius: 10px; padding: 0.625rem 0.875rem; text-align: center; cursor: pointer; transition: all 0.2s; background: #fff; font-size: 0.8rem; font-weight: 600; color: #475569; }
         .submethod-btn:hover { border-color: #93c5fd; }
         .submethod-btn.active { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
-        .submethod-btn img, .submethod-btn i { display: block; font-size: 20px; margin-bottom: 4px; }
-        .amount-options { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-        .amount-opt { flex: 1; min-width: 120px; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
-        .amount-opt:hover { border-color: #93c5fd; }
-        .amount-opt.active { border-color: #2563eb; background: #eff6ff; }
-        .amount-opt .amt-value { font-size: 18px; font-weight: 700; color: #1e293b; }
-        .amount-opt .amt-label { font-size: 11px; color: #64748b; }
-        .amount-opt .badge-rec { font-size: 10px; background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
-        .form-group input, .form-group select { width: 100%; padding: 12px 16px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; transition: border-color 0.2s; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-        .btn-primary { width: 100%; padding: 14px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-        .btn-warning { width: 100%; padding: 14px; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-        .btn-warning:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
-        .manual-box { background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-        .manual-box .number { font-size: 26px; font-weight: 700; color: #92400e; letter-spacing: 1px; }
-        .manual-box .name { font-size: 14px; color: #92400e; margin-top: 2px; }
-        .manual-box .amount { font-size: 18px; font-weight: 600; color: #92400e; margin-top: 8px; }
-        .alert { padding: 14px 18px; border-radius: 10px; margin-bottom: 18px; font-size: 14px; }
-        .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-        .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-        .alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
-        .features { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .features .item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; }
-        .features .item i { color: #16a34a; }
-        @media (max-width: 640px) {
-            .container { margin: 20px auto; }
-            .card-header, .card-body { padding: 20px; }
-            .status-row { flex-direction: column; }
-            .method-tabs { flex-direction: column; }
-            .submethod-row { flex-direction: column; }
-            .amount-options { flex-direction: column; }
-            .features { grid-template-columns: 1fr; }
+        .submethod-btn i { font-size: 1.25rem; display: block; margin-bottom: 2px; }
+        .opt-btn { border: 2px solid #e2e8f0; border-radius: 12px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: #fff; }
+        .opt-btn:hover { border-color: #93c5fd; }
+        .opt-btn.active { border-color: #2563eb; background: #eff6ff; }
+        .opt-btn .amt { font-size: 1.125rem; font-weight: 700; color: #1e293b; }
+        .opt-btn .lbl { font-size: 0.75rem; color: #64748b; }
+        .opt-btn .badge-rec { font-size: 0.65rem; background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 4px; }
+        .manual-rice { background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 1.25rem; }
+        .manual-rice .big-number { font-size: 1.5rem; font-weight: 700; color: #92400e; letter-spacing: 0.5px; }
+        .status-stat { background: #f8fafc; border-radius: 12px; padding: 1rem; text-align: center; border: 1px solid #e2e8f0; }
+        .status-stat .stat-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-stat .stat-value { font-size: 1.25rem; font-weight: 700; color: #1e293b; }
+        @media (max-width: 576px) {
+            .payment-card .card-body { padding: 1.25rem; }
+            .nav-payments .nav-link { padding: 0.75rem; }
         }
     </style>
 </head>
 <body>
     <?php require_once __DIR__ . '/php/includes/header.php'; ?>
 
-    <div class="container">
+    <div class="container py-4">
         <?php if ($message): ?>
-            <div class="alert <?= $success ? 'alert-success' : 'alert-error' ?>"><?= htmlspecialchars($message) ?></div>
+            <div class="alert <?= $success ? 'alert-success' : 'alert-danger' ?> alert-dismissible fade show shadow-sm border-0 rounded-3" role="alert">
+                <i class="fas <?= $success ? 'fa-check-circle' : 'fa-exclamation-circle' ?> me-2"></i>
+                <?= htmlspecialchars($message) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         <?php endif; ?>
         <?php if ($error): ?>
-            <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 rounded-3" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <?= htmlspecialchars($error) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         <?php endif; ?>
 
-        <div class="card">
-            <div class="card-header">
-                <h1><i class="fas fa-wallet"></i> Topup & Subscription</h1>
-                <p>Choose a payment method to subscribe or topup your wallet</p>
-            </div>
-            <div class="card-body">
-                <!-- Status bar -->
-                <div class="status-row">
-                    <div class="status-box">
-                        <div class="label">Status</div>
-                        <div class="value <?= $subStatus['status'] === 'active' ? 'green' : ($subStatus['status'] === 'trial' ? 'blue' : 'red') ?>">
-                            <?php if ($subStatus['status'] === 'active'): ?><i class="fas fa-check-circle"></i> Active
-                            <?php elseif ($subStatus['status'] === 'trial'): ?><i class="fas fa-clock"></i> Trial
-                            <?php else: ?><i class="fas fa-times-circle"></i> Expired<?php endif; ?>
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+
+                <!-- Main Card -->
+                <div class="card payment-card">
+                    <div class="card-header text-white">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="pay-icon-circle bg-white bg-opacity-25">
+                                <i class="fas fa-wallet text-white"></i>
+                            </div>
+                            <div>
+                                <h1 class="mb-0 fw-bold">Topup &amp; Subscription</h1>
+                                <p class="mb-0 mt-1" style="opacity:0.85;font-size:0.875rem;">
+                                    Choose a payment method to subscribe or topup your wallet
+                                </p>
+                            </div>
                         </div>
                     </div>
-                    <div class="status-box">
-                        <div class="label">Days Left</div>
-                        <div class="value"><?= $subStatus['days_remaining'] ?>d</div>
-                    </div>
-                    <div class="status-box">
-                        <div class="label">Wallet</div>
-                        <div class="value green"><?= number_format($walletBalance) ?> TZS</div>
+                    <div class="card-body">
+
+                        <!-- Status Row -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-4">
+                                <div class="status-stat">
+                                    <div class="stat-label">Status</div>
+                                    <div class="stat-value">
+                                        <?php if ($subStatus['status'] === 'active'): ?>
+                                            <span class="text-success"><i class="fas fa-check-circle"></i> Active</span>
+                                        <?php elseif ($subStatus['status'] === 'trial'): ?>
+                                            <span class="text-primary"><i class="fas fa-clock"></i> Trial</span>
+                                        <?php else: ?>
+                                            <span class="text-danger"><i class="fas fa-times-circle"></i> Expired</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="status-stat">
+                                    <div class="stat-label">Days Left</div>
+                                    <div class="stat-value"><?= $subStatus['days_remaining'] ?>d</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="status-stat">
+                                    <div class="stat-label">Wallet</div>
+                                    <div class="stat-value text-success"><?= number_format($walletBalance) ?> <small class="fw-normal" style="font-size:0.65rem;">TZS</small></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php if ($success): ?>
+                            <div class="text-center py-3">
+                                <div class="mb-3">
+                                    <i class="fas fa-check-circle text-success" style="font-size:3rem;"></i>
+                                </div>
+                                <h5 class="fw-bold text-dark">Payment Submitted Successfully!</h5>
+                                <p class="text-muted small">You now have access to all premium features.</p>
+                                <div class="row g-2 mt-3">
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center gap-2 text-muted small">
+                                            <i class="fas fa-child text-success"></i> View child progress
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center gap-2 text-muted small">
+                                            <i class="fas fa-star text-success"></i> Results &amp; stars
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center gap-2 text-muted small">
+                                            <i class="fas fa-book text-success"></i> Assignments
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center gap-2 text-muted small">
+                                            <i class="fas fa-chart-line text-success"></i> Performance reports
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="parent/dashboard.php" class="btn btn-primary mt-3 px-4 rounded-pill">
+                                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                                </a>
+                            </div>
+                            <?php require_once __DIR__ . '/php/includes/footer.php'; ?>
+                            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                            </body></html>
+                            <?php return; ?>
+                        <?php endif; ?>
+
+                        <form method="POST" id="paymentForm">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="payment_method" id="paymentMethod" value="snippe">
+                            <input type="hidden" name="payment_submethod" id="paymentSubmethod" value="mobile">
+                            <input type="hidden" name="payment_type" id="paymentType" value="subscription">
+
+                            <!-- Payment Type Selection -->
+                            <label class="fw-semibold text-muted small text-uppercase mb-2">Payment Type</label>
+                            <div class="row g-2 mb-4">
+                                <div class="col-6">
+                                    <div class="opt-btn active h-100 d-flex flex-column align-items-center justify-content-center" onclick="selectType(this, 'subscription')">
+                                        <div class="amt">1,500 TZS</div>
+                                        <div class="lbl">Monthly Subscription</div>
+                                        <span class="badge-rec mt-1">Recommended</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="opt-btn h-100 d-flex flex-column align-items-center justify-content-center" onclick="selectType(this, 'wallet_topup')">
+                                        <div class="amt">Custom</div>
+                                        <div class="lbl">Wallet Topup</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Custom Amount -->
+                            <div id="customAmountBox" class="mb-3" style="display:none;">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" name="amount" id="customAmount" min="500" step="500" placeholder="Amount">
+                                    <label for="customAmount">Amount (TZS) — min 500</label>
+                                </div>
+                            </div>
+
+                            <!-- Payment Method Tabs -->
+                            <label class="fw-semibold text-muted small text-uppercase mb-2">Payment Method</label>
+                            <ul class="nav nav-payments nav-justified gap-2 mb-4" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="tab-mobile" data-bs-toggle="tab" data-bs-target="#content-mobile" type="button" role="tab" onclick="setMethod('snippe', 'mobile')">
+                                        <i class="fas fa-mobile-alt"></i>
+                                        Mobile Money
+                                        <small>M-Pesa, Airtel, Mixx, Halotel</small>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="tab-card" data-bs-toggle="tab" data-bs-target="#content-card" type="button" role="tab" onclick="setMethod('snippe', 'card')">
+                                        <i class="fas fa-credit-card"></i>
+                                        Card Payment
+                                        <small>Visa, Mastercard, Local debit</small>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="tab-manual" data-bs-toggle="tab" data-bs-target="#content-manual" type="button" role="tab" onclick="setMethod('manual', '')">
+                                        <i class="fas fa-hand-holding-usd"></i>
+                                        Manual
+                                        <small>Mix by Yas Lipa</small>
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Tab Content -->
+                            <div class="tab-content">
+
+                                <!-- Mobile Money -->
+                                <div class="tab-pane fade show active" id="content-mobile" role="tabpanel">
+                                    <div class="alert alert-info border-0 rounded-3 py-2 small d-flex align-items-center gap-2 mb-3">
+                                        <i class="fas fa-info-circle"></i>
+                                        You will receive a USSD push on your phone. Approve the payment to complete.
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        <input type="tel" class="form-control" name="phone" id="phoneMobile" placeholder="Phone" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
+                                        <label for="phoneMobile">Phone Number (Tanzania)</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100 btn-lg rounded-3">
+                                        <i class="fas fa-mobile-alt me-2"></i> Pay with Mobile Money
+                                    </button>
+                                </div>
+
+                                <!-- Card Payment -->
+                                <div class="tab-pane fade" id="content-card" role="tabpanel">
+                                    <div class="alert alert-info border-0 rounded-3 py-2 small d-flex align-items-center gap-2 mb-3">
+                                        <i class="fas fa-info-circle"></i>
+                                        You will be redirected to a secure checkout page to enter your card details.
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        <input type="email" class="form-control" name="email" id="emailCard" placeholder="Email" value="<?= htmlspecialchars($_POST['email'] ?? $_SESSION['email'] ?? '') ?>">
+                                        <label for="emailCard">Email Address</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100 btn-lg rounded-3">
+                                        <i class="fas fa-credit-card me-2"></i> Pay with Card
+                                    </button>
+                                </div>
+
+                                <!-- Manual Payment -->
+                                <div class="tab-pane fade" id="content-manual" role="tabpanel">
+                                    <div class="manual-rice mb-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="bg-warning bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                                                <i class="fas fa-university text-warning"></i>
+                                            </div>
+                                            <div>
+                                                <div class="big-number"><i class="fas fa-phone-alt me-1"></i> <?= MANUAL_PAYMENT_NUMBER ?></div>
+                                                <div class="text-muted small"><?= MANUAL_PAYMENT_NAME ?> (<?= MANUAL_PAYMENT_NETWORK ?>)</div>
+                                                <div class="fw-semibold text-warning-emphasis small mt-1">
+                                                    <i class="fas fa-tag me-1"></i> 1,500 TZS (Monthly Subscription)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-light rounded-3 p-3 mb-3">
+                                        <h6 class="fw-bold small text-uppercase text-muted mb-2"><i class="fas fa-list-ol me-1"></i> Steps</h6>
+                                        <ol class="mb-0 ps-3 small text-muted" style="line-height:1.9;">
+                                            <li>Send <strong>1,500 TZS</strong> to <strong><?= MANUAL_PAYMENT_NUMBER ?></strong> via Mix by Yas Lipa</li>
+                                            <li>Copy the <strong>Transaction ID</strong> you receive after payment</li>
+                                            <li>Enter the transaction details below to submit for verification</li>
+                                        </ol>
+                                    </div>
+
+                                    <div class="form-floating mb-2">
+                                        <input type="tel" class="form-control" name="phone" id="manualPhone" placeholder="Phone" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
+                                        <label for="manualPhone">Phone Number Used</label>
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" name="transaction_id" id="manualTxnId" placeholder="Transaction ID">
+                                        <label for="manualTxnId">Transaction ID</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning w-100 btn-lg rounded-3 text-white fw-semibold">
+                                        <i class="fas fa-paper-plane me-2"></i> Submit for Verification
+                                    </button>
+                                    <p class="text-muted small text-center mt-2 mb-0">
+                                        <i class="fas fa-clock me-1"></i> Verification takes up to 24 hours. You will receive an SMS confirmation.
+                                    </p>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <?php if ($success): ?>
-                    <div class="features">
-                        <div class="item"><i class="fas fa-child"></i> View child progress</div>
-                        <div class="item"><i class="fas fa-star"></i> Results & stars</div>
-                        <div class="item"><i class="fas fa-book"></i> Assignments</div>
-                        <div class="item"><i class="fas fa-chart-line"></i> Performance reports</div>
-                    </div>
-                    <div style="margin-top:20px;text-align:center;">
-                        <a href="parent/dashboard.php" class="btn-primary" style="display:inline-block;width:auto;padding:12px 32px;text-decoration:none;">
-                            <i class="fas fa-arrow-left"></i> Back to Dashboard
-                        </a>
-                    </div>
-                    <?php return; endif; ?>
-
-                <form method="POST" id="paymentForm">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="payment_method" id="paymentMethod" value="">
-                    <input type="hidden" name="payment_submethod" id="paymentSubmethod" value="mobile">
-                    <input type="hidden" name="payment_type" id="paymentType" value="subscription">
-
-                    <!-- Payment type: Subscription or Wallet Topup -->
-                    <div class="amount-options" style="margin-bottom:24px;">
-                        <div class="amount-opt active" onclick="selectAmountType(this, 'subscription')">
-                            <div class="amt-value">1,500 TZS</div>
-                            <div class="amt-label">Monthly Subscription</div>
-                            <span class="badge-rec">Recommended</span>
-                        </div>
-                        <div class="amount-opt" onclick="selectAmountType(this, 'wallet_topup')">
-                            <div class="amt-value">Custom</div>
-                            <div class="amt-label">Wallet Topup</div>
-                        </div>
-                    </div>
-
-                    <!-- Custom amount input (shown only for wallet topup) -->
-                    <div id="customAmountBox" style="display:none;margin-bottom:20px;">
-                        <div class="form-group">
-                            <label>Amount (TZS)</label>
-                            <input type="number" name="amount" id="customAmount" min="500" step="500" placeholder="Enter amount (min 500 TZS)">
-                        </div>
-                    </div>
-
-                    <!-- Payment method tabs -->
-                    <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:10px;">Payment Method</div>
-                    <div class="method-tabs">
-                        <div class="method-tab active" onclick="selectMethod(this, 'snippe', 'mobile')">
-                            <div class="tab-icon"><i class="fas fa-mobile-alt"></i></div>
-                            <div class="tab-label">Mobile Money</div>
-                            <div class="tab-desc">M-Pesa, Airtel, Mixx, Halotel</div>
-                        </div>
-                        <div class="method-tab" onclick="selectMethod(this, 'snippe', 'card')">
-                            <div class="tab-icon"><i class="fas fa-credit-card"></i></div>
-                            <div class="tab-label">Card Payment</div>
-                            <div class="tab-desc">Visa, Mastercard, Local debit</div>
-                        </div>
-                        <div class="method-tab" onclick="selectMethod(this, 'manual', '')">
-                            <div class="tab-icon"><i class="fas fa-hand-holding-usd"></i></div>
-                            <div class="tab-label">Manual</div>
-                            <div class="tab-desc">Mix by Yas Lipa</div>
-                        </div>
-                    </div>
-
-                    <!-- === Mobile Money content === -->
-                    <div class="method-content active" id="content-snippe-mobile">
-                        <p style="font-size:13px;color:#64748b;margin-bottom:12px;">
-                            <i class="fas fa-info-circle"></i> You will receive a USSD push on your phone. Approve the payment to complete.
-                        </p>
-                        <div class="form-group">
-                            <label>Phone Number (Tanzania)</label>
-                            <input type="tel" name="phone" placeholder="07XX XXX XXX" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>" required>
-                        </div>
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-mobile-alt"></i> Pay with Mobile Money
-                        </button>
-                    </div>
-
-                    <!-- === Card Payment content === -->
-                    <div class="method-content" id="content-snippe-card">
-                        <p style="font-size:13px;color:#64748b;margin-bottom:12px;">
-                            <i class="fas fa-info-circle"></i> You will be redirected to a secure checkout page to enter your card details.
-                        </p>
-                        <div class="form-group">
-                            <label>Email Address</label>
-                            <input type="email" name="email" placeholder="your@email.com" value="<?= htmlspecialchars($_POST['email'] ?? $_SESSION['email'] ?? '') ?>">
-                        </div>
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-credit-card"></i> Pay with Card
-                        </button>
-                    </div>
-
-                    <!-- === Manual Payment content === -->
-                    <div class="method-content" id="content-manual">
-                        <div class="manual-box">
-                            <div class="number"><i class="fas fa-phone-alt"></i> <?= MANUAL_PAYMENT_NUMBER ?></div>
-                            <div class="name"><i class="fas fa-user"></i> <?= MANUAL_PAYMENT_NAME ?> (<?= MANUAL_PAYMENT_NETWORK ?>)</div>
-                            <div class="amount"><i class="fas fa-tag"></i> 1,500 TZS (Monthly Subscription)</div>
-                        </div>
-                        <ol style="margin:12px 0 16px 18px;font-size:13px;color:#475569;line-height:1.9;">
-                            <li>Send <strong>1,500 TZS</strong> to <strong><?= MANUAL_PAYMENT_NUMBER ?></strong> via Mix by Yas Lipa</li>
-                            <li>Copy the <strong>Transaction ID</strong> you receive after payment</li>
-                            <li>Enter the transaction details below to submit for verification</li>
-                        </ol>
-                        <div class="form-group">
-                            <label>Phone Number Used</label>
-                            <input type="tel" name="phone_manual" id="manualPhone" placeholder="07XX XXX XXX">
-                        </div>
-                        <div class="form-group">
-                            <label>Transaction ID</label>
-                            <input type="text" name="transaction_id" id="manualTxnId" placeholder="e.g. YL123456789">
-                        </div>
-                        <button type="submit" class="btn-warning">
-                            <i class="fas fa-paper-plane"></i> Submit for Verification
-                        </button>
-                        <p style="font-size:12px;color:#64748b;margin-top:10px;text-align:center;">
-                            <i class="fas fa-clock"></i> Verification takes up to 24 hours. You will receive an SMS confirmation.
-                        </p>
-                    </div>
-                </form>
+                <div class="text-center mt-3">
+                    <span class="text-muted small">Need help? <a href="contact.php" class="fw-semibold">Contact us</a></span>
+                </div>
             </div>
-        </div>
-
-        <div style="text-align:center;margin-top:24px;font-size:13px;color:#64748b;">
-            Need help? <a href="contact.php" style="color:#2563eb;font-weight:600;">Contact us</a>
         </div>
     </div>
 
     <?php require_once __DIR__ . '/php/includes/footer.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        function selectAmountType(el, type) {
-            document.querySelectorAll('.amount-opt').forEach(o => o.classList.remove('active'));
+        function selectType(el, type) {
+            document.querySelectorAll('.opt-btn').forEach(o => o.classList.remove('active'));
             el.classList.add('active');
             document.getElementById('paymentType').value = type;
             document.getElementById('customAmountBox').style.display = type === 'wallet_topup' ? 'block' : 'none';
         }
 
-        function selectMethod(el, method, submethod) {
-            document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
+        function setMethod(method, submethod) {
             document.getElementById('paymentMethod').value = method;
             document.getElementById('paymentSubmethod').value = submethod;
-            document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
-            const target = document.getElementById('content-' + method + (submethod ? '-' + submethod : ''));
-            if (target) target.classList.add('active');
         }
 
         // Restore state on error
-        const savedMethod = '<?= htmlspecialchars($_POST['payment_method'] ?? '') ?>';
-        const savedSub = '<?= htmlspecialchars($_POST['payment_submethod'] ?? '') ?>';
-        const savedType = '<?= htmlspecialchars($_POST['payment_type'] ?? 'subscription') ?>';
-        if (savedType === 'wallet_topup') {
-            document.querySelectorAll('.amount-opt').forEach(o => {
-                if (o.querySelector('.amt-label')?.textContent.includes('Wallet')) {
-                    o.classList.add('active');
-                    document.querySelector('.amount-opt:first-child').classList.remove('active');
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedMethod = '<?= htmlspecialchars($_POST['payment_method'] ?? '') ?>';
+            const savedSub = '<?= htmlspecialchars($_POST['payment_submethod'] ?? '') ?>';
+            const savedType = '<?= htmlspecialchars($_POST['payment_type'] ?? 'subscription') ?>';
+
+            if (savedType === 'wallet_topup') {
+                const opts = document.querySelectorAll('.opt-btn');
+                opts.forEach(o => {
+                    if (o.querySelector('.lbl')?.textContent.includes('Wallet')) {
+                        o.classList.add('active');
+                        opts[0].classList.remove('active');
+                    }
+                });
+                document.getElementById('paymentType').value = 'wallet_topup';
+                document.getElementById('customAmountBox').style.display = 'block';
+            }
+
+            if (savedMethod) {
+                setMethod(savedMethod, savedSub);
+                const tabMap = {
+                    'snippe-mobile': 'tab-mobile',
+                    'snippe-card': 'tab-card',
+                    'manual-': 'tab-manual'
+                };
+                const tabId = tabMap[savedMethod + '-' + savedSub];
+                if (tabId) {
+                    const tab = document.getElementById(tabId);
+                    if (tab) {
+                        const bsTab = new bootstrap.Tab(tab);
+                        bsTab.show();
+                    }
                 }
-            });
-            document.getElementById('paymentType').value = 'wallet_topup';
-            document.getElementById('customAmountBox').style.display = 'block';
-        }
-        if (savedMethod) {
-            document.querySelectorAll('.method-tab').forEach(t => {
-                t.classList.remove('active');
-                const isMobile = savedMethod === 'snippe' && savedSub === 'mobile' && t.querySelector('.tab-label')?.textContent === 'Mobile Money';
-                const isCard = savedMethod === 'snippe' && savedSub === 'card' && t.querySelector('.tab-label')?.textContent === 'Card Payment';
-                const isManual = savedMethod === 'manual' && t.querySelector('.tab-label')?.textContent === 'Manual';
-                if (isMobile || isCard || isManual) t.classList.add('active');
-            });
-            document.getElementById('paymentMethod').value = savedMethod;
-            document.getElementById('paymentSubmethod').value = savedSub;
-            document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
-            const target = document.getElementById('content-' + savedMethod + (savedSub ? '-' + savedSub : ''));
-            if (target) target.classList.add('active');
-        }
+            }
+        });
     </script>
 </body>
 </html>
