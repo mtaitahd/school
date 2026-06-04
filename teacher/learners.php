@@ -75,15 +75,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $smsResult = $smsService->sendSMS($student['parent_phone'], $message, 'parent_link', 'parent', $student_id);
             
             if ($smsResult['success']) {
-                $success = "Message sent";
+                $response = ['ok' => true, 'message' => 'Message sent'];
             } else {
-                $error = "Message not sent";
+                $response = ['ok' => false, 'message' => 'Message not sent'];
             }
         } catch (Exception $e) {
-            $error = "Message not sent";
+            $response = ['ok' => false, 'message' => 'Message not sent'];
         }
     } else {
-        $error = "Student has no claim code or parent phone number";
+        $response = ['ok' => false, 'message' => 'Student has no claim code or parent phone number'];
+    }
+    
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
+    }
+    
+    if ($response['ok']) {
+        $success = $response['message'];
+    } else {
+        $error = $response['message'];
     }
 }
 
@@ -300,7 +312,6 @@ if (isset($_GET['edit'])) {
                                                     '<?php echo htmlspecialchars($learner['first_name'], ENT_QUOTES); ?>', 
                                                     '<?php echo htmlspecialchars($learner['last_name'], ENT_QUOTES); ?>', 
                                                     '<?php echo htmlspecialchars($learner['username'], ENT_QUOTES); ?>', 
-                                                    '<?php echo htmlspecialchars($learner['phone'] ?? '', ENT_QUOTES); ?>', 
                                                     '<?php echo htmlspecialchars($learner['parent_phone'] ?? '', ENT_QUOTES); ?>', 
                                                     <?php echo $learner['is_active'] ? 'true' : 'false'; ?>)" 
                                                 title="Edit Learner">
@@ -433,10 +444,6 @@ if (isset($_GET['edit'])) {
                         <small style="color: var(--text-light);">Username cannot be changed</small>
                     </div>
                     <div class="form-group-child">
-                        <label class="form-label-child">Phone Number</label>
-                        <input type="text" class="form-control-child" name="phone" id="edit_phone" placeholder="+255XXXXXXXXX">
-                    </div>
-                    <div class="form-group-child">
                         <label class="form-label-child">Parent Phone Number</label>
                         <input type="text" class="form-control-child" name="parent_phone" id="edit_parent_phone" placeholder="+255XXXXXXXXX">
                     </div>
@@ -475,12 +482,11 @@ if (isset($_GET['edit'])) {
             });
         }
 
-        function openEditLearnerModal(studentId, firstName, lastName, username, phone, parentPhone, isActive) {
+        function openEditLearnerModal(studentId, firstName, lastName, username, parentPhone, isActive) {
             document.getElementById('edit_student_id').value = studentId;
             document.getElementById('edit_first_name').value = firstName;
             document.getElementById('edit_last_name').value = lastName;
             document.getElementById('edit_username').value = username;
-            document.getElementById('edit_phone').value = phone;
             document.getElementById('edit_parent_phone').value = parentPhone;
             document.getElementById('edit_is_active').checked = isActive;
             openModal('editLearnerModal');
@@ -498,10 +504,36 @@ if (isset($_GET['edit'])) {
                         confirmButtonColor: 'var(--primary-blue)',
                         cancelButtonColor: '#6c757d',
                         confirmButtonText: '<i class="fas fa-sms me-1"></i> Yes, send SMS',
-                        cancelButtonText: 'Cancel'
+                        cancelButtonText: 'Cancel',
+                        showLoaderOnConfirm: true,
+                        preConfirm: function() {
+                            return fetch(window.location.href, {
+                                method: 'POST',
+                                headers: {'X-Requested-With': 'XMLHttpRequest'},
+                                body: new FormData(form)
+                            }).then(function(res) {
+                                return res.json();
+                            }).then(function(data) {
+                                if (!data.ok) {
+                                    Swal.showValidationMessage(data.message);
+                                }
+                                return data;
+                            }).catch(function() {
+                                Swal.showValidationMessage('Request failed');
+                            });
+                        },
+                        allowOutsideClick: function() { return !Swal.isLoading(); }
                     }).then(function(result) {
-                        if (result.isConfirmed) {
-                            form.submit();
+                        if (result.value) {
+                            Swal.fire({
+                                icon: result.value.ok ? 'success' : 'error',
+                                title: result.value.ok ? 'Message Sent' : 'Message Not Sent',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 4000,
+                                timerProgressBar: true
+                            });
                         }
                     });
                 });
