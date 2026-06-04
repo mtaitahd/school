@@ -1,5 +1,4 @@
 Options -Indexes
-ServerSignature Off
 
 <IfModule mod_headers.c>
     Header always unset X-Powered-By
@@ -21,16 +20,20 @@ ServerSignature Off
     ExpiresByType application/javascript "access plus 1 month"
 </IfModule>
 
+# Block sensitive files
 <FilesMatch "^(\.env|composer\.json|composer\.lock|phpunit\.xml|\.gitignore|\.cpanel\.yml)">
-    Require all denied
+    Order Allow,Deny
+    Deny from all
 </FilesMatch>
 
 <FilesMatch "\.(sql|md|log|bak|old)$">
-    Require all denied
+    Order Allow,Deny
+    Deny from all
 </FilesMatch>
 
-<FilesMatch "(^\.|\/\.)">
-    Require all denied
+<FilesMatch "^\.">
+    Order Allow,Deny
+    Deny from all
 </FilesMatch>
 
 RewriteEngine On
