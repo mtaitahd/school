@@ -74,7 +74,8 @@ if ($completed) {
     $database->execute(
         "UPDATE student_assignments sa
          JOIN assignments a ON sa.assignment_id = a.assignment_id
-         SET sa.status = 'completed', sa.score = GREATEST(COALESCE(sa.score, 0), ?), sa.submitted_at = NOW()
+         SET sa.status = 'completed', sa.score = GREATEST(COALESCE(sa.score, 0), ?), sa.submitted_at = NOW(),
+             sa.completed_at = NOW()
          WHERE sa.student_id = ? AND a.activity_id = ? AND sa.status != 'completed'",
         [$score, $user_id, $activity_id]
     );
@@ -82,10 +83,20 @@ if ($completed) {
     $database->execute(
         "UPDATE student_assignments sa
          JOIN assignments a ON sa.assignment_id = a.assignment_id
-         SET sa.status = 'in_progress'
+         SET sa.status = 'in_progress', sa.started_at = COALESCE(sa.started_at, NOW())
          WHERE sa.student_id = ? AND a.activity_id = ? AND sa.status = 'pending'",
         [$user_id, $activity_id]
     );
 }
+
+// Recalculate question tracking fields from assignment_answers for linked assignments
+$database->execute(
+    "UPDATE student_assignments sa
+     SET total_questions = (SELECT COUNT(*) FROM assignment_questions aq WHERE aq.assignment_id = sa.assignment_id),
+         answered_questions = (SELECT COUNT(*) FROM assignment_answers aa JOIN assignment_questions aq ON aa.question_id = aq.question_id WHERE aa.student_assignment_id = sa.student_assignment_id AND aa.given_answer IS NOT NULL AND aa.given_answer != ''),
+         skipped_questions = (SELECT COUNT(*) FROM assignment_questions aq WHERE aq.assignment_id = sa.assignment_id AND aq.question_id NOT IN (SELECT aa2.question_id FROM assignment_answers aa2 WHERE aa2.student_assignment_id = sa.student_assignment_id AND aa2.given_answer IS NOT NULL AND aa2.given_answer != ''))
+     WHERE sa.student_id = ? AND sa.assignment_id IN (SELECT assignment_id FROM assignments WHERE activity_id = ?)",
+    [$user_id, $activity_id]
+);
 
 echo json_encode(['ok' => true, 'score' => $score, 'stars' => $stars, 'completed' => (bool) $completed]);

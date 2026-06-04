@@ -4,6 +4,7 @@ require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/lang.php';
 require_once __DIR__ . '/../php/includes/auth.php';
 require_once __DIR__ . '/../php/includes/migrate.php';
+require_once __DIR__ . '/../php/includes/SubscriptionMiddleware.php';
 ensure_schema_v2($database);
 
 auth_require_role(['learner'], 'login.php');
@@ -15,12 +16,24 @@ $sidebar_active = 'dashboard';
 $dashboard_page_title = $current_lang === 'sw' ? 'Dashibodi Yangu' : 'My Dashboard';
 $lang_page = 'dashboard.php';
 
+$trialInfo = SubscriptionMiddleware::getLearnerTrialInfo($learner_id);
+
 $stats = $database->fetchOne(
     "SELECT
         (SELECT COUNT(*) FROM progress WHERE user_id = ? AND completed = 1) AS completed,
         (SELECT COALESCE(SUM(stars_earned), 0) FROM progress WHERE user_id = ?) AS stars,
-        (SELECT COUNT(*) FROM student_assignments WHERE student_id = ? AND status NOT IN ('completed', 'graded')) AS pending_assignments",
-    [$learner_id, $learner_id, $learner_id]
+        (SELECT COUNT(*) FROM student_assignments WHERE student_id = ? AND status = 'pending') AS pending_assignments,
+        (SELECT COUNT(*) FROM student_assignments WHERE student_id = ? AND status IN ('completed','auto_submitted')) AS completed_assignments,
+        (SELECT COUNT(*) FROM student_assignments WHERE student_id = ? AND status = 'in_progress') AS in_progress_assignments",
+    [$learner_id, $learner_id, $learner_id, $learner_id, $learner_id]
+);
+
+// Average score from completed assignments
+$avgScore = $database->fetchOne(
+    "SELECT COALESCE(ROUND(AVG(score), 0), 0) AS avg_score
+     FROM student_assignments
+     WHERE student_id = ? AND status IN ('completed','auto_submitted') AND score IS NOT NULL",
+    [$learner_id]
 );
 
 $recent_assignments = $database->fetchAll(
@@ -53,13 +66,53 @@ $recent_assignments = $database->fetchAll(
 </head>
 <body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>
 
+        <!-- Trial / Subscription Banner -->
+        <?php if ($trialInfo['status'] === 'trial'): ?>
+            <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
+                <div>
+                    <i class="fas fa-clock me-2"></i>
+                    <strong><?php echo $current_lang === 'sw' ? 'Majaribio ya Bure' : 'Free Trial'; ?></strong> —
+                    <?php if ($trialInfo['days_remaining'] > 0): ?>
+                        <?php echo $current_lang === 'sw' ? 'Umesalia siku' : 'You have'; ?> <strong><?php echo $trialInfo['days_remaining']; ?></strong> <?php echo $current_lang === 'sw' ? 'siku za majaribio' : 'trial days remaining'; ?>.
+                    <?php else: ?>
+                        <?php echo $current_lang === 'sw' ? 'Muda wa majaribio umeisha. Tafadhali lipa ili kuendelea.' : 'Trial period has ended. Please subscribe to continue.'; ?>
+                    <?php endif; ?>
+                </div>
+                <a href="../payment.php" class="btn btn-warning btn-sm fw-bold px-4" style="border-radius:50px;">
+                    <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Subscribe Now'; ?> — 1,500 TZS
+                </a>
+            </div>
+        <?php elseif ($trialInfo['status'] === 'active' && $trialInfo['days_remaining'] <= 7): ?>
+            <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
+                <div>
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong><?php echo $current_lang === 'sw' ? 'Uanachama Unakaribia Kuisha' : 'Subscription Expiring'; ?></strong> —
+                    <?php echo $current_lang === 'sw' ? 'Siku zilizobaki' : 'Days remaining'; ?>: <strong><?php echo $trialInfo['days_remaining']; ?></strong>
+                </div>
+                <a href="../payment.php" class="btn btn-outline-warning btn-sm fw-bold px-3" style="border-radius:50px;">
+                    <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Jaza Salio' : 'Topup'; ?>
+                </a>
+            </div>
+        <?php elseif (!$trialInfo['is_active']): ?>
+            <div class="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
+                <div>
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong><?php echo $current_lang === 'sw' ? 'Huduma Imezuiwa' : 'Access Blocked'; ?></strong> —
+                    <?php echo $current_lang === 'sw' ? 'Tafadhali lipa 1,500 TZS ili kuendelea.' : 'Please pay 1,500 TZS to continue.'; ?>
+                </div>
+                <a href="../payment.php" class="btn btn-danger btn-sm fw-bold px-4" style="border-radius:50px;">
+                    <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?>
+                </a>
+            </div>
+        <?php endif; ?>
+
         <div class="row g-4 mb-4">
             <div class="col-xl-3 col-md-6">
                 <div class="card h-100 py-2 text-center">
                     <div class="card-body">
                         <div class="icon-circle mb-3" style="background:var(--primary-green);width:56px;height:56px;font-size:1.5rem;margin:0 auto;"><i class="fas fa-check text-white"></i></div>
-                        <p style="font-size:2rem;font-weight:700;margin:0;color:var(--text-dark);"><?php echo (int) $stats['completed']; ?></p>
-                        <p class="text-muted mb-0"><?php echo $current_lang === 'sw' ? 'Zimekamilika' : 'Completed'; ?></p>
+                        <p style="font-size:2rem;font-weight:700;margin:0;color:var(--text-dark);"><?php echo (int) ($stats['completed_assignments'] ?? 0); ?></p>
+                        <p class="text-muted mb-0"><?php echo $current_lang === 'sw' ? 'Zimekamilishwa' : 'Completed'; ?></p>
                     </div>
                 </div>
             </div>
@@ -67,7 +120,7 @@ $recent_assignments = $database->fetchAll(
                 <div class="card h-100 py-2 text-center">
                     <div class="card-body">
                         <div class="icon-circle mb-3" style="background:var(--primary-yellow);width:56px;height:56px;font-size:1.5rem;margin:0 auto;"><i class="fas fa-star text-white"></i></div>
-                        <p style="font-size:2rem;font-weight:700;margin:0;color:var(--text-dark);"><?php echo (int) $stats['stars']; ?></p>
+                        <p style="font-size:2rem;font-weight:700;margin:0;color:var(--text-dark);"><?php echo (int) ($stats['stars'] ?? 0); ?></p>
                         <p class="text-muted mb-0"><?php echo $current_lang === 'sw' ? 'Nyota' : 'Stars'; ?></p>
                     </div>
                 </div>
@@ -76,8 +129,17 @@ $recent_assignments = $database->fetchAll(
                 <div class="card h-100 py-2 text-center">
                     <div class="card-body">
                         <div class="icon-circle mb-3" style="background:var(--primary-blue);width:56px;height:56px;font-size:1.5rem;margin:0 auto;"><i class="fas fa-clipboard-list text-white"></i></div>
-                        <p style="font-size:2rem;font-weight:700;margin:0;color:var(--text-dark);"><?php echo (int) $stats['pending_assignments']; ?></p>
-                        <p class="text-muted mb-0"><?php echo $current_lang === 'sw' ? 'Zilizopangwa' : 'Assigned'; ?></p>
+                        <p style="font-size:2rem;font-weight:700;margin:0;color:var(--text-dark);"><?php echo (int) ($stats['pending_assignments'] ?? 0); ?></p>
+                        <p class="text-muted mb-0"><?php echo $current_lang === 'sw' ? 'Zinazosubiri' : 'Pending'; ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2 text-center">
+                    <div class="card-body">
+                        <div class="icon-circle mb-3" style="background:var(--primary-orange);width:56px;height:56px;font-size:1.5rem;margin:0 auto;"><i class="fas fa-chart-line text-white"></i></div>
+                        <p style="font-size:2rem;font-weight:700;margin:0;color:var(--text-dark);"><?php echo (int) ($avgScore['avg_score'] ?? 0); ?>%</p>
+                        <p class="text-muted mb-0"><?php echo $current_lang === 'sw' ? 'Wastani wa Alama' : 'Avg Score'; ?></p>
                     </div>
                 </div>
             </div>

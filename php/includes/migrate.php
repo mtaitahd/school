@@ -280,5 +280,81 @@ function ensure_schema_v2($database): void {
         $database->execute("CREATE INDEX idx_notifications_created ON notifications(created_at)");
     }
 
+    // === Assignment Engine v2: question tracking, timer, answers ===
+    $saCols2 = $database->fetchAll("SHOW COLUMNS FROM student_assignments");
+    $saFields2 = array_column($saCols2, 'Field');
+    if (!in_array('total_questions', $saFields2)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN total_questions INT DEFAULT 0 AFTER status");
+    }
+    if (!in_array('answered_questions', $saFields2)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN answered_questions INT DEFAULT 0 AFTER total_questions");
+    }
+    if (!in_array('skipped_questions', $saFields2)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN skipped_questions INT DEFAULT 0 AFTER answered_questions");
+    }
+    if (!in_array('completed_questions', $saFields2)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN completed_questions INT DEFAULT 0 AFTER skipped_questions");
+    }
+    if (!in_array('progress_percentage', $saFields2)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN progress_percentage DECIMAL(5,2) DEFAULT 0.00 AFTER completed_questions");
+    }
+    if (!in_array('duration_minutes', $saFields2)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN duration_minutes INT DEFAULT NULL AFTER progress_percentage");
+    }
+    if (!in_array('started_at', $saFields2)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN started_at TIMESTAMP NULL AFTER assigned_at");
+    }
+    if (!in_array('completed_at', $saFields2)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN completed_at TIMESTAMP NULL AFTER started_at");
+    }
+    if (!in_array('submission_type', $saFields2)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN submission_type ENUM('manual','automatic','time_expired') DEFAULT 'manual' AFTER completed_at");
+    }
+
+    // Fix ENUM to add new statuses
+    $enumCheck2 = $database->fetchAll("SHOW COLUMNS FROM student_assignments WHERE Field = 'status'");
+    if (!empty($enumCheck2)) {
+        $type2 = $enumCheck2[0]['Type'] ?? '';
+        if (strpos($type2, 'expired') === false || strpos($type2, 'auto_submitted') === false) {
+            $database->execute("ALTER TABLE student_assignments MODIFY COLUMN status ENUM('pending','in_progress','completed','expired','auto_submitted') DEFAULT 'pending'");
+        }
+    }
+
+    // Assignment questions table
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS assignment_questions (
+            question_id INT AUTO_INCREMENT PRIMARY KEY,
+            assignment_id INT NOT NULL,
+            question_text TEXT NOT NULL,
+            question_type ENUM('multiple_choice','true_false','short_answer','fill_blank') DEFAULT 'multiple_choice',
+            options JSON DEFAULT NULL,
+            correct_answer TEXT NOT NULL,
+            points INT DEFAULT 1,
+            sort_order INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (assignment_id) REFERENCES assignments(assignment_id) ON DELETE CASCADE,
+            INDEX idx_assignment (assignment_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    // Assignment answers table
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS assignment_answers (
+            answer_id INT AUTO_INCREMENT PRIMARY KEY,
+            student_assignment_id INT NOT NULL,
+            question_id INT NOT NULL,
+            student_id INT NOT NULL,
+            given_answer TEXT DEFAULT NULL,
+            is_correct TINYINT(1) DEFAULT 0,
+            points_earned INT DEFAULT 0,
+            answered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (student_assignment_id) REFERENCES student_assignments(student_assignment_id) ON DELETE CASCADE,
+            FOREIGN KEY (question_id) REFERENCES assignment_questions(question_id) ON DELETE CASCADE,
+            FOREIGN KEY (student_id) REFERENCES users(user_id) ON DELETE CASCADE,
+            UNIQUE KEY unique_student_question (student_assignment_id, question_id),
+            INDEX idx_student_assignment (student_assignment_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
     $done = true;
 }
