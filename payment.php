@@ -87,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$userEmailStored = $_SESSION['email'] ?? $database->fetchOne("SELECT email FROM users WHERE user_id = ?", [$parentId])['email'] ?? '';
 $current_lang = $_SESSION['lang'] ?? 'en';
 $active_nav = 'topup';
 $dashboard_role = 'parent';
@@ -254,17 +255,20 @@ $dashboard_page_title = 'Payment';
             <div class="modal-body">
                 <p class="text-muted small mb-3">Choose what you're paying for</p>
                 <div class="d-flex flex-column gap-3">
-                    <div class="type-card active d-flex flex-column align-items-center justify-content-center py-4" onclick="selectType(this, 'subscription'); closeTypeModal()" id="typeSubCard">
+                    <div class="type-card active d-flex flex-column align-items-center justify-content-center py-4" onclick="selectType(this, 'subscription')" id="typeSubCard">
                         <div class="type-amt">1,500 TZS</div>
                         <div class="type-lbl">Monthly Subscription</div>
                         <span class="type-badge">Recommended</span>
                     </div>
-                    <div class="type-card d-flex flex-column align-items-center justify-content-center py-4" onclick="selectType(this, 'wallet_topup'); closeTypeModal()" id="typeWalletCard">
+                    <div class="type-card d-flex flex-column align-items-center justify-content-center py-4" onclick="selectType(this, 'wallet_topup')" id="typeWalletCard">
                         <div class="type-amt">Custom</div>
                         <div class="type-lbl">Wallet Topup</div>
                         <span class="type-badge" style="background:#dcfce7;color:#15803d;">Flexible</span>
                     </div>
                 </div>
+                <button type="button" class="btn btn-primary w-100 mt-3 rounded-3 py-2 fw-bold" onclick="proceedToMethod()">
+                    <i class="fas fa-arrow-right me-2"></i> Continue
+                </button>
             </div>
         </div>
     </div>
@@ -291,12 +295,12 @@ $dashboard_page_title = 'Payment';
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="method-card d-flex flex-column align-items-start" onclick="selectMethod('snippe', 'card'); bootstrap.Modal.getInstance(document.getElementById('paymentMethodModal')).hide(); openCardModal()">
+                        <div class="method-card d-flex flex-column align-items-start" onclick="submitCardDirect()">
                             <div class="mc-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">
                                 <i class="fas fa-credit-card"></i>
                             </div>
                             <div class="mc-title">Card Payment</div>
-                            <div class="mc-desc">Visa, Mastercard, Local debit<br>Secure online checkout</div>
+                            <div class="mc-desc">Visa, Mastercard, Local debit<br>Redirect to secure checkout</div>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -385,29 +389,25 @@ $dashboard_page_title = 'Payment';
     </div>
 </div>
 
-<!-- ===== CARD PAYMENT MODAL ===== -->
-<div class="modal fade modal-pform" id="cardModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- ===== CARD EMAIL MODAL (fallback if no stored email) ===== -->
+<div class="modal fade modal-pform" id="cardEmailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Card Payment</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="alert alert-info border-0 rounded-3 py-2 small d-flex align-items-center gap-2 mb-3">
-                    <i class="fas fa-info-circle"></i>
-                    You will be redirected to a secure checkout page to enter your card details.
-                </div>
+                <p class="text-muted small mb-3">Enter your email to proceed to secure checkout</p>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small" for="emailCard">Email Address</label>
-                    <input type="email" class="form-control form-control-lg" id="emailCard" placeholder="your@email.com" value="<?= htmlspecialchars($_POST['email'] ?? $_SESSION['email'] ?? '') ?>">
+                    <input type="email" class="form-control form-control-lg" id="cardEmailInput" placeholder="your@email.com">
                 </div>
                 <div id="cardAmountRow" class="mb-3" style="display:none;">
                     <label class="form-label fw-semibold text-muted small">Amount (TZS)</label>
-                    <input type="number" class="form-control form-control-lg" id="cardAmount" min="500" step="500" placeholder="Enter amount">
+                    <input type="number" class="form-control form-control-lg" id="cardAmtInput" min="500" step="500" placeholder="Enter amount">
                 </div>
-                <button type="button" class="btn btn-primary w-100 btn-lg rounded-3" onclick="submitCardPayment()">
-                    <i class="fas fa-credit-card me-2"></i> Pay with Card
+                <button type="button" class="btn btn-primary w-100 btn-lg rounded-3" onclick="doCardSubmit()">
+                    <i class="fas fa-arrow-right me-2"></i> Continue to Checkout
                 </button>
             </div>
         </div>
@@ -473,6 +473,7 @@ $dashboard_page_title = 'Payment';
 <script>
 let selectedNetwork = '';
 const isWallet = () => document.getElementById('paymentType').value === 'wallet_topup';
+const userEmail = '<?= htmlspecialchars(addslashes($userEmailStored)) ?>';
 
 function selectType(el, type) {
     document.querySelectorAll('.type-card').forEach(o => o.classList.remove('active'));
@@ -506,35 +507,62 @@ function updateSelectionSummary() {
 
 // ===== Modal Openers =====
 function openTypeModal() {
-    const modal = new bootstrap.Modal(document.getElementById('paymentTypeModal'));
-    modal.show();
-}
-
-function closeTypeModal() {
-    bootstrap.Modal.getInstance(document.getElementById('paymentTypeModal')).hide();
+    new bootstrap.Modal(document.getElementById('paymentTypeModal')).show();
 }
 
 function openMethodModal() {
-    const modal = new bootstrap.Modal(document.getElementById('paymentMethodModal'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('paymentMethodModal')).show();
+}
+
+function proceedToMethod() {
+    bootstrap.Modal.getInstance(document.getElementById('paymentTypeModal')).hide();
+    setTimeout(() => openMethodModal(), 300);
 }
 
 function openMobileModal() {
     setMethod('snippe', 'mobile');
-    const modal = new bootstrap.Modal(document.getElementById('mobileMoneyModal'));
-    modal.show();
-}
-
-function openCardModal() {
-    setMethod('snippe', 'card');
-    const modal = new bootstrap.Modal(document.getElementById('cardModal'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('mobileMoneyModal')).show();
 }
 
 function openManualModal() {
     setMethod('manual', '');
-    const modal = new bootstrap.Modal(document.getElementById('manualModal'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('manualModal')).show();
+}
+
+function submitCardDirect() {
+    setMethod('snippe', 'card');
+    bootstrap.Modal.getInstance(document.getElementById('paymentMethodModal')).hide();
+
+    if (userEmail && userEmail.includes('@')) {
+        document.getElementById('emailInput').value = userEmail;
+        document.getElementById('paymentForm').submit();
+    } else {
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(document.getElementById('cardEmailModal'));
+            modal.show();
+        }, 300);
+    }
+}
+
+function doCardSubmit() {
+    const email = document.getElementById('cardEmailInput').value.trim();
+    if (!email || !email.includes('@')) {
+        document.getElementById('cardEmailInput').classList.add('is-invalid');
+        document.getElementById('cardEmailInput').focus();
+        return;
+    }
+    document.getElementById('emailInput').value = email;
+    if (isWallet()) {
+        const amt = document.getElementById('cardAmtInput').value;
+        if (!amt || amt < 500) {
+            document.getElementById('cardAmtInput').classList.add('is-invalid');
+            document.getElementById('cardAmtInput').focus();
+            return;
+        }
+        document.getElementById('amountInput').value = amt;
+    }
+    bootstrap.Modal.getInstance(document.getElementById('cardEmailModal')).hide();
+    document.getElementById('paymentForm').submit();
 }
 
 // ===== Mobile Money =====
@@ -581,27 +609,7 @@ function cancelMobilePayment() {
 }
 
 // ===== Card Payment =====
-function submitCardPayment() {
-    const email = document.getElementById('emailCard').value.trim();
-    if (!email || !email.includes('@')) {
-        document.getElementById('emailCard').classList.add('is-invalid');
-        document.getElementById('emailCard').focus();
-        return;
-    }
-    document.getElementById('emailInput').value = email;
-
-    if (isWallet()) {
-        const amt = document.getElementById('cardAmount').value;
-        if (!amt || amt < 500) {
-            document.getElementById('cardAmount').classList.add('is-invalid');
-            document.getElementById('cardAmount').focus();
-            return;
-        }
-        document.getElementById('amountInput').value = amt;
-    }
-
-    document.getElementById('paymentForm').submit();
-}
+// Handled by submitCardDirect() + doCardSubmit() above
 
 // ===== Manual Payment =====
 function submitManualPayment() {
@@ -628,7 +636,7 @@ document.getElementById('modalPhone').addEventListener('input', function () {
 });
 
 // ===== Form validation styling =====
-document.querySelectorAll('#cardModal input').forEach(i => {
+document.querySelectorAll('#cardEmailModal input').forEach(i => {
     i.addEventListener('input', () => i.classList.remove('is-invalid'));
 });
 document.querySelectorAll('#mobileMoneyModal input').forEach(i => {
