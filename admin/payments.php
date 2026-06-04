@@ -263,16 +263,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                         <tr>
                             <td>#<?= $sub['id'] ?></td>
                             <td><strong><?= htmlspecialchars($sub['first_name'] . ' ' . $sub['last_name']) ?></strong><br><small class="text-muted"><?= htmlspecialchars($sub['username']) ?></small></td>
-                            <td>
-                                <?php $sClass = match($sub['status']) {
-                                    'active' => 'bg-success',
-                                    'trial' => 'bg-info text-dark',
-                                    'expired' => 'bg-danger',
-                                    'cancelled' => 'bg-secondary',
-                                    default => 'bg-warning text-dark'
-                                }; ?>
-                                <span class="badge <?= $sClass ?>"><?= ucfirst($sub['status']) ?></span>
-                            </td>
+                            <td><span class="small text-muted"><?= ucfirst($sub['status']) ?></span></td>
                             <td><small><?= $sub['current_period_start'] ? date('d M Y', strtotime($sub['current_period_start'])) : '-' ?></small></td>
                             <td><small><?= $sub['current_period_end'] ? date('d M Y', strtotime($sub['current_period_end'])) : '-' ?></small></td>
                             <td><small><?= ucfirst($sub['payment_method'] ?? 'none') ?></small></td>
