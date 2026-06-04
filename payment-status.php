@@ -246,9 +246,11 @@ function showSwal(data) {
         showConfirmButton: completed || failed || cancelled,
         confirmButtonText: '<i class="fas fa-tachometer-alt me-1"></i> Go to Dashboard',
         confirmButtonColor: '#2563eb',
-        showDenyButton: failed || cancelled,
-        denyButtonText: '<i class="fas fa-redo me-1"></i> Try Again',
-        denyButtonColor: '#64748b',
+        showDenyButton: (failed || cancelled) || (pending && !isManual),
+        denyButtonText: (failed || cancelled)
+            ? '<i class="fas fa-redo me-1"></i> Try Again'
+            : '<i class="fas fa-sync me-1"></i> Resend Push',
+        denyButtonColor: (failed || cancelled) ? '#64748b' : '#2563eb',
         showCancelButton: pending,
         cancelButtonText: '<i class="fas fa-ban me-1"></i> Cancel Payment',
         cancelButtonColor: '#dc2626',
@@ -263,12 +265,51 @@ function showSwal(data) {
             window.location.href = 'parent/dashboard.php';
         },
         preDeny: () => {
-            window.location.href = 'payment.php';
+            if (failed || cancelled) {
+                window.location.href = 'payment.php';
+            } else if (pending && !isManual) {
+                retryPush();
+                return false;
+            }
         }
     }).then(result => {
         if (result.dismiss === Swal.DismissReason.cancel) {
             cancelPayment();
         }
+    });
+}
+
+function retryPush() {
+    fetch('api/retry-push.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'ref=' + encodeURIComponent(ref) + '&_csrf_token=' + encodeURIComponent(csrfToken)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'USSD Push Sent',
+                text: data.message || 'Angalia simu yako na uingize siri yako.',
+                timer: 3000,
+                showConfirmButton: true,
+                confirmButtonText: 'OK'
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: data.error || 'Failed to resend push. Try again later.'
+            });
+        }
+    })
+    .catch(() => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Network Error',
+            text: 'Could not reach the server. Check your connection.'
+        });
     });
 }
 
@@ -313,10 +354,12 @@ function updateSwal(data) {
         html: html,
         icon: iconCfg.icon,
         iconColor: iconCfg.iconColor,
-        showConfirmButton: !pending,
+        showConfirmButton: (!pending && status !== 'manual_review'),
         showCancelButton: pending,
-        showDenyButton: !pending && (status === 'failed' || cancelled),
-        denyButtonText: (status === 'failed' || cancelled) ? '<i class="fas fa-redo me-1"></i> Try Again' : undefined,
+        showDenyButton: (!pending && (status === 'failed' || cancelled)) || (pending && !isManual),
+        denyButtonText: (!pending && (status === 'failed' || cancelled))
+            ? '<i class="fas fa-redo me-1"></i> Try Again'
+            : '<i class="fas fa-sync me-1"></i> Resend Push',
         allowEscapeKey: !pending
     });
 

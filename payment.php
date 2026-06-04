@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             $normalized = pay_normalize_phone($phone);
-            if (!preg_match('/^255[67]\d{8}$/', $normalized)) {
+            if (!preg_match('/^255\d{9}$/', $normalized)) {
                 $error = 'Tafadhali ingiza namba halali ya simu (Tanzania)';
             } else {
                 $result = pay_create_snippe_payment($parentId, $normalized, '', $paymentType);

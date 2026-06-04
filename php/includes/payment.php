@@ -23,8 +23,8 @@ const SNIPPE_IP_WHITELIST = [
     '35.xxx.xxx.xxx',
 ];
 
-function pay_idempotency_key(int $parentId): string {
-    return 'parent-' . $parentId . '-month-' . date('Ym');
+function pay_idempotency_key(string $reference): string {
+    return 'pay-' . $reference;
 }
 
 function pay_normalize_phone(string $phone): string {
@@ -49,7 +49,7 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
 
     $amount = ($type === 'wallet_topup') ? (float) ($_POST['amount'] ?? SUBSCRIPTION_AMOUNT) : SUBSCRIPTION_AMOUNT;
     $reference = strtoupper(bin2hex(random_bytes(8)));
-    $idempotencyKey = pay_idempotency_key($parentId);
+    $idempotencyKey = pay_idempotency_key($reference);
     $method = $_POST['payment_submethod'] ?? 'mobile';
     $rawAppUrl = rtrim(sec_env('APP_URL', 'https://smartmathconner.co.tz'), '/');
     // Never allow localhost URLs in production API calls
@@ -190,6 +190,33 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
         'payment_url' => $paymentUrl,
         'message' => $respData['message'] ?? $data['message'] ?? 'Payment initiated',
     ];
+}
+
+function pay_retry_push(string $reference): array {
+    $ch = curl_init(SNIPPE_API_BASE . '/payments/' . urlencode($reference) . '/push');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . SNIPPE_API_KEY,
+            'Content-Type: application/json',
+        ],
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_SSL_VERIFYPEER => true,
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    $data = $response ? json_decode($response, true) : null;
+
+    if ($curlError || $httpCode >= 400) {
+        return ['success' => false, 'error' => $curlError ?: ('HTTP ' . $httpCode)];
+    }
+
+    return ['success' => true, 'data' => $data];
 }
 
 function pay_verify_snippe_payment(string $reference): array {
