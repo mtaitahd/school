@@ -51,7 +51,12 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
     $reference = strtoupper(bin2hex(random_bytes(8)));
     $idempotencyKey = pay_idempotency_key($parentId);
     $method = $_POST['payment_submethod'] ?? 'mobile';
-    $appUrl = rtrim(sec_env('APP_URL', 'https://smartmathconner.co.tz'), '/');
+    $rawAppUrl = rtrim(sec_env('APP_URL', 'https://smartmathconner.co.tz'), '/');
+    // Never allow localhost URLs in production API calls
+    if (preg_match('/localhost/i', $rawAppUrl)) {
+        $rawAppUrl = 'https://smartmathconner.co.tz';
+    }
+    $appUrl = preg_replace('/^http:/i', 'https:', $rawAppUrl);
 
     $user = $database->fetchOne("SELECT first_name, last_name, email FROM `users` WHERE user_id = ?", [$parentId]);
     $firstName = $user['first_name'] ?? 'Parent';
