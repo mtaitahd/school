@@ -142,7 +142,7 @@ include '../php/includes/dashboard-start.php';
         <?php endif; ?>
         <?php if (isset($_GET['sms_error'])): ?>
             <div class="alert alert-warning alert-dismissible fade show py-2 px-3 mb-4 text-center" style="border-radius:10px;font-size:0.9rem;border:none;max-width:700px;margin:0 auto;" role="alert">
-                <i class="fas fa-exclamation-triangle me-1"></i>SMS notice: <?php echo htmlspecialchars($_GET['sms_error']); ?>
+                <i class="fas fa-exclamation-triangle me-1"></i><?php echo htmlspecialchars($_GET['sms_error']); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <script>setTimeout(function(){ document.querySelector('.alert-warning')?.remove(); }, 7000);</script>

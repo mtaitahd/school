@@ -126,11 +126,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $assignment_id
                         );
                         if (is_array($smsResult) && !$smsResult['success']) {
-                            $sms_status = ' SMS notification failed: ' . $smsResult['message'];
-                        } elseif (!is_array($smsResult) || empty($smsResult['queued'])) {
-                            $sms_status = ' SMS sent to parent.';
+                            $sms_status = ' Message not sent';
                         } else {
-                            $sms_status = ' SMS queued for delivery.';
+                            $sms_status = ' Message sent';
                         }
                     }
                     

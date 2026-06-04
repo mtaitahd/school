@@ -67,14 +67,12 @@ if ($student_id) {
             $msg = "Kona Ya Hisabati: Your child account has been created. Username: $username, Claim Code: $claim_code. Use these to link your child on your parent dashboard.";
             $smsResult = $sms->sendSMS($parent_phone, $msg, 'parent_link', 'parent', $student_id);
             if (!$smsResult['success']) {
-                error_log('SMS: ' . $smsResult['message']);
-                $smsErrorParam = '&sms_error=' . urlencode($smsResult['message']);
+                $smsErrorParam = '&sms_error=' . urlencode('Message not sent');
             } elseif (!empty($smsResult['queued'])) {
-                $smsErrorParam = '&sms_error=' . urlencode('SMS request accepted; delivery pending. Please verify the parent phone number.');
+                $smsErrorParam = '&sms_error=' . urlencode('Message sent');
             }
         } catch (Exception $e) {
-            error_log('SMS: ' . $e->getMessage());
-            $smsErrorParam = '&sms_error=' . urlencode($e->getMessage());
+            $smsErrorParam = '&sms_error=' . urlencode('Message not sent');
         }
     }
     header('Location: ' . $redirect . '?success=1&code=' . urlencode($claim_code) . $smsErrorParam);

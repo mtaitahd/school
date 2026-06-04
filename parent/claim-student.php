@@ -69,9 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['access_code'])) {
                                 $access_record['student_id']
                             );
                             if (is_array($smsResult) && !$smsResult['success']) {
-                                $success .= ' SMS failed: ' . $smsResult['message'];
+                                $success .= ' Message not sent';
                             } else {
-                                $success .= ' SMS confirmation sent to your phone.';
+                                $success .= ' Message sent';
                             }
                         }
                     } else {

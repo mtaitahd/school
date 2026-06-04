@@ -75,16 +75,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $smsResult = $smsService->sendSMS($student['parent_phone'], $message, 'parent_link', 'parent', $student_id);
             
             if ($smsResult['success']) {
-                if (!empty($smsResult['queued'])) {
-                    $success = "SMS request accepted; delivery pending. Please verify the parent phone number.";
-                } else {
-                    $success = "SMS sent successfully to parent";
-                }
+                $success = "Message sent";
             } else {
-                $error = "Failed to send SMS: " . $smsResult['message'];
+                $error = "Message not sent";
             }
         } catch (Exception $e) {
-            $error = "Failed to send SMS: " . $e->getMessage();
+            $error = "Message not sent";
         }
     } else {
         $error = "Student has no claim code or parent phone number";
@@ -180,7 +176,7 @@ if (isset($_GET['edit'])) {
         <script>
             Swal.fire({
                 icon: 'warning',
-                title: 'SMS Notice',
+                title: 'Notice',
                 text: <?php echo json_encode($_GET['sms_error']); ?>,
                 toast: true,
                 position: 'top-end',
@@ -195,7 +191,7 @@ if (isset($_GET['edit'])) {
         <script>
             Swal.fire({
                 icon: 'success',
-                title: 'SMS Sent',
+                title: 'Message Sent',
                 text: <?php echo json_encode($success); ?>,
                 toast: true,
                 position: 'top-end',
@@ -210,7 +206,7 @@ if (isset($_GET['edit'])) {
         <script>
             Swal.fire({
                 icon: 'error',
-                title: 'SMS Failed',
+                title: 'Message Not Sent',
                 text: <?php echo json_encode($error); ?>,
                 toast: true,
                 position: 'top-end',

@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['claim_code'])) {
                                 }
                             } catch (Exception $e) {
                                 error_log("SMS confirmation failed: " . $e->getMessage());
-                                $sms_error = '&sms_error=' . urlencode('Failed to send SMS confirmation.');
+                                $sms_error = '&sms_error=' . urlencode('Message not sent');
                             }
                         }
                         
