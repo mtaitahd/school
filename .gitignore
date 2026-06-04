@@ -2,3 +2,4 @@ error_log
 uploads/
 logs/
 .cpanel.yml
+.env
