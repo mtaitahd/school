@@ -58,7 +58,7 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
     }
     $appUrl = preg_replace('/^http:/i', 'https:', $rawAppUrl);
 
-    $user = $database->fetchOne("SELECT first_name, last_name, email FROM `users` WHERE user_id = ?", [$parentId]);
+    $user = $database->fetchOne("SELECT first_name, last_name, email, parent_phone FROM `users` WHERE user_id = ?", [$parentId]);
     $firstName = $user['first_name'] ?? 'Parent';
     $lastName = $user['last_name'] ?? 'User';
     $userEmail = trim($user['email'] ?? '');
@@ -95,11 +95,11 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
                 'redirect_url' => $appUrl . '/payment-status?ref=' . $reference,
                 'cancel_url' => $appUrl . '/payment?cancelled=1',
             ],
-            'phone_number' => $phone ?: null,
             'customer' => [
                 'firstname' => $firstName,
                 'lastname' => $lastName,
                 'email' => $userEmail,
+                'phone' => $phone ?: ($user['parent_phone'] ?? ''),
                 'address' => 'Dar es Salaam',
                 'city' => 'Dar es Salaam',
                 'state' => 'DSM',
@@ -109,6 +109,11 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
             'webhook_url' => $webhookUrl,
             'metadata' => $metadata,
         ];
+        if ($phone !== '') {
+            $payload['phone_number'] = $phone;
+        } elseif (!empty($user['parent_phone'])) {
+            $payload['phone_number'] = $user['parent_phone'];
+        }
     } else {
         $payload = [
             'payment_type' => 'mobile',
@@ -150,8 +155,11 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
 
     if ($curlError || $httpCode >= 400 || !$data) {
         $errorMsg = $curlError;
+        if ($response && !$data) {
+            $data = ['raw_response' => $response];
+        }
         if (!$errorMsg && $data) {
-            $errorMsg = $data['message'] ?? $data['error'] ?? ('HTTP ' . $httpCode);
+            $errorMsg = $data['message'] ?? $data['error'] ?? json_encode($data['errors'] ?? $data) ?: ('HTTP ' . $httpCode);
         }
         if (!$errorMsg) {
             $errorMsg = 'Payment API error (HTTP ' . $httpCode . ')';
