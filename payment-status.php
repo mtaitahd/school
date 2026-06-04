@@ -255,11 +255,16 @@ function showSwal(data) {
         cancelButtonText: '<i class="fas fa-ban me-1"></i> Cancel Payment',
         cancelButtonColor: '#dc2626',
         focusConfirm: false,
-        allowOutsideClick: false,
-        allowEscapeKey: !pending,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
         didOpen: () => {
             currentSwal = Swal;
             if (pending && !isManual) startPolling();
+        },
+        didClose: () => {
+            if (pending) {
+                window.location.href = 'payment';
+            }
         },
         preConfirm: () => {
             window.location.href = 'parent/dashboard.php';

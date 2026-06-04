@@ -44,33 +44,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($paymentMethod === 'snippe') {
         if ($submethod === 'card') {
-            $result = pay_create_snippe_payment($parentId, '', $emailAddr, $paymentType);
-            if ($result['success']) {
-                if ($result['payment_url']) {
-                    header('Location: ' . $result['payment_url']);
-                    exit;
-                }
-                header('Location: payment-status.php?ref=' . urlencode($result['reference']));
+            require_once __DIR__ . '/php/includes/SnippeCardPaymentService.php';
+            $service = new SnippeCardPaymentService($database);
+            $result = $service->createPayment($parentId, $emailAddr, $paymentType, $customAmount);
+            if ($result['success'] && $result['payment_url']) {
+                header('Location: ' . $result['payment_url']);
                 exit;
-            } else {
-                $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
             }
+            $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
         } else {
             $normalized = pay_normalize_phone($phone);
             if (!preg_match('/^255\d{9}$/', $normalized)) {
                 $error = 'Tafadhali ingiza namba halali ya simu (Tanzania)';
-            } else {
-                $result = pay_create_snippe_payment($parentId, $normalized, '', $paymentType);
-                if ($result['success']) {
-                    if ($result['payment_url']) {
-                        header('Location: ' . $result['payment_url']);
-                        exit;
-                    }
-                    header('Location: payment-status.php?ref=' . urlencode($result['reference']));
-                    exit;
                 } else {
-                    $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
-                }
+                    $result = pay_create_snippe_payment($parentId, $normalized, '', $paymentType);
+                    if ($result['success']) {
+                        if ($result['payment_url']) {
+                            header('Location: ' . $result['payment_url']);
+                            exit;
+                        }
+                        header('Location: payment-status?ref=' . urlencode($result['reference']));
+                        exit;
+                    } else {
+                        $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
+                    }
             }
         }
     } elseif ($paymentMethod === 'manual') {
@@ -81,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Tafadhali ingiza namba ya simu uliyotumia';
         } else {
             $result = pay_create_manual_payment($parentId, $manualPhone, $transactionId);
-            header('Location: payment-status.php?ref=' . urlencode($result['reference']));
+            header('Location: payment-status?ref=' . urlencode($result['reference']));
             exit;
         }
     }

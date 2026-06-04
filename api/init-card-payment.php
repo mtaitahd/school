@@ -5,6 +5,7 @@ require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/auth.php';
 require_once __DIR__ . '/../php/includes/payment.php';
+require_once __DIR__ . '/../php/includes/SnippeCardPaymentService.php';
 
 header('Content-Type: application/json');
 sec_send_headers();
@@ -31,12 +32,11 @@ if (!csrf_verify($token)) {
 }
 
 $paymentType = $_POST['payment_type'] ?? 'subscription';
-$email = $_POST['email'] ?? '';
+$email = trim($_POST['email'] ?? '');
+$customAmount = (float) ($_POST['amount'] ?? 0);
 
-$_POST['payment_submethod'] = 'card';
-$_POST['amount'] = (float) ($_POST['amount'] ?? 0);
-
-$result = pay_create_snippe_payment($parentId, '', $email, $paymentType);
+$service = new SnippeCardPaymentService($database);
+$result = $service->createPayment($parentId, $email, $paymentType, $customAmount);
 
 if ($result['success']) {
     echo json_encode([
@@ -48,6 +48,6 @@ if ($result['success']) {
     http_response_code(400);
     echo json_encode([
         'ok' => false,
-        'error' => $result['error'] ?? 'Payment initiation failed',
+        'error' => $result['error'],
     ]);
 }
