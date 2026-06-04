@@ -445,7 +445,7 @@ $dashboard_page_title = 'Topup';
                     </label>
                     <div class="phone-prefix mb-2">
                         <span class="prefix">+255</span>
-                        <input type="tel" class="form-control form-control-lg" id="modalPhone" placeholder="7XX XXX XXX" maxlength="9" autocomplete="off">
+                        <input type="tel" class="form-control form-control-lg" id="modalPhone" placeholder="XX XXX XXXX" maxlength="10" autocomplete="off">
                     </div>
                     <div class="small text-muted mb-3">
                         <i class="fas fa-info-circle me-1"></i> Weka namba bila <strong>0</strong> au <strong>+255</strong>
@@ -508,15 +508,15 @@ function submitMobilePayment() {
     document.getElementById('paymentForm').submit();
 }
 
-// Auto-format phone: only digits, max 9
+// Format phone: digits + space grouping (space doesn't count toward the 9-digit limit)
 document.getElementById('modalPhone').addEventListener('input', function () {
-    this.value = this.value.replace(/\D/g, '').slice(0, 9);
+    const digits = this.value.replace(/\D/g, '').slice(0, 9);
     this.classList.remove('is-invalid');
 
-    // Visual grouping: 7XX XXX XXX
-    const v = this.value;
-    if (v.length > 5) {
-        this.value = v.slice(0, 5) + ' ' + v.slice(5);
+    if (digits.length > 5) {
+        this.value = digits.slice(0, 5) + ' ' + digits.slice(5);
+    } else {
+        this.value = digits;
     }
 });
 

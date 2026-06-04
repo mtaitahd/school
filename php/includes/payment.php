@@ -55,8 +55,11 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
 
     $user = $database->fetchOne("SELECT first_name, last_name, email FROM `users` WHERE user_id = ?", [$parentId]);
     $firstName = $user['first_name'] ?? 'Parent';
-    $lastName = $user['last_name'] ?? '';
-    $userEmail = $user['email'] ?? $email;
+    $lastName = $user['last_name'] ?? 'User';
+    $userEmail = trim($user['email'] ?? '');
+    if ($userEmail === '') {
+        $userEmail = $email !== '' ? $email : 'parent' . $parentId . '@smartmathconner.co.tz';
+    }
 
     if ($method !== 'card') {
         $phone = pay_normalize_phone($phone);
@@ -67,6 +70,16 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')",
         [$parentId, $amount, SUBSCRIPTION_CURRENCY, $method === 'card' ? 'snippe_card' : 'snippe', $type, $phone, $userEmail, $reference]
     );
+
+    $webhookUrl = $appUrl . '/webhooks/snippe';
+    // Force HTTPS for webhook URL
+    $webhookUrl = preg_replace('/^http:/i', 'https:', $webhookUrl);
+
+    $metadata = [
+        'parent_id' => (string) $parentId,
+        'payment_id' => (string) $paymentId,
+        'type' => $type,
+    ];
 
     if ($method === 'card') {
         $payload = [
@@ -81,20 +94,15 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
             'customer' => [
                 'firstname' => $firstName,
                 'lastname' => $lastName,
-                'email' => $userEmail ?: $email,
+                'email' => $userEmail,
                 'address' => 'Dar es Salaam',
                 'city' => 'Dar es Salaam',
                 'state' => 'DSM',
                 'postcode' => '14101',
                 'country' => 'TZ',
             ],
-            'webhook_url' => $appUrl . '/webhooks/snippe',
-            'reference' => $reference,
-            'metadata' => [
-                'parent_id' => (string) $parentId,
-                'payment_id' => (string) $paymentId,
-                'type' => $type,
-            ],
+            'webhook_url' => $webhookUrl,
+            'metadata' => $metadata,
         ];
     } else {
         $payload = [
@@ -107,15 +115,10 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
             'customer' => [
                 'firstname' => $firstName,
                 'lastname' => $lastName,
-                'email' => $userEmail ?: $email,
+                'email' => $userEmail,
             ],
-            'webhook_url' => $appUrl . '/webhooks/snippe',
-            'reference' => $reference,
-            'metadata' => [
-                'parent_id' => (string) $parentId,
-                'payment_id' => (string) $paymentId,
-                'type' => $type,
-            ],
+            'webhook_url' => $webhookUrl,
+            'metadata' => $metadata,
         ];
     }
 
@@ -267,11 +270,12 @@ function pay_process_webhook(): void {
     }
 
     $payment = $database->fetchOne(
-        "SELECT * FROM `payments` WHERE reference = ? LIMIT 1",
-        [$reference]
+        "SELECT * FROM `payments` WHERE reference = ? OR transaction_id = ? LIMIT 1",
+        [$reference, $reference]
     );
 
     if (!$payment) {
+        error_log('Snippe webhook: payment not found for reference/transaction_id ' . $reference);
         http_response_code(404);
         exit('Payment not found');
     }
