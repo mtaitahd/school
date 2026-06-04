@@ -151,5 +151,54 @@ function ensure_schema_v2($database): void {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
 
+    // Parent-student links table (migrations_v3)
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS parent_student_links (
+            link_id INT AUTO_INCREMENT PRIMARY KEY,
+            parent_id INT NOT NULL,
+            student_id INT NOT NULL,
+            access_code VARCHAR(20) NOT NULL,
+            is_active TINYINT(1) DEFAULT 1,
+            linked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (parent_id) REFERENCES users(user_id) ON DELETE CASCADE,
+            FOREIGN KEY (student_id) REFERENCES users(user_id) ON DELETE CASCADE,
+            UNIQUE KEY unique_parent_student (parent_id, student_id),
+            INDEX idx_access_code (access_code)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    // Assignments table (migrations_v3)
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS assignments (
+            assignment_id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            description TEXT NULL,
+            due_date DATE NULL,
+            assignment_type ENUM('activity', 'worksheet', 'quiz', 'custom') DEFAULT 'activity',
+            created_by INT NOT NULL,
+            activity_id INT NULL,
+            is_active TINYINT(1) DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE CASCADE,
+            INDEX idx_activity (activity_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
+    // Student assignments table (migrations_v3)
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS student_assignments (
+            student_assignment_id INT AUTO_INCREMENT PRIMARY KEY,
+            student_id INT NOT NULL,
+            assignment_id INT NOT NULL,
+            status ENUM('pending', 'submitted', 'graded') DEFAULT 'pending',
+            score INT NULL,
+            notes TEXT NULL,
+            assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            submitted_at TIMESTAMP NULL,
+            FOREIGN KEY (student_id) REFERENCES users(user_id) ON DELETE CASCADE,
+            FOREIGN KEY (assignment_id) REFERENCES assignments(assignment_id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+
     $done = true;
 }
