@@ -1,8 +1,8 @@
 <?php
-require_once '../php/includes/session.php';
-require_once '../php/includes/security.php';
-require_once '../php/includes/csrf.php';
-require_once '../php/db_connection.php';
+require_once '__DIR__ . '/../php/includes/session.php';
+require_once '__DIR__ . '/../php/includes/security.php';
+require_once '__DIR__ . '/../php/includes/csrf.php';
+require_once '__DIR__ . '/../php/db_connection.php';
 
 sec_require_rate_limit();
 
@@ -40,7 +40,7 @@ $database->execute(
     [$parent_id]
 );
 
-require_once '../php/includes/lang.php';
+require_once '__DIR__ . '/../php/includes/lang.php';
 $current_lang = $_SESSION['lang'] ?? 'en';
 $base_path = '../';
 $dashboard_role = 'parent';

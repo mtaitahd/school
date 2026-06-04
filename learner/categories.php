@@ -1,7 +1,7 @@
 <?php
-require_once '../php/db_connection.php';
-require_once '../php/includes/lang.php';
-require_once '../php/includes/learner-session.php';
+require_once '__DIR__ . '/../php/db_connection.php';
+require_once '__DIR__ . '/../php/includes/lang.php';
+require_once '__DIR__ . '/../php/includes/learner-session.php';
 
 if (!empty($_SERVER['REQUEST_URI']) && preg_match('#/learner/learner/#', $_SERVER['REQUEST_URI'])) {
     $fixed = preg_replace('#/learner/learner/#', '/learner/', $_SERVER['REQUEST_URI']);
@@ -15,7 +15,7 @@ $active_nav = 'learning';
 $lang_page = 'categories.php';
 $use_learner_dashboard = $learner_logged_in;
 if ($use_learner_dashboard) {
-    require_once '../php/includes/auth.php';
+    require_once '__DIR__ . '/../php/includes/auth.php';
     $dashboard_role = 'learner';
     $sidebar_active = 'learn';
 }

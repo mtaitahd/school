@@ -1,9 +1,9 @@
 <?php
-require_once '../php/includes/security.php';
+require_once '__DIR__ . '/../php/includes/security.php';
 if (session_status() === PHP_SESSION_NONE) {
     sec_session_start();
 }
-require_once '../php/db_connection.php';
+require_once '__DIR__ . '/../php/db_connection.php';
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 $all_users = $database->fetchAll("SELECT * FROM users ORDER BY created_at DESC");
 
-require_once '../php/includes/lang.php';
+require_once '__DIR__ . '/../php/includes/lang.php';
 $base_path = '../';
 $dashboard_role = 'admin';
 $sidebar_active = 'users';
