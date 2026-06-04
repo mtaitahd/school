@@ -226,14 +226,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                             <td><small><?= ucfirst($pmt['payment_type']) ?></small></td>
                             <td><code style="font-size:0.8rem;"><?= htmlspecialchars($pmt['transaction_id'] ?? '-') ?></code></td>
                             <td>
-                                <?php $statusClass = match($pmt['status']) {
-                                    'completed' => 'bg-success',
-                                    'pending' => 'bg-warning text-dark',
-                                    'failed' => 'bg-danger',
-                                    'manual_review' => 'bg-info text-dark',
-                                    default => 'bg-secondary'
-                                }; ?>
-                                <span class="badge <?= $statusClass ?>"><?= ucfirst(str_replace('_', ' ', $pmt['status'])) ?></span>
+                                <span class="small text-muted"><?= ucfirst(str_replace('_', ' ', $pmt['status'])) ?></span>
                             </td>
                             <td><small><?= date('d M Y H:i', strtotime($pmt['created_at'])) ?></small></td>
                         </tr>
