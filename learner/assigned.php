@@ -70,7 +70,7 @@ $assignments = $database->fetchAll(
             <div class="alert alert-danger py-2 px-4 mb-4" style="border-radius:10px;border:none;font-size:0.9rem;">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 <?php echo $current_lang === 'sw' ? 'Huduma yako imezuiwa. Tafadhali lipa 1,500 TZS ili kuendelea na masomo.' : 'Your subscription has expired. Please pay 1,500 TZS to continue learning.'; ?>
-                <a href="../payment.php" class="btn btn-danger btn-sm fw-bold ms-2 px-3" style="border-radius:50px;"><?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?></a>
+                <a href="../payment" class="btn btn-danger btn-sm fw-bold ms-2 px-3" style="border-radius:50px;"><?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?></a>
             </div>
         <?php endif; ?>
 

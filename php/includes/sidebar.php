@@ -12,55 +12,55 @@ switch ($role) {
     case 'teacher':
         $subtitle = 'TEACHER';
         $items = [
-            ['id' => 'dashboard', 'href' => 'dashboard.php', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
-            ['id' => 'classes', 'href' => 'manage-classes.php', 'icon' => 'fa-chalkboard-teacher', 'label' => 'Classes'],
-            ['id' => 'learners', 'href' => 'learners.php', 'icon' => 'fa-users', 'label' => 'Learners'],
-            ['id' => 'assign', 'href' => 'assign-activity.php', 'icon' => 'fa-tasks', 'label' => 'Assign Activity'],
-            ['id' => 'progress', 'href' => 'learners.php', 'icon' => 'fa-chart-line', 'label' => 'Learner Progress'],
-            ['id' => 'lesson-plans', 'href' => 'lesson-plans.php', 'icon' => 'fa-book-open', 'label' => 'Lesson Plans'],
-            ['id' => 'all-activities', 'href' => 'all-activities.php', 'icon' => 'fa-list', 'label' => 'All Activities'],
-            ['id' => 'activity-library', 'href' => 'activity-library.php', 'icon' => 'fa-th-large', 'label' => 'Activity Summary'],
+            ['id' => 'dashboard', 'href' => 'dashboard', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
+            ['id' => 'classes', 'href' => 'manage-classes', 'icon' => 'fa-chalkboard-teacher', 'label' => 'Classes'],
+            ['id' => 'learners', 'href' => 'learners', 'icon' => 'fa-users', 'label' => 'Learners'],
+            ['id' => 'assign', 'href' => 'assign-activity', 'icon' => 'fa-tasks', 'label' => 'Assign Activity'],
+            ['id' => 'progress', 'href' => 'learners', 'icon' => 'fa-chart-line', 'label' => 'Learner Progress'],
+            ['id' => 'lesson-plans', 'href' => 'lesson-plans', 'icon' => 'fa-book-open', 'label' => 'Lesson Plans'],
+            ['id' => 'all-activities', 'href' => 'all-activities', 'icon' => 'fa-list', 'label' => 'All Activities'],
+            ['id' => 'activity-library', 'href' => 'activity-library', 'icon' => 'fa-th-large', 'label' => 'Activity Summary'],
         ];
         break;
     case 'parent':
         $subtitle = 'PARENT';
         $items = [
-            ['id' => 'dashboard', 'href' => 'dashboard.php', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
-            ['id' => 'claim', 'href' => 'dashboard.php?claim=1', 'icon' => 'fa-key', 'label' => 'Claim Child'],
-            ['id' => 'topup', 'href' => app_in_role_folder($role) ? '../payment.php' : 'payment.php', 'icon' => 'fa-wallet', 'label' => 'Payment'],
-            ['id' => 'guide', 'href' => 'guide.php?lang=' . urlencode($lang), 'icon' => 'fa-book-open', 'label' => 'Parent Guide'],
+            ['id' => 'dashboard', 'href' => 'dashboard', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
+            ['id' => 'claim', 'href' => 'dashboard?claim=1', 'icon' => 'fa-key', 'label' => 'Claim Child'],
+            ['id' => 'topup', 'href' => app_in_role_folder($role) ? '../payment' : 'payment', 'icon' => 'fa-wallet', 'label' => 'Payment'],
+            ['id' => 'guide', 'href' => 'guide?lang=' . urlencode($lang), 'icon' => 'fa-book-open', 'label' => 'Parent Guide'],
         ];
         break;
     case 'learner':
         $subtitle = 'LEARNER';
         $items = [
-            ['id' => 'dashboard', 'href' => 'dashboard.php?lang=' . urlencode($lang), 'icon' => 'fa-star', 'label' => 'My Corner'],
-            ['id' => 'learn', 'href' => 'categories.php?lang=' . urlencode($lang), 'icon' => 'fa-play-circle', 'label' => 'Start Learning'],
-            ['id' => 'assigned', 'href' => 'assigned.php?lang=' . urlencode($lang), 'icon' => 'fa-clipboard-list', 'label' => 'Assigned Activities'],
+            ['id' => 'dashboard', 'href' => 'dashboard?lang=' . urlencode($lang), 'icon' => 'fa-star', 'label' => 'My Corner'],
+            ['id' => 'learn', 'href' => 'categories?lang=' . urlencode($lang), 'icon' => 'fa-play-circle', 'label' => 'Start Learning'],
+            ['id' => 'assigned', 'href' => 'assigned?lang=' . urlencode($lang), 'icon' => 'fa-clipboard-list', 'label' => 'Assigned Activities'],
         ];
         break;
     case 'admin':
         $subtitle = 'ADMIN';
         $items = [
-            ['id' => 'dashboard', 'href' => 'dashboard.php', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
-            ['id' => 'announcements', 'href' => 'announcements.php', 'icon' => 'fa-bullhorn', 'label' => 'Announcements'],
-            ['id' => 'announcement-ticker', 'href' => 'announcement-ticker.php', 'icon' => 'fa-scroll', 'label' => 'Ticker Messages'],
-            ['id' => 'hero-slides', 'href' => 'hero-slides.php', 'icon' => 'fa-images', 'label' => 'Hero Slides'],
-            ['id' => 'notes', 'href' => 'notes.php', 'icon' => 'fa-sticky-note', 'label' => 'Notes Board'],
-            ['id' => 'events', 'href' => 'events.php', 'icon' => 'fa-calendar-alt', 'label' => 'Events Calendar'],
-            ['id' => 'governance', 'href' => 'governance.php', 'icon' => 'fa-users-cog', 'label' => 'Governance'],
-            ['id' => 'users', 'href' => 'users.php', 'icon' => 'fa-users-cog', 'label' => 'Manage Users'],
-            ['id' => 'modules', 'href' => 'modules.php', 'icon' => 'fa-cubes', 'label' => 'Modules'],
-            ['id' => 'payments', 'href' => 'payments.php', 'icon' => 'fa-credit-card', 'label' => 'Payments'],
-            ['id' => 'upload', 'href' => 'upload-content.php', 'icon' => 'fa-cloud-upload-alt', 'label' => 'Upload Content'],
-            ['id' => 'logs', 'href' => 'logs.php', 'icon' => 'fa-clipboard-list', 'label' => 'Error Logs'],
+            ['id' => 'dashboard', 'href' => 'dashboard', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
+            ['id' => 'announcements', 'href' => 'announcements', 'icon' => 'fa-bullhorn', 'label' => 'Announcements'],
+            ['id' => 'announcement-ticker', 'href' => 'announcement-ticker', 'icon' => 'fa-scroll', 'label' => 'Ticker Messages'],
+            ['id' => 'hero-slides', 'href' => 'hero-slides', 'icon' => 'fa-images', 'label' => 'Hero Slides'],
+            ['id' => 'notes', 'href' => 'notes', 'icon' => 'fa-sticky-note', 'label' => 'Notes Board'],
+            ['id' => 'events', 'href' => 'events', 'icon' => 'fa-calendar-alt', 'label' => 'Events Calendar'],
+            ['id' => 'governance', 'href' => 'governance', 'icon' => 'fa-users-cog', 'label' => 'Governance'],
+            ['id' => 'users', 'href' => 'users', 'icon' => 'fa-users-cog', 'label' => 'Manage Users'],
+            ['id' => 'modules', 'href' => 'modules', 'icon' => 'fa-cubes', 'label' => 'Modules'],
+            ['id' => 'payments', 'href' => 'payments', 'icon' => 'fa-credit-card', 'label' => 'Payments'],
+            ['id' => 'upload', 'href' => 'upload-content', 'icon' => 'fa-cloud-upload-alt', 'label' => 'Upload Content'],
+            ['id' => 'logs', 'href' => 'logs', 'icon' => 'fa-clipboard-list', 'label' => 'Error Logs'],
         ];
         break;
 }
 
-$logout_href = app_in_role_folder($role) ? '../logout.php' : 'logout.php';
+$logout_href = app_in_role_folder($role) ? '../logout' : 'logout';
 $logo_src = app_in_role_folder($role) ? '../assets/images/logo.png' : 'assets/images/logo.png';
-$home_href = app_in_role_folder($role) ? '../index.php?lang=' . urlencode($lang) : 'index.php?lang=' . urlencode($lang);
+$home_href = app_in_role_folder($role) ? '../index?lang=' . urlencode($lang) : 'index?lang=' . urlencode($lang);
 $role_label = ucfirst($role);
 ?><ul class="navbar-nav sidebar sidebar-light accordion" id="accordionSidebar">
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?php echo htmlspecialchars($home_href); ?>">

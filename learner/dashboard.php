@@ -78,7 +78,7 @@ $recent_assignments = $database->fetchAll(
                         <?php echo $current_lang === 'sw' ? 'Muda wa majaribio umeisha. Tafadhali lipa ili kuendelea.' : 'Trial period has ended. Please subscribe to continue.'; ?>
                     <?php endif; ?>
                 </div>
-                <a href="../payment.php" class="btn btn-warning btn-sm fw-bold px-4" style="border-radius:50px;">
+                <a href="../payment" class="btn btn-warning btn-sm fw-bold px-4" style="border-radius:50px;">
                     <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Subscribe Now'; ?> — 1,500 TZS
                 </a>
             </div>
@@ -89,7 +89,7 @@ $recent_assignments = $database->fetchAll(
                     <strong><?php echo $current_lang === 'sw' ? 'Uanachama Unakaribia Kuisha' : 'Subscription Expiring'; ?></strong> —
                     <?php echo $current_lang === 'sw' ? 'Siku zilizobaki' : 'Days remaining'; ?>: <strong><?php echo $trialInfo['days_remaining']; ?></strong>
                 </div>
-                <a href="../payment.php" class="btn btn-outline-warning btn-sm fw-bold px-3" style="border-radius:50px;">
+                <a href="../payment" class="btn btn-outline-warning btn-sm fw-bold px-3" style="border-radius:50px;">
                     <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Jaza Salio' : 'Topup'; ?>
                 </a>
             </div>
@@ -100,7 +100,7 @@ $recent_assignments = $database->fetchAll(
                     <strong><?php echo $current_lang === 'sw' ? 'Huduma Imezuiwa' : 'Access Blocked'; ?></strong> —
                     <?php echo $current_lang === 'sw' ? 'Tafadhali lipa 1,500 TZS ili kuendelea.' : 'Please pay 1,500 TZS to continue.'; ?>
                 </div>
-                <a href="../payment.php" class="btn btn-danger btn-sm fw-bold px-4" style="border-radius:50px;">
+                <a href="../payment" class="btn btn-danger btn-sm fw-bold px-4" style="border-radius:50px;">
                     <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?>
                 </a>
             </div>

@@ -127,7 +127,7 @@ include '../php/includes/dashboard-start.php';
                         <?= $current_lang === 'sw' ? 'Muda wa majaribio umeisha. Tafadhali lipa ili kuendelea.' : 'Trial period has ended. Please subscribe to continue.' ?>
                     <?php endif; ?>
                 </div>
-                <a href="../payment.php" class="btn btn-warning btn-sm fw-bold px-4" style="border-radius:50px;">
+                <a href="../payment" class="btn btn-warning btn-sm fw-bold px-4" style="border-radius:50px;">
                     <i class="fas fa-wallet me-1"></i> <?= $current_lang === 'sw' ? 'Lipa Sasa' : 'Subscribe Now' ?> — 1,500 TZS
                 </a>
             </div>
@@ -141,7 +141,7 @@ include '../php/includes/dashboard-start.php';
                         <span class="ms-2 badge bg-warning text-dark"><?= $current_lang === 'sw' ? 'Itaisha hivi karibuni' : 'Expiring soon' ?></span>
                     <?php endif; ?>
                 </div>
-                <a href="../payment.php" class="btn btn-outline-success btn-sm fw-bold px-3" style="border-radius:50px;">
+                <a href="../payment" class="btn btn-outline-success btn-sm fw-bold px-3" style="border-radius:50px;">
                     <i class="fas fa-wallet me-1"></i> <?= $current_lang === 'sw' ? 'Jaza Salio' : 'Topup' ?>
                 </a>
             </div>
@@ -152,7 +152,7 @@ include '../php/includes/dashboard-start.php';
                     <strong><?= $current_lang === 'sw' ? 'Uanachama Umeisha' : 'Subscription Expired' ?></strong> —
                     <?= $current_lang === 'sw' ? 'Tafadhali lipa 1,500 TZS ili kuendelea kutumia huduma.' : 'Please pay 1,500 TZS to continue accessing the service.' ?>
                 </div>
-                <a href="../payment.php" class="btn btn-danger btn-sm fw-bold px-4" style="border-radius:50px;">
+                <a href="../payment" class="btn btn-danger btn-sm fw-bold px-4" style="border-radius:50px;">
                     <i class="fas fa-wallet me-1"></i> <?= $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now' ?>
                 </a>
             </div>
