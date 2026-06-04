@@ -1,68 +1,71 @@
 <?php
-session_start();
+require_once 'php/includes/session.php';
+require_once 'php/includes/security.php';
+require_once 'php/includes/csrf.php';
+require_once 'php/includes/validator.php';
 require_once 'php/db_connection.php';
+
+sec_send_headers();
 
 $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirm_password = $_POST['confirm_password'] ?? '';
-    $first_name = trim($_POST['first_name'] ?? '');
-    $last_name = trim($_POST['last_name'] ?? '');
-    $role = $_POST['role'] ?? 'parent';
-    
-    // Validation
-    if (empty($username) || empty($password) || empty($first_name) || empty($last_name)) {
-        $error = 'Please fill in all required fields.';
-    } elseif (strlen($username) < 3) {
-        $error = 'Username must be at least 3 characters long.';
-    } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters long.';
-    } elseif ($password !== $confirm_password) {
-        $error = 'Passwords do not match.';
-    } elseif (!in_array($role, ['teacher', 'parent'])) {
-        $error = 'Invalid role selected.';
-    } else {
-        // Check if username already exists
-        $existing_user = $database->fetchOne(
-            "SELECT user_id FROM users WHERE username = ?",
-            [$username]
-        );
-        
-        if ($existing_user) {
-            $error = 'Username already exists. Please choose another one.';
+    csrf_require();
+
+    try {
+        $username = Validator::username($_POST['username'] ?? '');
+        $email = Validator::email($_POST['email'] ?? '');
+        $password = Validator::password($_POST['password'] ?? '');
+        $confirm_password = $_POST['confirm_password'] ?? '';
+        $first_name = Validator::string($_POST['first_name'] ?? '', 1, 100);
+        $last_name = Validator::string($_POST['last_name'] ?? '', 1, 100);
+        $role = Validator::inArray($_POST['role'] ?? 'parent', ['teacher', 'parent']);
+    } catch (InvalidArgumentException $e) {
+        $error = $e->getMessage();
+    }
+
+    if (empty($error)) {
+        if ($password !== $confirm_password) {
+            $error = 'Passwords do not match.';
         } else {
-            // Check if email already exists (if provided)
-            if (!empty($email)) {
-                $existing_email = $database->fetchOne(
-                    "SELECT user_id FROM users WHERE email = ?",
-                    [$email]
-                );
-                
-                if ($existing_email) {
-                    $error = 'Email already registered. Please use another email or login.';
+            // Check if username already exists
+            $existing_user = $database->fetchOne(
+                "SELECT user_id FROM users WHERE username = ?",
+                [$username]
+            );
+
+            if ($existing_user) {
+                $error = 'Username already exists. Please choose another one.';
+            } else {
+                // Check if email already exists (if provided)
+                if (!empty($email)) {
+                    $existing_email = $database->fetchOne(
+                        "SELECT user_id FROM users WHERE email = ?",
+                        [$email]
+                    );
+
+                    if ($existing_email) {
+                        $error = 'Email already registered. Please use another email or login.';
+                    }
                 }
-            }
-            
-            if (empty($error)) {
-                // Hash password
-                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                
-                // Insert new user
-                $user_id = $database->insert(
-                    "INSERT INTO users (username, email, password, role, first_name, last_name) VALUES (?, ?, ?, ?, ?, ?)",
-                    [$username, $email ?: null, $hashed_password, $role, $first_name, $last_name]
-                );
-                
-                if ($user_id) {
-                    $success = 'Registration successful! You can now login.';
-                    // Clear form data
-                    $_POST = array();
-                } else {
-                    $error = 'Registration failed. Please try again.';
+
+                if (empty($error)) {
+                    // Hash password
+                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+                    // Insert new user
+                    $user_id = $database->insert(
+                        "INSERT INTO users (username, email, password, role, first_name, last_name) VALUES (?, ?, ?, ?, ?, ?)",
+                        [$username, $email ?: null, $hashed_password, $role, $first_name, $last_name]
+                    );
+
+                    if ($user_id) {
+                        $success = 'Registration successful! You can now login.';
+                        $_POST = [];
+                    } else {
+                        $error = 'Registration failed. Please try again.';
+                    }
                 }
             }
         }
@@ -107,6 +110,7 @@ include 'php/includes/auth-split-start.php';
                 <?php endif; ?>
 
                 <form method="POST" action="" class="auth-form">
+                    <?php echo csrf_field(); ?>
                     <div class="auth-form-grid">
                         <div class="form-group-child">
                             <label class="form-label-child" for="first_name">First Name</label>

@@ -1,6 +1,10 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
+
+sec_require_rate_limit();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: index');
@@ -35,6 +39,7 @@ if (isset($_GET['delete'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    csrf_require();
     $event_title = trim($_POST['event_title'] ?? '');
     $event_date = trim($_POST['event_date'] ?? '');
     $event_time = trim($_POST['event_time'] ?? '');
@@ -179,6 +184,7 @@ $lang_page = 'events.php';
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="">
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="<?php echo $edit_event ? 'update' : 'create'; ?>">
                 <?php if ($edit_event): ?>
                     <input type="hidden" name="id" value="<?php echo $edit_event['id']; ?>">

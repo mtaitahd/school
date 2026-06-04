@@ -1,8 +1,12 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
 require_once '../php/claim_code_generator.php';
 require_once '../php/sms_service.php';
+
+sec_require_rate_limit();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
     header('Location: login.php');
@@ -16,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || ($_POST['action'] ?? '') !== 'add_s
     header('Location: ' . $redirect);
     exit;
 }
+
+csrf_require();
 
 $username = trim($_POST['username'] ?? '');
 $first_name = trim($_POST['first_name'] ?? '');

@@ -1,11 +1,18 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
+
+sec_require_rate_limit();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: index');
     exit;
 }
+
+$csrf_error = $_SESSION['_csrf_error'] ?? null;
+unset($_SESSION['_csrf_error']);
 
 $upload_dir = __DIR__ . '/../uploads/announcements/';
 if (!is_dir($upload_dir)) {
@@ -78,6 +85,7 @@ if (isset($_GET['delete'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    csrf_require();
     $title = trim($_POST['title'] ?? '');
     $slug_input = trim($_POST['slug'] ?? '');
     $short_description = trim($_POST['short_description'] ?? '');
@@ -200,6 +208,11 @@ $lang_page = 'announcements.php';
         </div>
     </div>
     <div class="card-body">
+        <?php if ($csrf_error): ?>
+            <div class="alert alert-danger py-2 px-3 mb-3 text-center" style="border-radius:10px;font-size:0.9rem;border:none;">
+                <?php echo htmlspecialchars($csrf_error); ?>
+            </div>
+        <?php endif; ?>
         <?php if ($message): ?>
             <div class="alert alert-<?php echo $message_type === 'success' ? 'success' : 'danger'; ?> py-2 px-3 mb-3 text-center" style="border-radius:10px;font-size:0.9rem;border:none;">
                 <?php echo htmlspecialchars($message); ?>
@@ -300,6 +313,7 @@ $lang_page = 'announcements.php';
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="" enctype="multipart/form-data">
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="<?php echo $edit_announcement ? 'update' : 'create'; ?>">
                 <?php if ($edit_announcement): ?>
                     <input type="hidden" name="id" value="<?php echo $edit_announcement['announcement_id']; ?>">

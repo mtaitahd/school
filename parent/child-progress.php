@@ -1,6 +1,13 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
+
+sec_send_headers();
+if (session_status() === PHP_SESSION_NONE) {
+    sec_session_start();
+}
 
 // Check if user is logged in (teacher or parent)
 if (!isset($_SESSION['user_id'])) {
@@ -126,7 +133,7 @@ $activity_assignments = $database->fetchAll("
                     <img src="../assets/images/logo.png" alt="Kona Ya Hisabati Logo" class="navbar-logo">
                     <div class="navbar-brand-text">
                         <span class="brand-main">Kona Ya Hisabati</span>
-                        <span class="brand-subtitle">Jifunze • Furahia • Fanikiwa</span>
+                        <span class="brand-subtitle">Jifunze ï¿½ Furahia ï¿½ Fanikiwa</span>
                     </div>
                 </div>
 
@@ -282,12 +289,12 @@ $activity_assignments = $database->fetchAll("
                     <?php foreach ($assignments as $as): ?>
                     <tr style="border-bottom:1px solid #eee;">
                         <td style="padding:10px;"><?php echo htmlspecialchars($as['title']); ?></td>
-                        <td style="padding:10px;"><?php echo $as['activity_name'] ? htmlspecialchars($as['activity_name']) : '—'; ?></td>
-                        <td style="padding:10px;"><?php echo $as['module_name'] ? htmlspecialchars($as['module_name']) : '—'; ?></td>
+                        <td style="padding:10px;"><?php echo $as['activity_name'] ? htmlspecialchars($as['activity_name']) : 'ï¿½'; ?></td>
+                        <td style="padding:10px;"><?php echo $as['module_name'] ? htmlspecialchars($as['module_name']) : 'ï¿½'; ?></td>
                         <td style="padding:10px;">
                             <span style="background:var(--primary-blue);color:#fff;padding:4px 10px;border-radius:12px;font-size:0.8rem;"><?php echo htmlspecialchars(ucfirst($as['status'])); ?></span>
                         </td>
-                        <td style="padding:10px;"><?php echo $as['due_date'] ? date('M d, Y', strtotime($as['due_date'])) : '—'; ?></td>
+                        <td style="padding:10px;"><?php echo $as['due_date'] ? date('M d, Y', strtotime($as['due_date'])) : 'ï¿½'; ?></td>
                         <td style="padding:10px;">
                             <?php if ($as['activity_id']): ?>
                                 <a href="activity-preview.php?activity_id=<?php echo (int) $as['activity_id']; ?>&child_id=<?php echo $child_id; ?>" 
@@ -330,13 +337,13 @@ $activity_assignments = $database->fetchAll("
                             <?php foreach ($activity_assignments as $aa): ?>
                                 <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 12px;"><?php echo htmlspecialchars($aa['activity_name']); ?></td>
-                                <td style="padding: 12px;"><?php echo htmlspecialchars($aa['module_name'] ?? '—'); ?></td>
+                                <td style="padding: 12px;"><?php echo htmlspecialchars($aa['module_name'] ?? 'ï¿½'); ?></td>
                                 <td style="padding: 12px;">
-                                    <?php echo htmlspecialchars(trim(($aa['teacher_first'] ?? '') . ' ' . ($aa['teacher_last'] ?? '')) ?: '—'); ?>
+                                    <?php echo htmlspecialchars(trim(($aa['teacher_first'] ?? '') . ' ' . ($aa['teacher_last'] ?? '')) ?: 'ï¿½'); ?>
                                 </td>
                                 <td style="padding: 12px;"><?php echo date('M d, Y H:i', strtotime($aa['assigned_at'])); ?></td>
                                 <td style="padding: 12px;"><span style="background: var(--primary-blue); color:#fff; padding:4px 10px; border-radius:10px; font-size:0.8rem;"><?php echo htmlspecialchars(ucfirst($aa['status'])); ?></span></td>
-                                <td style="padding: 12px;"><?php echo !empty($aa['due_date']) ? date('M d, Y', strtotime($aa['due_date'])) : '—'; ?></td>
+                                <td style="padding: 12px;"><?php echo !empty($aa['due_date']) ? date('M d, Y', strtotime($aa['due_date'])) : 'ï¿½'; ?></td>
                                 <td style="padding: 12px;">
                                     <a href="activity-preview.php?activity_id=<?php echo (int) $aa['activity_id']; ?>&child_id=<?php echo $child_id; ?>" 
                                        class="btn-child btn-child-primary" style="min-height:35px;min-width:35px;font-size:0.85rem;padding:8px 12px;display:inline-block;text-decoration:none;">
@@ -457,6 +464,7 @@ $activity_assignments = $database->fetchAll("
             <h2 class="activity-title text-center">Send Note to Teacher</h2>
             <p class="activity-instruction text-center" id="sendNoteTeacherLabel"></p>
             <form method="POST" action="send-note">
+                <?= csrf_field() ?>
                 <input type="hidden" name="child_id" id="note_child_id" value="<?php echo $child_id; ?>">
                 <input type="hidden" name="teacher_id" id="note_teacher_id" value="">
                 <input type="hidden" name="activity_id" id="note_activity_id" value="">

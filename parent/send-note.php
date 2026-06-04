@@ -1,6 +1,10 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
+
+sec_require_rate_limit();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
     header('Location: ../login.php');
@@ -8,6 +12,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
 }
 
 $parent_id = (int) $_SESSION['user_id'];
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: dashboard.php');
+    exit;
+}
+
+csrf_require();
+
 $teacher_id = isset($_POST['teacher_id']) ? intval($_POST['teacher_id']) : 0;
 $child_id = isset($_POST['child_id']) ? intval($_POST['child_id']) : 0;
 $activity_id = isset($_POST['activity_id']) && $_POST['activity_id'] !== '' ? intval($_POST['activity_id']) : null;

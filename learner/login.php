@@ -1,6 +1,11 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
+
+sec_require_rate_limit();
+sec_send_headers();
 
 if (isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'learner') {
     header('Location: dashboard.php');
@@ -10,27 +15,33 @@ if (isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'learner') {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_require();
+
     $username = trim($_POST['username'] ?? '');
-    
+
     if (empty($username)) {
         $error = 'Please enter your username.';
+    } elseif (!sec_login_rate_limit($username)) {
+        $error = 'Too many login attempts. Please try again in 15 minutes.';
     } else {
         // Check for learner account (no password required)
         $learner = $database->fetchOne(
             "SELECT * FROM users WHERE username = ? AND role = 'learner' AND is_active = 1",
             [$username]
         );
-        
+
         if ($learner) {
-            // Set session variables
-            $_SESSION['user_id'] = $learner['user_id'];
+            sec_clear_login_rate_limit($username);
+            sec_session_regenerate();
+            $_SESSION['user_id'] = (int) $learner['user_id'];
             $_SESSION['username'] = $learner['username'];
             $_SESSION['role'] = $learner['role'];
             $_SESSION['first_name'] = $learner['first_name'];
             $_SESSION['last_name'] = $learner['last_name'];
             $_SESSION['profile_image'] = $learner['profile_image'] ?? '';
             $_SESSION['email'] = $learner['email'] ?? '';
-            
+            $_SESSION['_CREATED'] = time();
+
             // Redirect to learning activities
             header('Location: dashboard.php');
             exit;
@@ -68,6 +79,7 @@ include '../php/includes/auth-split-start.php';
             <?php endif; ?>
 
             <form method="POST" action="" class="auth-form">
+                <?php echo csrf_field(); ?>
                 <div class="form-group-child">
                     <label class="form-label-child" for="username">Username</label>
                     <div class="auth-input-wrap">

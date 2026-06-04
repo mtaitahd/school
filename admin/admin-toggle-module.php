@@ -1,11 +1,22 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
 require_once '../php/includes/auth.php';
 
+sec_require_rate_limit();
+
 auth_require_role(['admin'], 'index');
 
-$module_id = (int) ($_GET['module_id'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: dashboard');
+    exit;
+}
+
+csrf_require();
+
+$module_id = (int) ($_POST['module_id'] ?? 0);
 if ($module_id > 0) {
     $module = $database->fetchOne("SELECT is_active FROM modules WHERE module_id = ?", [$module_id]);
     if ($module) {

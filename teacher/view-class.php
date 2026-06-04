@@ -1,6 +1,10 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
+
+sec_require_rate_limit();
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
@@ -25,6 +29,7 @@ if (!$class) {
 
 // Handle student addition
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_student') {
+    csrf_require();
     $student_id = intval($_POST['student_id']);
     
     // Check if student exists

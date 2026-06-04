@@ -1,6 +1,8 @@
 <?php
+require_once 'php/includes/security.php';
+sec_send_headers();
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    sec_session_start();
 }
 require_once 'php/db_connection.php';
 require_once 'php/includes/lang.php';

@@ -1,8 +1,12 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
 require_once '../php/includes/lang.php';
 require_once '../php/includes/auth.php';
+
+sec_require_rate_limit();
 
 auth_require_role(['teacher'], 'login.php');
 
@@ -26,6 +30,7 @@ $activities = $database->fetchAll(
 );
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_require();
     $learner_id = $_POST['learner_id'] ?? '';
     $activity_id = (int) ($_POST['activity_id'] ?? 0);
     $notes = trim($_POST['notes'] ?? '');

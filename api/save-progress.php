@@ -1,8 +1,12 @@
 <?php
-session_start();
-header('Content-Type: application/json');
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
 require_once '../php/includes/migrate.php';
+
+header('Content-Type: application/json');
+sec_send_headers();
 
 ensure_schema_v2($database);
 
@@ -13,6 +17,21 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'learner') {
 }
 
 $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+
+// For JSON requests, verify CSRF via X-CSRF-Token header
+if (empty($input['_csrf_token']) && empty($_POST['_csrf_token'])) {
+    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    if (!csrf_verify($token)) {
+        http_response_code(419);
+        echo json_encode(['ok' => false, 'error' => 'CSRF token validation failed.']);
+        exit;
+    }
+} elseif (!csrf_verify($input['_csrf_token'] ?? $_POST['_csrf_token'] ?? '')) {
+    http_response_code(419);
+    echo json_encode(['ok' => false, 'error' => 'CSRF token validation failed.']);
+    exit;
+}
+
 $user_id = (int) $_SESSION['user_id'];
 $activity_id = (int) ($input['activity_id'] ?? 0);
 $score = min(100, max(0, (int) ($input['score'] ?? 0)));
@@ -52,7 +71,6 @@ if ($completed) {
         [$user_id, $activity_id]
     );
 
-    // Also mark any related student_assignments (assignment entries that reference this activity) as completed
     $database->execute(
         "UPDATE student_assignments sa
          JOIN assignments a ON sa.assignment_id = a.assignment_id
@@ -63,6 +81,3 @@ if ($completed) {
 }
 
 echo json_encode(['ok' => true, 'score' => $score, 'stars' => $stars, 'completed' => (bool) $completed]);
-
-
-

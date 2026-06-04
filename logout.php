@@ -1,19 +1,12 @@
 <?php
-session_start();
+require_once 'php/includes/session.php';
+require_once 'php/includes/security.php';
 
-// Destroy all session data
-$_SESSION = array();
-
-// Delete the session cookie
-if (isset($_COOKIE[session_name()])) {
-    setcookie(session_name(), '', time()-42000, '/');
-}
-
-// Destroy the session
-session_destroy();
-
-// Redirect to home page
+sec_send_headers();
+sec_session_destroy();
 ?>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,4 +19,3 @@ session_destroy();
 <?php
 header('Location: index.php');
 exit;
-?>

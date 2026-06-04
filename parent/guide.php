@@ -1,5 +1,10 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+sec_send_headers();
+if (session_status() === PHP_SESSION_NONE) {
+    sec_session_start();
+}
 require_once '../php/includes/lang.php';
 $current_lang = isset($_GET['lang']) ? $_GET['lang'] : 'en';
 $base_path = '../';

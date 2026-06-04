@@ -1,6 +1,8 @@
 <?php
+require_once __DIR__ . '/security.php';
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/migrate.php';
+sec_send_headers();
 
 if (empty($dashboard_role)) {
     $dashboard_role = auth_role();

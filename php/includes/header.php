@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/security.php';
+sec_send_headers();
+
 $base = $base_path ?? '';
 $active = $active_nav ?? 'home';
 $lang = $current_lang ?? 'en';
@@ -6,7 +9,7 @@ $lang_page = $lang_page ?? basename($_SERVER['SCRIPT_NAME']);
 $logo_src = $base . 'assets/images/logo.png';
 
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    sec_session_start();
 }
 
 if (($layout ?? '') === 'dashboard') {

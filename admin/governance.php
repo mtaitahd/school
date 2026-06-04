@@ -1,6 +1,10 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
+
+sec_require_rate_limit();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: index');
@@ -48,6 +52,7 @@ if (isset($_GET['delete'])) {
 
 // Handle create/update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    csrf_require();
     $name = trim($_POST['name'] ?? '');
     $title = trim($_POST['title'] ?? '');
     $profile_link = trim($_POST['profile_link'] ?? '');

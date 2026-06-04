@@ -1,8 +1,12 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
 require_once '../php/claim_code_generator.php';
 require_once '../php/sms_service.php';
+
+sec_require_rate_limit();
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
@@ -19,6 +23,7 @@ $classes = $database->fetchAll(
 
 // Handle regenerate code action
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'regenerate_code') {
+    csrf_require();
     $student_id = intval($_POST['student_id']);
     $codeGenerator = new ClaimCodeGenerator();
     
@@ -32,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // Handle update learner action
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_learner') {
+    csrf_require();
     $student_id = intval($_POST['student_id']);
     $first_name = trim($_POST['first_name'] ?? '');
     $last_name = trim($_POST['last_name'] ?? '');
@@ -55,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // Handle resend SMS action
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'resend_sms') {
+    csrf_require();
     $student_id = intval($_POST['student_id']);
     
     $student = $database->fetchOne("SELECT claim_code, parent_phone, first_name FROM users WHERE user_id = ?", [$student_id]);
@@ -135,7 +142,7 @@ if (isset($_GET['edit'])) {
 
     <?php if (isset($_GET['success'])): ?>
         <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 9999; max-width: 400px;" role="alert">
-            <i class="fas fa-check-circle me-2"></i>Student created! Claim code: <strong><?php echo htmlspecialchars($_GET['code'] ?? ''); ?></strong> — share with parent.
+            <i class="fas fa-check-circle me-2"></i>Student created! Claim code: <strong><?php echo htmlspecialchars($_GET['code'] ?? ''); ?></strong> ï¿½ share with parent.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <script>setTimeout(function(){ document.querySelector('.alert-success')?.remove(); }, 5000);</script>
@@ -334,7 +341,7 @@ if (isset($_GET['edit'])) {
                     <div class="form-group-child">
                         <label class="form-label-child">Parent phone (for claim code SMS)</label>
                         <input type="text" class="form-control-child" name="parent_phone" placeholder="+255XXXXXXXXX">
-                        <small style="color:var(--text-light);">Parent uses claim code on their dashboard — no direct add.</small>
+                        <small style="color:var(--text-light);">Parent uses claim code on their dashboard ï¿½ no direct add.</small>
                     </div>
                 </div>
                 <div class="kona-modal-footer">

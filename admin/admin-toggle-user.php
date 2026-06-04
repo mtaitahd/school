@@ -1,11 +1,22 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
 require_once '../php/includes/auth.php';
 
+sec_require_rate_limit();
+
 auth_require_role(['admin'], 'index');
 
-$user_id = (int) ($_GET['user_id'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: dashboard');
+    exit;
+}
+
+csrf_require();
+
+$user_id = (int) ($_POST['user_id'] ?? 0);
 if ($user_id > 0 && $user_id !== auth_user_id()) {
     $user = $database->fetchOne("SELECT is_active FROM users WHERE user_id = ?", [$user_id]);
     if ($user) {

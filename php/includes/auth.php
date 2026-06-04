@@ -2,8 +2,24 @@
 /**
  * Session helpers for role-based access
  */
+require_once __DIR__ . '/session.php';
+require_once __DIR__ . '/csrf.php';
+
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    sec_session_start();
+}
+
+function auth_login(array $user): void {
+    sec_session_regenerate();
+
+    $_SESSION['user_id'] = (int) $user['user_id'];
+    $_SESSION['username'] = $user['username'];
+    $_SESSION['role'] = $user['role'];
+    $_SESSION['first_name'] = $user['first_name'];
+    $_SESSION['last_name'] = $user['last_name'];
+    $_SESSION['profile_image'] = $user['profile_image'] ?? '';
+    $_SESSION['email'] = $user['email'] ?? '';
+    $_SESSION['_CREATED'] = time();
 }
 
 function auth_user_id(): ?int {

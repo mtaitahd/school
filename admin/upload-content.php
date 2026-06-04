@@ -1,8 +1,12 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
 require_once '../php/includes/lang.php';
 require_once '../php/includes/auth.php';
+
+sec_require_rate_limit();
 
 auth_require_role(['admin'], 'index');
 
@@ -22,6 +26,7 @@ if (!is_dir($upload_dir)) {
 $modules = $database->fetchAll("SELECT module_id, module_name FROM modules ORDER BY order_index");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_require();
     $action = $_POST['action'] ?? 'upload';
 
     if ($action === 'module') {
@@ -61,40 +66,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif ($action === 'upload' && !empty($_FILES['content_file']['name'])) {
         $file = $_FILES['content_file'];
-        $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'audio/mpeg', 'audio/wav', 'application/pdf'];
+        $allowed_mimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'audio/mpeg', 'audio/wav', 'application/pdf'];
+        $allowed_exts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp3', 'wav', 'pdf'];
         $max_size = 5 * 1024 * 1024;
 
         if ($file['error'] !== UPLOAD_ERR_OK) {
             $error = 'Upload failed. Please try again.';
         } elseif ($file['size'] > $max_size) {
             $error = 'File is too large (max 5MB).';
-        } elseif (!in_array($file['type'], $allowed, true)) {
-            $error = 'File type not allowed. Use JPG, PNG, MP3, or PDF.';
         } else {
-            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $safe = preg_replace('/[^a-zA-Z0-9_-]/', '_', pathinfo($file['name'], PATHINFO_FILENAME));
-            $filename = $safe . '_' . time() . '.' . $ext;
-            $dest = $upload_dir . $filename;
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $detected_mime = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
 
-            if (move_uploaded_file($file['tmp_name'], $dest)) {
-                $related_type = $_POST['related_type'] ?? 'image';
-                $related_id = !empty($_POST['related_id']) ? (int) $_POST['related_id'] : null;
-                $database->insert(
-                    "INSERT INTO content_uploads (uploaded_by, file_name, file_path, file_type, related_type, related_id, description)
-                     VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    [
-                        $admin_id,
-                        $file['name'],
-                        'uploads/content/' . $filename,
-                        $file['type'],
-                        $related_type,
-                        $related_id,
-                        trim($_POST['description'] ?? ''),
-                    ]
-                );
-                $message = 'File uploaded successfully.';
+            if (!in_array($detected_mime, $allowed_mimes, true)) {
+                $error = 'File type not allowed. Use JPG, PNG, WebP, MP3, WAV, or PDF.';
             } else {
-                $error = 'Could not save file on server.';
+                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                if (!in_array($ext, $allowed_exts, true)) {
+                    $error = 'File extension not allowed.';
+                } else {
+                    $safe = preg_replace('/[^a-zA-Z0-9_-]/', '_', pathinfo($file['name'], PATHINFO_FILENAME));
+                    $filename = $safe . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+                    $dest = $upload_dir . $filename;
+
+                    if (move_uploaded_file($file['tmp_name'], $dest)) {
+                        $related_type = $_POST['related_type'] ?? 'image';
+                        $related_id = !empty($_POST['related_id']) ? (int) $_POST['related_id'] : null;
+                        $database->insert(
+                            "INSERT INTO content_uploads (uploaded_by, file_name, file_path, file_type, related_type, related_id, description)
+                             VALUES (?, ?, ?, ?, ?, ?, ?)",
+                            [
+                                $admin_id,
+                                $file['name'],
+                                'uploads/content/' . $filename,
+                                $detected_mime,
+                                $related_type,
+                                $related_id,
+                                trim($_POST['description'] ?? ''),
+                            ]
+                        );
+                        $message = 'File uploaded successfully.';
+                    } else {
+                        $error = 'Could not save file on server.';
+                    }
+                }
             }
         }
     }
@@ -179,6 +195,7 @@ $uploads = $database->fetchAll(
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="POST">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="action" value="module">
                     <div class="modal-body" style="padding:20px 24px;">
                         <div class="mb-3">
@@ -212,6 +229,7 @@ $uploads = $database->fetchAll(
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="POST">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="action" value="activity">
                     <div class="modal-body" style="padding:20px 24px;">
                         <div class="mb-3">
@@ -257,6 +275,7 @@ $uploads = $database->fetchAll(
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="POST" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="action" value="upload">
                     <div class="modal-body" style="padding:20px 24px;">
                         <div class="mb-3">

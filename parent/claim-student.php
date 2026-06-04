@@ -1,6 +1,10 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
+
+sec_require_rate_limit();
 
 // Check if user is logged in and is a parent
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
@@ -12,6 +16,7 @@ $parent_id = $_SESSION['user_id'];
 
 // Handle claim code submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['access_code'])) {
+    csrf_require();
     $access_code = trim(strtoupper($_POST['access_code']));
     
     // Validate access code format
@@ -73,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['access_code'])) {
 
 // Handle reset code request (for teachers to reset a student's access code)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'reset_code' && isset($_POST['student_id'])) {
+    csrf_require();
     $student_id = intval($_POST['student_id']);
     
     // Verify parent is linked to this student

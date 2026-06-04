@@ -1,6 +1,11 @@
 <?php
-session_start();
+require_once 'php/includes/session.php';
+require_once 'php/includes/security.php';
+require_once 'php/includes/csrf.php';
 require_once 'php/db_connection.php';
+
+sec_require_rate_limit();
+sec_send_headers();
 
 // Get role from URL parameter
 $requested_role = isset($_GET['role']) ? $_GET['role'] : '';
@@ -34,28 +39,26 @@ if (isset($_SESSION['user_id'])) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_require();
+
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
-    
+
     if (empty($username) || empty($password)) {
         $error = 'Please enter both username and password.';
+    } elseif (!sec_login_rate_limit($username)) {
+        $error = 'Too many login attempts. Please try again in 15 minutes.';
     } else {
         // Check database for user
         $user = $database->fetchOne(
             "SELECT * FROM users WHERE username = ? AND is_active = 1",
             [$username]
         );
-        
+
         if ($user && password_verify($password, $user['password'])) {
-            // Set session variables
-            $_SESSION['user_id'] = $user['user_id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
-            $_SESSION['first_name'] = $user['first_name'];
-            $_SESSION['last_name'] = $user['last_name'];
-            $_SESSION['profile_image'] = $user['profile_image'] ?? '';
-            $_SESSION['email'] = $user['email'] ?? '';
-            
+            sec_clear_login_rate_limit($username);
+            auth_login($user);
+
             // Redirect based on role
             if ($user['role'] === 'teacher') {
                 header('Location: teacher/dashboard.php');
@@ -109,6 +112,7 @@ include 'php/includes/auth-split-start.php';
             <?php endif; ?>
 
             <form method="POST" action="" class="auth-form">
+                <?php echo csrf_field(); ?>
                 <div class="form-group-child">
                     <label class="form-label-child" for="username">Username</label>
                     <div class="auth-input-wrap">

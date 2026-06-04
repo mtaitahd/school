@@ -1,7 +1,11 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
 require_once '../php/includes/auth.php';
+
+sec_require_rate_limit();
 
 auth_require_role(['admin'], 'index');
 
@@ -12,6 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['ok' => false, 'message' => 'Method not allowed']);
     exit;
 }
+
+csrf_require();
 
 $action = $_POST['action'] ?? '';
 $admin_id = auth_user_id();
@@ -95,6 +101,31 @@ switch ($action) {
         }
         $database->execute('UPDATE users SET is_active = NOT is_active WHERE user_id = ?', [$user_id]);
         json_ok('User status updated.');
+
+    case 'locklogin':
+        $user_id = (int) ($_POST['user_id'] ?? 0);
+        if ($user_id < 1) {
+            json_err('Invalid user.');
+        }
+        $user = $database->fetchOne('SELECT username FROM users WHERE user_id = ?', [$user_id]);
+        if (!$user) {
+            json_err('User not found.');
+        }
+        sec_admin_lock($user['username']);
+        json_ok('User login locked for 15 minutes.');
+
+    case 'unlocklogin':
+        $user_id = (int) ($_POST['user_id'] ?? 0);
+        if ($user_id < 1) {
+            json_err('Invalid user.');
+        }
+        $user = $database->fetchOne('SELECT username FROM users WHERE user_id = ?', [$user_id]);
+        if (!$user) {
+            json_err('User not found.');
+        }
+        sec_admin_unlock($user['username']);
+        sec_clear_login_rate_limit_all($user['username']);
+        json_ok('User login unlocked.');
 
     default:
         json_err('Unknown action.');

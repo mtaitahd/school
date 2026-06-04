@@ -1,5 +1,10 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+sec_send_headers();
+if (session_status() === PHP_SESSION_NONE) {
+    sec_session_start();
+}
 require_once '../php/db_connection.php';
 
 // Check if user is logged in and is a parent

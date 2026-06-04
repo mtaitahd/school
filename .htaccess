@@ -1,4 +1,49 @@
+Options -Indexes
+ServerSignature Off
+
+<IfModule mod_headers.c>
+    Header always unset X-Powered-By
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+<FilesMatch "^(\.env|composer\.json|composer\.lock|phpunit\.xml|\.gitignore|\.cpanel\.yml)">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "\.(sql|md|log|bak|old)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "(^\.|\/\.)">
+    Require all denied
+</FilesMatch>
+
 RewriteEngine On
+
+# Block TRACE/TRACK methods
+RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+RewriteRule .* - [F]
+
+# Block malicious query strings
+RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
+RewriteRule .* - [F]
 
 # Announcement detail: /announcement/some-slug -> announcement.php?slug=some-slug
 RewriteRule ^announcement/([a-zA-Z0-9_-]+)/?$ announcement.php?slug=$1 [L,QSA]

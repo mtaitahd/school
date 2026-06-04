@@ -1,6 +1,10 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
+
+sec_require_rate_limit();
 
 // Check if user is logged in and is a parent
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
@@ -12,6 +16,7 @@ $parent_id = $_SESSION['user_id'];
 
 // Handle mark all as read
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'mark_all_read') {
+    csrf_require();
     $database->execute(
         "UPDATE notifications SET is_read = 1 WHERE user_id = ?",
         [$parent_id]

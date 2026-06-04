@@ -1,5 +1,8 @@
 <?php
-session_start();
+require_once '../php/includes/security.php';
+if (session_status() === PHP_SESSION_NONE) {
+    sec_session_start();
+}
 require_once '../php/db_connection.php';
 
 // Check if user is logged in and is admin
@@ -71,6 +74,8 @@ $lang_page = 'users.php';
                                     <?php if ($user['user_id'] != $_SESSION['user_id']): ?>
                                         <button type="button" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="deleteUser(<?php echo (int)$user['user_id']; ?>, '<?php echo htmlspecialchars(addslashes($user['username'])); ?>')"><i class="fas fa-trash"></i></button>
                                         <button type="button" class="btn btn-warning btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="toggleUser(<?php echo (int)$user['user_id']; ?>)"><i class="fas fa-power-off"></i></button>
+                                        <button type="button" class="btn btn-info btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;color:#fff;" onclick="unlockUser(<?php echo (int)$user['user_id']; ?>)" title="Clear rate limit"><i class="fas fa-unlock"></i></button>
+                                        <button type="button" class="btn btn-secondary btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="lockUser(<?php echo (int)$user['user_id']; ?>)" title="Lock login for 15 min"><i class="fas fa-lock"></i></button>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -236,6 +241,16 @@ $lang_page = 'users.php';
             if (!confirm('Delete user ' + name + '? This cannot be undone.')) return;
             const fd = new FormData(); fd.append('user_id', userId);
             postUser('delete', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+        }
+        function lockUser(userId) {
+            if (!confirm('Lock this user out of login for 15 minutes?')) return;
+            const fd = new FormData(); fd.append('user_id', userId);
+            postUser('locklogin', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+        }
+        function unlockUser(userId) {
+            if (!confirm('Clear rate limit and unlock login for this user?')) return;
+            const fd = new FormData(); fd.append('user_id', userId);
+            postUser('unlocklogin', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
         }
     </script>
 </body>

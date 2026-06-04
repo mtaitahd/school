@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/security.php';
+sec_send_headers();
+
 /**
  * Split-screen auth layout — visual panel (left) + form panel (right).
  * Set $auth_base (e.g. '' or '../') and optional $auth_tagline before include.

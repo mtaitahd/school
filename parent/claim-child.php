@@ -1,8 +1,12 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
 require_once '../php/claim_code_generator.php';
 require_once '../php/sms_service.php';
+
+sec_require_rate_limit();
 
 // Check if user is logged in and is a parent
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
@@ -16,6 +20,7 @@ $success = '';
 
 // Handle claim code submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['claim_code'])) {
+    csrf_require();
     $claim_code = trim(strtoupper($_POST['claim_code']));
     
     // Initialize claim code generator

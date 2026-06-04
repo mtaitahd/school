@@ -1,4 +1,8 @@
-DOCTYPE html>
+<?php
+require_once 'php/includes/session.php';
+require_once 'php/includes/security.php';
+sec_send_headers();
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">

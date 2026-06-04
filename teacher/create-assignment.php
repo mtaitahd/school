@@ -1,6 +1,10 @@
 <?php
-session_start();
+require_once '../php/includes/session.php';
+require_once '../php/includes/security.php';
+require_once '../php/includes/csrf.php';
 require_once '../php/db_connection.php';
+
+sec_require_rate_limit();
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
@@ -12,6 +16,7 @@ $teacher_id = $_SESSION['user_id'];
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_require();
     $class_id = !empty($_POST['class_id']) ? (int)$_POST['class_id'] : null;
     $title = trim($_POST['title']);
     $description = trim($_POST['description']);
