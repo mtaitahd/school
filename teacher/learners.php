@@ -314,15 +314,17 @@ if (isset($_GET['edit'])) {
                                             <button class="btn-child btn-child-info" style="min-height: 35px; min-width: 35px; font-size: 0.85rem;" onclick="copyCode('<?php echo htmlspecialchars($learner['claim_code']); ?>')" title="Copy Code">
                                                 <i class="fas fa-copy"></i>
                                             </button>
-                                            <form method="POST" style="display: inline;">
+                                            <form method="POST" style="display: inline;" class="regenerate-code-form">
+                                                <?php echo csrf_field(); ?>
                                                 <input type="hidden" name="action" value="regenerate_code">
                                                 <input type="hidden" name="student_id" value="<?php echo $learner['user_id']; ?>">
-                                                <button type="submit" class="btn-child btn-child-warning" style="min-height: 35px; min-width: 35px; font-size: 0.85rem;" title="Regenerate Code" onclick="return confirm('Are you sure you want to regenerate the claim code? The old code will no longer work.');">
+                                                <button type="button" class="btn-child btn-child-warning btn-regenerate-code" style="min-height: 35px; min-width: 35px; font-size: 0.85rem;" title="Regenerate Code">
                                                     <i class="fas fa-sync-alt"></i>
                                                 </button>
                                             </form>
                                             <?php if ($learner['parent_phone']): ?>
                                                 <form method="POST" style="display: inline;" class="resend-sms-form">
+                                                    <?php echo csrf_field(); ?>
                                                     <input type="hidden" name="action" value="resend_sms">
                                                     <input type="hidden" name="student_id" value="<?php echo $learner['user_id']; ?>">
                                                     <button type="button" class="btn-child btn-child-primary btn-resend-sms" style="min-height: 35px; min-width: 35px; font-size: 0.85rem;" title="Send SMS Again">
@@ -352,6 +354,7 @@ if (isset($_GET['edit'])) {
                 <button type="button" class="kona-modal-close" data-modal-close aria-label="Close">&times;</button>
             </div>
             <form method="POST" action="student-actions">
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="add_student">
                 <input type="hidden" name="redirect" value="learners.php">
                 <div class="kona-modal-body">
@@ -491,15 +494,33 @@ if (isset($_GET['edit'])) {
             document.querySelectorAll('.btn-resend-sms').forEach(function(btn) {
                 btn.addEventListener('click', function(e) {
                     var form = this.closest('.resend-sms-form');
-                    var studentName = this.closest('tr')?.querySelector('.learner-name')?.textContent?.trim() || 'this student';
                     Swal.fire({
                         title: 'Send SMS?',
-                        text: 'Send claim code to parent of ' + studentName + '?',
+                        text: 'Send claim code to parent again?',
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonColor: 'var(--primary-blue)',
                         cancelButtonColor: '#6c757d',
                         confirmButtonText: '<i class="fas fa-sms me-1"></i> Yes, send SMS',
+                        cancelButtonText: 'Cancel'
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+            document.querySelectorAll('.btn-regenerate-code').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    var form = this.closest('.regenerate-code-form');
+                    Swal.fire({
+                        title: 'Regenerate Code?',
+                        text: 'The old claim code will no longer work. Are you sure?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e6a800',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="fas fa-sync-alt me-1"></i> Yes, regenerate',
                         cancelButtonText: 'Cancel'
                     }).then(function(result) {
                         if (result.isConfirmed) {
