@@ -106,7 +106,7 @@ class SubscriptionMiddleware {
         $now = time();
         $endDate = $sub['status'] === 'trial' ? $sub['trial_end'] : $sub['current_period_end'];
         $endTs = $endDate ? strtotime($endDate) : $now;
-        $daysRemaining = max(0, (int) ceil(($endTs - $now) / 86400));
+        $daysRemaining = max(0, (int) floor(($endTs - $now) / 86400));
         $isActive = $sub['status'] === 'active' || ($sub['status'] === 'trial' && $endTs > $now);
 
         $labels = [
