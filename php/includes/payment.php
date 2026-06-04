@@ -89,11 +89,18 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
     $data = $response ? json_decode($response, true) : null;
 
     if ($curlError || $httpCode >= 400 || !$data) {
+        $errorMsg = $curlError;
+        if (!$errorMsg && $data) {
+            $errorMsg = $data['message'] ?? $data['error'] ?? ('HTTP ' . $httpCode);
+        }
+        if (!$errorMsg) {
+            $errorMsg = 'Payment API error (HTTP ' . $httpCode . ')';
+        }
         $database->execute(
             "UPDATE `payments` SET status = 'failed', api_response = ? WHERE id = ?",
-            [json_encode(['error' => $curlError, 'http_code' => $httpCode, 'response' => $response]), $paymentId]
+            [json_encode(['error' => $errorMsg, 'http_code' => $httpCode, 'response' => $response]), $paymentId]
         );
-        return ['success' => false, 'error' => $curlError ?: 'Payment API error'];
+        return ['success' => false, 'error' => $errorMsg];
     }
 
     $transactionId = $data['transaction_id'] ?? $data['id'] ?? null;
