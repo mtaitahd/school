@@ -123,6 +123,7 @@ if (isset($_GET['edit'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="dashboard-body">
     <?php
@@ -146,45 +147,78 @@ if (isset($_GET['edit'])) {
     </div>
 
     <?php if (isset($_GET['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 9999; max-width: 400px;" role="alert">
-            <i class="fas fa-check-circle me-2"></i>Student created! Claim code: <strong><?php echo htmlspecialchars($_GET['code'] ?? ''); ?></strong> � share with parent.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <script>setTimeout(function(){ document.querySelector('.alert-success')?.remove(); }, 5000);</script>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Student Created',
+                html: 'Student created! Claim code: <strong><?php echo htmlspecialchars($_GET['code'] ?? ''); ?></strong>',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true
+            });
+        </script>
     <?php endif; ?>
     <?php if (isset($_GET['error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 9999; max-width: 400px;" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i><?php
-            $errs = ['missing_fields' => 'Please fill all required fields.', 'username_exists' => 'Username already exists.', 'create_failed' => 'Failed to create student.'];
-            echo htmlspecialchars($errs[$_GET['error']] ?? 'An error occurred.');
-            ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <script>setTimeout(function(){ document.querySelector('.alert-danger')?.remove(); }, 5000);</script>
+        <?php $errs = ['missing_fields' => 'Please fill all required fields.', 'username_exists' => 'Username already exists.', 'create_failed' => 'Failed to create student.']; ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: <?php echo json_encode($errs[$_GET['error']] ?? 'An error occurred.'); ?>,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true
+            });
+        </script>
     <?php endif; ?>
 
     <?php if (isset($_GET['sms_error'])): ?>
-        <div class="alert alert-warning alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 9999; max-width: 420px;" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($_GET['sms_error']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <script>setTimeout(function(){ document.querySelector('.alert-warning')?.remove(); }, 7000);</script>
+        <script>
+            Swal.fire({
+                icon: 'warning',
+                title: 'SMS Notice',
+                text: <?php echo json_encode($_GET['sms_error']); ?>,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 7000,
+                timerProgressBar: true
+            });
+        </script>
     <?php endif; ?>
 
     <?php if (isset($success)): ?>
-        <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 9999; max-width: 400px;" role="alert">
-            <i class="fas fa-check-circle me-2"></i><?php echo htmlspecialchars($success); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <script>setTimeout(function(){ document.querySelector('.alert-success')?.remove(); }, 5000);</script>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'SMS Sent',
+                text: <?php echo json_encode($success); ?>,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true
+            });
+        </script>
     <?php endif; ?>
 
     <?php if (isset($error)): ?>
-        <div class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 9999; max-width: 400px;" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i><?php echo htmlspecialchars($error); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <script>setTimeout(function(){ document.querySelector('.alert-danger')?.remove(); }, 5000);</script>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'SMS Failed',
+                text: <?php echo json_encode($error); ?>,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 7000,
+                timerProgressBar: true
+            });
+        </script>
     <?php endif; ?>
 
 
@@ -288,10 +322,10 @@ if (isset($_GET['edit'])) {
                                                 </button>
                                             </form>
                                             <?php if ($learner['parent_phone']): ?>
-                                                <form method="POST" style="display: inline;">
+                                                <form method="POST" style="display: inline;" class="resend-sms-form">
                                                     <input type="hidden" name="action" value="resend_sms">
                                                     <input type="hidden" name="student_id" value="<?php echo $learner['user_id']; ?>">
-                                                    <button type="submit" class="btn-child btn-child-primary" style="min-height: 35px; min-width: 35px; font-size: 0.85rem;" title="Send SMS Again" onclick="return confirm('Send claim code SMS to parent again?');">
+                                                    <button type="button" class="btn-child btn-child-primary btn-resend-sms" style="min-height: 35px; min-width: 35px; font-size: 0.85rem;" title="Send SMS Again">
                                                         <i class="fas fa-sms"></i>
                                                     </button>
                                                 </form>
@@ -452,6 +486,29 @@ if (isset($_GET['edit'])) {
             document.getElementById('edit_is_active').checked = isActive;
             openModal('editLearnerModal');
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-resend-sms').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    var form = this.closest('.resend-sms-form');
+                    var studentName = this.closest('tr')?.querySelector('.learner-name')?.textContent?.trim() || 'this student';
+                    Swal.fire({
+                        title: 'Send SMS?',
+                        text: 'Send claim code to parent of ' + studentName + '?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: 'var(--primary-blue)',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="fas fa-sms me-1"></i> Yes, send SMS',
+                        cancelButtonText: 'Cancel'
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
     </script>
 </body>
 </html>
