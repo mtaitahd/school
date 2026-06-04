@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/lang.php';
 require_once __DIR__ . '/../php/includes/learner-session.php';
+require_once __DIR__ . '/../php/includes/auth.php';
 require_once __DIR__ . '/../php/includes/SubscriptionMiddleware.php';
 
 // Subscription enforcement for logged-in learners
