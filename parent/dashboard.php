@@ -115,6 +115,22 @@ include '../php/includes/dashboard-start.php';
             <?php endif; ?>
         </div>
 
+        <!-- Flash Messages -->
+        <?php if (isset($_GET['claimed'])): ?>
+            <div class="alert alert-success alert-dismissible fade show py-2 px-3 mb-4 text-center" style="border-radius:10px;font-size:0.9rem;border:none;max-width:700px;margin:0 auto;" role="alert">
+                <i class="fas fa-check-circle me-1"></i>Child successfully linked to your account!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <script>setTimeout(function(){ document.querySelector('.alert-success')?.remove(); }, 5000);</script>
+        <?php endif; ?>
+        <?php if (isset($_GET['sms_error'])): ?>
+            <div class="alert alert-warning alert-dismissible fade show py-2 px-3 mb-4 text-center" style="border-radius:10px;font-size:0.9rem;border:none;max-width:700px;margin:0 auto;" role="alert">
+                <i class="fas fa-exclamation-triangle me-1"></i>SMS notice: <?php echo htmlspecialchars($_GET['sms_error']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <script>setTimeout(function(){ document.querySelector('.alert-warning')?.remove(); }, 7000);</script>
+        <?php endif; ?>
+
         <!-- Subscription Status Banner -->
         <?php if ($subStatus['status'] === 'trial'): ?>
             <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">

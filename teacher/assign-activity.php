@@ -114,19 +114,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         [$learner_id]
                     );
                     
+                    $sms_status = '';
                     if ($student && $student['phone']) {
                         require_once __DIR__ . '/../php/sms_service.php';
                         $smsService = new SmsService();
-                        $smsService->sendAssignmentReminder(
+                        $smsResult = $smsService->sendAssignmentReminder(
                             $student['phone'],
                             $student['first_name'] . ' ' . $student['last_name'],
                             $title,
                             $due_date ?: 'No due date',
                             $assignment_id
                         );
+                        if (is_array($smsResult) && !$smsResult['success']) {
+                            $sms_status = ' SMS notification failed: ' . $smsResult['message'];
+                        } elseif (!is_array($smsResult) || empty($smsResult['queued'])) {
+                            $sms_status = ' SMS sent to parent.';
+                        } else {
+                            $sms_status = ' SMS queued for delivery.';
+                        }
                     }
                     
-                    $message = 'Activity assigned successfully!';
+                    $message = 'Activity assigned successfully!' . $sms_status;
                 } else {
                     $message = 'Could not save assignment. Please try again.';
                 }

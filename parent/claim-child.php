@@ -67,26 +67,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['claim_code'])) {
                             [$parent_id, $student_info['user_id'], $claim_code]
                         );
                         
-                        $success = "Successfully linked to " . htmlspecialchars($student_info['first_name'] . ' ' . $student_info['last_name']) . "!";
-                        
                         // Send SMS confirmation if parent has phone number
+                        $sms_error = '';
                         $parent = $database->fetchOne("SELECT phone FROM users WHERE user_id = ?", [$parent_id]);
                         if ($parent && $parent['phone']) {
                             try {
                                 $smsService = new SmsService();
-                                $smsService->sendParentLinkingConfirmation(
+                                $smsResult = $smsService->sendParentLinkingConfirmation(
                                     $parent['phone'],
                                     $student_info['first_name'] . ' ' . $student_info['last_name'],
                                     $claim_code,
                                     $student_info['user_id']
                                 );
+                                if (isset($smsResult) && is_array($smsResult) && !$smsResult['success']) {
+                                    $sms_error = '&sms_error=' . urlencode($smsResult['message']);
+                                }
                             } catch (Exception $e) {
                                 error_log("SMS confirmation failed: " . $e->getMessage());
+                                $sms_error = '&sms_error=' . urlencode('Failed to send SMS confirmation.');
                             }
                         }
                         
                         // Redirect to dashboard after successful claim
-                        header('Location: dashboard.php');
+                        header('Location: dashboard.php?claimed=1' . $sms_error);
                         exit;
                     } else {
                         $error = "Failed to claim child. Please try again.";

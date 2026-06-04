@@ -62,12 +62,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['access_code'])) {
                         if ($parent && $parent['phone']) {
                             require_once __DIR__ . '/../php/sms_service.php';
                             $smsService = new SmsService();
-                            $smsService->sendParentLinkingConfirmation(
+                            $smsResult = $smsService->sendParentLinkingConfirmation(
                                 $parent['phone'],
                                 $access_record['first_name'] . ' ' . $access_record['last_name'],
                                 $access_code,
                                 $access_record['student_id']
                             );
+                            if (is_array($smsResult) && !$smsResult['success']) {
+                                $success .= ' SMS failed: ' . $smsResult['message'];
+                            } else {
+                                $success .= ' SMS confirmation sent to your phone.';
+                            }
                         }
                     } else {
                         $error = "Failed to link student. Please try again.";
