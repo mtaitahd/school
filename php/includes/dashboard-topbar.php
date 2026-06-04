@@ -9,15 +9,30 @@ $notification_count = 0;
 $notifications = [];
 if (isset($database) && auth_role() === 'parent') {
     $parent_id = auth_user_id();
-    $notifications = $database->fetchAll("
-        SELECT n.*, u.first_name, u.last_name
-        FROM notifications n
-        JOIN users u ON n.related_user_id = u.user_id
-        WHERE n.user_id = ? AND n.is_read = 0
-        ORDER BY n.created_at DESC
-        LIMIT 10
-    ", [$parent_id]);
-    $notification_count = count($notifications);
+    try {
+        // Ensure related_user_id column exists (migrate v3→v4)
+        $cols = $database->fetchAll("SHOW COLUMNS FROM notifications");
+        $colNames = array_column($cols, 'Field');
+        if (!in_array('related_user_id', $colNames)) {
+            $database->execute("ALTER TABLE notifications ADD COLUMN related_user_id INT NULL AFTER user_id");
+        }
+    } catch (Throwable $e) {
+        error_log('notifications migration error: ' . $e->getMessage());
+    }
+    try {
+        $notifications = $database->fetchAll("
+            SELECT n.*, u.first_name, u.last_name
+            FROM notifications n
+            JOIN users u ON n.related_user_id = u.user_id
+            WHERE n.user_id = ? AND n.is_read = 0
+            ORDER BY n.created_at DESC
+            LIMIT 10
+        ", [$parent_id]);
+        $notification_count = count($notifications);
+    } catch (Throwable $e) {
+        $notifications = [];
+        $notification_count = 0;
+    }
 }
 ?><nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top">
     <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">

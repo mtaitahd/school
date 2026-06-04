@@ -200,22 +200,38 @@ function ensure_schema_v2($database): void {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
 
-    // Notifications table (migrations_v4_notifications)
-    $database->execute("
-        CREATE TABLE IF NOT EXISTS notifications (
-            notification_id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id INT NOT NULL,
-            related_user_id INT NULL,
-            notification_type ENUM('assignment', 'completion', 'badge', 'reminder', 'system') NOT NULL,
-            title VARCHAR(255) NOT NULL,
-            message TEXT NOT NULL,
-            link VARCHAR(255) NULL,
-            is_read TINYINT(1) DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-            FOREIGN KEY (related_user_id) REFERENCES users(user_id) ON DELETE SET NULL
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-    ");
+    // Notifications table (migrations_v4_notifications) — migrate from v3 if needed
+    $notifExists = $database->fetchOne("SHOW TABLES LIKE 'notifications'");
+    if (!$notifExists) {
+        $database->execute("
+            CREATE TABLE IF NOT EXISTS notifications (
+                notification_id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                related_user_id INT NULL,
+                notification_type ENUM('assignment', 'completion', 'badge', 'reminder', 'system') NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                message TEXT NOT NULL,
+                link VARCHAR(255) NULL,
+                is_read TINYINT(1) DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+                FOREIGN KEY (related_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        ");
+    } else {
+        // Migrate v3 schema: add related_user_id if missing
+        $cols = $database->fetchAll("SHOW COLUMNS FROM notifications");
+        $colNames = array_column($cols, 'Field');
+        if (!in_array('related_user_id', $colNames)) {
+            $database->execute("ALTER TABLE notifications ADD COLUMN related_user_id INT NULL AFTER user_id");
+        }
+        if (!in_array('notification_type', $colNames)) {
+            $database->execute("ALTER TABLE notifications ADD COLUMN notification_type ENUM('assignment', 'completion', 'badge', 'reminder', 'system') NOT NULL DEFAULT 'system' AFTER related_user_id");
+        }
+        if (!in_array('link', $colNames)) {
+            $database->execute("ALTER TABLE notifications ADD COLUMN link VARCHAR(255) NULL AFTER message");
+        }
+    }
     $idxCheck = $database->fetchAll("SHOW INDEX FROM notifications WHERE Key_name = 'idx_notifications_user_read'");
     if (empty($idxCheck)) {
         $database->execute("CREATE INDEX idx_notifications_user_read ON notifications(user_id, is_read)");
