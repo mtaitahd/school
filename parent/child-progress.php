@@ -100,7 +100,7 @@ foreach ($module_progress as &$module) {
 }
 
 $assignments = $database->fetchAll(
-    "SELECT a.title, a.description, a.due_date, a.assignment_type, sa.status, act.activity_id, act.activity_name, m.module_name, m.module_color
+    "SELECT a.title, a.description, a.due_date, a.assignment_type, sa.status, sa.score, act.activity_id, act.activity_name, m.module_name, m.module_color
      FROM student_assignments sa
      JOIN assignments a ON sa.assignment_id = a.assignment_id
      LEFT JOIN activities act ON a.activity_id = act.activity_id
@@ -290,6 +290,7 @@ $activity_assignments = $database->fetchAll("
                         <th style="padding:10px;text-align:left;">Activity</th>
                         <th style="padding:10px;text-align:left;">Module</th>
                         <th style="padding:10px;text-align:left;">Status</th>
+                        <th style="padding:10px;text-align:left;">Score</th>
                         <th style="padding:10px;text-align:left;">Due</th>
                         <th style="padding:10px;text-align:left;">Action</th>
                     </tr></thead>
@@ -297,12 +298,19 @@ $activity_assignments = $database->fetchAll("
                     <?php foreach ($assignments as $as): ?>
                     <tr style="border-bottom:1px solid #eee;">
                         <td style="padding:10px;"><?php echo htmlspecialchars($as['title']); ?></td>
-                        <td style="padding:10px;"><?php echo $as['activity_name'] ? htmlspecialchars($as['activity_name']) : '�'; ?></td>
-                        <td style="padding:10px;"><?php echo $as['module_name'] ? htmlspecialchars($as['module_name']) : '�'; ?></td>
+                        <td style="padding:10px;"><?php echo $as['activity_name'] ? htmlspecialchars($as['activity_name']) : '—'; ?></td>
+                        <td style="padding:10px;"><?php echo $as['module_name'] ? htmlspecialchars($as['module_name']) : '—'; ?></td>
                         <td style="padding:10px;">
-                            <span style="background:var(--primary-blue);color:#fff;padding:4px 10px;border-radius:12px;font-size:0.8rem;"><?php echo htmlspecialchars(ucfirst($as['status'])); ?></span>
+                            <span style="background:var(--primary-blue);color:#fff;padding:4px 10px;border-radius:12px;font-size:0.8rem;"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $as['status']))); ?></span>
                         </td>
-                        <td style="padding:10px;"><?php echo $as['due_date'] ? date('M d, Y', strtotime($as['due_date'])) : '�'; ?></td>
+                        <td style="padding:10px;">
+                            <?php if (!is_null($as['score'])): ?>
+                                <span style="background:var(--primary-green);color:#fff;padding:4px 10px;border-radius:12px;font-size:0.8rem;"><?php echo (int)$as['score']; ?>%</span>
+                            <?php else: ?>
+                                <span style="color:var(--text-light);">—</span>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding:10px;"><?php echo $as['due_date'] ? date('M d, Y', strtotime($as['due_date'])) : '—'; ?></td>
                         <td style="padding:10px;">
                             <?php if ($as['activity_id']): ?>
                                 <a href="activity-preview.php?activity_id=<?php echo (int) $as['activity_id']; ?>&child_id=<?php echo $child_id; ?>" 

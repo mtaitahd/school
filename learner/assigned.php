@@ -13,8 +13,11 @@ $sidebar_active = 'assigned';
 $lang_page = 'assigned.php';
 
 $assignments = $database->fetchAll(
-    "SELECT a.*, sa.status, sa.student_assignment_id, act.activity_id, act.activity_name, act.activity_type, m.module_name, m.module_color,
-            u.first_name AS teacher_first
+    "SELECT a.*, sa.status, sa.score, sa.student_assignment_id, sa.submitted_at,
+            act.activity_id, act.activity_name, act.activity_type, m.module_name, m.module_color,
+            u.first_name AS teacher_first,
+            (SELECT p.attempts FROM progress p WHERE p.user_id = ? AND p.activity_id = a.activity_id LIMIT 1) AS attempts,
+            (SELECT p.completed FROM progress p WHERE p.user_id = ? AND p.activity_id = a.activity_id LIMIT 1) AS progress_completed
      FROM student_assignments sa
      JOIN assignments a ON sa.assignment_id = a.assignment_id
      LEFT JOIN users u ON a.teacher_id = u.user_id
@@ -22,7 +25,7 @@ $assignments = $database->fetchAll(
      LEFT JOIN modules m ON act.module_id = m.module_id
      WHERE sa.student_id = ?
      ORDER BY sa.status ASC, a.due_date ASC, a.created_at DESC",
-    [$learner_id]
+    [$learner_id, $learner_id, $learner_id]
 );
 ?>
 <!DOCTYPE html>
@@ -50,7 +53,15 @@ $assignments = $database->fetchAll(
             </div>
         <?php else: ?>
             <div class="row-child">
-                <?php foreach ($assignments as $a): ?>
+                <?php foreach ($assignments as $a):
+                    $has_started = !empty($a['attempts']) && $a['attempts'] > 0;
+                    $is_completed = ($a['progress_completed'] ?? 0) == 1 || $a['status'] === 'completed' || $a['status'] === 'graded';
+                    $status_display = $is_completed ? 'completed' : ($has_started ? 'in_progress' : ($a['status'] ?? 'pending'));
+                    $status_label = $current_lang === 'sw'
+                        ? ($status_display === 'completed' ? 'Imekamilika' : ($status_display === 'in_progress' ? 'Inaendelea' : 'Inasubiri'))
+                        : ($status_display === 'completed' ? 'Completed' : ($status_display === 'in_progress' ? 'In Progress' : 'Pending'));
+                    $status_bg = $status_display === 'completed' ? 'var(--primary-green)' : ($status_display === 'in_progress' ? 'var(--primary-blue)' : 'var(--primary-yellow)');
+                ?>
                 <div class="col-child-3 mb-20">
                     <article class="dashboard-card assigned-card" style="border-left:6px solid <?php echo htmlspecialchars($a['module_color'] ?? 'var(--primary-blue)'); ?>;">
                         <h3><?php echo htmlspecialchars($a['title']); ?></h3>
@@ -62,21 +73,20 @@ $assignments = $database->fetchAll(
                         <?php endif; ?>
                         <p><small><?php echo $current_lang === 'sw' ? 'Mwalimu' : 'Teacher'; ?>: <?php echo htmlspecialchars($a['teacher_first'] ?? 'N/A'); ?></small></p>
                         <?php if ($a['due_date']): ?><p><small><?php echo $current_lang === 'sw' ? 'Tarehe' : 'Due'; ?>: <?php echo htmlspecialchars(date('M d, Y', strtotime($a['due_date']))); ?></small></p><?php endif; ?>
-                        <?php
-                            $status_text = htmlspecialchars(ucfirst($a['status']));
-                            $status_bg = 'var(--primary-yellow)';
-                            if (($a['status'] ?? '') === 'completed') { $status_bg = 'var(--primary-green)'; }
-                        ?>
-                        <span class="badge" style="background:<?php echo $status_bg; ?>;padding:4px 10px;border-radius:12px;"><?php echo $status_text; ?></span>
-                        <?php if (($a['status'] ?? '') === 'completed'): ?>
-                            <span class="btn-child btn-child-secondary mt-20" style="display:inline-block; cursor:default; opacity:0.9;"><?php echo $current_lang === 'sw' ? 'Imefanyika' : 'Done'; ?></span>
+                        <span class="badge" style="background:<?php echo $status_bg; ?>;padding:4px 10px;border-radius:12px;"><?php echo $status_label; ?></span>
+                        <?php if ($is_completed): ?>
+                            <?php if (!is_null($a['score'])): ?>
+                                <p class="mt-10 mb-0"><small><?php echo $current_lang === 'sw' ? 'Alama' : 'Score'; ?>: <strong><?php echo (int) ($a['score'] ?? 0); ?>%</strong></small></p>
+                            <?php endif; ?>
+                            <span class="btn-child btn-child-secondary mt-10" style="display:inline-block; cursor:default; opacity:0.9;"><?php echo $current_lang === 'sw' ? 'Imefanyika' : 'Done'; ?></span>
                         <?php else: ?>
                             <?php if ($a['activity_id']): ?>
-                                <a href="activity.php?activity_id=<?php echo (int) $a['activity_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-20" style="display:inline-block;">
-                                    <i class="fas fa-play me-2"></i><?php echo $current_lang === 'sw' ? 'Anza' : 'Start'; ?>
+                                <a href="activity.php?activity_id=<?php echo (int) $a['activity_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block;">
+                                    <i class="fas fa-<?php echo $has_started ? 'play-circle' : 'play'; ?> me-2"></i>
+                                    <?php echo $current_lang === 'sw' ? ($has_started ? 'Endelea' : 'Anza') : ($has_started ? 'Continue' : 'Start'); ?>
                                 </a>
                             <?php else: ?>
-                                <a href="categories.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-20" style="display:inline-block;">
+                                <a href="categories.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block;">
                                     <i class="fas fa-play me-2"></i><?php echo $current_lang === 'sw' ? 'Anza Kujifunza' : 'Start Learning'; ?>
                                 </a>
                             <?php endif; ?>

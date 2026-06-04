@@ -190,7 +190,7 @@ function ensure_schema_v2($database): void {
             student_assignment_id INT AUTO_INCREMENT PRIMARY KEY,
             student_id INT NOT NULL,
             assignment_id INT NOT NULL,
-            status ENUM('pending', 'submitted', 'graded') DEFAULT 'pending',
+            status ENUM('pending', 'in_progress', 'submitted', 'graded', 'completed') DEFAULT 'pending',
             score INT NULL,
             notes TEXT NULL,
             assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -199,6 +199,14 @@ function ensure_schema_v2($database): void {
             FOREIGN KEY (assignment_id) REFERENCES assignments(assignment_id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
+    // Migrate existing ENUM if needed
+    $enumCheck = $database->fetchAll("SHOW COLUMNS FROM student_assignments WHERE Field = 'status'");
+    if (!empty($enumCheck)) {
+        $type = $enumCheck[0]['Type'] ?? '';
+        if (strpos($type, 'completed') === false) {
+            $database->execute("ALTER TABLE student_assignments MODIFY COLUMN status ENUM('pending','in_progress','submitted','graded','completed') DEFAULT 'pending'");
+        }
+    }
 
     // Notifications table (migrations_v4_notifications) — migrate from v3 if needed
     $notifExists = $database->fetchOne("SHOW TABLES LIKE 'notifications'");

@@ -74,8 +74,16 @@ if ($completed) {
     $database->execute(
         "UPDATE student_assignments sa
          JOIN assignments a ON sa.assignment_id = a.assignment_id
-         SET sa.status = 'completed'
+         SET sa.status = 'completed', sa.score = GREATEST(COALESCE(sa.score, 0), ?), sa.submitted_at = NOW()
          WHERE sa.student_id = ? AND a.activity_id = ? AND sa.status != 'completed'",
+        [$score, $user_id, $activity_id]
+    );
+} else {
+    $database->execute(
+        "UPDATE student_assignments sa
+         JOIN assignments a ON sa.assignment_id = a.assignment_id
+         SET sa.status = 'in_progress'
+         WHERE sa.student_id = ? AND a.activity_id = ? AND sa.status = 'pending'",
         [$user_id, $activity_id]
     );
 }

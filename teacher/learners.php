@@ -93,7 +93,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $learners = $database->fetchAll("
     SELECT u.*, 
            (SELECT COUNT(*) FROM progress p WHERE p.user_id = u.user_id AND p.completed = 1) as completed_activities,
-           (SELECT SUM(p.stars_earned) FROM progress p WHERE p.user_id = u.user_id) as total_stars
+           (SELECT SUM(p.stars_earned) FROM progress p WHERE p.user_id = u.user_id) as total_stars,
+           (SELECT ROUND(AVG(sa.score), 0) FROM student_assignments sa JOIN assignments a ON sa.assignment_id = a.assignment_id WHERE sa.student_id = u.user_id AND sa.score IS NOT NULL) as avg_assignment_score,
+           (SELECT COUNT(*) FROM student_assignments sa WHERE sa.student_id = u.user_id AND sa.status = 'completed') as completed_assignments,
+           (SELECT COUNT(*) FROM student_assignments sa WHERE sa.student_id = u.user_id) as total_assignments
     FROM users u 
     WHERE u.role = 'learner' 
     ORDER BY u.created_at DESC
@@ -201,8 +204,10 @@ if (isset($_GET['edit'])) {
                             <th style="padding: 15px; text-align: left; border-bottom: 2px solid var(--primary-blue);">Name</th>
                             <th style="padding: 15px; text-align: center; border-bottom: 2px solid var(--primary-blue);">Claim Code</th>
                             <th style="padding: 15px; text-align: center; border-bottom: 2px solid var(--primary-blue);">Parent Status</th>
-                            <th style="padding: 15px; text-align: center; border-bottom: 2px solid var(--primary-blue);">Completed</th>
+                            <th style="padding: 15px; text-align: center; border-bottom: 2px solid var(--primary-blue);">Activities</th>
                             <th style="padding: 15px; text-align: center; border-bottom: 2px solid var(--primary-blue);">Stars</th>
+                            <th style="padding: 15px; text-align: center; border-bottom: 2px solid var(--primary-blue);">Assignments</th>
+                            <th style="padding: 15px; text-align: center; border-bottom: 2px solid var(--primary-blue);">Avg Score</th>
                             <th style="padding: 15px; text-align: center; border-bottom: 2px solid var(--primary-blue);">Joined</th>
                             <th style="padding: 15px; text-align: center; border-bottom: 2px solid var(--primary-blue);">Actions</th>
                         </tr>
@@ -241,6 +246,16 @@ if (isset($_GET['edit'])) {
                                 <td style="padding: 15px; text-align: center;">
                                     <span style="background: var(--primary-yellow); color: var(--text-dark); padding: 5px 15px; border-radius: 15px;">
                                         <i class="fas fa-star me-1"></i><?php echo $learner['total_stars']; ?>
+                                    </span>
+                                </td>
+                                <td style="padding: 15px; text-align: center;">
+                                    <span style="background: var(--primary-blue); color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.85rem;">
+                                        <?php echo $learner['completed_assignments'] ?? 0; ?>/<?php echo $learner['total_assignments'] ?? 0; ?>
+                                    </span>
+                                </td>
+                                <td style="padding: 15px; text-align: center;">
+                                    <span style="background: <?php echo ($learner['avg_assignment_score'] ?? 0) >= 70 ? 'var(--primary-green)' : (($learner['avg_assignment_score'] ?? 0) >= 40 ? 'var(--primary-orange)' : 'var(--primary-red)'); ?>; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.85rem;">
+                                        <?php echo $learner['avg_assignment_score'] ?? '—'; ?>%
                                     </span>
                                 </td>
                                 <td style="padding: 15px; text-align: center;">
