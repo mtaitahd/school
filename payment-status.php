@@ -26,7 +26,7 @@ if ($role !== 'parent') {
 
 $ref = $_GET['ref'] ?? '';
 if (!$ref) {
-    header('Location: topup.php'); exit;
+    header('Location: payment.php'); exit;
 }
 
 $payment = $database->fetchOne(
@@ -35,7 +35,7 @@ $payment = $database->fetchOne(
 );
 
 if (!$payment) {
-    header('Location: topup.php'); exit;
+    header('Location: payment.php'); exit;
 }
 
 // Handle cancel action before status variables
@@ -263,7 +263,7 @@ function showSwal(data) {
             window.location.href = 'parent/dashboard.php';
         },
         preDeny: () => {
-            window.location.href = 'topup.php';
+            window.location.href = 'payment.php';
         }
     }).then(result => {
         if (result.dismiss === Swal.DismissReason.cancel) {

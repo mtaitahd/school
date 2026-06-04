@@ -65,7 +65,7 @@ $is_guest = ($logged_role === '');
             <div class="navbar-right">
                 <?php if ($logged_name !== '' && $logged_role !== ''): ?>
                     <?php if ($logged_role === 'parent'): ?>
-                    <a href="<?php echo app_web_path('topup.php'); ?>" class="nav-topup-btn" title="Topup / Subscription">
+                    <a href="<?php echo app_web_path('payment.php'); ?>" class="nav-topup-btn" title="Payment / Subscription">
                         <i class="fas fa-wallet" aria-hidden="true"></i>
                         <span>Topup</span>
                     </a>

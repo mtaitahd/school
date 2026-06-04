@@ -41,7 +41,7 @@ switch ($logged_role) {
             ['id' => 'parent_dashboard', 'href' => app_web_path('parent/dashboard.php'), 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
             ['id' => 'students', 'href' => app_web_path('parent/dashboard.php'), 'icon' => 'fa-users', 'label' => 'Students'],
             ['id' => 'reports', 'href' => app_web_path('parent/dashboard.php'), 'icon' => 'fa-chart-line', 'label' => 'Reports'],
-            ['id' => 'topup', 'href' => app_web_path('topup.php'), 'icon' => 'fa-wallet', 'label' => 'Topup'],
+            ['id' => 'topup', 'href' => app_web_path('payment.php'), 'icon' => 'fa-wallet', 'label' => 'Payment'],
         ];
         break;
 
