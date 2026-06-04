@@ -5,6 +5,8 @@ require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/claim_code_generator.php';
 require_once __DIR__ . '/../php/sms_service.php';
+require_once __DIR__ . '/../php/includes/migrate.php';
+ensure_schema_v2($database);
 
 sec_require_rate_limit();
 
