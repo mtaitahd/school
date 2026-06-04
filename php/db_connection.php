@@ -1,12 +1,12 @@
 <?php
 
 class Database {
-    private string $host;
-    private string $db_name;
-    private string $username;
-    private string $password;
-    private string $charset = 'utf8mb4';
-    private ?PDO $pdo = null;
+    private $host;
+    private $db_name;
+    private $username;
+    private $password;
+    private $charset = 'utf8mb4';
+    private $pdo = null;
 
     public function __construct() {
         $envPath = __DIR__ . '/../.env';
@@ -48,7 +48,7 @@ class Database {
         return $this->pdo;
     }
 
-    public function query(string $sql, array $params = []): PDOStatement|false {
+    public function query(string $sql, array $params = []) {
         $pdo = $this->getConnection();
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
@@ -72,7 +72,7 @@ class Database {
         return $stmt->execute($params);
     }
 
-    public function insert(string $sql, array $params = []): int|false {
+    public function insert(string $sql, array $params = []) {
         $pdo = $this->getConnection();
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
