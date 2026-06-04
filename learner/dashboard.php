@@ -3,6 +3,8 @@ session_start();
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/lang.php';
 require_once __DIR__ . '/../php/includes/auth.php';
+require_once __DIR__ . '/../php/includes/migrate.php';
+ensure_schema_v2($database);
 
 auth_require_role(['learner'], 'login.php');
 

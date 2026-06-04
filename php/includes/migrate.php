@@ -184,6 +184,24 @@ function ensure_schema_v2($database): void {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
 
+    // Ensure assignments table has teacher_id and activity_id columns
+    // (handle schema mismatch between migrations_v3.sql and this PHP migration)
+    $assignCols = $database->fetchAll("SHOW COLUMNS FROM assignments");
+    $aFields = array_column($assignCols, 'Field');
+    if (!in_array('teacher_id', $aFields)) {
+        if (in_array('created_by', $aFields)) {
+            $database->execute("ALTER TABLE assignments CHANGE created_by teacher_id INT NOT NULL");
+        } else {
+            $database->execute("ALTER TABLE assignments ADD COLUMN teacher_id INT NOT NULL AFTER title, ADD FOREIGN KEY (teacher_id) REFERENCES users(user_id) ON DELETE CASCADE");
+        }
+    }
+    if (!in_array('activity_id', $aFields)) {
+        $database->execute("ALTER TABLE assignments ADD COLUMN activity_id INT NULL AFTER assignment_type, ADD INDEX idx_activity (activity_id)");
+    }
+    if (!in_array('due_date', $aFields) && in_array('created_at', $aFields)) {
+        $database->execute("ALTER TABLE assignments ADD COLUMN due_date DATE NULL AFTER description");
+    }
+
     // Student assignments table (migrations_v3)
     $database->execute("
         CREATE TABLE IF NOT EXISTS student_assignments (
@@ -199,6 +217,19 @@ function ensure_schema_v2($database): void {
             FOREIGN KEY (assignment_id) REFERENCES assignments(assignment_id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
+    // Ensure student_assignments has score, submitted_at columns (missing from v3.sql)
+    $saCols = $database->fetchAll("SHOW COLUMNS FROM student_assignments");
+    $saFields = array_column($saCols, 'Field');
+    if (!in_array('score', $saFields)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN score INT NULL AFTER status");
+    }
+    if (!in_array('submitted_at', $saFields)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN submitted_at TIMESTAMP NULL AFTER assigned_at");
+    }
+    if (!in_array('notes', $saFields)) {
+        $database->execute("ALTER TABLE student_assignments ADD COLUMN notes TEXT NULL AFTER score");
+    }
+
     // Migrate existing ENUM if needed
     $enumCheck = $database->fetchAll("SHOW COLUMNS FROM student_assignments WHERE Field = 'status'");
     if (!empty($enumCheck)) {

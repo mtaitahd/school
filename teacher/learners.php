@@ -3,6 +3,8 @@ require_once __DIR__ . '/../php/includes/session.php';
 require_once __DIR__ . '/../php/includes/security.php';
 require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/migrate.php';
+ensure_schema_v2($database);
 require_once __DIR__ . '/../php/claim_code_generator.php';
 require_once __DIR__ . '/../php/sms_service.php';
 
