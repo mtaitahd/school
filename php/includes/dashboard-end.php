@@ -10,6 +10,7 @@
     </div>
 </div>
 
+<?php include __DIR__ . '/whatsapp-support.php'; ?>
 <?php $asset_base = ($base_path ?? '') . 'assets/'; ?>
 <script src="<?php echo $asset_base; ?>vendor/jquery/jquery.min.js"></script>
 <script src="<?php echo $asset_base; ?>vendor/jquery-easing/jquery.easing.min.js"></script>

@@ -18,7 +18,7 @@ if (!isset($nav_items)) {
                     <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                     <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                    <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://wa.me/255616591639" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                 </div>
             </div>
             <div class="col-child-3 footer-col">
@@ -49,3 +49,4 @@ if (!isset($nav_items)) {
         </div>
     </div>
 </footer>
+<?php include __DIR__ . '/whatsapp-support.php'; ?>

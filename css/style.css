@@ -2298,6 +2298,103 @@ body.page-child {
     transform: scale(1.1);
 }
 
+/* Floating WhatsApp support widget */
+.whatsapp-support {
+    position: fixed;
+    bottom: 80px;
+    right: 16px;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.whatsapp-toggle {
+    display: none;
+}
+
+.whatsapp-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #25D366;
+    color: #fff;
+    border: 3px solid #fff;
+    border-radius: 26px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    user-select: none;
+}
+
+.whatsapp-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+
+.whatsapp-btn i {
+    font-size: 1.4rem;
+}
+
+.whatsapp-menu {
+    display: none;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+    min-width: 230px;
+    animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.whatsapp-toggle:checked + .whatsapp-btn + .whatsapp-menu,
+.whatsapp-toggle:checked ~ .whatsapp-menu {
+    display: flex;
+}
+
+.whatsapp-menu-header {
+    background: #075E54;
+    color: #fff;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.whatsapp-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.15s;
+    font-size: 0.95rem;
+}
+
+.whatsapp-item:last-child {
+    border-bottom: none;
+}
+
+.whatsapp-item:hover {
+    background: #f0faf4;
+    color: #075E54;
+}
+
+.whatsapp-item i {
+    font-size: 1.3rem;
+    color: #25D366;
+}
+
 body.dyslexia-mode {
     font-family: 'Comic Sans MS', 'Nunito', sans-serif;
     letter-spacing: 0.05em;
