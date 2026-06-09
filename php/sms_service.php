@@ -154,7 +154,9 @@ class SmsService {
                 $status = strtolower($responseData['status'] ?? '');
                 $batchId = $responseData['batch_id'] ?? '';
 
-                if ($status === 'queued' && !empty($batchId)) {
+                $successStatuses = ['queued', 'success', 'sent', 'accepted'];
+
+                if (in_array($status, $successStatuses) && !empty($batchId)) {
                     $this->updateSMSLog($smsLogId, 'sent', $response);
                     return [
                         'success' => true,
@@ -165,7 +167,7 @@ class SmsService {
                     ];
                 }
 
-                if ($status === 'queued') {
+                if (in_array($status, $successStatuses)) {
                     $this->updateSMSLog($smsLogId, 'pending', $response, 'No batch_id returned');
                     return [
                         'success' => true,

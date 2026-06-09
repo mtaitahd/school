@@ -77,10 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if ($smsResult['success']) {
                 $response = ['ok' => true, 'message' => 'Message sent'];
             } else {
-                $response = ['ok' => false, 'message' => 'Message not sent'];
+                $errMsg = $smsResult['message'] ?? 'Unknown error';
+                $response = ['ok' => false, 'message' => 'Message not sent: ' . $errMsg];
             }
         } catch (Exception $e) {
-            $response = ['ok' => false, 'message' => 'Message not sent'];
+            $response = ['ok' => false, 'message' => 'Message not sent: ' . $e->getMessage()];
         }
     } else {
         $response = ['ok' => false, 'message' => 'Student has no claim code or parent phone number'];
