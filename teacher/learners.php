@@ -149,9 +149,14 @@ if (isset($_GET['edit'])) {
             <h1 class="activity-title mb-0">Learners Progress</h1>
             <p class="activity-instruction mb-0">Monitor learner performance and manage students</p>
         </div>
-        <button type="button" class="btn-child btn-child-primary" onclick="openModal('addStudentModal')">
-            <i class="fas fa-user-plus me-2"></i>Add Student
-        </button>
+        <div style="display: flex; gap: 10px;">
+            <a href="import-students" class="btn-child btn-child-secondary">
+                <i class="fas fa-file-import me-2"></i>Import
+            </a>
+            <button type="button" class="btn-child btn-child-primary" onclick="openModal('addStudentModal')">
+                <i class="fas fa-user-plus me-2"></i>Add Student
+            </button>
+        </div>
     </div>
 
     <?php if (isset($_GET['success'])): ?>

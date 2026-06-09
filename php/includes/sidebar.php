@@ -15,6 +15,7 @@ switch ($role) {
             ['id' => 'dashboard', 'href' => 'dashboard', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
             ['id' => 'classes', 'href' => 'manage-classes', 'icon' => 'fa-chalkboard-teacher', 'label' => 'Classes'],
             ['id' => 'learners', 'href' => 'learners', 'icon' => 'fa-users', 'label' => 'Learners'],
+            ['id' => 'import', 'href' => 'import-students', 'icon' => 'fa-file-import', 'label' => 'Import Students'],
             ['id' => 'assign', 'href' => 'assign-activity', 'icon' => 'fa-tasks', 'label' => 'Assign Activity'],
             ['id' => 'progress', 'href' => 'learners', 'icon' => 'fa-chart-line', 'label' => 'Learner Progress'],
             ['id' => 'lesson-plans', 'href' => 'lesson-plans', 'icon' => 'fa-book-open', 'label' => 'Lesson Plans'],
