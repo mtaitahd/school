@@ -5,6 +5,7 @@ require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/claim_code_generator.php';
 require_once __DIR__ . '/../php/sms_service.php';
+require_once __DIR__ . '/../php/includes/SpreadsheetReader.php';
 
 sec_require_rate_limit();
 
@@ -30,8 +31,8 @@ if (isset($_GET['download_template'])) {
     ];
 
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment; filename="student_import_template.xls"');
-    echo generateXLSX($headers, $rows);
+    header('Content-Disposition: attachment; filename="student_import_template.xlsx"');
+    echo SpreadsheetReader::generateXLSX($headers, $rows);
     exit;
 }
 
@@ -147,14 +148,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 fclose($handle);
             }
-        } elseif (in_array($extension, ['xls'])) {
+        } elseif (in_array($extension, ['xls', 'xlsx'])) {
             try {
-                $parsed_data = parseXLSX($file['tmp_name']);
+                $parsed_data = SpreadsheetReader::parseFile($file['tmp_name']);
             } catch (Exception $e) {
                 $parse_errors[] = 'Failed to parse Excel file: ' . $e->getMessage();
             }
         } else {
-            $parse_errors[] = 'Unsupported format. Please upload an Excel (.xlsx) or CSV (.csv) file.';
+            $parse_errors[] = 'Unsupported format. Please upload an Excel (.xls, .xlsx) or CSV (.csv) file.';
         }
 
         if (!empty($parsed_data)) {
@@ -173,205 +174,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-function parseXLSX($filePath) {
-    $zip = new ZipArchive();
-    if ($zip->open($filePath) !== true) {
-        throw new Exception('Cannot open XLSX file');
-    }
-
-    $sharedStrings = [];
-    $ssXml = $zip->getFromName('xl/sharedStrings.xls');
-    if ($ssXml !== false) {
-        $ss = simplexml_load_string($ssXml);
-        if ($ss !== false) {
-            foreach ($ss->si as $si) {
-                $sharedStrings[] = (string)$si->t;
-            }
-        }
-    }
-
-    $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xls');
-    $zip->close();
-
-    if ($sheetXml === false) {
-        throw new Exception('No worksheet found in XLSX file');
-    }
-
-    $xml = simplexml_load_string($sheet);
-    if ($xml === false) {
-        throw new Exception('Cannot parse worksheet data');
-    }
-
-    $ns = $xml->getNamespaces(true);
-    $mainNs = $ns[''] ?? '';
-
-    $sheetData = $xml->sheetData;
-    if ($mainNs && !$sheetData) {
-        $sheetData = $xml->children($mainNs)->sheetData;
-    }
-    if (!$sheetData) {
-        throw new Exception('No sheet data found');
-    }
-
-    $rows = $sheetData->row;
-    if (!$rows || count($rows) === 0) {
-        throw new Exception('No rows found in worksheet.xls');
-    }
-
-    $data = [];
-    $headers = [];
-    $rowIndex = 0;
-
-    foreach ($rows as $row) {
-        $cells = $mainNs ? $row->children($mainNs) : $row->children();
-        $cellList = [];
-        foreach ($cells->c as $cell) {
-            $cellList[] = $cell;
-        }
-
-        $rowData = [];
-        foreach ($cellList as $cell) {
-            $type = (string)$cell['t'];
-            if ($type === 's' && isset($cell->v)) {
-                $idx = (int)$cell->v;
-                $rowData[] = $sharedStrings[$idx] ?? '';
-            } elseif (isset($cell->v)) {
-                $rowData[] = (string)$cell->v;
-            } else {
-                $rowData[] = '';
-            }
-        }
-
-        if ($rowIndex === 0) {
-            if (!empty($rowData)) {
-                $rowData[0] = preg_replace('/^\xEF\xBB\xBF|\x{FEFF}/u', '', $rowData[0]);
-            }
-            $headers = array_map(function($h) { return trim(strtolower($h)); }, $rowData);
-        } else {
-            if (!empty($rowData)) {
-                $assoc = [];
-                foreach ($headers as $i => $h) {
-                    $assoc[$h] = $rowData[$i] ?? '';
-                }
-                if (!isset($assoc['password'])) $assoc['password'] = '';
-                if (!isset($assoc['phone'])) $assoc['phone'] = '';
-                if (!isset($assoc['parent_phone'])) $assoc['parent_phone'] = '';
-
-                $un = trim($assoc['username'] ?? '');
-                $fn = trim($assoc['first_name'] ?? '');
-                $ln = trim($assoc['last_name'] ?? '');
-                if (!empty($un) || !empty($fn) || !empty($ln)) {
-                    $data[] = $assoc;
-                }
-            }
-        }
-        $rowIndex++;
-    }
-
-    return $data;
-}
-
-function generateXLSX(array $headers, array $rows): string {
-    $zip = new ZipArchive();
-    $tmp = tempnam(sys_get_temp_dir(), 'xlsx');
-    if ($zip->open($tmp, ZipArchive::CREATE) !== true) {
-        throw new Exception('Cannot create XLSX file');
-    }
-
-    $zip->addFromString('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-  <Default Extension="xml" ContentType="application/xml"/>
-  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
-  <Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
-  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
-</Types>');
-
-    $zip->addFromString('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
-</Relationships>');
-
-    $zip->addFromString('xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-  <sheets><sheet name="Students" sheetId="1" r:id="rId1"/></sheets>
-</workbook>');
-
-    $zip->addFromString('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
-  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>
-  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
-</Relationships>');
-
-    $zip->addFromString('xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <fonts count="2">
-    <font><sz val="11"/><name val="Calibri"/></font>
-    <font><b/><sz val="11"/><name val="Calibri"/></font>
-  </fonts>
-  <fills count="2">
-    <fill><patternFill patternType="none"/></fill>
-    <fill><patternFill patternType="gray125"/></fill>
-  </fills>
-  <borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
-  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-  <cellXfs count="2">
-    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
-    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
-  </cellXfs>
-</styleSheet>');
-
-    $allStrings = array_merge($headers);
-    foreach ($rows as $row) {
-        $allStrings = array_merge($allStrings, $row);
-    }
-    $allStrings = array_values(array_unique($allStrings));
-    $stringIndex = array_flip($allStrings);
-
-    $ssXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="' . count($allStrings) . '" uniqueCount="' . count($allStrings) . '">';
-    foreach ($allStrings as $s) {
-        $ssXml .= '<si><t>' . htmlspecialchars($s, ENT_XML1) . '</t></si>';
-    }
-    $ssXml .= '</sst>';
-    $zip->addFromString('xl/sharedStrings.xml', $ssXml);
-
-    $sheetXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <sheetData>';
-    $colLetters = ['A','B','C','D','E','F','G','H','I','J'];
-
-    foreach ([$headers] as $ri => $rowData) {
-        $sheetXml .= '<row r="' . ($ri + 1) . '">';
-        foreach ($rowData as $ci => $val) {
-            $col = $colLetters[$ci] ?? 'A';
-            $idx = $stringIndex[$val];
-            $sheetXml .= '<c r="' . $col . ($ri + 1) . '" t="s"><v>' . $idx . '</v></c>';
-        }
-        $sheetXml .= '</row>';
-    }
-
-    foreach ($rows as $ri => $rowData) {
-        $rn = $ri + 2;
-        $sheetXml .= '<row r="' . $rn . '">';
-        foreach ($rowData as $ci => $val) {
-            $col = $colLetters[$ci] ?? 'A';
-            $idx = $stringIndex[$val];
-            $sheetXml .= '<c r="' . $col . $rn . '" t="s"><v>' . $idx . '</v></c>';
-        }
-        $sheetXml .= '</row>';
-    }
-
-    $sheetXml .= '</sheetData></worksheet>';
-    $zip->addFromString('xl/worksheets/sheet1.xml', $sheetXml);
-
-    $zip->close();
-    $content = file_get_contents($tmp);
-    unlink($tmp);
-    return $content;
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -443,7 +245,7 @@ function generateXLSX(array $headers, array $rows): string {
         <div style="padding: 20px;">
             <div class="alert-child alert-child-info mb-20">
                 <i class="fas fa-info-circle me-2"></i>
-                Upload an <strong>Excel (.xlsx)</strong> file with these columns:
+                Upload an <strong>Excel (.xls, .xlsx)</strong> file with these columns:
                 <br><br>
                 <strong>Required columns:</strong> <code>username</code>, <code>first_name</code>, <code>last_name</code>, <code>password</code>
                 <br><strong>Optional columns:</strong> <code>phone</code> (student phone), <code>parent_phone</code> (parent will receive SMS with claim code)
@@ -464,8 +266,8 @@ function generateXLSX(array $headers, array $rows): string {
                 <?php echo csrf_field(); ?>
                 <div class="form-group-child">
                     <label class="form-label-child">Select File *</label>
-                    <input type="file" class="form-control-child" name="import_file" accept=".xlsx,.csv" required>
-                    <small style="color: var(--text-light);">Format: Excel (.xlsx) or CSV (.csv)</small>
+                    <input type="file" class="form-control-child" name="import_file" accept=".xls,.xlsx,.csv" required>
+                    <small style="color: var(--text-light);">Format: Excel (.xls, .xlsx) or CSV (.csv)</small>
                 </div>
                 <?php if (!empty($classes)): ?>
                 <div class="form-group-child">

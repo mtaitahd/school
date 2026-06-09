@@ -476,7 +476,25 @@ if (isset($_GET['edit'])) {
     <script>
         <?php if (!empty($_GET['add'])): ?>document.addEventListener('DOMContentLoaded', function(){ openModal('addStudentModal'); });<?php endif; ?>
         function viewLearnerDetails(learnerId) {
-            window.location.href = '../parent/child-progress.php?child_id=' + learnerId;
+            fetch('../api/check-student-subscription.php?student_id=' + learnerId)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.active) {
+                        window.location.href = '../parent/child-progress.php?child_id=' + learnerId;
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Subscription Required',
+                            html: data.message + '<br><br><a href="../payment" class="btn-child btn-child-primary" style="display:inline-flex;padding:8px 25px;">Go to Payment</a>',
+                            showConfirmButton: true,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: 'var(--primary-blue)'
+                        });
+                    }
+                })
+                .catch(function() {
+                    window.location.href = '../parent/child-progress.php?child_id=' + learnerId;
+                });
         }
 
         function copyCode(code) {
