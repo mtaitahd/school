@@ -22,15 +22,16 @@ $classes = $database->fetchAll(
 
 // Handle template download
 if (isset($_GET['download_template'])) {
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="student_import_template.csv"');
-    $output = fopen('php://output', 'w');
-    fwrite($output, "\xEF\xBB\xBF");
-    fputcsv($output, ['username', 'first_name', 'last_name', 'password', 'phone', 'parent_phone']);
-    fputcsv($output, ['john.doe', 'John', 'Doe', 'pass123', '+255700000000', '+255711000000']);
-    fputcsv($output, ['jane.doe', 'Jane', 'Doe', 'pass456', '+255700000001', '+255711000001']);
-    fputcsv($output, ['kamau.k', 'Kamau', 'Kip', 'pass789', '', '']);
-    fclose($output);
+    $headers = ['username', 'first_name', 'last_name', 'password', 'phone', 'parent_phone'];
+    $rows = [
+        ['john.doe', 'John', 'Doe', 'pass123', '+255700000000', '+255711000000'],
+        ['jane.doe', 'Jane', 'Doe', 'pass456', '+255700000001', '+255711000001'],
+        ['kamau.k', 'Kamau', 'Kip', 'pass789', '', ''],
+    ];
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="student_import_template.xls"');
+    echo generateXLSX($headers, $rows);
     exit;
 }
 
@@ -146,14 +147,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 fclose($handle);
             }
-        } elseif (in_array($extension, ['xlsx'])) {
+        } elseif (in_array($extension, ['xls'])) {
             try {
                 $parsed_data = parseXLSX($file['tmp_name']);
             } catch (Exception $e) {
                 $parse_errors[] = 'Failed to parse Excel file: ' . $e->getMessage();
             }
         } else {
-            $parse_errors[] = 'Unsupported format. Please upload a .csv or .xlsx file.';
+            $parse_errors[] = 'Unsupported format. Please upload an Excel (.xlsx) or CSV (.csv) file.';
         }
 
         if (!empty($parsed_data)) {
@@ -179,7 +180,7 @@ function parseXLSX($filePath) {
     }
 
     $sharedStrings = [];
-    $ssXml = $zip->getFromName('xl/sharedStrings.xml');
+    $ssXml = $zip->getFromName('xl/sharedStrings.xls');
     if ($ssXml !== false) {
         $ss = simplexml_load_string($ssXml);
         if ($ss !== false) {
@@ -189,14 +190,14 @@ function parseXLSX($filePath) {
         }
     }
 
-    $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
+    $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xls');
     $zip->close();
 
     if ($sheetXml === false) {
         throw new Exception('No worksheet found in XLSX file');
     }
 
-    $xml = simplexml_load_string($sheetXml);
+    $xml = simplexml_load_string($sheet);
     if ($xml === false) {
         throw new Exception('Cannot parse worksheet data');
     }
@@ -214,7 +215,7 @@ function parseXLSX($filePath) {
 
     $rows = $sheetData->row;
     if (!$rows || count($rows) === 0) {
-        throw new Exception('No rows found in worksheet');
+        throw new Exception('No rows found in worksheet.xls');
     }
 
     $data = [];
@@ -268,6 +269,108 @@ function parseXLSX($filePath) {
     }
 
     return $data;
+}
+
+function generateXLSX(array $headers, array $rows): string {
+    $zip = new ZipArchive();
+    $tmp = tempnam(sys_get_temp_dir(), 'xlsx');
+    if ($zip->open($tmp, ZipArchive::CREATE) !== true) {
+        throw new Exception('Cannot create XLSX file');
+    }
+
+    $zip->addFromString('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>');
+
+    $zip->addFromString('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>');
+
+    $zip->addFromString('xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets><sheet name="Students" sheetId="1" r:id="rId1"/></sheets>
+</workbook>');
+
+    $zip->addFromString('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>');
+
+    $zip->addFromString('xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="2">
+    <font><sz val="11"/><name val="Calibri"/></font>
+    <font><b/><sz val="11"/><name val="Calibri"/></font>
+  </fonts>
+  <fills count="2">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+  </fills>
+  <borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="2">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+  </cellXfs>
+</styleSheet>');
+
+    $allStrings = array_merge($headers);
+    foreach ($rows as $row) {
+        $allStrings = array_merge($allStrings, $row);
+    }
+    $allStrings = array_values(array_unique($allStrings));
+    $stringIndex = array_flip($allStrings);
+
+    $ssXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="' . count($allStrings) . '" uniqueCount="' . count($allStrings) . '">';
+    foreach ($allStrings as $s) {
+        $ssXml .= '<si><t>' . htmlspecialchars($s, ENT_XML1) . '</t></si>';
+    }
+    $ssXml .= '</sst>';
+    $zip->addFromString('xl/sharedStrings.xml', $ssXml);
+
+    $sheetXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetData>';
+    $colLetters = ['A','B','C','D','E','F','G','H','I','J'];
+
+    foreach ([$headers] as $ri => $rowData) {
+        $sheetXml .= '<row r="' . ($ri + 1) . '">';
+        foreach ($rowData as $ci => $val) {
+            $col = $colLetters[$ci] ?? 'A';
+            $idx = $stringIndex[$val];
+            $sheetXml .= '<c r="' . $col . ($ri + 1) . '" t="s"><v>' . $idx . '</v></c>';
+        }
+        $sheetXml .= '</row>';
+    }
+
+    foreach ($rows as $ri => $rowData) {
+        $rn = $ri + 2;
+        $sheetXml .= '<row r="' . $rn . '">';
+        foreach ($rowData as $ci => $val) {
+            $col = $colLetters[$ci] ?? 'A';
+            $idx = $stringIndex[$val];
+            $sheetXml .= '<c r="' . $col . $rn . '" t="s"><v>' . $idx . '</v></c>';
+        }
+        $sheetXml .= '</row>';
+    }
+
+    $sheetXml .= '</sheetData></worksheet>';
+    $zip->addFromString('xl/worksheets/sheet1.xml', $sheetXml);
+
+    $zip->close();
+    $content = file_get_contents($tmp);
+    unlink($tmp);
+    return $content;
 }
 ?>
 <!DOCTYPE html>
@@ -340,11 +443,13 @@ function parseXLSX($filePath) {
         <div style="padding: 20px;">
             <div class="alert-child alert-child-info mb-20">
                 <i class="fas fa-info-circle me-2"></i>
+                Upload an <strong>Excel (.xlsx)</strong> file with these columns:
+                <br><br>
                 <strong>Required columns:</strong> <code>username</code>, <code>first_name</code>, <code>last_name</code>, <code>password</code>
                 <br><strong>Optional columns:</strong> <code>phone</code> (student phone), <code>parent_phone</code> (parent will receive SMS with claim code)
                 <br><br>
                 <a href="?download_template=1" class="btn-child btn-child-primary" style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 15px; font-size: 0.85rem;">
-                    <i class="fas fa-download"></i> Download CSV Template
+                    <i class="fas fa-download"></i> Download Excel Template
                 </a>
             </div>
 
@@ -359,8 +464,8 @@ function parseXLSX($filePath) {
                 <?php echo csrf_field(); ?>
                 <div class="form-group-child">
                     <label class="form-label-child">Select File *</label>
-                    <input type="file" class="form-control-child" name="import_file" accept=".csv,.xlsx" required>
-                    <small style="color: var(--text-light);">Accepted formats: .csv, .xlsx</small>
+                    <input type="file" class="form-control-child" name="import_file" accept=".xlsx,.csv" required>
+                    <small style="color: var(--text-light);">Format: Excel (.xlsx) or CSV (.csv)</small>
                 </div>
                 <?php if (!empty($classes)): ?>
                 <div class="form-group-child">
