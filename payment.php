@@ -191,8 +191,7 @@ $dashboard_page_title = 'Payment';
 
         <form method="POST" id="paymentForm">
             <?= csrf_field() ?>
-            <input type="hidden" name="payment_method" id="paymentMethod" value="snippe">
-            <input type="hidden" name="payment_submethod" id="paymentSubmethod" value="mobile">
+            <input type="hidden" name="payment_method" id="paymentMethod" value="manual">
             <input type="hidden" name="payment_type" id="paymentType" value="subscription">
             <input type="hidden" name="phone" id="phoneInput">
             <input type="hidden" name="email" id="emailInput">
@@ -207,7 +206,7 @@ $dashboard_page_title = 'Payment';
                     </button>
                 </div>
                 <div class="col-md-6">
-                    <button type="button" class="btn btn-outline-primary w-100 py-4 rounded-4 shadow-sm d-flex align-items-center justify-content-center gap-3" style="border:2px dashed #93c5fd;font-size:1.05rem;" onclick="openMethodModal()">
+                    <button type="button" class="btn btn-outline-primary w-100 py-4 rounded-4 shadow-sm d-flex align-items-center justify-content-center gap-3" style="border:2px dashed #93c5fd;font-size:1.05rem;" onclick="openManualModal()">
                         <i class="fas fa-credit-card fa-lg"></i>
                         <span class="fw-bold">Choose Payment Method</span>
                     </button>
@@ -246,117 +245,7 @@ $dashboard_page_title = 'Payment';
     </div>
 </div>
 
-<!-- ===== PAYMENT METHOD MODAL ===== -->
-<div class="modal fade modal-pform" id="paymentMethodModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Payment Method</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted small mb-3">Choose how you want to pay</p>
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="method-card d-flex flex-column align-items-start" onclick="openMobileModal()">
-                            <div class="mc-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
-                                <i class="fas fa-mobile-alt"></i>
-                            </div>
-                            <div class="mc-title">Mobile Money</div>
-                            <div class="mc-desc">Airtel, M-Pesa, Mixx, Halotel<br>Pay with USSD push</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="method-card d-flex flex-column align-items-start" onclick="cardPayment()">
-                            <div class="mc-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">
-                                <i class="fas fa-credit-card"></i>
-                            </div>
-                            <div class="mc-title">Card Payment</div>
-                            <div class="mc-desc">Visa, Mastercard, Local debit<br>Redirect to secure checkout</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="method-card d-flex flex-column align-items-start" onclick="openManualModal()">
-                            <div class="mc-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
-                                <i class="fas fa-hand-holding-usd"></i>
-                            </div>
-                            <div class="mc-title">Manual Payment</div>
-                            <div class="mc-desc">Mix by Yas Lipa<br>Send to <?= MANUAL_PAYMENT_NUMBER ?></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ===== MOBILE MONEY MODAL ===== -->
-<div class="modal fade modal-pform" id="mobileMoneyModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold"><i class="fas fa-mobile-alt me-2 text-primary"></i>Mobile Money</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info border-0 rounded-3 py-2 small d-flex align-items-center gap-2 mb-3">
-                    <i class="fas fa-info-circle"></i>
-                    Weka namba ya simu yako. Utapokea USSD push kwenye simu yako kukamilisha malipo.
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-semibold small text-muted mb-2"><i class="fas fa-phone me-1"></i> Namba ya Simu</label>
-                    <div class="phone-prefix">
-                        <span class="prefix">+255</span>
-                        <input type="tel" class="form-control form-control-lg" id="modalPhone" placeholder="XX XXX XXXX" maxlength="10" autocomplete="off">
-                    </div>
-                    <div class="small text-muted mt-2">
-                        <i class="fas fa-info-circle me-1"></i> Weka namba yako yoyote (M-Pesa, Airtel, Mixx, Halotel)
-                    </div>
-                </div>
-
-                <div id="mobileAmountRow" class="mb-3" style="display:none;">
-                    <label class="form-label fw-semibold small text-muted">Amount (TZS)</label>
-                    <input type="number" class="form-control form-control-lg" id="mobileAmount" min="500" step="500" placeholder="Enter amount">
-                </div>
-
-                <button type="button" class="btn btn-primary w-100 btn-lg rounded-3 mb-2" id="mobilePayBtn" onclick="submitMobilePayment()">
-                    <i class="fas fa-check-circle me-2"></i> Pay
-                </button>
-                <button type="button" class="btn btn-outline-secondary w-100 rounded-3" onclick="cancelMobilePayment()">
-                    <i class="fas fa-times me-2"></i> Cancel
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ===== CARD EMAIL MODAL (fallback if no stored email) ===== -->
-<div class="modal fade modal-pform" id="cardEmailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Card Payment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted small mb-3">Enter your email to proceed to secure checkout</p>
-                <div class="mb-3">
-                    <input type="email" class="form-control form-control-lg" id="cardEmailInput" placeholder="your@email.com">
-                </div>
-                <div id="cardAmtRow" class="mb-3" style="display:none;">
-                    <label class="form-label fw-semibold text-muted small">Amount (TZS)</label>
-                    <input type="number" class="form-control form-control-lg" id="cardAmtInput" min="500" step="500" placeholder="Enter amount">
-                </div>
-                <button type="button" class="btn btn-primary w-100 btn-lg rounded-3" onclick="doCardSubmit()" id="cardCheckoutBtn">
-                    <i class="fas fa-arrow-right me-2"></i> Continue to Checkout
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ===== MANUAL PAYMENT MODAL ===== -->
+<!-- ===== MANUAL PAYMENT MODAL (Lipa Number) ===== -->
 <div class="modal fade modal-pform" id="manualModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -414,21 +303,17 @@ $dashboard_page_title = 'Payment';
 
 <script>
 const isWallet = () => document.getElementById('paymentType').value === 'wallet_topup';
-const userEmail = '<?= htmlspecialchars(addslashes($userEmailStored)) ?>';
-let csrfToken = '<?= htmlspecialchars(addslashes(csrf_token())) ?>';
 
-// ===== Auto-flow: Type → Method =====
+// ===== Auto-flow: Type → Manual Payment (Lipa Number) =====
 function selectTypeAndProceed(type) {
     document.querySelectorAll('.type-card').forEach(o => o.classList.remove('active'));
     document.getElementById(type === 'subscription' ? 'typeSubCard' : 'typeWalletCard').classList.add('active');
     document.getElementById('paymentType').value = type;
-    const showAmt = type === 'wallet_topup';
-    document.getElementById('mobileAmountRow').style.display = showAmt ? 'block' : 'none';
-    document.getElementById('manualAmountLabel').textContent = showAmt ? 'Custom Amount (Wallet Topup)' : '1,500 TZS (Subscription)';
+    document.getElementById('manualAmountLabel').textContent = type === 'wallet_topup' ? 'Custom Amount (Wallet Topup)' : '1,500 TZS (Subscription)';
 
     bootstrap.Modal.getInstance(document.getElementById('paymentTypeModal')).hide();
     setTimeout(() => {
-        new bootstrap.Modal(document.getElementById('paymentMethodModal')).show();
+        new bootstrap.Modal(document.getElementById('manualModal')).show();
     }, 300);
 }
 
@@ -437,153 +322,12 @@ function openTypeModal() {
     new bootstrap.Modal(document.getElementById('paymentTypeModal')).show();
 }
 
-function openMethodModal() {
-    new bootstrap.Modal(document.getElementById('paymentMethodModal')).show();
-}
-
-function openMobileModal() {
-    const typeModal = document.getElementById('paymentMethodModal');
-    const bsModal = bootstrap.Modal.getInstance(typeModal);
-    if (bsModal) bsModal.hide();
-
-    document.getElementById('paymentMethod').value = 'snippe';
-    document.getElementById('paymentSubmethod').value = 'mobile';
-    document.getElementById('modalPhone').value = '';
-    document.getElementById('modalPhone').classList.remove('is-invalid');
-    const payBtn = document.getElementById('mobilePayBtn');
-    payBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Pay';
-    payBtn.disabled = false;
-
-    setTimeout(() => {
-        new bootstrap.Modal(document.getElementById('mobileMoneyModal')).show();
-        setTimeout(() => document.getElementById('modalPhone').focus(), 500);
-    }, 300);
-}
-
 function openManualModal() {
-    const typeModal = document.getElementById('paymentMethodModal');
-    const bsModal = bootstrap.Modal.getInstance(typeModal);
-    if (bsModal) bsModal.hide();
-
     document.getElementById('paymentMethod').value = 'manual';
-    setTimeout(() => {
-        new bootstrap.Modal(document.getElementById('manualModal')).show();
-    }, 300);
+    new bootstrap.Modal(document.getElementById('manualModal')).show();
 }
 
-// ===== Card Payment — AJAX direct to Snippe =====
-function cardPayment() {
-    const modal = bootstrap.Modal.getInstance(document.getElementById('paymentMethodModal'));
-    if (modal) modal.hide();
-
-    document.getElementById('paymentMethod').value = 'snippe';
-    document.getElementById('paymentSubmethod').value = 'card';
-
-    document.getElementById('cardAmtRow').style.display = isWallet() ? 'block' : 'none';
-
-    if (userEmail && userEmail.includes('@') && !isWallet()) {
-        doCardAjax(userEmail);
-    } else {
-        setTimeout(() => {
-            new bootstrap.Modal(document.getElementById('cardEmailModal')).show();
-        }, 300);
-    }
-}
-
-function doCardSubmit() {
-    const email = document.getElementById('cardEmailInput').value.trim();
-    if (!email || !email.includes('@')) {
-        document.getElementById('cardEmailInput').classList.add('is-invalid');
-        document.getElementById('cardEmailInput').focus();
-        return;
-    }
-    if (isWallet()) {
-        const amt = document.getElementById('cardAmtInput').value;
-        if (!amt || amt < 500) {
-            document.getElementById('cardAmtInput').classList.add('is-invalid');
-            document.getElementById('cardAmtInput').focus();
-            return;
-        }
-        document.getElementById('amountInput').value = amt;
-    }
-    bootstrap.Modal.getInstance(document.getElementById('cardEmailModal')).hide();
-    doCardAjax(email);
-}
-
-function doCardAjax(email) {
-    const btn = document.getElementById('cardCheckoutBtn') || document.querySelector('.btn-primary');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Redirecting...'; }
-
-    const formData = new FormData();
-    formData.append('payment_type', document.getElementById('paymentType').value);
-    formData.append('email', email);
-    formData.append('_csrf_token', csrfToken);
-    if (isWallet()) {
-        formData.append('amount', document.getElementById('amountInput').value || document.getElementById('cardAmtInput').value || '0');
-    }
-
-    fetch('api/init-card-payment.php', {
-        method: 'POST',
-        headers: { 'X-CSRF-Token': csrfToken },
-        body: formData,
-        credentials: 'same-origin'
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.ok && data.payment_url) {
-            window.location.href = data.payment_url;
-        } else if (data.ok && data.reference) {
-            window.location.href = 'payment-status.php?ref=' + data.reference;
-        } else {
-            alert(data.error || 'Payment failed. Please try again.');
-            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-arrow-right me-2"></i> Continue to Checkout'; }
-        }
-    })
-    .catch(err => {
-        alert('Network error. Please try again.');
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-arrow-right me-2"></i> Continue to Checkout'; }
-    });
-}
-
-// ===== Mobile Money =====
-function submitMobilePayment() {
-    const phoneInput = document.getElementById('modalPhone');
-    const raw = phoneInput.value.replace(/\D/g, '');
-    if (raw.length < 9) {
-        phoneInput.classList.add('is-invalid');
-        phoneInput.focus();
-        return;
-    }
-
-    if (isWallet()) {
-        const amt = document.getElementById('mobileAmount').value;
-        if (!amt || amt < 500) {
-            document.getElementById('mobileAmount').classList.add('is-invalid');
-            document.getElementById('mobileAmount').focus();
-            return;
-        }
-        document.getElementById('amountInput').value = amt;
-    }
-
-    const payBtn = document.getElementById('mobilePayBtn');
-    payBtn.disabled = true;
-    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
-
-    const fullNumber = '+255' + raw.slice(-9);
-    document.getElementById('phoneInput').value = fullNumber;
-    document.getElementById('paymentForm').submit();
-}
-
-function cancelMobilePayment() {
-    document.getElementById('modalPhone').value = '';
-    document.getElementById('modalPhone').classList.remove('is-invalid');
-    const payBtn = document.getElementById('mobilePayBtn');
-    payBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Pay';
-    payBtn.disabled = false;
-    bootstrap.Modal.getInstance(document.getElementById('mobileMoneyModal')).hide();
-}
-
-// ===== Manual Payment =====
+// ===== Manual Payment (Lipa Number) =====
 function submitManualPayment() {
     const phone = document.getElementById('manualPhone').value.trim();
     const txnId = document.getElementById('manualTxnId').value.trim();
@@ -603,25 +347,7 @@ function submitManualPayment() {
     document.getElementById('paymentForm').submit();
 }
 
-// ===== Phone Formatting =====
-document.getElementById('modalPhone').addEventListener('input', function () {
-    const digits = this.value.replace(/\D/g, '').slice(0, 9);
-    this.classList.remove('is-invalid');
-    this.value = digits.length > 5 ? digits.slice(0, 5) + ' ' + digits.slice(5) : digits;
-});
-
-// ===== Enter key submits mobile payment =====
-document.getElementById('modalPhone').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { e.preventDefault(); submitMobilePayment(); }
-});
-
 // ===== Form validation styling =====
-document.querySelectorAll('#cardEmailModal input, #cardEmailModal .form-control').forEach(i => {
-    i.addEventListener('input', () => i.classList.remove('is-invalid'));
-});
-document.querySelectorAll('#mobileMoneyModal input').forEach(i => {
-    i.addEventListener('input', () => i.classList.remove('is-invalid'));
-});
 document.querySelectorAll('#manualModal input').forEach(i => {
     i.addEventListener('input', () => i.classList.remove('is-invalid'));
 });
