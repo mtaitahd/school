@@ -356,5 +356,15 @@ function ensure_schema_v2($database): void {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
 
+    // Add age and gender columns to users table
+    $userCols = $database->fetchAll("SHOW COLUMNS FROM users");
+    $uFields = array_column($userCols, 'Field');
+    if (!in_array('age', $uFields)) {
+        $database->execute("ALTER TABLE users ADD COLUMN age INT NULL AFTER last_name");
+    }
+    if (!in_array('gender', $uFields)) {
+        $database->execute("ALTER TABLE users ADD COLUMN gender VARCHAR(10) NULL AFTER age");
+    }
+
     $done = true;
 }

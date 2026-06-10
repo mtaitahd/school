@@ -41,15 +41,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_learner') {
     csrf_require();
     $student_id = intval($_POST['student_id']);
-    $first_name = trim($_POST['first_name'] ?? '');
-    $last_name = trim($_POST['last_name'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
+    $fullname = trim($_POST['fullname'] ?? '');
+    $age = intval($_POST['age'] ?? 0);
+    $gender = trim($_POST['gender'] ?? '');
     $parent_phone = trim($_POST['parent_phone'] ?? '');
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     
-    if (!empty($first_name) && !empty($last_name)) {
-        $sql = "UPDATE users SET first_name = ?, last_name = ?, phone = ?, parent_phone = ?, is_active = ? WHERE user_id = ?";
-        $params = [$first_name, $last_name, $phone, $parent_phone, $is_active, $student_id];
+    if (!empty($fullname)) {
+        $nameParts = explode(' ', $fullname, 2);
+        $first_name = $nameParts[0];
+        $last_name = $nameParts[1] ?? '';
+        $sql = "UPDATE users SET first_name = ?, last_name = ?, age = ?, gender = ?, parent_phone = ?, is_active = ? WHERE user_id = ?";
+        $params = [$first_name, $last_name, $age, $gender, $parent_phone, $is_active, $student_id];
         
         if ($database->execute($sql, $params)) {
             $success = "Learner information updated successfully!";
@@ -57,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $error = "Failed to update learner information.";
         }
     } else {
-        $error = "First name and last name are required.";
+            $error = "Full name is required.";
     }
 }
 
@@ -319,7 +322,9 @@ if (isset($_GET['edit'])) {
                                                     '<?php echo htmlspecialchars($learner['last_name'], ENT_QUOTES); ?>', 
                                                     '<?php echo htmlspecialchars($learner['username'], ENT_QUOTES); ?>', 
                                                     '<?php echo htmlspecialchars($learner['parent_phone'] ?? '', ENT_QUOTES); ?>', 
-                                                    <?php echo $learner['is_active'] ? 'true' : 'false'; ?>)" 
+                                                    <?php echo $learner['is_active'] ? 'true' : 'false'; ?>,
+                                                    <?php echo (int)($learner['age'] ?? 0); ?>,
+                                                    '<?php echo htmlspecialchars($learner['gender'] ?? '', ENT_QUOTES); ?>')" 
                                                 title="Edit Learner">
                                             <i class="fas fa-edit"></i>
                                         </button>
@@ -384,20 +389,25 @@ if (isset($_GET['edit'])) {
                     <?php endif; ?>
                     
                     <div class="form-group-child">
-                        <label class="form-label-child">Username *</label>
-                        <input type="text" class="form-control-child" name="username" required autocomplete="off">
+                        <label class="form-label-child">FULLNAME *</label>
+                        <input type="text" class="form-control-child" name="fullname" required placeholder="e.g. John Doe" autocomplete="off">
                     </div>
                     <div class="row-child">
                         <div class="col-child-2">
                             <div class="form-group-child">
-                                <label class="form-label-child">First name *</label>
-                                <input type="text" class="form-control-child" name="first_name" required>
+                                <label class="form-label-child">AGE *</label>
+                                <input type="number" class="form-control-child" name="age" required min="1" max="120">
                             </div>
                         </div>
                         <div class="col-child-2">
                             <div class="form-group-child">
-                                <label class="form-label-child">Last name *</label>
-                                <input type="text" class="form-control-child" name="last_name" required>
+                                <label class="form-label-child">GENDER *</label>
+                                <select class="form-control-child" name="gender" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -406,9 +416,9 @@ if (isset($_GET['edit'])) {
                         <input type="password" class="form-control-child" name="password" required minlength="6">
                     </div>
                     <div class="form-group-child">
-                        <label class="form-label-child">Parent phone (for claim code SMS)</label>
-                        <input type="text" class="form-control-child" name="parent_phone" placeholder="+255XXXXXXXXX">
-                        <small style="color:var(--text-light);">Parent uses claim code on their dashboard � no direct add.</small>
+                        <label class="form-label-child">Parent Phone Number *</label>
+                        <input type="text" class="form-control-child" name="parent_phone" required placeholder="+255XXXXXXXXX">
+                        <small style="color:var(--text-light);">Parent will receive SMS with claim code to link their child</small>
                     </div>
                 </div>
                 <div class="kona-modal-footer">
@@ -430,24 +440,28 @@ if (isset($_GET['edit'])) {
                 <input type="hidden" name="action" value="update_learner">
                 <input type="hidden" name="student_id" id="edit_student_id">
                 <div class="kona-modal-body">
+                    <div class="form-group-child">
+                        <label class="form-label-child">FULLNAME</label>
+                        <input type="text" class="form-control-child" name="fullname" id="edit_fullname" required placeholder="e.g. John Doe">
+                    </div>
                     <div class="row-child">
                         <div class="col-child-2">
                             <div class="form-group-child">
-                                <label class="form-label-child">First Name</label>
-                                <input type="text" class="form-control-child" name="first_name" id="edit_first_name" required>
+                                <label class="form-label-child">AGE</label>
+                                <input type="number" class="form-control-child" name="age" id="edit_age" min="1" max="120">
                             </div>
                         </div>
                         <div class="col-child-2">
                             <div class="form-group-child">
-                                <label class="form-label-child">Last Name</label>
-                                <input type="text" class="form-control-child" name="last_name" id="edit_last_name" required>
+                                <label class="form-label-child">GENDER</label>
+                                <select class="form-control-child" name="gender" id="edit_gender">
+                                    <option value="">-- Select --</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group-child">
-                        <label class="form-label-child">Username</label>
-                        <input type="text" class="form-control-child" id="edit_username" disabled>
-                        <small style="color: var(--text-light);">Username cannot be changed</small>
                     </div>
                     <div class="form-group-child">
                         <label class="form-label-child">Parent Phone Number</label>
@@ -506,11 +520,11 @@ if (isset($_GET['edit'])) {
             });
         }
 
-        function openEditLearnerModal(studentId, firstName, lastName, username, parentPhone, isActive) {
+        function openEditLearnerModal(studentId, firstName, lastName, username, parentPhone, isActive, age, gender) {
             document.getElementById('edit_student_id').value = studentId;
-            document.getElementById('edit_first_name').value = firstName;
-            document.getElementById('edit_last_name').value = lastName;
-            document.getElementById('edit_username').value = username;
+            document.getElementById('edit_fullname').value = (firstName + ' ' + lastName).trim();
+            document.getElementById('edit_age').value = age || '';
+            document.getElementById('edit_gender').value = gender || '';
             document.getElementById('edit_parent_phone').value = parentPhone;
             document.getElementById('edit_is_active').checked = isActive;
             openModal('editLearnerModal');

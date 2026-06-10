@@ -23,22 +23,32 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || ($_POST['action'] ?? '') !== 'add_s
 
 csrf_require();
 
-$username = trim($_POST['username'] ?? '');
-$first_name = trim($_POST['first_name'] ?? '');
-$last_name = trim($_POST['last_name'] ?? '');
+$fullname = trim($_POST['fullname'] ?? '');
+$age = isset($_POST['age']) ? (int) $_POST['age'] : 0;
+$gender = trim($_POST['gender'] ?? '');
 $password = trim($_POST['password'] ?? '');
-$phone = trim($_POST['phone'] ?? '');
 $parent_phone = trim($_POST['parent_phone'] ?? '');
 $class_id = !empty($_POST['class_id']) ? (int) $_POST['class_id'] : null;
 
-if ($username === '' || $first_name === '' || $last_name === '' || $password === '') {
+// Split fullname into first and last name
+$nameParts = explode(' ', $fullname, 2);
+$first_name = $nameParts[0];
+$last_name = $nameParts[1] ?? '';
+
+if ($fullname === '' || $password === '') {
     header('Location: ' . $redirect . '?error=missing_fields');
     exit;
 }
 
-if ($database->fetchOne('SELECT user_id FROM users WHERE username = ?', [$username])) {
-    header('Location: ' . $redirect . '?error=username_exists');
-    exit;
+// Auto-generate username from fullname
+$username = strtolower(preg_replace('/[^a-zA-Z0-9]/', '.', $fullname));
+$username = preg_replace('/\.+/', '.', $username);
+$username = trim($username, '.');
+$base_username = $username;
+$suffix = 1;
+while ($database->fetchOne('SELECT user_id FROM users WHERE username = ?', [$username])) {
+    $username = $base_username . '.' . $suffix;
+    $suffix++;
 }
 
 $codeGenerator = new ClaimCodeGenerator();
@@ -46,9 +56,9 @@ $claim_code = $codeGenerator->generateCode();
 $hashed = password_hash($password, PASSWORD_DEFAULT);
 
 $student_id = $database->insert(
-    "INSERT INTO users (username, password, role, first_name, last_name, phone, parent_phone, claim_code, claim_code_created_at)
-     VALUES (?, ?, 'learner', ?, ?, ?, ?, ?, NOW())",
-    [$username, $hashed, $first_name, $last_name, $phone, $parent_phone, $claim_code]
+    "INSERT INTO users (username, password, role, first_name, last_name, age, gender, parent_phone, claim_code, claim_code_created_at)
+     VALUES (?, ?, 'learner', ?, ?, ?, ?, ?, ?, NOW())",
+    [$username, $hashed, $first_name, $last_name, $age, $gender, $parent_phone, $claim_code]
 );
 
 if ($student_id) {

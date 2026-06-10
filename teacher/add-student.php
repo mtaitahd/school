@@ -21,31 +21,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $results = [];
         
         foreach ($students as $index => $student_data) {
-            $username = trim($student_data['username'] ?? '');
-            $first_name = trim($student_data['first_name'] ?? '');
-            $last_name = trim($student_data['last_name'] ?? '');
+            $fullname = trim($student_data['fullname'] ?? '');
+            $age = intval($student_data['age'] ?? 0);
+            $gender = trim($student_data['gender'] ?? '');
             $password = trim($student_data['password'] ?? '');
-            $phone = trim($student_data['phone'] ?? '');
             $parent_phone = trim($student_data['parent_phone'] ?? '');
             
             // Skip empty rows
-            if (empty($username) && empty($first_name) && empty($last_name)) {
+            if (empty($fullname)) {
                 continue;
             }
             
+            // Split fullname into first and last name
+            $nameParts = explode(' ', $fullname, 2);
+            $first_name = $nameParts[0];
+            $last_name = $nameParts[1] ?? '';
+            
             // Validate inputs
-            if (empty($username) || empty($first_name) || empty($last_name) || empty($password)) {
+            if (empty($fullname) || empty($password)) {
                 $error_count++;
                 $results[] = "Row " . ($index + 1) . ": Missing required fields";
                 continue;
             }
             
-            // Check if username already exists
-            $existing = $database->fetchOne("SELECT user_id FROM users WHERE username = ?", [$username]);
-            if ($existing) {
-                $error_count++;
-                $results[] = "Row " . ($index + 1) . ": Username '$username' already exists";
-                continue;
+            // Auto-generate username from fullname
+            $username = strtolower(preg_replace('/[^a-zA-Z0-9]/', '.', $fullname));
+            $username = preg_replace('/\.+/', '.', $username);
+            $username = trim($username, '.');
+            $base_username = $username;
+            $suffix = 1;
+            while ($database->fetchOne("SELECT user_id FROM users WHERE username = ?", [$username])) {
+                $username = $base_username . '.' . $suffix;
+                $suffix++;
             }
             
             // Hash password
@@ -56,9 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $claim_code = $codeGenerator->generateCode();
             
             // Insert student with claim code
-            $sql = "INSERT INTO users (username, password, role, first_name, last_name, phone, parent_phone, claim_code, claim_code_created_at) 
-                    VALUES (?, ?, 'learner', ?, ?, ?, ?, ?, NOW())";
-            $params = [$username, $hashed_password, $first_name, $last_name, $phone, $parent_phone, $claim_code];
+            $sql = "INSERT INTO users (username, password, role, first_name, last_name, age, gender, parent_phone, claim_code, claim_code_created_at) 
+                    VALUES (?, ?, 'learner', ?, ?, ?, ?, ?, ?, NOW())";
+            $params = [$username, $hashed_password, $first_name, $last_name, $age, $gender, $parent_phone, $claim_code];
             
             $student_id = $database->insert($sql, $params);
             
@@ -93,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 $success_count++;
-                $results[] = "Row " . ($index + 1) . ": $first_name $last_name - Claim Code: $claim_code";
+                $results[] = "Row " . ($index + 1) . ": $fullname - Claim Code: $claim_code";
             } else {
                 $error_count++;
                 $results[] = "Row " . ($index + 1) . ": Failed to create student";
@@ -109,33 +116,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else {
         // Single student submission (backward compatibility)
-        $username = trim($_POST['username']);
-        $first_name = trim($_POST['first_name']);
-        $last_name = trim($_POST['last_name']);
-        $password = trim($_POST['password']);
-        $phone = trim($_POST['phone']);
-        $parent_phone = trim($_POST['parent_phone']);
+        $fullname = trim($_POST['fullname'] ?? '');
+        $age = intval($_POST['age'] ?? 0);
+        $gender = trim($_POST['gender'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+        $parent_phone = trim($_POST['parent_phone'] ?? '');
+        
+        // Split fullname into first and last name
+        $nameParts = explode(' ', $fullname, 2);
+        $first_name = $nameParts[0];
+        $last_name = $nameParts[1] ?? '';
         
         // Validate inputs
-        if (empty($username) || empty($first_name) || empty($last_name) || empty($password)) {
+        if (empty($fullname) || empty($password)) {
             $error = "All required fields must be filled.";
         } else {
-            // Check if username already exists
-            $existing = $database->fetchOne("SELECT user_id FROM users WHERE username = ?", [$username]);
-            if ($existing) {
-                $error = "Username already exists.";
-            } else {
-                // Hash password
-                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                
-                // Generate claim code
-                $codeGenerator = new ClaimCodeGenerator();
-                $claim_code = $codeGenerator->generateCode();
-                
-                // Insert student with claim code
-                $sql = "INSERT INTO users (username, password, role, first_name, last_name, phone, parent_phone, claim_code, claim_code_created_at) 
-                        VALUES (?, ?, 'learner', ?, ?, ?, ?, ?, NOW())";
-                $params = [$username, $hashed_password, $first_name, $last_name, $phone, $parent_phone, $claim_code];
+            // Auto-generate username from fullname
+            $username = strtolower(preg_replace('/[^a-zA-Z0-9]/', '.', $fullname));
+            $username = preg_replace('/\.+/', '.', $username);
+            $username = trim($username, '.');
+            $base_username = $username;
+            $suffix = 1;
+            while ($database->fetchOne("SELECT user_id FROM users WHERE username = ?", [$username])) {
+                $username = $base_username . '.' . $suffix;
+                $suffix++;
+            }
+            
+            // Hash password
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            
+            // Generate claim code
+            $codeGenerator = new ClaimCodeGenerator();
+            $claim_code = $codeGenerator->generateCode();
+            
+            // Insert student with claim code
+            $sql = "INSERT INTO users (username, password, role, first_name, last_name, age, gender, parent_phone, claim_code, claim_code_created_at) 
+                    VALUES (?, ?, 'learner', ?, ?, ?, ?, ?, ?, NOW())";
+            $params = [$username, $hashed_password, $first_name, $last_name, $age, $gender, $parent_phone, $claim_code];
                 
                 $student_id = $database->insert($sql, $params);
                 
@@ -262,21 +279,26 @@ $classes = $database->fetchAll("
                     </div>
                     
                     <div class="form-group-child">
-                        <label class="form-label-child">Username *</label>
-                        <input type="text" class="form-control-child" name="students[1][username]" required>
+                        <label class="form-label-child">FULLNAME *</label>
+                        <input type="text" class="form-control-child" name="students[1][fullname]" required placeholder="e.g. John Doe">
                     </div>
                     
                     <div class="row-child">
                         <div class="col-child-2">
                             <div class="form-group-child">
-                                <label class="form-label-child">First Name *</label>
-                                <input type="text" class="form-control-child" name="students[1][first_name]" required>
+                                <label class="form-label-child">AGE *</label>
+                                <input type="number" class="form-control-child" name="students[1][age]" required min="1" max="120">
                             </div>
                         </div>
                         <div class="col-child-2">
                             <div class="form-group-child">
-                                <label class="form-label-child">Last Name *</label>
-                                <input type="text" class="form-control-child" name="students[1][last_name]" required>
+                                <label class="form-label-child">GENDER *</label>
+                                <select class="form-control-child" name="students[1][gender]" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -284,11 +306,6 @@ $classes = $database->fetchAll("
                     <div class="form-group-child">
                         <label class="form-label-child">Password *</label>
                         <input type="password" class="form-control-child" name="students[1][password]" required minlength="6">
-                    </div>
-                    
-                    <div class="form-group-child">
-                        <label class="form-label-child">Student Phone Number</label>
-                        <input type="text" class="form-control-child" name="students[1][phone]" placeholder="+255XXXXXXXXX">
                     </div>
                     
                     <div class="form-group-child">
@@ -346,30 +363,31 @@ $classes = $database->fetchAll("
                     '</button>' +
                 '</div>' +
                 '<div class="form-group-child">' +
-                    '<label class="form-label-child">Username *</label>' +
-                    '<input type="text" class="form-control-child" name="students[' + studentCount + '][username]" required>' +
+                    '<label class="form-label-child">FULLNAME *</label>' +
+                    '<input type="text" class="form-control-child" name="students[' + studentCount + '][fullname]" required placeholder="e.g. John Doe">' +
                 '</div>' +
                 '<div class="row-child">' +
                     '<div class="col-child-2">' +
                         '<div class="form-group-child">' +
-                            '<label class="form-label-child">First Name *</label>' +
-                            '<input type="text" class="form-control-child" name="students[' + studentCount + '][first_name]" required>' +
+                            '<label class="form-label-child">AGE *</label>' +
+                            '<input type="number" class="form-control-child" name="students[' + studentCount + '][age]" required min="1" max="120">' +
                         '</div>' +
                     '</div>' +
                     '<div class="col-child-2">' +
                         '<div class="form-group-child">' +
-                            '<label class="form-label-child">Last Name *</label>' +
-                            '<input type="text" class="form-control-child" name="students[' + studentCount + '][last_name]" required>' +
+                            '<label class="form-label-child">GENDER *</label>' +
+                            '<select class="form-control-child" name="students[' + studentCount + '][gender]" required>' +
+                                '<option value="">-- Select --</option>' +
+                                '<option value="Male">Male</option>' +
+                                '<option value="Female">Female</option>' +
+                                '<option value="Other">Other</option>' +
+                            '</select>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="form-group-child">' +
                     '<label class="form-label-child">Password *</label>' +
                     '<input type="password" class="form-control-child" name="students[' + studentCount + '][password]" required minlength="6">' +
-                '</div>' +
-                '<div class="form-group-child">' +
-                    '<label class="form-label-child">Student Phone Number</label>' +
-                    '<input type="text" class="form-control-child" name="students[' + studentCount + '][phone]" placeholder="+255XXXXXXXXX">' +
                 '</div>' +
                 '<div class="form-group-child">' +
                     '<label class="form-label-child">Parent Phone Number *</label>' +
