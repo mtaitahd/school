@@ -343,12 +343,6 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
 
     <?php include 'php/includes/footer.php'; ?>
 
-    <div class="a11y-toolbar" role="group" aria-label="Customizer options">
-        <button type="button" class="a11y-btn" id="btnWhatsApp" title="Chat on WhatsApp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></button>
-        <button type="button" class="a11y-btn" id="btnFont" title="Change font" aria-label="Cycle font"><i class="fas fa-font"></i></button>
-        <button type="button" class="a11y-btn" id="btnColor" title="Change color theme" aria-label="Cycle color theme"><i class="fas fa-palette"></i></button>
-    </div>
-
     <script>
     // Dynamic hero slider — handles any number of slides with arrow navigation
     (function() {

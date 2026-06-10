@@ -50,10 +50,10 @@ if (!isset($nav_items)) {
     </div>
 </footer>
 <div class="a11y-toolbar" role="group" aria-label="Customizer options">
+    <span class="whatsapp-label">Need Support?</span>
     <button type="button" class="a11y-btn" id="btnWhatsApp" title="Chat on WhatsApp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></button>
     <button type="button" class="a11y-btn" id="btnFont" title="Change font" aria-label="Cycle font"><i class="fas fa-font"></i></button>
     <button type="button" class="a11y-btn" id="btnColor" title="Change color theme" aria-label="Cycle color theme"><i class="fas fa-palette"></i></button>
 </div>
 
-<?php include __DIR__ . '/whatsapp-support.php'; ?>
 <script src="<?php echo ($base_path ?? '') . 'js/customizer.js'; ?>"></script>
