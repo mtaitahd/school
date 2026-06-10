@@ -2365,17 +2365,20 @@ body.page-child {
 
 .whatsapp-label {
     font-size: 0.85rem;
-    font-weight: 600;
-    color: #25D366;
+    font-weight: 700;
+    color: #fff;
     background: none;
     padding: 2px 8px;
-    animation: fadePulse 2s ease-in-out infinite;
     white-space: nowrap;
+    animation: waFade 2.5s ease-in-out infinite;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
-@keyframes fadePulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.2; }
+@keyframes waFade {
+    0%   { opacity: 0; transform: translateY(6px); }
+    30%  { opacity: 1; transform: translateY(0); }
+    70%  { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-6px); }
 }
 
 .whatsapp-menu {
