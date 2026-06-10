@@ -2363,8 +2363,14 @@ body.page-child {
     font-size: 1.4rem;
 }
 
-.whatsapp-btn span {
+.whatsapp-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #25D366;
+    background: none;
+    padding: 2px 8px;
     animation: fadePulse 2s ease-in-out infinite;
+    white-space: nowrap;
 }
 
 @keyframes fadePulse {

@@ -1,8 +1,8 @@
 <div class="whatsapp-support">
     <input type="checkbox" id="whatsapp-toggle" class="whatsapp-toggle" hidden>
+    <span class="whatsapp-label">Need Support?</span>
     <label for="whatsapp-toggle" class="whatsapp-btn">
         <i class="fab fa-whatsapp"></i>
-        <span>Need Support?</span>
     </label>
     <div class="whatsapp-menu">
         <div class="whatsapp-menu-header">Chat with us on WhatsApp</div>
