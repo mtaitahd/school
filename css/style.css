@@ -6670,12 +6670,16 @@ body {
 /* Layout Wrappers */
 #wrapper {
     display: flex;
+    height: 100vh;
+    overflow: hidden;
 }
 
 #wrapper #content-wrapper {
     background-color: var(--background-light);
     width: 100%;
     overflow-x: hidden;
+    overflow-y: auto;
+    height: 100vh;
 }
 
 #wrapper #content-wrapper #content {
@@ -6685,7 +6689,8 @@ body {
 /* Sidebar Base */
 .sidebar {
     width: 6.5rem;
-    min-height: 100vh;
+    height: 100vh;
+    overflow-y: auto;
     background: #fff;
     transition: width 0.25s ease;
     z-index: 1050;
@@ -6825,6 +6830,9 @@ body {
 .topbar {
     height: 64px;
     gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 1051;
 }
 
 .topbar-search {
