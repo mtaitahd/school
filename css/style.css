@@ -1388,6 +1388,11 @@ body > nav.navbar-modern:first-of-type {
     z-index: 2;
 }
 
+.hero-overlay h1,
+.hero-overlay .col-lg-8 > p {
+    color: #ffffff !important;
+}
+
 /* --- Responsive --- */
 @media (max-width: 1024px) {
     .navbar-menu {
