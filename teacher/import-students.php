@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Auto-generate username in SMART/chil/NNN format if not provided
             if (empty($username)) {
                 $maxNum = $database->fetchOne(
-                    "SELECT COALESCE(MAX(CAST(SUBSTRING(username, 11) AS UNSIGNED)), 0) + 1
+                    "SELECT COALESCE(MAX(CAST(SUBSTRING(username, 12) AS UNSIGNED)), 0) + 1
                      FROM users WHERE role = 'learner' AND username LIKE 'SMART/chil/%'"
                 );
                 $username = 'SMART/chil/' . str_pad((string) $maxNum, 3, '0', STR_PAD_LEFT);
