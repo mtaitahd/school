@@ -2358,6 +2358,15 @@ body.page-child {
     font-size: 1.4rem;
 }
 
+.whatsapp-btn span {
+    animation: fadePulse 2s ease-in-out infinite;
+}
+
+@keyframes fadePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+}
+
 .whatsapp-menu {
     display: none;
     flex-direction: column;
