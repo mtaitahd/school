@@ -13,11 +13,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
 $learners = $database->fetchAll("
     SELECT u.*, 
            (SELECT COUNT(*) FROM progress p WHERE p.user_id = u.user_id AND p.completed = 1) as completed_activities,
-           (SELECT SUM(p.stars_earned) FROM progress p WHERE p.user_id = u.user_id) as total_stars
+           (SELECT SUM(p.stars_earned) FROM progress p WHERE p.user_id = u.user_id) as total_stars,
+           (SELECT COUNT(*) FROM student_assignments sa JOIN assignments a ON sa.assignment_id = a.assignment_id WHERE sa.student_id = u.user_id AND a.teacher_id = ? AND sa.status = 'completed') as completed_assignments,
+           (SELECT COUNT(*) FROM student_assignments sa JOIN assignments a ON sa.assignment_id = a.assignment_id WHERE sa.student_id = u.user_id AND a.teacher_id = ? AND sa.status IN ('pending','in_progress')) as pending_assignments
     FROM users u 
     WHERE u.role = 'learner' 
     ORDER BY u.created_at DESC
-");
+", [$_SESSION['user_id'], $_SESSION['user_id']]);
 
 // Fetch module statistics
 $module_stats = $database->fetchAll("
@@ -112,7 +114,11 @@ $lang_page = 'dashboard.php';
                             <div class="col">
                                 <div class="text-xs fw-bold text-uppercase mb-1" style="color:var(--primary-green);">Completed Activities</div>
                                 <div class="h3 mb-0 fw-bold" style="color:var(--primary-green);">
-                                    <?php echo array_sum(array_column($learners, 'completed_activities')); ?>
+                                    <?php
+                                    $from_progress = array_sum(array_column($learners, 'completed_activities'));
+                                    $from_assignments = array_sum(array_column($learners, 'completed_assignments'));
+                                    echo max($from_progress, $from_assignments);
+                                    ?>
                                 </div>
                             </div>
                             <div class="col-auto">

@@ -155,6 +155,18 @@ $assignments = $database->fetchAll(
      ORDER BY a.created_at DESC",
     [$teacher_id]
 );
+
+$assign_stats = $database->fetchOne(
+    "SELECT
+        COUNT(sa.student_assignment_id) AS total,
+        SUM(CASE WHEN sa.status = 'completed' THEN 1 ELSE 0 END) AS completed,
+        SUM(CASE WHEN sa.status = 'in_progress' THEN 1 ELSE 0 END) AS in_progress,
+        SUM(CASE WHEN sa.status = 'pending' THEN 1 ELSE 0 END) AS pending
+     FROM student_assignments sa
+     JOIN assignments a ON sa.assignment_id = a.assignment_id
+     WHERE a.teacher_id = ?",
+    [$teacher_id]
+);
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang; ?>">
@@ -245,6 +257,29 @@ $assignments = $database->fetchAll(
                 </div>
             </div>
         </div>
+
+        <?php if ($assign_stats && $assign_stats['total'] > 0): ?>
+        <div class="dashboard-card mb-30">
+            <div style="display:flex;gap:20px;flex-wrap:wrap;padding:20px;">
+                <div style="flex:1;min-width:120px;text-align:center;padding:15px;background:var(--background-light);border-radius:10px;">
+                    <div style="font-size:2rem;font-weight:700;color:var(--primary-blue);"><?php echo (int)$assign_stats['total']; ?></div>
+                    <div style="font-size:0.85rem;color:var(--text-light);">Total Assigned</div>
+                </div>
+                <div style="flex:1;min-width:120px;text-align:center;padding:15px;background:var(--background-light);border-radius:10px;">
+                    <div style="font-size:2rem;font-weight:700;color:var(--primary-green);"><?php echo (int)$assign_stats['completed']; ?></div>
+                    <div style="font-size:0.85rem;color:var(--text-light);">Completed</div>
+                </div>
+                <div style="flex:1;min-width:120px;text-align:center;padding:15px;background:var(--background-light);border-radius:10px;">
+                    <div style="font-size:2rem;font-weight:700;color:var(--primary-orange);"><?php echo (int)$assign_stats['in_progress']; ?></div>
+                    <div style="font-size:0.85rem;color:var(--text-light);">In Progress</div>
+                </div>
+                <div style="flex:1;min-width:120px;text-align:center;padding:15px;background:var(--background-light);border-radius:10px;">
+                    <div style="font-size:2rem;font-weight:700;color:var(--text-light);"><?php echo (int)$assign_stats['pending']; ?></div>
+                    <div style="font-size:0.85rem;color:var(--text-light);">Pending</div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <div class="dashboard-card">
             <h3 class="dashboard-card-title mb-20">Recent Assignments</h3>
