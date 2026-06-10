@@ -26,7 +26,6 @@ csrf_require();
 $fullname = trim($_POST['fullname'] ?? '');
 $age = isset($_POST['age']) ? (int) $_POST['age'] : 0;
 $gender = trim($_POST['gender'] ?? '');
-$password = trim($_POST['password'] ?? '');
 $parent_phone = trim($_POST['parent_phone'] ?? '');
 $class_id = !empty($_POST['class_id']) ? (int) $_POST['class_id'] : null;
 
@@ -35,7 +34,7 @@ $nameParts = explode(' ', $fullname, 2);
 $first_name = $nameParts[0];
 $last_name = $nameParts[1] ?? '';
 
-if ($fullname === '' || $password === '') {
+if ($fullname === '') {
     header('Location: ' . $redirect . '?error=missing_fields');
     exit;
 }
@@ -51,9 +50,12 @@ while ($database->fetchOne('SELECT user_id FROM users WHERE username = ?', [$use
     $suffix++;
 }
 
+// Auto-generate password
+$password = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8);
+$hashed = password_hash($password, PASSWORD_DEFAULT);
+
 $codeGenerator = new ClaimCodeGenerator();
 $claim_code = $codeGenerator->generateCode();
-$hashed = password_hash($password, PASSWORD_DEFAULT);
 
 $student_id = $database->insert(
     "INSERT INTO users (username, password, role, first_name, last_name, age, gender, parent_phone, claim_code, claim_code_created_at)

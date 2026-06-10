@@ -412,12 +412,8 @@ if (isset($_GET['edit'])) {
                         </div>
                     </div>
                     <div class="form-group-child">
-                        <label class="form-label-child">Password *</label>
-                        <input type="password" class="form-control-child" name="password" required minlength="6">
-                    </div>
-                    <div class="form-group-child">
-                        <label class="form-label-child">Parent Phone Number *</label>
-                        <input type="text" class="form-control-child" name="parent_phone" required placeholder="+255XXXXXXXXX">
+                        <label class="form-label-child">Parent Phone Number</label>
+                        <input type="text" class="form-control-child" name="parent_phone" placeholder="+255XXXXXXXXX">
                         <small style="color:var(--text-light);">Parent will receive SMS with claim code to link their child</small>
                     </div>
                 </div>

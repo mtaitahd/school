@@ -24,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fullname = trim($student_data['fullname'] ?? '');
             $age = intval($student_data['age'] ?? 0);
             $gender = trim($student_data['gender'] ?? '');
-            $password = trim($student_data['password'] ?? '');
             $parent_phone = trim($student_data['parent_phone'] ?? '');
             
             // Skip empty rows
@@ -38,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $last_name = $nameParts[1] ?? '';
             
             // Validate inputs
-            if (empty($fullname) || empty($password)) {
+            if (empty($fullname)) {
                 $error_count++;
                 $results[] = "Row " . ($index + 1) . ": Missing required fields";
                 continue;
@@ -55,7 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $suffix++;
             }
             
-            // Hash password
+            // Auto-generate password
+            $password = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8);
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             
             // Generate claim code
@@ -119,7 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fullname = trim($_POST['fullname'] ?? '');
         $age = intval($_POST['age'] ?? 0);
         $gender = trim($_POST['gender'] ?? '');
-        $password = trim($_POST['password'] ?? '');
         $parent_phone = trim($_POST['parent_phone'] ?? '');
         
         // Split fullname into first and last name
@@ -128,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $last_name = $nameParts[1] ?? '';
         
         // Validate inputs
-        if (empty($fullname) || empty($password)) {
+        if (empty($fullname)) {
             $error = "All required fields must be filled.";
         } else {
             // Auto-generate username from fullname
@@ -142,7 +141,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $suffix++;
             }
             
-            // Hash password
+            // Auto-generate password
+            $password = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8);
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             
             // Generate claim code
@@ -304,13 +304,8 @@ $classes = $database->fetchAll("
                     </div>
                     
                     <div class="form-group-child">
-                        <label class="form-label-child">Password *</label>
-                        <input type="password" class="form-control-child" name="students[1][password]" required minlength="6">
-                    </div>
-                    
-                    <div class="form-group-child">
-                        <label class="form-label-child">Parent Phone Number *</label>
-                        <input type="text" class="form-control-child" name="students[1][parent_phone]" required placeholder="+255XXXXXXXXX">
+                        <label class="form-label-child">Parent Phone Number</label>
+                        <input type="text" class="form-control-child" name="students[1][parent_phone]" placeholder="+255XXXXXXXXX">
                         <small style="color: var(--text-light);">Parent will receive SMS with claim code to link their child</small>
                     </div>
                 </div>
@@ -386,12 +381,8 @@ $classes = $database->fetchAll("
                     '</div>' +
                 '</div>' +
                 '<div class="form-group-child">' +
-                    '<label class="form-label-child">Password *</label>' +
-                    '<input type="password" class="form-control-child" name="students[' + studentCount + '][password]" required minlength="6">' +
-                '</div>' +
-                '<div class="form-group-child">' +
-                    '<label class="form-label-child">Parent Phone Number *</label>' +
-                    '<input type="text" class="form-control-child" name="students[' + studentCount + '][parent_phone]" required placeholder="+255XXXXXXXXX">' +
+                    '<label class="form-label-child">Parent Phone Number</label>' +
+                    '<input type="text" class="form-control-child" name="students[' + studentCount + '][parent_phone]" placeholder="+255XXXXXXXXX">' +
                     '<small style="color: var(--text-light);">Parent will receive SMS with claim code to link their child</small>' +
                 '</div>';
             

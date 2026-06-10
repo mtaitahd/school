@@ -15,6 +15,9 @@ $kyh_notes = $database->fetchAll("SELECT id, title, slug, featured_image, short_
 
 // Events Calendar data — upcoming published events
 $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_time, event_description FROM events WHERE status = 'published' AND event_date >= CURDATE() ORDER BY event_date ASC LIMIT 5");
+
+// Total registered students count
+$total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE role = 'learner'")['count'] ?? 0;
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang === 'sw' ? 'sw' : 'en'; ?>">
@@ -27,6 +30,7 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@400;600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="page-child">
     <?php include 'php/includes/header.php'; ?>
@@ -76,8 +80,8 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
                         <div class="row justify-content-center g-4 mb-3">
                             <div class="col-4 col-md-3">
                                 <div class="home-stat">
-                                    <strong class="text-white display-5 fw-black">10+</strong>
-                                    <span class="d-block fw-bold text-uppercase tracking-wider" style="color:#FFD43B;"><?php echo $current_lang === 'sw' ? 'Shughuli' : 'Activities'; ?></span>
+                                    <strong class="text-white display-5 fw-black"><?php echo number_format($total_students); ?>+</strong>
+                                    <span class="d-block fw-bold text-uppercase tracking-wider" style="color:#FFD43B;"><?php echo $current_lang === 'sw' ? 'Wanafunzi' : 'Students'; ?></span>
                                 </div>
                             </div>
                             <div class="col-4 col-md-3">
@@ -339,11 +343,10 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
 
     <?php include 'php/includes/footer.php'; ?>
 
-    <div class="a11y-toolbar" role="group" aria-label="Accessibility options">
-        <button type="button" class="a11y-btn" id="toggleContrast" title="High contrast" aria-label="Toggle high contrast"><i class="fas fa-adjust"></i></button>
-        <button type="button" class="a11y-btn" id="toggleDyslexia" title="Dyslexia-friendly text" aria-label="Toggle dyslexia-friendly mode"><i class="fas fa-font"></i></button>
-        <button type="button" class="a11y-btn" id="cycleColor" title="Change color theme" aria-label="Cycle color theme"><i class="fas fa-palette"></i></button>
-        <button type="button" class="a11y-btn" id="cycleFont" title="Change font" aria-label="Cycle font"><i class="fas fa-text-height"></i></button>
+    <div class="a11y-toolbar" role="group" aria-label="Customizer options">
+        <button type="button" class="a11y-btn" id="btnWhatsApp" title="Chat on WhatsApp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></button>
+        <button type="button" class="a11y-btn" id="btnFont" title="Change font" aria-label="Cycle font"><i class="fas fa-font"></i></button>
+        <button type="button" class="a11y-btn" id="btnColor" title="Change color theme" aria-label="Cycle color theme"><i class="fas fa-palette"></i></button>
     </div>
 
     <script>
@@ -426,20 +429,7 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
         }
     }
 
-    // Color & font cycler
-    (function() {
-        var colors = ['#007bff', '#28a745', '#dc3545', '#6f42c1', '#fd7e14'];
-        var fonts = ['Poppins, sans-serif', 'Arial, sans-serif', 'Georgia, serif', '"Courier New", monospace', '"Times New Roman", serif'];
-        var ci = 0, fi = 0;
-        document.getElementById('cycleColor').addEventListener('click', function() {
-            ci = (ci + 1) % colors.length;
-            document.querySelector('.hero-section .display-3').style.color = colors[ci];
-        });
-        document.getElementById('cycleFont').addEventListener('click', function() {
-            fi = (fi + 1) % fonts.length;
-            document.querySelector('.hero-section .display-3').style.fontFamily = fonts[fi];
-        });
-    })();
     </script>
+    <script src="js/customizer.js"></script>
 </body>
 </html>
