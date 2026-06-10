@@ -10,7 +10,7 @@ require_once __DIR__ . '/../php/includes/SpreadsheetReader.php';
 sec_require_rate_limit();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 

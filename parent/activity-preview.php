@@ -11,7 +11,7 @@ ensure_schema_v2($database);
 
 // Check if user is logged in and is a parent
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -20,7 +20,7 @@ $activity_id = isset($_GET['activity_id']) ? intval($_GET['activity_id']) : 0;
 $child_id = isset($_GET['child_id']) ? intval($_GET['child_id']) : 0;
 
 if ($activity_id === 0 || $child_id === 0) {
-    header('Location: dashboard.php');
+    header('Location: dashboard');
     exit;
 }
 
@@ -32,7 +32,7 @@ $linked = $database->fetchOne(
 );
 
 if (!$linked) {
-    header('Location: dashboard.php');
+    header('Location: dashboard');
     exit;
 }
 
@@ -45,7 +45,7 @@ $activity = $database->fetchOne("
 ", [$activity_id]);
 
 if (!$activity) {
-    header('Location: dashboard.php');
+    header('Location: dashboard');
     exit;
 }
 
@@ -75,7 +75,7 @@ $activity_data = json_decode($activity['activity_data'], true) ?: [];
                     <img src="../assets/images/logo.png" alt="Kona Ya Hisabati Logo" class="navbar-logo">
                     <div class="navbar-brand-text">
                         <span class="brand-main">Kona Ya Hisabati</span>
-                        <span class="brand-subtitle">Jifunze • Furahia • Fanikiwa</span>
+                        <span class="brand-subtitle">Jifunze â€¢ Furahia â€¢ Fanikiwa</span>
                     </div>
                 </div>
 
@@ -205,7 +205,7 @@ $activity_data = json_decode($activity['activity_data'], true) ?: [];
 
         <!-- Back Button -->
         <div class="text-center mb-30">
-            <a href="child-progress.php?child_id=<?php echo $child_id; ?>" class="btn-child btn-child-secondary btn-child-large">
+            <a href="child-progress?child_id=<?php echo $child_id; ?>" class="btn-child btn-child-secondary btn-child-large">
                 <i class="fas fa-arrow-left me-2"></i>Back to Progress Report
             </a>
         </div>

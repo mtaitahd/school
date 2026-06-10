@@ -61,7 +61,7 @@ $recent_notes = $database->fetchAll("SELECT id, title, slug, featured_image, sho
                 <p style="color:var(--text-light);max-width:400px;margin:12px auto 24px;">
                     <?php echo $current_lang === 'sw' ? 'Hatukuweza kupata taarifa uliyotafuta.' : 'The note you are looking for could not be found.'; ?>
                 </p>
-                <a href="index.php" class="kyh-board-card-btn" style="display:inline-flex;"><?php echo $current_lang === 'sw' ? 'Rudi Nyumbani' : 'Back to Home'; ?></a>
+                <a href="index" class="kyh-board-card-btn" style="display:inline-flex;"><?php echo $current_lang === 'sw' ? 'Rudi Nyumbani' : 'Back to Home'; ?></a>
             </div>
         <?php else: ?>
             <div class="row">

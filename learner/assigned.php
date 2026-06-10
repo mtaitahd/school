@@ -78,7 +78,7 @@ $assignments = $database->fetchAll(
             <div class="dashboard-card text-center">
                 <i class="fas fa-clipboard-check" style="font-size:4rem;color:var(--primary-green);"></i>
                 <p class="mt-20 activity-instruction"><?php echo $current_lang === 'sw' ? 'Hakuna shughuli zilizopangwa bado. Anza kujifunza!' : 'No assignments yet. Start learning!'; ?></p>
-                <a href="categories.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-20"><?php echo htmlspecialchars($t['nav_start'] ?? 'Start Learning'); ?></a>
+                <a href="categories?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-20"><?php echo htmlspecialchars($t['nav_start'] ?? 'Start Learning'); ?></a>
             </div>
         <?php else: ?>
             <div class="row-child">
@@ -123,23 +123,23 @@ $assignments = $database->fetchAll(
                             <?php if ($has_questions): ?>
                                 <p class="mb-0"><small><?php echo $current_lang === 'sw' ? 'Jibu' : 'Answered'; ?>: <?php echo (int) ($a['answered_questions'] ?? 0); ?>/<?php echo (int) ($a['total_questions'] ?? 0); ?></small></p>
                             <?php endif; ?>
-                            <a href="assigned.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-secondary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
+                            <a href="assigned?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-secondary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
                                 <i class="fas fa-eye me-1"></i><?php echo $current_lang === 'sw' ? 'Angalia Matokeo' : 'Review'; ?>
                             </a>
                         <?php elseif ($is_quiz && $has_questions): ?>
                             <!-- Quiz type with questions -> take-assignment -->
-                            <a href="take-assignment.php?sa_id=<?php echo (int) $a['student_assignment_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
+                            <a href="take-assignment?sa_id=<?php echo (int) $a['student_assignment_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
                                 <i class="fas fa-<?php echo $has_started ? 'play-circle' : 'play'; ?> me-1"></i>
                                 <?php echo $current_lang === 'sw' ? ($has_started ? 'Endelea' : 'Anza') : ($has_started ? 'Continue' : 'Start'); ?>
                             </a>
                         <?php elseif ($a['activity_id']): ?>
                             <!-- Activity type -> activity.php -->
-                            <a href="activity.php?activity_id=<?php echo (int) $a['activity_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
+                            <a href="activity?activity_id=<?php echo (int) $a['activity_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
                                 <i class="fas fa-<?php echo $has_started ? 'play-circle' : 'play'; ?> me-1"></i>
                                 <?php echo $current_lang === 'sw' ? ($has_started ? 'Endelea' : 'Anza') : ($has_started ? 'Continue' : 'Start'); ?>
                             </a>
                         <?php else: ?>
-                            <a href="categories.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
+                            <a href="categories?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
                                 <i class="fas fa-play me-1"></i><?php echo $current_lang === 'sw' ? 'Anza Kujifunza' : 'Start Learning'; ?>
                             </a>
                         <?php endif; ?>

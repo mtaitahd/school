@@ -23,13 +23,13 @@ if ($use_learner_dashboard) {
 }
 
 if ($module_id === 0) {
-    header('Location: categories.php?lang=' . $current_lang);
+    header('Location: categories?lang=' . $current_lang);
     exit;
 }
 
 $module = $database->fetchOne("SELECT * FROM modules WHERE module_id = ? AND is_active = 1", [$module_id]);
 if (!$module) {
-    header('Location: categories.php?lang=' . urlencode($current_lang) . '&error=module');
+    header('Location: categories?lang=' . urlencode($current_lang) . '&error=module');
     exit;
 }
 
@@ -64,7 +64,7 @@ $activities = $database->fetchAll(
 <?php endif; ?>
         <?php if ($use_learner_dashboard): ?>
         <p class="mb-20">
-            <a href="categories.php?lang=<?php echo urlencode($current_lang); ?>" class="btn-child btn-child-yellow">
+            <a href="categories?lang=<?php echo urlencode($current_lang); ?>" class="btn-child btn-child-yellow">
                 <i class="fas fa-arrow-left me-2"></i><?php echo $t['activity_back'] ?? 'Back'; ?>
             </a>
         </p>

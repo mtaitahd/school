@@ -254,7 +254,7 @@ $active_nav = 'home';
                 <i class="fas fa-newspaper"></i>
                 <h2><?php echo $current_lang === 'sw' ? 'Tangazo Halijapatikana' : 'Announcement Not Found'; ?></h2>
                 <p><?php echo $current_lang === 'sw' ? 'Samahani, tangazo ulililotafuta halipo au limefutwa.' : 'Sorry, the announcement you are looking for does not exist or has been removed.'; ?></p>
-                <a href="index.php<?php echo $current_lang !== 'en' ? '?lang=' . urlencode($current_lang) : ''; ?>" class="kyh-board-card-btn">
+                <a href="index<?php echo $current_lang !== 'en' ? '?lang=' . urlencode($current_lang) : ''; ?>" class="kyh-board-card-btn">
                     <i class="fas fa-arrow-left"></i> <?php echo $current_lang === 'sw' ? 'Rudi Nyumbani' : 'Back to Home'; ?>
                 </a>
             </div>
@@ -291,7 +291,7 @@ $active_nav = 'home';
                         <?php echo nl2br(htmlspecialchars($announcement['content'])); ?>
                     </div>
 
-                    <a href="index.php<?php echo $current_lang !== 'en' ? '?lang=' . urlencode($current_lang) : ''; ?>" class="announcement-back-link">
+                    <a href="index<?php echo $current_lang !== 'en' ? '?lang=' . urlencode($current_lang) : ''; ?>" class="announcement-back-link">
                         <i class="fas fa-arrow-left"></i> <?php echo $current_lang === 'sw' ? 'Rudi kwenye Ukurasa wa Mwanzo' : 'Back to Home Page'; ?>
                     </a>
                 </div>

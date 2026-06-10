@@ -34,9 +34,9 @@ function auth_is_logged_in(): bool {
     return auth_user_id() !== null;
 }
 
-function auth_require_role(array $roles, string $redirect = '../index.php'): void {
+function auth_require_role(array $roles, string $redirect = '../index'): void {
     if (!auth_is_logged_in() || !in_array(auth_role(), $roles, true)) {
-        header('Location: ' . $redirect);
+        header('Location: ' . preg_replace('/\.php$/', '', $redirect));
         exit;
     }
 }

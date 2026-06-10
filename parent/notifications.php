@@ -14,7 +14,7 @@ sub_require_access();
 
 // Check if user is logged in as parent
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         "UPDATE notifications SET is_read = 1 WHERE user_id = ?",
         [$parent_id]
     );
-    header('Location: notifications.php?success=all_marked');
+    header('Location: notifications?success=all_marked');
     exit;
 }
 

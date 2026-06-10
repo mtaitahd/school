@@ -54,12 +54,12 @@ function getLearnerBase() {
 
 function selectModule(moduleId) {
     const lang = getPageLang();
-    window.location.href = getLearnerBase() + 'activities.php?module_id=' + encodeURIComponent(moduleId) + '&lang=' + encodeURIComponent(lang);
+    window.location.href = getLearnerBase() + 'activities?module_id=' + encodeURIComponent(moduleId) + '&lang=' + encodeURIComponent(lang);
 }
 
 function selectActivity(activityId) {
     const lang = getPageLang();
-    window.location.href = getLearnerBase() + 'activity.php?activity_id=' + encodeURIComponent(activityId) + '&lang=' + encodeURIComponent(lang);
+    window.location.href = getLearnerBase() + 'activity?activity_id=' + encodeURIComponent(activityId) + '&lang=' + encodeURIComponent(lang);
 }
 
 function showStarAnimation() {
@@ -102,7 +102,7 @@ function nextActivity(activityId) {
 }
 
 function returnToModules() {
-    window.location.href = 'index.php';
+    window.location.href = 'index';
 }
 
 function initNavbar() {

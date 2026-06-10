@@ -12,11 +12,11 @@ sec_send_headers();
 $requested_role = isset($_GET['role']) ? $_GET['role'] : '';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $requested_role === 'parent') {
-    header('Location: parent/login.php');
+    header('Location: parent/login');
     exit;
 }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $requested_role === 'teacher') {
-    header('Location: teacher/login.php');
+    header('Location: teacher/login');
     exit;
 }
 
@@ -24,15 +24,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $requested_role === 'teacher') {
 if (isset($_SESSION['user_id'])) {
     $role = $_SESSION['role'];
     if ($role === 'teacher') {
-        header('Location: teacher/dashboard.php');
+        header('Location: teacher/dashboard');
     } elseif ($role === 'parent') {
-        header('Location: parent/dashboard.php');
+        header('Location: parent/dashboard');
     } elseif ($role === 'admin') {
-        header('Location: admin/dashboard.php');
+        header('Location: admin/dashboard');
     } elseif ($role === 'learner') {
-        header('Location: learner/dashboard.php');
+        header('Location: learner/dashboard');
     } else {
-        header('Location: index.php');
+        header('Location: index');
     }
     exit;
 }
@@ -62,15 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Redirect based on role
             if ($user['role'] === 'teacher') {
-                header('Location: teacher/dashboard.php');
+                header('Location: teacher/dashboard');
             } elseif ($user['role'] === 'parent') {
-                header('Location: parent/dashboard.php');
+                header('Location: parent/dashboard');
             } elseif ($user['role'] === 'admin') {
-                header('Location: admin/dashboard.php');
+                header('Location: admin/dashboard');
             } elseif ($user['role'] === 'learner') {
-                header('Location: learner/dashboard.php');
+                header('Location: learner/dashboard');
             } else {
-                header('Location: index.php');
+                header('Location: index');
             }
             exit;
         } else {
@@ -98,9 +98,9 @@ include 'php/includes/auth-split-start.php';
             <header class="auth-form-header">
                 <h1 class="auth-form-title">Login</h1>
                 <?php if ($requested_role === 'teacher'): ?>
-                    <p class="auth-form-subtitle">Teacher account — enter your credentials to access your dashboard</p>
+                    <p class="auth-form-subtitle">Teacher account â€” enter your credentials to access your dashboard</p>
                 <?php elseif ($requested_role === 'parent'): ?>
-                    <p class="auth-form-subtitle">Parent account — enter your credentials to access your dashboard</p>
+                    <p class="auth-form-subtitle">Parent account â€” enter your credentials to access your dashboard</p>
                 <?php else: ?>
                     <p class="auth-form-subtitle">Teacher &amp; parent sign in to Kona Ya Hisabati</p>
                 <?php endif; ?>

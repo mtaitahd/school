@@ -11,7 +11,7 @@ $base_path = '';
 $active_nav = 'about';
 $lang_page = 'about.php';
 $page_title = 'About - Kona Ya Hisabati';
-$page_description = 'Learn about Kona Ya Hisabati — Pre-Primary mathematics learning for Tanzania.';
+$page_description = 'Learn about Kona Ya Hisabati â€” Pre-Primary mathematics learning for Tanzania.';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang === 'sw' ? 'sw' : 'en'; ?>">
@@ -29,7 +29,7 @@ $page_description = 'Learn about Kona Ya Hisabati — Pre-Primary mathematics le
     <!-- Minimal Top Bar -->
     <div class="about-topbar">
         <div class="about-topbar-content">
-            <a href="index.php?lang=<?php echo $current_lang; ?>" class="about-back-btn" aria-label="Back to Home">
+            <a href="index?lang=<?php echo $current_lang; ?>" class="about-back-btn" aria-label="Back to Home">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div class="about-logo">
@@ -38,7 +38,7 @@ $page_description = 'Learn about Kona Ya Hisabati — Pre-Primary mathematics le
                 </div>
                 <div class="about-logo-text">
                     <span class="about-logo-main">Kona Ya Hisabati</span>
-                    <span class="about-logo-sub">Jifunze • Furahia • Fanikiwa</span>
+                    <span class="about-logo-sub">Jifunze â€¢ Furahia â€¢ Fanikiwa</span>
                 </div>
             </div>
         </div>

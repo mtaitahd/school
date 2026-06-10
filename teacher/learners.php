@@ -12,7 +12,7 @@ sec_require_rate_limit();
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -308,7 +308,7 @@ if (isset($_GET['edit'])) {
                                 </td>
                                 <td style="padding: 15px; text-align: center;">
                                     <span style="background: <?php echo ($learner['avg_assignment_score'] ?? 0) >= 70 ? 'var(--primary-green)' : (($learner['avg_assignment_score'] ?? 0) >= 40 ? 'var(--primary-orange)' : 'var(--primary-red)'); ?>; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.85rem;">
-                                        <?php echo $learner['avg_assignment_score'] ?? '—'; ?>%
+                                        <?php echo $learner['avg_assignment_score'] ?? 'â€”'; ?>%
                                     </span>
                                 </td>
                                 <td style="padding: 15px; text-align: center;">
@@ -374,7 +374,7 @@ if (isset($_GET['edit'])) {
             <form method="POST" action="student-actions">
                 <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="add_student">
-                <input type="hidden" name="redirect" value="learners.php">
+                <input type="hidden" name="redirect" value="learners">
                 <div class="kona-modal-body">
                     <?php if (!empty($classes)): ?>
                     <div class="form-group-child">
@@ -491,7 +491,7 @@ if (isset($_GET['edit'])) {
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     if (data.active) {
-                        window.location.href = '../parent/child-progress.php?child_id=' + learnerId;
+                        window.location.href = '../parent/child-progress?child_id=' + learnerId;
                     } else {
                         Swal.fire({
                             icon: 'warning',
@@ -504,7 +504,7 @@ if (isset($_GET['edit'])) {
                     }
                 })
                 .catch(function() {
-                    window.location.href = '../parent/child-progress.php?child_id=' + learnerId;
+                    window.location.href = '../parent/child-progress?child_id=' + learnerId;
                 });
         }
 

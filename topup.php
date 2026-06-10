@@ -1,3 +1,3 @@
 <?php
-header('Location: payment.php');
+header('Location: payment');
 exit;

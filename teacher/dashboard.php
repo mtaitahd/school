@@ -4,7 +4,7 @@ require_once __DIR__ . '/../php/db_connection.php';
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -66,7 +66,7 @@ $lang_page = 'dashboard.php';
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <h1 class="h3 mb-0 text-gray-800" style="font-family:'Poppins',sans-serif;font-weight:700;">Teacher Dashboard</h1>
             <div class="d-flex gap-2 flex-wrap">
-                <a href="learners.php?add=1" class="btn btn-primary" style="background:var(--primary-blue);border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;text-decoration:none;">
+                <a href="learners?add=1" class="btn btn-primary" style="background:var(--primary-blue);border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;text-decoration:none;">
                     <i class="fas fa-user-plus me-2"></i>Add Student
                 </a>
                 <a href="learners" class="btn btn-success" style="background:var(--primary-green);border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;text-decoration:none;">

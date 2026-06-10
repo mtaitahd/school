@@ -17,7 +17,7 @@ try {
         echo "<div style='background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin: 20px 0;'>";
         echo "<strong>Migration already completed!</strong> The subscriptions table already exists.";
         echo "</div>";
-        echo "<p><a href='../admin/dashboard.php'>Go to Admin Dashboard</a></p>";
+        echo "<p><a href='../admin/dashboard'>Go to Admin Dashboard</a></p>";
         exit;
     }
 
@@ -41,7 +41,7 @@ try {
             INDEX `idx_status` (`status`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
-    echo "<p style='color: green;'>✓ subscriptions table created</p>";
+    echo "<p style='color: green;'>âœ“ subscriptions table created</p>";
 
     // Create payments table
     echo "<p>Creating payments table...</p>";
@@ -70,7 +70,7 @@ try {
             INDEX `idx_transaction` (`transaction_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
-    echo "<p style='color: green;'>✓ payments table created</p>";
+    echo "<p style='color: green;'>âœ“ payments table created</p>";
 
     // Create wallet table
     echo "<p>Creating wallet table...</p>";
@@ -85,25 +85,25 @@ try {
             INDEX `idx_parent` (`parent_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
-    echo "<p style='color: green;'>✓ wallet table created</p>";
+    echo "<p style='color: green;'>âœ“ wallet table created</p>";
 
     // Add trial columns to users table
     echo "<p>Adding trial columns to users table...</p>";
     try {
         $database->execute("ALTER TABLE `users` ADD COLUMN `trial_start` DATETIME DEFAULT NULL AFTER `parent_claimed`");
-        echo "<p style='color: green;'>✓ trial_start column added</p>";
+        echo "<p style='color: green;'>âœ“ trial_start column added</p>";
     } catch (Exception $e) {
         echo "<p style='color: orange;'>- trial_start already exists</p>";
     }
     try {
         $database->execute("ALTER TABLE `users` ADD COLUMN `trial_end` DATETIME DEFAULT NULL AFTER `trial_start`");
-        echo "<p style='color: green;'>✓ trial_end column added</p>";
+        echo "<p style='color: green;'>âœ“ trial_end column added</p>";
     } catch (Exception $e) {
         echo "<p style='color: orange;'>- trial_end already exists</p>";
     }
     try {
         $database->execute("ALTER TABLE `users` ADD COLUMN `subscription_status` ENUM('trial','active','expired','cancelled') NOT NULL DEFAULT 'trial' AFTER `trial_end`");
-        echo "<p style='color: green;'>✓ subscription_status column added</p>";
+        echo "<p style='color: green;'>âœ“ subscription_status column added</p>";
     } catch (Exception $e) {
         echo "<p style='color: orange;'>- subscription_status already exists</p>";
     }
@@ -112,7 +112,7 @@ try {
     echo "<p>Updating sms_logs sms_type enum...</p>";
     try {
         $database->execute("ALTER TABLE `sms_logs` MODIFY COLUMN `sms_type` ENUM('assignment','performance','parent_link','fee_payment','general','payment_success','subscription_reminder','trial_ending','overdue') NOT NULL DEFAULT 'general'");
-        echo "<p style='color: green;'>✓ sms_logs sms_type updated</p>";
+        echo "<p style='color: green;'>âœ“ sms_logs sms_type updated</p>";
     } catch (Exception $e) {
         echo "<p style='color: orange;'>- Could not update sms_logs enum: " . $e->getMessage() . "</p>";
     }
@@ -128,12 +128,12 @@ try {
         require_once __DIR__ . '/../php/includes/subscription.php';
         sub_init_trial((int) $parent['user_id']);
     }
-    echo "<p style='color: green;'>✓ Initialized trial for " . count($existingParents) . " existing parents</p>";
+    echo "<p style='color: green;'>âœ“ Initialized trial for " . count($existingParents) . " existing parents</p>";
 
     echo "<div style='background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0;'>";
     echo "<strong>Migration v8 completed successfully!</strong>";
     echo "</div>";
-    echo "<p><a href='../admin/dashboard.php'>Go to Admin Dashboard</a></p>";
+    echo "<p><a href='../admin/dashboard'>Go to Admin Dashboard</a></p>";
 
 } catch (Exception $e) {
     echo "<div style='background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 20px 0;'>";

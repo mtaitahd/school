@@ -8,12 +8,12 @@ $base_path = '';
 $active_nav = 'home';
 $lang_page = 'index.php';
 $page_title = 'Kona Ya Hisabati | Pre-Primary Mathematics Learning';
-$page_description = 'Kona Ya Hisabati — interactive Pre-Primary mathematics for Tanzania. Teachers, parents, and learners access numeracy activities, lesson plans, and progress tracking.';
+$page_description = 'Kona Ya Hisabati â€” interactive Pre-Primary mathematics for Tanzania. Teachers, parents, and learners access numeracy activities, lesson plans, and progress tracking.';
 
-// Notes Board data — latest 3 published notes
+// Notes Board data â€” latest 3 published notes
 $kyh_notes = $database->fetchAll("SELECT id, title, slug, featured_image, short_description, publish_date, created_at FROM notes WHERE status = 'published' ORDER BY COALESCE(publish_date, created_at) DESC LIMIT 3");
 
-// Events Calendar data — upcoming published events
+// Events Calendar data â€” upcoming published events
 $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_time, event_description FROM events WHERE status = 'published' AND event_date >= CURDATE() ORDER BY event_date ASC LIMIT 5");
 
 // Total registered students count
@@ -98,7 +98,7 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
                             </div>
                         </div>
                         <div class="hero-actions" style="margin-top:28px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                            <a href="learner/categories.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-yellow" style="text-decoration:none;min-height:52px;font-size:1.05rem;border-radius:50px;">
+                            <a href="learner/categories?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-yellow" style="text-decoration:none;min-height:52px;font-size:1.05rem;border-radius:50px;">
                                 <i class="fas fa-play-circle" aria-hidden="true"></i>
                                 <?php echo htmlspecialchars($t['btn_start']); ?>
                             </a>
@@ -123,7 +123,7 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
                         <?php foreach ($kyh_notes as $n): ?>
                         <div class="kyh-note-item">
                             <div class="kyh-note-img">
-                                <a href="notes.php?id=<?php echo (int) $n['id']; ?>">
+                                <a href="notes?id=<?php echo (int) $n['id']; ?>">
                                     <?php if ($n['featured_image']): ?>
                                     <img src="<?php echo htmlspecialchars($n['featured_image']); ?>" alt="<?php echo htmlspecialchars($n['title']); ?>" loading="lazy">
                                     <?php else: ?>
@@ -132,7 +132,7 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
                                 </a>
                             </div>
                             <div class="kyh-note-body">
-                                <a href="notes.php?id=<?php echo (int) $n['id']; ?>" style="text-decoration:none;color:inherit;">
+                                <a href="notes?id=<?php echo (int) $n['id']; ?>" style="text-decoration:none;color:inherit;">
                                     <h4 class="kyh-note-title"><?php echo htmlspecialchars($n['title']); ?></h4>
                                 </a>
                                 <div class="kyh-note-date">
@@ -142,14 +142,14 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
                                 <?php if ($n['short_description']): ?>
                                 <p class="kyh-note-excerpt"><?php echo htmlspecialchars($n['short_description']); ?></p>
                                 <?php endif; ?>
-                                <a href="notes.php?id=<?php echo (int) $n['id']; ?>" class="kyh-note-link">
+                                <a href="notes?id=<?php echo (int) $n['id']; ?>" class="kyh-note-link">
                                     <?php echo $current_lang === 'sw' ? 'Soma Zaidi' : 'Read More'; ?> <i class="fas fa-arrow-right"></i>
                                 </a>
                             </div>
                         </div>
                         <?php endforeach; ?>
                     </div>
-                    <a href="notes.php" class="kyh-board-card-btn">
+                    <a href="notes" class="kyh-board-card-btn">
                         <?php echo $current_lang === 'sw' ? 'Maelezo Yote' : 'All Notes'; ?> <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -180,7 +180,7 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
                             <?php endforeach; ?>
                         </div>
                     </div>
-                    <a href="events.php" class="kyh-board-card-btn">
+                    <a href="events" class="kyh-board-card-btn">
                         <?php echo $current_lang === 'sw' ? 'Matukio Yote' : 'All Events'; ?> <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -344,7 +344,7 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
     <?php include 'php/includes/footer.php'; ?>
 
     <script>
-    // Dynamic hero slider — handles any number of slides with arrow navigation
+    // Dynamic hero slider â€” handles any number of slides with arrow navigation
     (function() {
         var slides = document.querySelectorAll('.hero-bg-slide');
         if (slides.length > 1) {

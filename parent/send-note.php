@@ -9,14 +9,14 @@ ensure_schema_v2($database);
 sec_require_rate_limit();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
-    header('Location: ../login.php');
+    header('Location: ../login');
     exit;
 }
 
 $parent_id = (int) $_SESSION['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: dashboard.php');
+    header('Location: dashboard');
     exit;
 }
 
@@ -28,7 +28,7 @@ $activity_id = isset($_POST['activity_id']) && $_POST['activity_id'] !== '' ? in
 $message = trim($_POST['message'] ?? '');
 
 if ($child_id === 0 || $teacher_id === 0 || $message === '') {
-    header('Location: child-progress.php?child_id=' . $child_id . '&sent=0');
+    header('Location: child-progress?child_id=' . $child_id . '&sent=0');
     exit;
 }
 
@@ -39,14 +39,14 @@ $linked = $database->fetchOne(
     [$parent_id, $child_id, $child_id, $parent_id]
 );
 if (!$linked) {
-    header('Location: dashboard.php');
+    header('Location: dashboard');
     exit;
 }
 
 // Verify teacher exists
 $teacher = $database->fetchOne("SELECT user_id FROM users WHERE user_id = ? AND role = 'teacher'", [$teacher_id]);
 if (!$teacher) {
-    header('Location: child-progress.php?child_id=' . $child_id . '&sent=0');
+    header('Location: child-progress?child_id=' . $child_id . '&sent=0');
     exit;
 }
 
@@ -61,6 +61,6 @@ try {
     $success = 0;
 }
 
-header('Location: child-progress.php?child_id=' . $child_id . '&sent=' . $success);
+header('Location: child-progress?child_id=' . $child_id . '&sent=' . $success);
 exit;
 ?>

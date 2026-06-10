@@ -19,9 +19,9 @@ $parentId = auth_user_id();
 $role = auth_role();
 
 if ($role !== 'parent') {
-    if ($role === 'admin') { header('Location: admin/dashboard.php'); exit; }
-    if ($role === 'teacher') { header('Location: teacher/dashboard.php'); exit; }
-    header('Location: index.php'); exit;
+    if ($role === 'admin') { header('Location: admin/dashboard'); exit; }
+    if ($role === 'teacher') { header('Location: teacher/dashboard'); exit; }
+    header('Location: index'); exit;
 }
 
 $subStatus = sub_get_status($parentId);
@@ -304,7 +304,7 @@ $dashboard_page_title = 'Payment';
 <script>
 const isWallet = () => document.getElementById('paymentType').value === 'wallet_topup';
 
-// ===== Auto-flow: Type → Manual Payment (Lipa Number) =====
+// ===== Auto-flow: Type â†’ Manual Payment (Lipa Number) =====
 function selectTypeAndProceed(type) {
     document.querySelectorAll('.type-card').forEach(o => o.classList.remove('active'));
     document.getElementById(type === 'subscription' ? 'typeSubCard' : 'typeWalletCard').classList.add('active');

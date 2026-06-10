@@ -8,7 +8,7 @@ sec_require_rate_limit();
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
         
         if ($result) {
-            header('Location: dashboard.php?success=class_created');
+            header('Location: dashboard?success=class_created');
             exit;
         } else {
             $error = "Failed to create class. Please try again.";
@@ -120,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="text-center mt-30">
                     <button type="button" 
                             class="btn-child btn-child-secondary" 
-                            onclick="window.location.href='dashboard.php'">
+                            onclick="window.location.href='dashboard'">
                         <i class="fas fa-times me-2"></i>Cancel
                     </button>
                     <button type="submit" 

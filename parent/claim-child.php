@@ -12,7 +12,7 @@ sec_require_rate_limit();
 
 // Check if user is logged in and is a parent
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
-    header('Location: ../login.php');
+    header('Location: ../login');
     exit;
 }
 
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['claim_code'])) {
                         }
                         
                         // Redirect to dashboard after successful claim
-                        header('Location: dashboard.php?claimed=1' . $sms_error);
+                        header('Location: dashboard?claimed=1' . $sms_error);
                         exit;
                     } else {
                         $error = "Failed to claim child. Please try again.";
@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['claim_code'])) {
 
 // Redirect to dashboard if not POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: dashboard.php');
+    header('Location: dashboard');
     exit;
 }
 ?>

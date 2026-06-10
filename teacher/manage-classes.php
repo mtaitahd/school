@@ -8,7 +8,7 @@ sec_require_rate_limit();
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
-    header('Location: ../login.php');
+    header('Location: ../login');
     exit;
 }
 
@@ -205,7 +205,7 @@ $classes = $database->fetchAll("
                                 </p>
                             </div>
                             <div style="display: flex; gap: 10px;">
-                                <a href="view-class.php?class_id=<?php echo $class['class_id']; ?>" 
+                                <a href="view-class?class_id=<?php echo $class['class_id']; ?>" 
                                    class="btn-child btn-child-info" style="min-height: 40px; min-width: 40px;">
                                     <i class="fas fa-eye"></i>
                                 </a>

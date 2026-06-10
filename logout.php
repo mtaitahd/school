@@ -17,5 +17,5 @@ sec_session_destroy();
     <link rel="stylesheet" href="css/style.css">
 </head>
 <?php
-header('Location: index.php');
+header('Location: index');
 exit;

@@ -118,7 +118,7 @@ function sub_require_access(): void {
     if ($parentId <= 0) return;
 
     if (!sub_can_access($parentId)) {
-        header('Location: ' . dirname($_SERVER['SCRIPT_NAME'], 2) . '/payment.php');
+        header('Location: ' . dirname($_SERVER['SCRIPT_NAME'], 2) . '/payment');
         exit;
     }
 }

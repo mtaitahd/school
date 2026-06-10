@@ -8,7 +8,7 @@ sec_require_rate_limit();
 sec_send_headers();
 
 if (isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'learner') {
-    header('Location: dashboard.php');
+    header('Location: dashboard');
     exit;
 }
 
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['_CREATED'] = time();
 
             // Redirect to learning activities
-            header('Location: dashboard.php');
+            header('Location: dashboard');
             exit;
         } else {
             $error = 'Username not found. Please ask your parent or teacher for help.';
@@ -69,7 +69,7 @@ include '../php/includes/auth-split-start.php';
 ?>
             <header class="auth-form-header">
                 <h1 class="auth-form-title">Login</h1>
-                <p class="auth-form-subtitle">Learner account — enter your username to start learning</p>
+                <p class="auth-form-subtitle">Learner account â€” enter your username to start learning</p>
             </header>
 
             <?php if ($error): ?>

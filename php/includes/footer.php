@@ -32,9 +32,9 @@ if (!isset($nav_items)) {
             <div class="col-child-3 footer-col">
                 <h3 class="footer-heading">Information</h3>
                 <ul class="footer-links">
-                    <li><a href="<?php echo app_web_path('about.php?lang=' . urlencode($lang)); ?>"><?php echo htmlspecialchars($t['footer_about'] ?? 'About'); ?></a></li>
-                    <li><a href="<?php echo app_web_path('contact.php'); ?>"><?php echo htmlspecialchars($t['footer_contact'] ?? 'Contact'); ?></a></li>
-                    <li><a href="<?php echo app_web_path('terms.php'); ?>"><?php echo htmlspecialchars($t['footer_terms'] ?? 'Terms'); ?></a></li>
+                    <li><a href="<?php echo app_web_path('about?lang=' . urlencode($lang)); ?>"><?php echo htmlspecialchars($t['footer_about'] ?? 'About'); ?></a></li>
+                    <li><a href="<?php echo app_web_path('contact'); ?>"><?php echo htmlspecialchars($t['footer_contact'] ?? 'Contact'); ?></a></li>
+                    <li><a href="<?php echo app_web_path('terms'); ?>"><?php echo htmlspecialchars($t['footer_terms'] ?? 'Terms'); ?></a></li>
                 </ul>
             </div>
             <div class="col-child-3 footer-col">

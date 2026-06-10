@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         pay_verify_manual($paymentId, 'reject');
         $_SESSION['flash_message'] = 'Payment rejected.';
     }
-    header('Location: payments.php');
+    header('Location: payments');
     exit;
 }
 

@@ -10,7 +10,7 @@ sec_require_rate_limit();
 
 // Check if user is logged in and is a parent
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
-    header('Location: ../login.php');
+    header('Location: ../login');
     exit;
 }
 
@@ -217,7 +217,7 @@ $children = $database->fetchAll("
                                 Linked on <?php echo date('M d, Y', strtotime($child['linked_at'])); ?>
                             </p>
                         </div>
-                        <a href="child-progress.php?child_id=<?php echo $child['user_id']; ?>" 
+                        <a href="child-progress?child_id=<?php echo $child['user_id']; ?>" 
                            class="btn-child btn-child-info" style="min-height: 40px; min-width: 40px;">
                             <i class="fas fa-chart-line"></i>
                         </a>

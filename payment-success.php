@@ -18,9 +18,9 @@ $parentId = auth_user_id();
 $role = auth_role();
 
 if ($role !== 'parent') {
-    if ($role === 'admin') { header('Location: admin/dashboard.php'); exit; }
-    if ($role === 'teacher') { header('Location: teacher/dashboard.php'); exit; }
-    header('Location: index.php'); exit;
+    if ($role === 'admin') { header('Location: admin/dashboard'); exit; }
+    if ($role === 'teacher') { header('Location: teacher/dashboard'); exit; }
+    header('Location: index'); exit;
 }
 
 $ref = $_GET['ref'] ?? '';

@@ -10,7 +10,7 @@ sec_require_rate_limit();
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -196,7 +196,7 @@ $classes = $database->fetchAll("
             <div class="d-flex gap-10 mt-30">
                 <button type="button" 
                         class="btn-child btn-child-secondary" 
-                        onclick="window.location.href='dashboard.php'"
+                        onclick="window.location.href='dashboard'"
                         style="flex: 1; padding: 12px 24px; font-size: 16px;">
                     <i class="fas fa-times" style="margin-right: 8px;"></i>Cancel
                 </button>

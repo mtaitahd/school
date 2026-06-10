@@ -71,7 +71,7 @@ $recent_assignments = $database->fetchAll(
             <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
                     <i class="fas fa-clock me-2"></i>
-                    <strong><?php echo $current_lang === 'sw' ? 'Majaribio ya Bure' : 'Free Trial'; ?></strong> —
+                    <strong><?php echo $current_lang === 'sw' ? 'Majaribio ya Bure' : 'Free Trial'; ?></strong> â€”
                     <?php if ($trialInfo['days_remaining'] > 0): ?>
                         <?php echo $current_lang === 'sw' ? 'Umesalia siku' : 'You have'; ?> <strong><?php echo $trialInfo['days_remaining']; ?></strong> <?php echo $current_lang === 'sw' ? 'siku za majaribio' : 'trial days remaining'; ?>.
                     <?php else: ?>
@@ -79,14 +79,14 @@ $recent_assignments = $database->fetchAll(
                     <?php endif; ?>
                 </div>
                 <a href="../payment" class="btn btn-warning btn-sm fw-bold px-4" style="border-radius:50px;">
-                    <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Subscribe Now'; ?> — 1,500 TZS
+                    <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Subscribe Now'; ?> â€” 1,500 TZS
                 </a>
             </div>
         <?php elseif ($trialInfo['status'] === 'active' && $trialInfo['days_remaining'] <= 7): ?>
             <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
                     <i class="fas fa-exclamation-circle me-2"></i>
-                    <strong><?php echo $current_lang === 'sw' ? 'Uanachama Unakaribia Kuisha' : 'Subscription Expiring'; ?></strong> —
+                    <strong><?php echo $current_lang === 'sw' ? 'Uanachama Unakaribia Kuisha' : 'Subscription Expiring'; ?></strong> â€”
                     <?php echo $current_lang === 'sw' ? 'Siku zilizobaki' : 'Days remaining'; ?>: <strong><?php echo $trialInfo['days_remaining']; ?></strong>
                 </div>
                 <a href="../payment" class="btn btn-outline-warning btn-sm fw-bold px-3" style="border-radius:50px;">
@@ -97,7 +97,7 @@ $recent_assignments = $database->fetchAll(
             <div class="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong><?php echo $current_lang === 'sw' ? 'Huduma Imezuiwa' : 'Access Blocked'; ?></strong> —
+                    <strong><?php echo $current_lang === 'sw' ? 'Huduma Imezuiwa' : 'Access Blocked'; ?></strong> â€”
                     <?php echo $current_lang === 'sw' ? 'Tafadhali lipa 1,500 TZS ili kuendelea.' : 'Please pay 1,500 TZS to continue.'; ?>
                 </div>
                 <a href="../payment" class="btn btn-danger btn-sm fw-bold px-4" style="border-radius:50px;">
@@ -147,7 +147,7 @@ $recent_assignments = $database->fetchAll(
 
         <div class="row g-4">
             <div class="col-xl-3 col-md-6">
-                <a href="categories.php?lang=<?php echo $current_lang; ?>" class="card h-100 py-2 text-center text-decoration-none" style="display:block;">
+                <a href="categories?lang=<?php echo $current_lang; ?>" class="card h-100 py-2 text-center text-decoration-none" style="display:block;">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center">
                         <i class="fas fa-play-circle mb-3" style="font-size:3rem;color:var(--primary-green);"></i>
                         <h5 class="fw-bold mb-0" style="color:var(--text-dark);"><?php echo htmlspecialchars($t['nav_start'] ?? 'Start Learning'); ?></h5>
@@ -155,7 +155,7 @@ $recent_assignments = $database->fetchAll(
                 </a>
             </div>
             <div class="col-xl-3 col-md-6">
-                <a href="assigned.php?lang=<?php echo $current_lang; ?>" class="card h-100 py-2 text-center text-decoration-none" style="display:block;">
+                <a href="assigned?lang=<?php echo $current_lang; ?>" class="card h-100 py-2 text-center text-decoration-none" style="display:block;">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center">
                         <i class="fas fa-tasks mb-3" style="font-size:3rem;color:var(--primary-blue);"></i>
                         <h5 class="fw-bold mb-0" style="color:var(--text-dark);"><?php echo htmlspecialchars($t['sb_learner_assigned'] ?? 'Assigned Activities'); ?></h5>
@@ -172,7 +172,7 @@ $recent_assignments = $database->fetchAll(
                     <i class="fas fa-clipboard-list"></i>
                 </div>
                 <h3 class="dashboard-card-title"><?php echo $current_lang === 'sw' ? 'Shughuli Zilizopangwa Hivi Karibuni' : 'Recent Assignments'; ?></h3>
-                <a href="assigned.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-secondary" style="margin-left:auto; min-height:35px; font-size:0.85rem; padding:6px 14px; text-decoration:none;">
+                <a href="assigned?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-secondary" style="margin-left:auto; min-height:35px; font-size:0.85rem; padding:6px 14px; text-decoration:none;">
                     <?php echo $current_lang === 'sw' ? 'Zote' : 'View All'; ?> <i class="fas fa-arrow-right ms-1"></i>
                 </a>
             </div>
@@ -208,12 +208,12 @@ $recent_assignments = $database->fetchAll(
                                 <i class="fas fa-check me-1"></i><?php echo $current_lang === 'sw' ? 'Umefanya' : 'Done'; ?>
                             </span>
                         <?php elseif ($a['activity_id']): ?>
-                            <a href="activity.php?activity_id=<?php echo (int) $a['activity_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
+                            <a href="activity?activity_id=<?php echo (int) $a['activity_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
                                 <i class="fas fa-<?php echo $has_started ? 'play-circle' : 'play'; ?> me-1"></i>
                                 <?php echo $current_lang === 'sw' ? ($has_started ? 'Endelea' : 'Anza') : ($has_started ? 'Continue' : 'Start'); ?>
                             </a>
                         <?php else: ?>
-                            <a href="categories.php?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
+                            <a href="categories?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
                                 <i class="fas fa-play me-1"></i><?php echo $current_lang === 'sw' ? 'Anza Kujifunza' : 'Start Learning'; ?>
                             </a>
                         <?php endif; ?>

@@ -4,7 +4,7 @@ require_once __DIR__ . '/../php/db_connection.php';
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -49,7 +49,7 @@ $game_count = count(array_filter($activities, fn($a) => $a['activity_type'] === 
                 <h1 class="activity-title mb-0">All Activities</h1>
                 <p class="activity-instruction mb-0">View and manage all learning activities in the system</p>
             </div>
-            <button type="button" class="btn-child btn-child-primary" onclick="window.location.href='activity-library.php'">
+            <button type="button" class="btn-child btn-child-primary" onclick="window.location.href='activity-library'">
                 <i class="fas fa-plus-circle me-2"></i>Create Activity
             </button>
         </div>
@@ -104,7 +104,7 @@ $game_count = count(array_filter($activities, fn($a) => $a['activity_type'] === 
                             </td>
                             <td style="padding: 15px;"><?php echo (int)$activity['order_index']; ?></td>
                             <td style="padding: 15px;">
-                                <a href="activity-library.php?edit=<?php echo $activity['activity_id']; ?>" 
+                                <a href="activity-library?edit=<?php echo $activity['activity_id']; ?>" 
                                    class="btn-child btn-child-warning" style="min-height: 35px; min-width: 35px; font-size: 0.8rem; padding: 0 10px; display: inline-block; text-decoration: none;">
                                     <i class="fas fa-edit"></i>
                                 </a>

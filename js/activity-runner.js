@@ -39,7 +39,7 @@
         };
 
         window.goBack = function () {
-            window.location.href = 'activities.php?module_id=' + cfg.moduleId + '&lang=' + (cfg.lang || 'en');
+            window.location.href = 'activities?module_id=' + cfg.moduleId + '&lang=' + (cfg.lang || 'en');
         };
 
         loadQuestion();

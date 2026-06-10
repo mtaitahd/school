@@ -24,7 +24,7 @@ $activity_id = isset($_GET['activity_id']) ? intval($_GET['activity_id']) : 0;
 $lang_page = 'activity.php?activity_id=' . $activity_id;
 
 if ($activity_id === 0) {
-    header('Location: categories.php?lang=' . $current_lang);
+    header('Location: categories?lang=' . $current_lang);
     exit;
 }
 
@@ -36,7 +36,7 @@ $activity = $database->fetchOne("
 ", [$activity_id]);
 
 if (!$activity) {
-    header('Location: categories.php?lang=' . $current_lang);
+    header('Location: categories?lang=' . $current_lang);
     exit;
 }
 
@@ -123,7 +123,7 @@ $isInteractiveEngine = in_array($engine, [
             totalQuestions: 5
         };
         function goBack() {
-            window.location.href = 'activities.php?module_id=' + ACTIVITY_CONFIG.moduleId + '&lang=' + ACTIVITY_CONFIG.lang;
+            window.location.href = 'activities?module_id=' + ACTIVITY_CONFIG.moduleId + '&lang=' + ACTIVITY_CONFIG.lang;
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

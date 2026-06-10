@@ -12,9 +12,9 @@ sec_send_headers();
 if (isset($_SESSION['user_id'])) {
     $role = $_SESSION['role'];
     if ($role === 'teacher') {
-        header('Location: dashboard.php');
+        header('Location: dashboard');
     } else {
-        header('Location: ../index.php');
+        header('Location: ../index');
     }
     exit;
 }
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user && password_verify($password, $user['password'])) {
             sec_clear_login_rate_limit($username);
             auth_login($user);
-            header('Location: dashboard.php');
+            header('Location: dashboard');
             exit;
         } else {
             $error = 'Invalid username or password.';
@@ -67,7 +67,7 @@ include '../php/includes/auth-split-start.php';
 ?>
             <header class="auth-form-header">
                 <h1 class="auth-form-title">Login</h1>
-                <p class="auth-form-subtitle">Teacher account — enter your credentials to access your dashboard</p>
+                <p class="auth-form-subtitle">Teacher account â€” enter your credentials to access your dashboard</p>
             </header>
 
             <?php if ($error): ?>

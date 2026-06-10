@@ -22,7 +22,7 @@ sec_send_headers();
                 <div class="navbar-brand-modern">
                     <div class="navbar-brand-text">
                         <span class="brand-main">Kona Ya Hisabati</span>
-                        <span class="brand-subtitle">Jifunze • Furahia • Fanikiwa</span>
+                        <span class="brand-subtitle">Jifunze â€¢ Furahia â€¢ Fanikiwa</span>
                     </div>
                 </div>
 
@@ -51,7 +51,7 @@ sec_send_headers();
                 <!-- Right Side -->
                 <div class="navbar-right">
                     <!-- Teacher Login Button -->
-                    <a href="login.php?role=teacher" class="teacher-login-btn">
+                    <a href="login?role=teacher" class="teacher-login-btn">
                         <i class="fas fa-chalkboard-teacher"></i>
                         <span>Teacher Login</span>
                     </a>

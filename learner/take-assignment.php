@@ -22,7 +22,7 @@ $sidebar_active = 'assigned';
 
 $studentAssignmentId = (int) ($_GET['sa_id'] ?? 0);
 if (!$studentAssignmentId) {
-    header('Location: assigned.php');
+    header('Location: assigned');
     exit;
 }
 
@@ -40,13 +40,13 @@ $sa = $database->fetchOne(
 );
 
 if (!$sa) {
-    header('Location: assigned.php');
+    header('Location: assigned');
     exit;
 }
 
 // If already completed, redirect to review or assigned
 if (in_array($sa['status'], ['completed', 'auto_submitted', 'expired'], true)) {
-    header('Location: assigned.php?lang=' . $current_lang);
+    header('Location: assigned?lang=' . $current_lang);
     exit;
 }
 
@@ -59,7 +59,7 @@ $questions = $database->fetchAll(
 $totalQuestions = count($questions);
 
 if ($totalQuestions === 0) {
-    header('Location: activity.php?activity_id=' . (int) $sa['activity_id']);
+    header('Location: activity?activity_id=' . (int) $sa['activity_id']);
     exit;
 }
 
@@ -473,12 +473,12 @@ $csrfToken = csrf_token();
                 <div><div style="font-size:1.5rem;font-weight:700;color:var(--primary-orange);">${data.skipped || 0}</div><small style="color:var(--text-light);">${CONFIG.lang === 'sw' ? 'Kuruka' : 'Skipped'}</small></div>
                 <div><div style="font-size:1.5rem;font-weight:700;color:var(--primary-blue);">${data.total || 0}</div><small style="color:var(--text-light);">${CONFIG.lang === 'sw' ? 'Jumla' : 'Total'}</small></div>
             </div>
-            <a href="assigned.php?lang=${CONFIG.lang}" class="btn-child btn-child-primary btn-child-large" style="text-decoration:none;display:inline-block;">
+            <a href="assigned?lang=${CONFIG.lang}" class="btn-child btn-child-primary btn-child-large" style="text-decoration:none;display:inline-block;">
                 <i class="fas fa-arrow-left me-2"></i>${CONFIG.strings.viewResults}
             </a>
         `;
         overlay.appendChild(card);
-        overlay.onclick = (e) => { if (e.target === overlay) window.location.href = 'assigned.php?lang=' + CONFIG.lang; };
+        overlay.onclick = (e) => { if (e.target === overlay) window.location.href = 'assigned?lang=' + CONFIG.lang; };
         document.body.appendChild(overlay);
     }
 

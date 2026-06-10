@@ -5,7 +5,7 @@ sec_send_headers();
 $base = $base_path ?? '';
 $active = $active_nav ?? 'home';
 $lang = $current_lang ?? 'en';
-$lang_page = $lang_page ?? basename($_SERVER['SCRIPT_NAME']);
+$lang_page = preg_replace('/\.php($|\?)/', '$1', $lang_page ?? basename($_SERVER['SCRIPT_NAME']));
 $logo_src = $base . 'assets/images/logo.png';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -33,7 +33,7 @@ $is_guest = ($logged_role === '');
                 <img src="<?php echo htmlspecialchars($logo_src); ?>" alt="Kona Ya Hisabati" class="navbar-logo" width="48" height="48">
                 <div class="navbar-brand-text">
                     <span class="brand-main">Kona Ya Hisabati</span>
-                    <span class="brand-subtitle"><?php echo htmlspecialchars($t['brand_sub'] ?? 'Jifunze • Furahia • Fanikiwa'); ?></span>
+                    <span class="brand-subtitle"><?php echo htmlspecialchars($t['brand_sub'] ?? 'Jifunze â€¢ Furahia â€¢ Fanikiwa'); ?></span>
                 </div>
             </a>
 
@@ -49,13 +49,13 @@ $is_guest = ($logged_role === '');
 
                 <?php if ($is_guest): ?>
                 <li class="navbar-item navbar-login-group-mobile" style="display:none;">
-                    <a href="<?php echo app_web_path('learner/login.php'); ?>" class="nav-login-pill learner" style="width:100%;justify-content:center;margin-bottom:8px;">
+                    <a href="<?php echo app_web_path('learner/login'); ?>" class="nav-login-pill learner" style="width:100%;justify-content:center;margin-bottom:8px;">
                         <i class="fas fa-child"></i> <?php echo htmlspecialchars($t['nav_learner_login'] ?? 'Learner'); ?>
                     </a>
-                    <a href="<?php echo app_web_path('teacher/login.php'); ?>" class="nav-login-pill teacher" style="width:100%;justify-content:center;margin-bottom:8px;">
+                    <a href="<?php echo app_web_path('teacher/login'); ?>" class="nav-login-pill teacher" style="width:100%;justify-content:center;margin-bottom:8px;">
                         <i class="fas fa-chalkboard-teacher"></i> <?php echo htmlspecialchars($t['nav_teacher_login'] ?? 'Teacher'); ?>
                     </a>
-                    <a href="<?php echo app_web_path('parent/login.php'); ?>" class="nav-login-pill parent" style="width:100%;justify-content:center;">
+                    <a href="<?php echo app_web_path('parent/login'); ?>" class="nav-login-pill parent" style="width:100%;justify-content:center;">
                         <i class="fas fa-user-friends"></i> <?php echo htmlspecialchars($t['nav_parent_login'] ?? 'Parent'); ?>
                     </a>
                 </li>
@@ -65,7 +65,7 @@ $is_guest = ($logged_role === '');
             <div class="navbar-right">
                 <?php if ($logged_name !== '' && $logged_role !== ''): ?>
                     <?php if ($logged_role === 'parent'): ?>
-                    <a href="<?php echo app_web_path('payment.php'); ?>" class="nav-topup-btn" title="Payment / Subscription">
+                    <a href="<?php echo app_web_path('payment'); ?>" class="nav-topup-btn" title="Payment / Subscription">
                         <i class="fas fa-wallet" aria-hidden="true"></i>
                         <span>Topup</span>
                     </a>
@@ -77,15 +77,15 @@ $is_guest = ($logged_role === '');
                     </a>
                 <?php elseif ($is_guest): ?>
                     <div class="navbar-login-group">
-                        <a href="<?php echo app_web_path('learner/login.php'); ?>" class="nav-login-pill learner" title="<?php echo htmlspecialchars($t['nav_learner_login'] ?? 'Learner Login'); ?>">
+                        <a href="<?php echo app_web_path('learner/login'); ?>" class="nav-login-pill learner" title="<?php echo htmlspecialchars($t['nav_learner_login'] ?? 'Learner Login'); ?>">
                             <i class="fas fa-child" aria-hidden="true"></i>
                             <span class="nav-pill-label"><?php echo htmlspecialchars($t['nav_learner_login'] ?? 'Learner'); ?></span>
                         </a>
-                        <a href="<?php echo app_web_path('teacher/login.php'); ?>" class="nav-login-pill teacher" title="<?php echo htmlspecialchars($t['nav_teacher_login'] ?? 'Teacher Login'); ?>">
+                        <a href="<?php echo app_web_path('teacher/login'); ?>" class="nav-login-pill teacher" title="<?php echo htmlspecialchars($t['nav_teacher_login'] ?? 'Teacher Login'); ?>">
                             <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
                             <span class="nav-pill-label"><?php echo htmlspecialchars($t['nav_teacher_login'] ?? 'Teacher'); ?></span>
                         </a>
-                        <a href="<?php echo app_web_path('parent/login.php'); ?>" class="nav-login-pill parent" title="<?php echo htmlspecialchars($t['nav_parent_login'] ?? 'Parent Login'); ?>">
+                        <a href="<?php echo app_web_path('parent/login'); ?>" class="nav-login-pill parent" title="<?php echo htmlspecialchars($t['nav_parent_login'] ?? 'Parent Login'); ?>">
                             <i class="fas fa-user-friends" aria-hidden="true"></i>
                             <span class="nav-pill-label"><?php echo htmlspecialchars($t['nav_parent_login'] ?? 'Parent'); ?></span>
                         </a>

@@ -1,10 +1,10 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
-header('Location: learners.php?add=1');
+header('Location: learners?add=1');
 exit;
 
 $teacher_id = $_SESSION['user_id'];
@@ -198,7 +198,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $error = "Failed to create student.";
                 }
-            }
         }
     }
 }

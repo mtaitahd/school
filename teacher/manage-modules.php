@@ -8,7 +8,7 @@ sec_require_rate_limit();
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -241,7 +241,7 @@ if (isset($_GET['edit'])) {
                                 </div>
                             </div>
                             <div style="display: flex; gap: 10px;">
-                                <a href="manage-modules.php?edit=<?php echo $module['module_id']; ?>" 
+                                <a href="manage-modules?edit=<?php echo $module['module_id']; ?>" 
                                    class="btn-child btn-child-warning" style="min-height: 40px; min-width: 40px;">
                                     <i class="fas fa-edit"></i>
                                 </a>

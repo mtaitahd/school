@@ -19,14 +19,14 @@ $parentId = auth_user_id();
 $role = auth_role();
 
 if ($role !== 'parent') {
-    if ($role === 'admin') { header('Location: admin/dashboard.php'); exit; }
-    if ($role === 'teacher') { header('Location: teacher/dashboard.php'); exit; }
-    header('Location: index.php'); exit;
+    if ($role === 'admin') { header('Location: admin/dashboard'); exit; }
+    if ($role === 'teacher') { header('Location: teacher/dashboard'); exit; }
+    header('Location: index'); exit;
 }
 
 $ref = $_GET['ref'] ?? '';
 if (!$ref) {
-    header('Location: payment.php'); exit;
+    header('Location: payment'); exit;
 }
 
 $payment = $database->fetchOne(
@@ -35,7 +35,7 @@ $payment = $database->fetchOne(
 );
 
 if (!$payment) {
-    header('Location: payment.php'); exit;
+    header('Location: payment'); exit;
 }
 
 // Handle cancel action before status variables
@@ -267,11 +267,11 @@ function showSwal(data) {
             }
         },
         preConfirm: () => {
-            window.location.href = 'parent/dashboard.php';
+            window.location.href = 'parent/dashboard';
         },
         preDeny: () => {
             if (failed || cancelled) {
-                window.location.href = 'payment.php';
+                window.location.href = 'payment';
             } else if (pending && !isManual) {
                 retryPush();
                 return false;

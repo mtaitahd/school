@@ -9,12 +9,12 @@ require_once __DIR__ . '/../php/sms_service.php';
 sec_require_rate_limit();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'teacher') {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
 $teacher_id = (int) $_SESSION['user_id'];
-$redirect = $_POST['redirect'] ?? 'learners.php';
+$redirect = $_POST['redirect'] ?? 'learners';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || ($_POST['action'] ?? '') !== 'add_student') {
     header('Location: ' . $redirect);

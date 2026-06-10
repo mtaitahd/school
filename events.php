@@ -66,7 +66,7 @@ if (!$event) {
                 <div style="text-align:center;padding:60px 20px;">
                     <i class="fas fa-calendar-day" style="font-size:3rem;color:var(--primary-blue);opacity:0.4;margin-bottom:16px;display:block;"></i>
                     <p style="color:var(--text-light);font-size:1.1rem;"><?php echo $current_lang === 'sw' ? 'Hakuna matukio yaliyopangwa kwa sasa.' : 'No upcoming events at this time.'; ?></p>
-                    <a href="index.php" class="kyh-board-card-btn" style="display:inline-flex;"><?php echo $current_lang === 'sw' ? 'Rudi Nyumbani' : 'Back to Home'; ?></a>
+                    <a href="index" class="kyh-board-card-btn" style="display:inline-flex;"><?php echo $current_lang === 'sw' ? 'Rudi Nyumbani' : 'Back to Home'; ?></a>
                 </div>
             <?php else: ?>
                 <div class="row g-4">
@@ -82,7 +82,7 @@ if (!$event) {
                                 <div style="flex:1;min-width:0;">
                                     <h5 style="font-family:'Poppins',sans-serif;font-size:0.95rem;font-weight:700;color:var(--navbar-dark);margin:0 0 4px;">
                                         <?php if ($e['event_description']): ?>
-                                        <a href="events.php?id=<?php echo (int)$e['id']; ?>" style="text-decoration:none;color:inherit;"><?php echo htmlspecialchars($e['event_title']); ?></a>
+                                        <a href="events?id=<?php echo (int)$e['id']; ?>" style="text-decoration:none;color:inherit;"><?php echo htmlspecialchars($e['event_title']); ?></a>
                                         <?php else: ?>
                                         <?php echo htmlspecialchars($e['event_title']); ?>
                                         <?php endif; ?>
