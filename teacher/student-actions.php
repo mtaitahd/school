@@ -39,15 +39,18 @@ if ($fullname === '') {
     exit;
 }
 
-// Auto-generate username from fullname
-$username = strtolower(preg_replace('/[^a-zA-Z0-9]/', '.', $fullname));
-$username = preg_replace('/\.+/', '.', $username);
-$username = trim($username, '.');
-$base_username = $username;
-$suffix = 1;
+// Auto-generate username in SMART/chil/NNN format
+$maxNum = $database->fetchOne(
+    "SELECT COALESCE(MAX(CAST(SUBSTRING(username, 11) AS UNSIGNED)), 0) + 1
+     FROM users WHERE role = 'learner' AND username LIKE 'SMART/chil/%'"
+);
+$username = 'SMART/chil/' . str_pad((string) $maxNum, 3, '0', STR_PAD_LEFT);
+// Ensure uniqueness (race condition guard)
+$suffix = 0;
+$base = $username;
 while ($database->fetchOne('SELECT user_id FROM users WHERE username = ?', [$username])) {
-    $username = $base_username . '.' . $suffix;
     $suffix++;
+    $username = $base . '.' . $suffix;
 }
 
 // Auto-generate password

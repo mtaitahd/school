@@ -25,9 +25,9 @@ $classes = $database->fetchAll(
 if (isset($_GET['download_template'])) {
     $headers = ['username', 'first_name', 'last_name', 'password', 'phone', 'parent_phone'];
     $rows = [
-        ['john.doe', 'John', 'Doe', 'pass123', '+255700000000', '+255711000000'],
-        ['jane.doe', 'Jane', 'Doe', 'pass456', '+255700000001', '+255711000001'],
-        ['kamau.k', 'Kamau', 'Kip', 'pass789', '', ''],
+        ['', 'John', 'Doe', 'pass123', '+255700000000', '+255711000000'],
+        ['', 'Jane', 'Doe', 'pass456', '+255700000001', '+255711000001'],
+        ['', 'Kamau', 'Kip', 'pass789', '', ''],
     ];
 
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -51,17 +51,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $results = [];
 
         foreach ($preview_data as $index => $row) {
-            $username = trim($row['username']);
+            $username = trim($row['username'] ?? '');
             $first_name = trim($row['first_name']);
             $last_name = trim($row['last_name']);
             $password = trim($row['password']);
             $phone = trim($row['phone'] ?? '');
             $parent_phone = trim($row['parent_phone'] ?? '');
 
-            if (empty($username) || empty($first_name) || empty($last_name) || empty($password)) {
+            if (empty($first_name) || empty($last_name) || empty($password)) {
                 $error_count++;
-                $results[] = "Row " . ($index + 1) . ": Missing required fields";
+                $results[] = "Row " . ($index + 1) . ": Missing required fields (first_name, last_name, password)";
                 continue;
+            }
+
+            // Auto-generate username in SMART/chil/NNN format if not provided
+            if (empty($username)) {
+                $maxNum = $database->fetchOne(
+                    "SELECT COALESCE(MAX(CAST(SUBSTRING(username, 11) AS UNSIGNED)), 0) + 1
+                     FROM users WHERE role = 'learner' AND username LIKE 'SMART/chil/%'"
+                );
+                $username = 'SMART/chil/' . str_pad((string) $maxNum, 3, '0', STR_PAD_LEFT);
+                $suffix = 0;
+                $base = $username;
+                while ($database->fetchOne('SELECT user_id FROM users WHERE username = ?', [$username])) {
+                    $suffix++;
+                    $username = $base . '.' . $suffix;
+                }
             }
 
             $existing = $database->fetchOne("SELECT user_id FROM users WHERE username = ?", [$username]);
@@ -247,8 +262,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <i class="fas fa-info-circle me-2"></i>
                 Upload an <strong>Excel (.xls, .xlsx)</strong> file with these columns:
                 <br><br>
-                <strong>Required columns:</strong> <code>username</code>, <code>first_name</code>, <code>last_name</code>, <code>password</code>
-                <br><strong>Optional columns:</strong> <code>phone</code> (student phone), <code>parent_phone</code> (parent will receive SMS with claim code)
+                <strong>Required columns:</strong> <code>first_name</code>, <code>last_name</code>, <code>password</code>
+                <br><strong>Optional columns:</strong> <code>username</code> (auto-generated as <code>SMART/chil/NNN</code> if blank), <code>phone</code>, <code>parent_phone</code>
                 <br><br>
                 <a href="?download_template=1" class="btn-child btn-child-primary" style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 15px; font-size: 0.85rem;">
                     <i class="fas fa-download"></i> Download Excel Template
