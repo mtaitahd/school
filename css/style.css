@@ -6677,13 +6677,18 @@ body {
 #wrapper #content-wrapper {
     background-color: var(--background-light);
     width: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     height: 100vh;
+    overflow: hidden;
 }
 
 #wrapper #content-wrapper #content {
-    flex: 1 0 auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
 }
 
 /* Sidebar Base */
@@ -6830,9 +6835,14 @@ body {
 .topbar {
     height: 64px;
     gap: 8px;
-    position: sticky;
-    top: 0;
+    flex-shrink: 0;
     z-index: 1051;
+}
+
+#container-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .topbar-search {
