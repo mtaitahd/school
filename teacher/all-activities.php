@@ -65,7 +65,7 @@ $game_count = count(array_filter($activities, fn($a) => $a['activity_type'] === 
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead>
-                        <tr style="background: var(--background-light);">
+                        <tr>
                             <th style="padding: 15px; text-align: left;">Activity</th>
                             <th style="padding: 15px; text-align: left;">Module</th>
                             <th style="padding: 15px; text-align: left;">Type</th>
@@ -103,15 +103,11 @@ $game_count = count(array_filter($activities, fn($a) => $a['activity_type'] === 
                             </td>
                             <td style="padding: 15px;"><?= htmlspecialchars($activity['module_name']) ?></td>
                             <td style="padding: 15px;">
-                                <span style="background: var(--primary-blue); color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8rem;">
-                                    <?= ucfirst($activity['activity_type']) ?>
-                                </span>
+                                <span style="font-weight:600;"><?= ucfirst($activity['activity_type']) ?></span>
                             </td>
                             <td style="padding: 15px;">
                                 <?php if ($engine): ?>
-                                <span style="background:#e8d5f5;color:#6b21a8;padding:3px 8px;border-radius:8px;font-size:0.75rem;">
-                                    <?= htmlspecialchars($engine) ?>
-                                </span>
+                                <span style="font-weight:600;"><?= htmlspecialchars($engine) ?></span>
                                 <?php if ($obj && isset($emojiMap[$obj])): ?>
                                 <span style="font-size:1.2rem;margin-left:4px;"><?= $emojiMap[$obj] ?></span>
                                 <?php endif; ?>
@@ -121,7 +117,7 @@ $game_count = count(array_filter($activities, fn($a) => $a['activity_type'] === 
                             </td>
                             <td style="padding: 15px;">
                                 <?php if ($level): ?>
-                                <span style="background:#dbeafe;color:#1e40af;padding:3px 8px;border-radius:8px;font-size:0.75rem;"><?= $level ?></span>
+                                <span style="font-weight:600;"><?= $level ?></span>
                                 <?php else: ?>
                                 <span style="color:var(--text-light);font-size:0.8rem;">—</span>
                                 <?php endif; ?>

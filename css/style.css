@@ -7100,10 +7100,15 @@ body {
 .dashboard-body .text-gray-800 { color: var(--text-dark) !important; }
 .dashboard-body .text-gray-500 { color: var(--text-light) !important; }
 
-/* Badge overrides */
-.badge-danger { background: var(--primary-red); color: #fff; padding: 0.25em 0.6em; border-radius: 10px; font-size: 0.75rem; }
-.badge-success { background: var(--primary-green); color: #fff; padding: 0.25em 0.6em; border-radius: 10px; font-size: 0.75rem; }
-.badge-warning { background: var(--primary-yellow-dark); color: var(--text-dark); padding: 0.25em 0.6em; border-radius: 10px; font-size: 0.75rem; }
+/* Badge overrides — plain text only, no background */
+.badge, .badge-danger, .badge-success, .badge-warning,
+.badge-primary, .badge-secondary, .badge-info, .badge-light, .badge-dark,
+[class*="badge-"], .status-badge, .swal-badge {
+    background: none !important;
+    background-color: transparent !important;
+}
+.badge i, .badge svg { margin-right: 0.25em; }
+.status-badge { font-weight: 600; }
 
 /* Table inside card */
 .dashboard-body .table-bordered {

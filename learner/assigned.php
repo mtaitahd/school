@@ -104,7 +104,7 @@ $assignments = $database->fetchAll(
                         <?php endif; ?>
                         <p><small><?php echo $current_lang === 'sw' ? 'Mwalimu' : 'Teacher'; ?>: <?php echo htmlspecialchars($a['teacher_first'] ?? 'N/A'); ?></small></p>
                         <?php if ($a['due_date']): ?><p><small><?php echo $current_lang === 'sw' ? 'Tarehe' : 'Due'; ?>: <?php echo htmlspecialchars(date('M d, Y', strtotime($a['due_date']))); ?></small></p><?php endif; ?>
-                        <span class="badge" style="background:<?php echo $status_bg; ?>;padding:4px 10px;border-radius:12px;"><?php echo $status_label; ?></span>
+                        <span style="font-weight:600;"><?php echo $status_label; ?></span>
 
                         <?php if ($has_questions && !$is_completed): ?>
                             <p class="mt-10 mb-0"><small><?php echo $current_lang === 'sw' ? 'Maswali' : 'Questions'; ?>: <?php echo (int) ($a['answered_questions'] ?? 0); ?>/<?php echo (int) ($a['total_questions'] ?? 0); ?></small></p>

@@ -300,9 +300,9 @@ include '../php/includes/dashboard-start.php';
                                                 <small class="text-muted"><?php echo htmlspecialchars($assignment['activity_name']); ?></small>
                                             <?php endif; ?>
                                         </td>
-                                        <td><span class="badge" style="background:var(--primary-purple);padding:4px 10px;"><?php echo htmlspecialchars(ucfirst($assignment['assignment_type'])); ?></span></td>
+                                        <td><span style="font-weight:600;"><?php echo htmlspecialchars(ucfirst($assignment['assignment_type'])); ?></span></td>
                                         <td>
-                                            <span class="badge" style="background:<?php echo match($assignment['status']) { 'completed' => 'var(--primary-green)', 'in_progress' => 'var(--primary-blue)', 'overdue' => 'var(--primary-red)', default => '#e6a800' }; ?>;padding:4px 10px;">
+                                            <span style="font-weight:600;color:<?php echo match($assignment['status']) { 'completed' => 'var(--primary-green)', 'in_progress' => 'var(--primary-blue)', 'overdue' => 'var(--primary-red)', default => 'var(--primary-yellow-dark)' }; ?>;">
                                                 <?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $assignment['status']))); ?>
                                             </span>
                                         </td>

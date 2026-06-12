@@ -282,32 +282,30 @@ if (isset($_GET['edit'])) {
                                 </td>
                                 <td style="padding: 15px; text-align: center;">
                                     <?php if ($learner['parent_claimed']): ?>
-                                        <span style="background: var(--primary-green); color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.85rem;">
+                                        <span style="font-weight:600;color:var(--primary-green);">
                                             <i class="fas fa-check-circle me-1"></i>Claimed
                                         </span>
                                     <?php else: ?>
-                                        <span style="background: var(--primary-orange); color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.85rem;">
+                                        <span style="font-weight:600;color:var(--primary-orange);">
                                             <i class="fas fa-clock me-1"></i>Not Claimed
                                         </span>
                                     <?php endif; ?>
                                 </td>
                                 <td style="padding: 15px; text-align: center;">
-                                    <span style="background: var(--primary-green); color: white; padding: 5px 15px; border-radius: 15px;">
-                                        <?php echo $learner['completed_activities']; ?>
+                                    <span style="font-weight:600;"><?php echo $learner['completed_activities']; ?></span>
+                                </td>
+                                <td style="padding: 15px; text-align: center;">
+                                    <span style="font-weight:600;">
+                                        <i class="fas fa-star me-1" style="color:var(--primary-yellow-dark);"></i><?php echo $learner['total_stars']; ?>
                                     </span>
                                 </td>
                                 <td style="padding: 15px; text-align: center;">
-                                    <span style="background: var(--primary-yellow); color: var(--text-dark); padding: 5px 15px; border-radius: 15px;">
-                                        <i class="fas fa-star me-1"></i><?php echo $learner['total_stars']; ?>
-                                    </span>
-                                </td>
-                                <td style="padding: 15px; text-align: center;">
-                                    <span style="background: var(--primary-blue); color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.85rem;">
+                                    <span style="font-weight:600;">
                                         <?php echo $learner['completed_assignments'] ?? 0; ?>/<?php echo $learner['total_assignments'] ?? 0; ?>
                                     </span>
                                 </td>
                                 <td style="padding: 15px; text-align: center;">
-                                    <span style="background: <?php echo ($learner['avg_assignment_score'] ?? 0) >= 70 ? 'var(--primary-green)' : (($learner['avg_assignment_score'] ?? 0) >= 40 ? 'var(--primary-orange)' : 'var(--primary-red)'); ?>; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.85rem;">
+                                    <span style="font-weight:600;color:<?php echo ($learner['avg_assignment_score'] ?? 0) >= 70 ? 'var(--primary-green)' : (($learner['avg_assignment_score'] ?? 0) >= 40 ? 'var(--primary-orange)' : 'var(--primary-red)'); ?>;">
                                         <?php echo $learner['avg_assignment_score'] ?? 'â€”'; ?>%
                                     </span>
                                 </td>

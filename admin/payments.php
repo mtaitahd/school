@@ -72,13 +72,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
         .stat-card { border-radius: 12px; border: none; transition: transform 0.15s; }
         .stat-card:hover { transform: translateY(-2px); }
         .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-    .badge-manual { background: #fef3c7; color: #92400e; }
-    .badge-completed { background: #d1fae5; color: #065f46; }
-    .badge-pending { background: #fef3c7; color: #92400e; }
-    .badge-failed { background: #fce4ec; color: #b91c1c; }
-    .badge-review { background: #e8d5f5; color: #6b21a8; }
-    .badge-refunded { background: #f1f5f9; color: #475569; }
-    .status-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 600; display: inline-block; }
+    .status-badge { font-weight: 600; }
     </style>
 </head>
 <body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>

@@ -301,11 +301,11 @@ $activity_assignments = $database->fetchAll("
                         <td style="padding:10px;"><?php echo $as['activity_name'] ? htmlspecialchars($as['activity_name']) : 'â€”'; ?></td>
                         <td style="padding:10px;"><?php echo $as['module_name'] ? htmlspecialchars($as['module_name']) : 'â€”'; ?></td>
                         <td style="padding:10px;">
-                            <span style="background:var(--primary-blue);color:#fff;padding:4px 10px;border-radius:12px;font-size:0.8rem;"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $as['status']))); ?></span>
+                            <span style="font-weight:600;"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $as['status']))); ?></span>
                         </td>
                         <td style="padding:10px;">
                             <?php if (!is_null($as['score'])): ?>
-                                <span style="background:var(--primary-green);color:#fff;padding:4px 10px;border-radius:12px;font-size:0.8rem;"><?php echo (int)$as['score']; ?>%</span>
+                                <span style="font-weight:600;color:var(--primary-green);"><?php echo (int)$as['score']; ?>%</span>
                             <?php else: ?>
                                 <span style="color:var(--text-light);">â€”</span>
                             <?php endif; ?>
@@ -339,7 +339,7 @@ $activity_assignments = $database->fetchAll("
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
-                            <tr style="background: var(--background-light);">
+                            <tr>
                                 <th style="padding: 12px; text-align: left;">Activity</th>
                                 <th style="padding: 12px; text-align: left;">Module</th>
                                 <th style="padding: 12px; text-align: left;">Teacher</th>
@@ -358,7 +358,7 @@ $activity_assignments = $database->fetchAll("
                                     <?php echo htmlspecialchars(trim(($aa['teacher_first'] ?? '') . ' ' . ($aa['teacher_last'] ?? '')) ?: 'ï¿½'); ?>
                                 </td>
                                 <td style="padding: 12px;"><?php echo date('M d, Y H:i', strtotime($aa['assigned_at'])); ?></td>
-                                <td style="padding: 12px;"><span style="background: var(--primary-blue); color:#fff; padding:4px 10px; border-radius:10px; font-size:0.8rem;"><?php echo htmlspecialchars(ucfirst($aa['status'])); ?></span></td>
+                                <td style="padding: 12px;"><span style="font-weight:600;"><?php echo htmlspecialchars(ucfirst($aa['status'])); ?></span></td>
                                 <td style="padding: 12px;"><?php echo !empty($aa['due_date']) ? date('M d, Y', strtotime($aa['due_date'])) : 'ï¿½'; ?></td>
                                 <td style="padding: 12px;">
                                     <a href="activity-preview?activity_id=<?php echo (int) $aa['activity_id']; ?>&child_id=<?php echo $child_id; ?>" 

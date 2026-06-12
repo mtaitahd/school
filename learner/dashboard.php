@@ -199,7 +199,7 @@ $recent_assignments = $database->fetchAll(
                                 : ($status_display === 'completed' ? 'Completed' : ($status_display === 'in_progress' ? 'In Progress' : 'Pending'));
                             $status_bg = $status_display === 'completed' ? 'var(--primary-green)' : ($status_display === 'in_progress' ? 'var(--primary-blue)' : 'var(--primary-yellow)');
                         ?>
-                        <span class="badge" style="background:<?php echo $status_bg; ?>;padding:4px 10px;border-radius:12px;"><?php echo $status_label; ?></span>
+                        <span style="font-weight:600;"><?php echo $status_label; ?></span>
                         <?php if ($is_completed): ?>
                             <?php if (!is_null($a['score'])): ?>
                                 <div style="margin-top:8px;"><small><?php echo $current_lang === 'sw' ? 'Alama' : 'Score'; ?>: <strong><?php echo (int)$a['score']; ?>%</strong></small></div>
