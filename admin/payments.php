@@ -195,7 +195,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                             <th>Parent</th>
                             <th>Amount</th>
                             <th>Phone</th>
-                            <th>Transaction ID</th>
+                            <th>Payment SMS</th>
                             <th>Date</th>
                             <th style="width:180px;">Action</th>
                         </tr>
@@ -207,7 +207,13 @@ require_once __DIR__ . '/../php/includes/lang.php';
                             <td><strong><?= htmlspecialchars($pmt['first_name'] . ' ' . $pmt['last_name']) ?></strong><br><small class="text-muted"><?= htmlspecialchars($pmt['username']) ?></small></td>
                             <td><strong><?= number_format((float) $pmt['amount']) ?></strong> TZS</td>
                             <td><?= htmlspecialchars($pmt['phone'] ?? '-') ?></td>
-                            <td><code><?= htmlspecialchars($pmt['transaction_id'] ?? '-') ?></code></td>
+                            <td>
+                                <?php $sms = $pmt['transaction_id'] ?? '-'; $smsPreview = mb_strlen($sms) > 40 ? htmlspecialchars(mb_substr($sms, 0, 40)) . '...' : htmlspecialchars($sms); ?>
+                                <span style="font-size:0.8rem;"><?= $smsPreview ?></span>
+                                <?php if (mb_strlen($sms) > 40): ?>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-1 view-sms-btn" style="border-radius:50px;padding:0 8px;font-size:0.7rem;" data-sms="<?= htmlspecialchars($sms, ENT_QUOTES) ?>"><i class="fas fa-eye"></i></button>
+                                <?php endif; ?>
+                            </td>
                             <td><small><?= date('d M Y H:i', strtotime($pmt['created_at'])) ?></small></td>
                             <td>
                                 <form method="POST" style="display:inline;">
@@ -245,7 +251,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                             <th>Amount</th>
                             <th>Method</th>
                             <th>Phone</th>
-                            <th>Transaction ID</th>
+                            <th>Payment SMS / Ref</th>
                             <th>Status</th>
                             <th>Date</th>
                             <th style="width:140px;">Action</th>
@@ -270,7 +276,13 @@ require_once __DIR__ . '/../php/includes/lang.php';
                                 <?= $pmt['method'] === 'snippe' ? 'Instant Pay (USSD)' : 'Manual' ?>
                             </td>
                             <td><small><?= htmlspecialchars($pmt['phone'] ?? '-') ?></small></td>
-                            <td><code style="font-size:0.8rem;"><?= htmlspecialchars($pmt['transaction_id'] ?? '-') ?></code></td>
+                            <td>
+                                <?php $sms = $pmt['transaction_id'] ?? '-'; $smsPreview = mb_strlen($sms) > 40 ? htmlspecialchars(mb_substr($sms, 0, 40)) . '...' : htmlspecialchars($sms); ?>
+                                <span style="font-size:0.8rem;"><?= $smsPreview ?></span>
+                                <?php if (mb_strlen($sms) > 40): ?>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-1 view-sms-btn" style="border-radius:50px;padding:0 8px;font-size:0.7rem;" data-sms="<?= htmlspecialchars($sms, ENT_QUOTES) ?>"><i class="fas fa-eye"></i></button>
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <span class="status-badge <?= $statusClass ?>"><?= ucfirst(str_replace('_', ' ', $pmt['status'])) ?></span>
                             </td>
@@ -463,6 +475,21 @@ require_once __DIR__ . '/../php/includes/lang.php';
             });
         });
     }
+    // View full SMS message
+    document.querySelectorAll('.view-sms-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var sms = this.getAttribute('data-sms');
+            var div = document.createElement('div');
+            div.textContent = sms;
+            div.style.cssText = 'font-family:monospace;font-size:0.85rem;white-space:pre-wrap;word-break:break-word;text-align:start;';
+            Swal.fire({
+                html: div.outerHTML,
+                confirmButtonText: 'Close',
+                confirmButtonColor: '#2563eb',
+                customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' }
+            });
+        });
+    });
     </script>
 </body>
 </html>

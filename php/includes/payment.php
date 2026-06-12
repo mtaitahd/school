@@ -261,14 +261,14 @@ function pay_verify_snippe_payment(string $reference): array {
     ];
 }
 
-function pay_create_manual_payment(int $parentId, string $phone, string $transactionId): array {
+function pay_create_manual_payment(int $parentId, string $phone, string $smsMessage): array {
     global $database;
     $reference = 'MANUAL-' . $parentId . '-' . time();
 
     $paymentId = $database->insert(
         "INSERT INTO `payments` (parent_id, amount, currency, method, payment_type, phone, reference, transaction_id, status)
          VALUES (?, ?, ?, 'manual', 'subscription', ?, ?, ?, 'manual_review')",
-        [$parentId, SUBSCRIPTION_AMOUNT, SUBSCRIPTION_CURRENCY, $phone, $reference, $transactionId]
+        [$parentId, SUBSCRIPTION_AMOUNT, SUBSCRIPTION_CURRENCY, $phone, $reference, $smsMessage]
     );
 
     return ['success' => true, 'payment_id' => $paymentId, 'reference' => $reference];

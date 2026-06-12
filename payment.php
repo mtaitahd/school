@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($paymentMethod === 'manual') {
         $manualPhone = $_POST['phone_manual'] ?? '';
         if (empty($transactionId)) {
-            $error = 'Tafadhali ingiza Transaction ID';
+            $error = 'Tafadhali bandika SMS ya malipo uliyopokea';
         } elseif (empty($manualPhone)) {
             $error = 'Tafadhali ingiza namba ya simu uliyotumia';
         } else {
@@ -334,8 +334,8 @@ $dashboard_page_title = 'Payment';
                     <h6 class="fw-bold small text-uppercase text-muted mb-2"><i class="fas fa-list-ol me-1"></i> Steps</h6>
                     <ol class="mb-0 ps-3 small text-muted" style="line-height:1.9;">
                         <li>Send to <strong><?= MANUAL_PAYMENT_NUMBER ?></strong> via Mix by Yas Lipa</li>
-                        <li>Copy the <strong>Transaction ID</strong> you receive after payment</li>
-                        <li>Enter the transaction details below to submit for verification</li>
+                        <li>Copy the <strong>payment SMS</strong> you receive after sending money</li>
+                        <li>Paste the entire SMS message below to submit for verification</li>
                     </ol>
                 </div>
 
@@ -344,8 +344,8 @@ $dashboard_page_title = 'Payment';
                     <input type="tel" class="form-control form-control-lg" name="phone_manual" id="manualPhone" placeholder="07XX XXX XXX" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small" for="manualTxnId">Transaction ID</label>
-                    <input type="text" class="form-control form-control-lg" name="transaction_id" id="manualTxnId" placeholder="e.g. YL123456789">
+                    <label class="form-label fw-semibold text-muted small" for="manualTxnId">Payment SMS Message</label>
+                    <textarea class="form-control form-control-lg" name="transaction_id" id="manualTxnId" rows="3" placeholder="Paste the full SMS message you received after payment..."></textarea>
                 </div>
                 <button type="button" class="btn btn-warning w-100 btn-lg rounded-3 text-white fw-semibold" onclick="submitManualPayment()">
                     <i class="fas fa-paper-plane me-2"></i> Submit for Verification
@@ -449,14 +449,14 @@ function openMethodModal() {
 function submitManualPayment() {
     const phone = document.getElementById('manualPhone').value.trim();
     const txnId = document.getElementById('manualTxnId').value.trim();
-    if (!txnId) {
-        document.getElementById('manualTxnId').classList.add('is-invalid');
-        document.getElementById('manualTxnId').focus();
-        return;
-    }
     if (!phone) {
         document.getElementById('manualPhone').classList.add('is-invalid');
         document.getElementById('manualPhone').focus();
+        return;
+    }
+    if (!txnId) {
+        document.getElementById('manualTxnId').classList.add('is-invalid');
+        document.getElementById('manualTxnId').focus();
         return;
     }
     const btn = document.querySelector('#manualModal .btn-warning');
