@@ -5,6 +5,7 @@ require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/auth.php';
 require_once __DIR__ . '/../php/includes/payment.php';
+require_once __DIR__ . '/../php/includes/url_helpers.php';
 
 sec_require_rate_limit();
 header('Content-Type: application/json');
@@ -60,10 +61,23 @@ if ($payment['method'] === 'snippe' && $payment['transaction_id']) {
     pay_notify_admins('cancelled', $payment['reference'], (float) $payment['amount'], $payment['currency'] ?? 'TZS', $payment['phone']);
 }
 
+// Notify the user (parent) about cancellation
+if (!empty($payment['phone'])) {
+    try {
+        require_once __DIR__ . '/../php/sms_service.php';
+        $sms = new SmsService();
+        $msg = 'Smart Math Corner: Malipo yako yameghairiwa. Rejea: ' . $payment['reference'] . '. Kiasi: ' . number_format((float) $payment['amount']) . ' ' . ($payment['currency'] ?? 'TZS') . '.';
+        $sms->sendSMS($payment['phone'], $msg, 'payment_cancelled', 'user', $parentId);
+    } catch (Exception $e) {
+        error_log('User cancel SMS notification failed: ' . $e->getMessage());
+    }
+}
+
 echo json_encode([
     'ok' => true,
     'status' => 'cancelled',
     'reference' => $payment['reference'],
     'api_cancelled' => $cancelledByApi,
     'message' => 'Malipo yameghairiwa.',
+    'redirect' => app_web_path('parent/dashboard.php'),
 ]);

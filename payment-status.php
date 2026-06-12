@@ -57,6 +57,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_payment'])) {
         }
         $payment['status'] = 'failed';
         $cancelled = true;
+        // Notify user via SMS
+        if (!empty($payment['phone'])) {
+            try {
+                require_once __DIR__ . '/php/sms_service.php';
+                $sms = new SmsService();
+                $msg = 'Smart Math Corner: Malipo yako yameghairiwa. Rejea: ' . $payment['reference'] . '. Kiasi: ' . number_format((float) $payment['amount']) . ' ' . ($payment['currency'] ?? 'TZS') . '.';
+                $sms->sendSMS($payment['phone'], $msg, 'payment_cancelled', 'user', $parentId);
+            } catch (Exception $e) {
+                error_log('User cancel SMS notification failed: ' . $e->getMessage());
+            }
+        }
     }
 }
 
@@ -361,12 +372,7 @@ function cancelPayment() {
             .then(r => r.json())
             .then(data => {
                 if (data.ok) {
-                    updateSwal({
-                        status: 'cancelled',
-                        reference: data.reference || ref,
-                        amount: '<?= $amount ?>',
-                        method: '<?= $payment['method'] ?>'
-                    });
+                    window.location.href = data.redirect || 'parent/dashboard.php';
                 } else {
                     Swal.fire({ icon: 'error', title: 'Failed', text: data.error || 'Cancellation failed.' });
                 }
