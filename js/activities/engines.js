@@ -64,10 +64,7 @@ const ActivityEngines = {
             ActivityCore.renderMC(choices, (selected, btn) => {
                 if (selected === total) {
                     btn.classList.add('correct');
-                    ActivityCore.celebrate();
-                    ActivityCore.sayEncouragement(() => {
-                        ActivityCore.showMiniGame(() => {});
-                    });
+                    ActivityCore.finishActivity();
                 } else {
                     btn.classList.add('incorrect');
                     ActivityCore.say('Good try. Let us count together again.', reset);

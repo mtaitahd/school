@@ -17,7 +17,6 @@
             if (cfg.audioInstruction) {
                 setTimeout(() => playInstruction(), 400);
             }
-            saveInteractiveProgress();
             return;
         }
 

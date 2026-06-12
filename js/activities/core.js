@@ -170,6 +170,43 @@ const ActivityCore = {
         if (scoreBlock) scoreBlock.style.display = 'none';
     },
 
+    finishActivity() {
+        const { display, options } = this.clearStage();
+        display.className = 'activity-display activity-stage';
+        display.innerHTML = '<div class="finish-screen text-center">' +
+            '<div class="finish-trophy">🏆</div>' +
+            '<h2 class="finish-title">Wonderful!</h2>' +
+            '<p class="finish-subtitle">You did a great job!</p></div>';
+        options.innerHTML = '';
+        const bar = document.getElementById('nextActivityBar');
+        if (bar) {
+            bar.style.display = 'flex';
+            const btn = document.getElementById('nextActivityBtn');
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-star me-2"></i>Great!';
+                btn.onclick = function () {
+                    if (typeof goBack === 'function') goBack();
+                };
+            }
+        }
+        this.celebrate();
+        this.say('Wonderful!');
+        const cfg = window.ACTIVITY_CONFIG || {};
+        if (cfg.activityId && cfg.saveProgressUrl) {
+            fetch(cfg.saveProgressUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    activity_id: cfg.activityId,
+                    score: 100,
+                    completed: 1,
+                    stars: 3
+                })
+            }).catch(function () {});
+        }
+    },
+
     showMiniGame(onDone) {
         const overlay = document.createElement('div');
         overlay.className = 'mini-game-overlay';

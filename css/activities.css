@@ -728,6 +728,41 @@
     text-transform: capitalize;
 }
 
+/* ---- Finish / Completion Screen ---- */
+.finish-screen {
+    padding: 24px;
+    animation: fadeInUp 0.6s ease;
+}
+
+.finish-trophy {
+    font-size: 6rem;
+    animation: trophyBounce 1s ease infinite;
+}
+
+@keyframes trophyBounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-12px) scale(1.1); }
+}
+
+.finish-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary-yellow);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+    margin: 16px 0 8px;
+}
+
+.finish-subtitle {
+    font-size: 1.4rem;
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* ---- Enhanced animations ---- */
 @keyframes correctPulse {
     0% { transform: scale(1); }
