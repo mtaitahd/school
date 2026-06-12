@@ -20,7 +20,7 @@ if (empty($username)) {
 
 // Look up learner
 $learner = $database->fetchOne(
-    "SELECT user_id, first_name, last_name, username, parent_id FROM users WHERE username = ? AND role = 'learner' AND is_active = 1",
+    "SELECT user_id, first_name, last_name, username, parent_id, subscription_status FROM users WHERE username = ? AND role = 'learner' AND is_active = 1",
     [$username]
 );
 
@@ -46,12 +46,10 @@ if (!$parentId) {
 }
 
 if (!$parentId) {
-    // No parent linked — allow access (teacher-managed)
     echo json_encode([
         'exists' => true,
-        'can_access' => true,
-        'redirect' => 'learner/categories?lang=' . ($_SESSION['lang'] ?? 'en'),
-        'message' => ''
+        'can_access' => false,
+        'message' => 'Tafadhali mwambie mzazi wako alipe ada ya mtoto wako ili uweze kuendelea na masomo.'
     ]);
     exit;
 }
