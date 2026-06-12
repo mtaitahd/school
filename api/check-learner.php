@@ -50,7 +50,7 @@ if (!$parentId) {
     echo json_encode([
         'exists' => true,
         'can_access' => true,
-        'redirect' => 'learner/login.php?username=' . urlencode($username),
+        'redirect' => 'learner/categories?lang=' . ($_SESSION['lang'] ?? 'en'),
         'message' => ''
     ]);
     exit;
@@ -61,11 +61,10 @@ require_once __DIR__ . '/../php/includes/subscription.php';
 $subStatus = sub_get_status($parentId);
 
 if ($subStatus['is_active']) {
-    $_SESSION['temp_learner_username'] = $username;
     echo json_encode([
         'exists' => true,
         'can_access' => true,
-        'redirect' => 'learner/login.php?username=' . urlencode($username),
+        'redirect' => 'learner/categories?lang=' . ($_SESSION['lang'] ?? 'en'),
         'message' => ''
     ]);
 } else {
