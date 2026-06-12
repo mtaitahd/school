@@ -695,6 +695,297 @@ const ActivityEngines = {
         round();
     },
 
+    /* ----- Math Game with Level 1 (1-9) and Level 2 (10-20) ----- */
+    math_game(config) {
+        ActivityCore.hideMultiRoundUI();
+        const ROUNDS_PER_LEVEL = 5;
+        const LEVELS = [
+            { name: 'Level 1', min: 1, max: 9, emoji: '🌟' },
+            { name: 'Level 2', min: 10, max: 20, emoji: '⭐' }
+        ];
+        let currentLevel = 0;
+        let currentRound = 0;
+        let correctCount = 0;
+
+        function showLevelSelect() {
+            currentLevel = 0;
+            currentRound = 0;
+            correctCount = 0;
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+
+            const title = document.createElement('h2');
+            title.className = 'math-game-title';
+            title.textContent = '🎮 Math Game';
+            display.appendChild(title);
+
+            const subtitle = document.createElement('p');
+            subtitle.className = 'math-game-subtitle';
+            subtitle.textContent = 'Choose your level!';
+            display.appendChild(subtitle);
+
+            const levelsDiv = document.createElement('div');
+            levelsDiv.className = 'math-game-levels';
+            LEVELS.forEach((level, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'math-game-level-btn';
+                btn.innerHTML = '<span class="level-emoji">' + level.emoji + '</span>' +
+                    '<span class="level-name">' + level.name + '</span>' +
+                    '<span class="level-range">Numbers ' + level.min + ' to ' + level.max + '</span>';
+                btn.onclick = function () {
+                    currentLevel = idx;
+                    currentRound = 0;
+                    correctCount = 0;
+                    startRound();
+                };
+                levelsDiv.appendChild(btn);
+            });
+            display.appendChild(levelsDiv);
+
+            ActivityCore.bindTopbarAudio(function () {
+                ActivityCore.say('Welcome to Math Game! Choose a level to start.');
+            });
+            ActivityCore.say('Welcome to Math Game! Choose a level to start.');
+        }
+
+        function startRound() {
+            const level = LEVELS[currentLevel];
+            const type = ActivityCore.pickRandom(['count', 'add', 'subtract']);
+            if (type === 'count') startCountingRound(level);
+            else if (type === 'add') startAdditionRound(level);
+            else startSubtractionRound(level);
+        }
+
+        function startCountingRound(level) {
+            const obj = ActivityCore.pickRandom(['apple', 'star', 'ball', 'car', 'fish', 'duck', 'flower', 'candy']);
+            const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🍎';
+            const total = ActivityCore.randomInt(level.min, Math.min(level.max, 12));
+            let tapped = 0;
+
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+
+            showRoundHeader(display, 'Count the ' + obj + 's!');
+
+            const grid = document.createElement('div');
+            grid.className = 'object-count-grid';
+            for (let i = 0; i < total; i++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'object-count-item';
+                btn.innerHTML = '<span class="count-label"></span><span class="count-emoji">' + emoji + '</span>';
+                const label = btn.querySelector('.count-label');
+                btn.onclick = function () {
+                    if (btn.classList.contains('tapped')) return;
+                    tapped++;
+                    btn.classList.add('tapped');
+                    label.textContent = tapped;
+                    ActivityCore.sayNumber(tapped);
+                    if (tapped >= total) {
+                        setTimeout(function () { showAnswer(total, level); }, 800);
+                    }
+                };
+                grid.appendChild(btn);
+            }
+            display.appendChild(grid);
+
+            ActivityCore.say('Count the ' + obj + 's. Tap each one.');
+        }
+
+        function startAdditionRound(level) {
+            const obj = ActivityCore.pickRandom(['apple', 'star', 'ball', 'car', 'fish', 'duck', 'flower', 'candy']);
+            const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🍎';
+            const maxA = Math.min(level.max, 10);
+            const a = ActivityCore.randomInt(Math.max(1, level.min), maxA);
+            const b = ActivityCore.randomInt(1, Math.min(level.max - a, 10));
+            const total = a + b;
+            let inBasket = 0;
+
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+
+            showRoundHeader(display, 'Add the ' + obj + 's!');
+            const eq = document.createElement('div');
+            eq.className = 'addition-eq';
+            eq.textContent = a + ' + ' + b + ' = ?';
+            display.appendChild(eq);
+
+            const layout = document.createElement('div');
+            layout.className = 'addition-layout';
+
+            const left = document.createElement('div');
+            left.className = 'addition-group';
+            const right = document.createElement('div');
+            right.className = 'addition-group';
+            const basket = document.createElement('div');
+            basket.className = 'addition-basket';
+            basket.innerHTML = '<span class="addition-basket-label">' + emoji + ' Basket</span>';
+
+            function makeItems(container, n) {
+                for (let i = 0; i < n; i++) {
+                    const f = document.createElement('span');
+                    f.className = 'draggable-fruit';
+                    f.textContent = emoji;
+                    f.style.cursor = 'pointer';
+                    f.onclick = function () {
+                        if (f.classList.contains('in-basket')) return;
+                        f.classList.add('in-basket');
+                        f.style.transform = 'scale(0)';
+                        setTimeout(function () {
+                            basket.appendChild(f);
+                            f.style.transform = 'scale(1)';
+                        }, 200);
+                        inBasket++;
+                        ActivityCore.sayNumber(inBasket);
+                        if (inBasket >= total) {
+                            setTimeout(function () { showAnswer(total, level); }, 800);
+                        }
+                    };
+                    container.appendChild(f);
+                }
+            }
+            makeItems(left, a);
+            makeItems(right, b);
+
+            layout.appendChild(left);
+            layout.appendChild(document.createTextNode('+'));
+            layout.appendChild(right);
+            layout.appendChild(basket);
+            display.appendChild(layout);
+
+            ActivityCore.say('Add the ' + obj + 's. Move them into the basket.');
+        }
+
+        function startSubtractionRound(level) {
+            const obj = ActivityCore.pickRandom(['apple', 'star', 'ball', 'car', 'fish', 'duck', 'flower', 'candy']);
+            const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🍎';
+            const start = ActivityCore.randomInt(Math.max(3, level.min + 1), Math.min(level.max, 15));
+            const remove = ActivityCore.randomInt(1, start - 1);
+            const answer = start - remove;
+            let removed = 0;
+
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+
+            showRoundHeader(display, 'Take away ' + obj + 's!');
+            const eq = document.createElement('div');
+            eq.className = 'addition-eq';
+            eq.textContent = start + ' - ' + remove + ' = ?';
+            display.appendChild(eq);
+
+            const grid = document.createElement('div');
+            grid.className = 'subtraction-grid';
+            for (let i = 0; i < start; i++) {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'subtraction-item';
+                item.textContent = emoji;
+                item.onclick = function () {
+                    if (item.classList.contains('removed') || removed >= remove) return;
+                    removed++;
+                    item.classList.add('removed');
+                    item.textContent = '💨';
+                    ActivityCore.sayNumber(removed);
+                    if (removed >= remove) {
+                        setTimeout(function () { showAnswer(answer, level); }, 800);
+                    }
+                };
+                grid.appendChild(item);
+            }
+            display.appendChild(grid);
+
+            ActivityCore.say('Take away ' + remove + ' ' + obj + 's. Tap them.');
+        }
+
+        function showRoundHeader(display, text) {
+            const header = document.createElement('div');
+            header.className = 'math-game-round-header';
+            header.innerHTML = '<span class="round-badge">' + LEVELS[currentLevel].emoji + ' ' + LEVELS[currentLevel].name +
+                '</span><span class="round-progress">Round ' + (currentRound + 1) + ' of ' + ROUNDS_PER_LEVEL + '</span>';
+            display.appendChild(header);
+            display.appendChild(ActivityCore.renderPrompt(text));
+        }
+
+        function showAnswer(correct, level) {
+            const options = ActivityCore.getOptions();
+            options.innerHTML = '';
+            const promptEl = ActivityCore.getDisplay().querySelector('.activity-prompt');
+            if (promptEl) promptEl.textContent = 'What is the answer?';
+
+            const poolMin = Math.max(0, correct - 3);
+            const poolMax = correct + 3;
+            const choices = ActivityCore.buildMCOptions(correct, poolMin, poolMax);
+            ActivityCore.renderMC(choices, function (selected, btn) {
+                if (selected === correct) {
+                    btn.classList.add('correct');
+                    correctCount++;
+                    ActivityCore.say('Correct!');
+                    setTimeout(nextRound, 1200);
+                } else {
+                    btn.classList.add('incorrect');
+                    ActivityCore.say('Try again.');
+                }
+            });
+            ActivityCore.say('Choose the correct answer.');
+        }
+
+        function nextRound() {
+            currentRound++;
+            if (currentRound >= ROUNDS_PER_LEVEL) {
+                showLevelComplete();
+            } else {
+                startRound();
+            }
+        }
+
+        function showLevelComplete() {
+            const level = LEVELS[currentLevel];
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+
+            display.innerHTML = '<div class="finish-screen text-center">' +
+                '<div class="finish-trophy">' + (correctCount >= ROUNDS_PER_LEVEL ? '🏆' : '🎉') + '</div>' +
+                '<h2 class="finish-title">' + level.name + ' Complete!</h2>' +
+                '<p class="finish-subtitle">You got ' + correctCount + ' out of ' + ROUNDS_PER_LEVEL + ' correct!</p></div>';
+
+            const nextDiv = document.createElement('div');
+            nextDiv.className = 'math-game-next-level';
+
+            if (currentLevel < LEVELS.length - 1) {
+                const nextBtn = document.createElement('button');
+                nextBtn.type = 'button';
+                nextBtn.className = 'btn-child btn-child-green btn-child-large btn-bounce';
+                nextBtn.innerHTML = '<i class="fas fa-arrow-right me-2"></i>Next: ' + LEVELS[currentLevel + 1].name;
+                nextBtn.onclick = function () {
+                    currentLevel++;
+                    currentRound = 0;
+                    correctCount = 0;
+                    startRound();
+                };
+                nextDiv.appendChild(nextBtn);
+            }
+
+            const againBtn = document.createElement('button');
+            againBtn.type = 'button';
+            againBtn.className = 'btn-child btn-child-primary btn-child-large btn-bounce';
+            againBtn.innerHTML = '<i class="fas fa-redo me-2"></i>Play Again';
+            againBtn.onclick = showLevelSelect;
+            nextDiv.appendChild(againBtn);
+
+            display.appendChild(nextDiv);
+            ActivityCore.celebrate();
+            ActivityCore.say('Great job! You completed ' + level.name + '!');
+        }
+
+        showLevelSelect();
+    },
+
     /* ----- Legacy simple counting ----- */
     counting(config) {
         if (config.object === 'mango' || config.engine === 'mango_counting') {

@@ -22,7 +22,8 @@ const ActivityRegistry = {
     addition: (c) => ActivityEngines.drag_addition(c),
     subtraction: (c) => ActivityEngines.visual_subtraction(c),
     matching: (c) => ActivityEngines.match_quantity(c),
-    game: (c) => ActivityEngines.match_quantity(c),
+    game: (c) => ActivityEngines.math_game(c),
+    math_game: (c) => ActivityEngines.math_game(c),
     objects: (c) => ActivityEngines.object_recognition(c),
 };
 

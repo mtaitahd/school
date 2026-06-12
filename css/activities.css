@@ -763,6 +763,98 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* ---- Math Game ---- */
+.math-game-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.math-game-subtitle {
+    font-size: 1.3rem;
+    text-align: center;
+    color: var(--text-dark);
+    margin-bottom: 24px;
+}
+
+.math-game-levels {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.math-game-level-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 24px 32px;
+    border: 4px solid var(--primary-blue);
+    border-radius: var(--border-radius-lg);
+    background: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: var(--shadow-soft);
+}
+
+.math-game-level-btn:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary-orange);
+    box-shadow: var(--shadow-hover);
+    background: #fff9e6;
+}
+
+.math-game-level-btn .level-emoji {
+    font-size: 3rem;
+}
+
+.math-game-level-btn .level-name {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+}
+
+.math-game-level-btn .level-range {
+    font-size: 1rem;
+    color: var(--text-light);
+}
+
+.math-game-round-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.round-badge {
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 6px 16px;
+    background: var(--primary-yellow);
+    border-radius: 50px;
+    color: var(--text-dark);
+}
+
+.round-progress {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.math-game-next-level {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
 /* ---- Enhanced animations ---- */
 @keyframes correctPulse {
     0% { transform: scale(1); }
