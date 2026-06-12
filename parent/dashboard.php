@@ -153,7 +153,7 @@ include '../php/includes/dashboard-start.php';
             <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
                     <i class="fas fa-clock me-2"></i>
-                    <strong><?= $current_lang === 'sw' ? 'Majaribio ya Bure' : 'Free Trial' ?></strong> â€”
+                    <strong><?= $current_lang === 'sw' ? 'Majaribio ya Bure' : 'Free Trial' ?></strong> :
                     <?php if ($subStatus['days_remaining'] > 0): ?>
                         <?= $current_lang === 'sw' ? 'Umesalia siku' : 'You have' ?> <strong><?= $subStatus['days_remaining'] ?></strong> <?= $current_lang === 'sw' ? 'siku za majaribio' : 'trial days remaining' ?>.
                     <?php else: ?>
@@ -161,14 +161,14 @@ include '../php/includes/dashboard-start.php';
                     <?php endif; ?>
                 </div>
                 <a href="../payment" class="btn btn-warning btn-sm fw-bold px-4" style="border-radius:50px;">
-                    <i class="fas fa-wallet me-1"></i> <?= $current_lang === 'sw' ? 'Lipa Sasa' : 'Subscribe Now' ?> â€” 1,500 TZS
+                    <i class="fas fa-wallet me-1"></i> <?= $current_lang === 'sw' ? 'Lipa Sasa' : 'Subscribe Now' ?> : 1,500 TZS
                 </a>
             </div>
         <?php elseif ($subStatus['status'] === 'active'): ?>
             <div class="alert alert-success d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
                     <i class="fas fa-check-circle me-2"></i>
-                    <strong><?= $current_lang === 'sw' ? 'Uanachama Unatumika' : 'Subscription Active' ?></strong> â€”
+                    <strong><?= $current_lang === 'sw' ? 'Uanachama Unatumika' : 'Subscription Active' ?></strong> :
                     <?= $current_lang === 'sw' ? 'Siku zilizobaki' : 'Days remaining' ?>: <strong><?= $subStatus['days_remaining'] ?></strong>
                     <?php if ($subStatus['days_remaining'] <= 3): ?>
                         <span class="ms-2 badge bg-warning text-dark"><?= $current_lang === 'sw' ? 'Itaisha hivi karibuni' : 'Expiring soon' ?></span>
@@ -182,7 +182,7 @@ include '../php/includes/dashboard-start.php';
             <div class="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong><?= $current_lang === 'sw' ? 'Uanachama Umeisha' : 'Subscription Expired' ?></strong> â€”
+                    <strong><?= $current_lang === 'sw' ? 'Uanachama Umeisha' : 'Subscription Expired' ?></strong> :
                     <?= $current_lang === 'sw' ? 'Tafadhali lipa 1,500 TZS ili kuendelea kutumia huduma.' : 'Please pay 1,500 TZS to continue accessing the service.' ?>
                 </div>
                 <a href="../payment" class="btn btn-danger btn-sm fw-bold px-4" style="border-radius:50px;">

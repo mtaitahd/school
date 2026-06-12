@@ -298,8 +298,8 @@ $activity_assignments = $database->fetchAll("
                     <?php foreach ($assignments as $as): ?>
                     <tr style="border-bottom:1px solid #eee;">
                         <td style="padding:10px;"><?php echo htmlspecialchars($as['title']); ?></td>
-                        <td style="padding:10px;"><?php echo $as['activity_name'] ? htmlspecialchars($as['activity_name']) : 'â€”'; ?></td>
-                        <td style="padding:10px;"><?php echo $as['module_name'] ? htmlspecialchars($as['module_name']) : 'â€”'; ?></td>
+                        <td style="padding:10px;"><?php echo $as['activity_name'] ? htmlspecialchars($as['activity_name']) : '&mdash;'; ?></td>
+                        <td style="padding:10px;"><?php echo $as['module_name'] ? htmlspecialchars($as['module_name']) : '&mdash;'; ?></td>
                         <td style="padding:10px;">
                             <span style="font-weight:600;"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $as['status']))); ?></span>
                         </td>
@@ -307,7 +307,7 @@ $activity_assignments = $database->fetchAll("
                             <?php if (!is_null($as['score'])): ?>
                                 <span style="font-weight:600;color:var(--primary-green);"><?php echo (int)$as['score']; ?>%</span>
                             <?php else: ?>
-                                <span style="color:var(--text-light);">â€”</span>
+                                <span style="color:var(--text-light);">&mdash;</span>
                             <?php endif; ?>
                         </td>
                         <td style="padding:10px;"><?php echo $as['due_date'] ? date('M d, Y', strtotime($as['due_date'])) : '&mdash;'; ?></td>

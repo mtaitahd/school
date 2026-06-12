@@ -11,7 +11,7 @@ $base_path = '';
 $active_nav = 'about';
 $lang_page = 'about.php';
 $page_title = 'About - Kona Ya Hisabati';
-$page_description = 'Learn about Kona Ya Hisabati â€” Pre-Primary mathematics learning for Tanzania.';
+$page_description = 'Learn about Kona Ya Hisabati - Pre-Primary mathematics learning for Tanzania.';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang === 'sw' ? 'sw' : 'en'; ?>">

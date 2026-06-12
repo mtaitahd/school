@@ -75,7 +75,7 @@ include '../php/includes/auth-split-start.php';
 ?>
             <header class="auth-form-header">
                 <h1 class="auth-form-title">Login</h1>
-                <p class="auth-form-subtitle">Learner account â€” enter your username to start learning</p>
+                <p class="auth-form-subtitle">Learner account &mdash; enter your username to start learning</p>
             </header>
 
             <?php if ($error): ?>

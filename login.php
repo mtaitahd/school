@@ -98,9 +98,9 @@ include 'php/includes/auth-split-start.php';
             <header class="auth-form-header">
                 <h1 class="auth-form-title">Login</h1>
                 <?php if ($requested_role === 'teacher'): ?>
-                    <p class="auth-form-subtitle">Teacher account â€” enter your credentials to access your dashboard</p>
+                    <p class="auth-form-subtitle">Teacher account &mdash; enter your credentials to access your dashboard</p>
                 <?php elseif ($requested_role === 'parent'): ?>
-                    <p class="auth-form-subtitle">Parent account â€” enter your credentials to access your dashboard</p>
+                    <p class="auth-form-subtitle">Parent account &mdash; enter your credentials to access your dashboard</p>
                 <?php else: ?>
                     <p class="auth-form-subtitle">Teacher &amp; parent sign in to Kona Ya Hisabati</p>
                 <?php endif; ?>

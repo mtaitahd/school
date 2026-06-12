@@ -71,7 +71,7 @@ $recent_assignments = $database->fetchAll(
             <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
                     <i class="fas fa-clock me-2"></i>
-                    <strong><?php echo $current_lang === 'sw' ? 'Majaribio ya Bure' : 'Free Trial'; ?></strong> â€”
+                    <strong><?php echo $current_lang === 'sw' ? 'Majaribio ya Bure' : 'Free Trial'; ?></strong> :
                     <?php if ($trialInfo['days_remaining'] > 0): ?>
                         <?php echo $current_lang === 'sw' ? 'Umesalia siku' : 'You have'; ?> <strong><?php echo $trialInfo['days_remaining']; ?></strong> <?php echo $current_lang === 'sw' ? 'siku za majaribio' : 'trial days remaining'; ?>.
                     <?php else: ?>
@@ -79,14 +79,14 @@ $recent_assignments = $database->fetchAll(
                     <?php endif; ?>
                 </div>
                 <a href="../payment" class="btn btn-warning btn-sm fw-bold px-4" style="border-radius:50px;">
-                    <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Subscribe Now'; ?> â€” 1,500 TZS
+                    <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Subscribe Now'; ?> : 1,500 TZS
                 </a>
             </div>
         <?php elseif ($trialInfo['status'] === 'active' && $trialInfo['days_remaining'] <= 7): ?>
             <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
                     <i class="fas fa-exclamation-circle me-2"></i>
-                    <strong><?php echo $current_lang === 'sw' ? 'Uanachama Unakaribia Kuisha' : 'Subscription Expiring'; ?></strong> â€”
+                    <strong><?php echo $current_lang === 'sw' ? 'Uanachama Unakaribia Kuisha' : 'Subscription Expiring'; ?></strong> :
                     <?php echo $current_lang === 'sw' ? 'Siku zilizobaki' : 'Days remaining'; ?>: <strong><?php echo $trialInfo['days_remaining']; ?></strong>
                 </div>
                 <a href="../payment" class="btn btn-outline-warning btn-sm fw-bold px-3" style="border-radius:50px;">
@@ -97,7 +97,7 @@ $recent_assignments = $database->fetchAll(
             <div class="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong><?php echo $current_lang === 'sw' ? 'Huduma Imezuiwa' : 'Access Blocked'; ?></strong> â€”
+                    <strong><?php echo $current_lang === 'sw' ? 'Huduma Imezuiwa' : 'Access Blocked'; ?></strong> :
                     <?php echo $current_lang === 'sw' ? 'Tafadhali lipa 1,500 TZS ili kuendelea.' : 'Please pay 1,500 TZS to continue.'; ?>
                 </div>
                 <a href="../payment" class="btn btn-danger btn-sm fw-bold px-4" style="border-radius:50px;">

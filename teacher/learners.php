@@ -306,7 +306,7 @@ if (isset($_GET['edit'])) {
                                 </td>
                                 <td style="padding: 15px; text-align: center;">
                                     <span style="font-weight:600;color:<?php echo ($learner['avg_assignment_score'] ?? 0) >= 70 ? 'var(--primary-green)' : (($learner['avg_assignment_score'] ?? 0) >= 40 ? 'var(--primary-orange)' : 'var(--primary-red)'); ?>;">
-                                        <?php echo $learner['avg_assignment_score'] ?? 'â€”'; ?>%
+                                        <?php echo $learner['avg_assignment_score'] ?? '&mdash;'; ?>%
                                     </span>
                                 </td>
                                 <td style="padding: 15px; text-align: center;">

@@ -113,7 +113,7 @@ $lesson_plans = $database->fetchAll("
             </div>
         <?php endif; ?>
 
-        <!-- Legacy inline form hidden â€” use modal -->
+        <!-- Legacy inline form hidden -- use modal -->
         
         <div class="dashboard-card mb-30" style="display:none;" aria-hidden="true">
             <div class="dashboard-card-header">

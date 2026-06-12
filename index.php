@@ -8,12 +8,12 @@ $base_path = '';
 $active_nav = 'home';
 $lang_page = 'index.php';
 $page_title = 'Kona Ya Hisabati | Pre-Primary Mathematics Learning';
-$page_description = 'Kona Ya Hisabati â€” interactive Pre-Primary mathematics for Tanzania. Teachers, parents, and learners access numeracy activities, lesson plans, and progress tracking.';
+$page_description = 'Kona Ya Hisabati - interactive Pre-Primary mathematics for Tanzania. Teachers, parents, and learners access numeracy activities, lesson plans, and progress tracking.';
 
-// Notes Board data â€” latest 3 published notes
+// Notes Board data -- latest 3 published notes
 $kyh_notes = $database->fetchAll("SELECT id, title, slug, featured_image, short_description, publish_date, created_at FROM notes WHERE status = 'published' ORDER BY COALESCE(publish_date, created_at) DESC LIMIT 3");
 
-// Events Calendar data â€” upcoming published events
+// Events Calendar data -- upcoming published events
 $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_time, event_description FROM events WHERE status = 'published' AND event_date >= CURDATE() ORDER BY event_date ASC LIMIT 5");
 
 // Total registered students count
@@ -345,7 +345,7 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
     <?php include 'php/includes/footer.php'; ?>
 
     <script>
-    // Dynamic hero slider â€” handles any number of slides with arrow navigation
+    // Dynamic hero slider -- handles any number of slides with arrow navigation
     (function() {
         var slides = document.querySelectorAll('.hero-bg-slide');
         if (slides.length > 1) {

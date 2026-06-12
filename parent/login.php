@@ -67,7 +67,7 @@ include '../php/includes/auth-split-start.php';
 ?>
             <header class="auth-form-header">
                 <h1 class="auth-form-title">Login</h1>
-                <p class="auth-form-subtitle">Parent account â€” enter your credentials to access your dashboard</p>
+                <p class="auth-form-subtitle">Parent account &mdash; enter your credentials to access your dashboard</p>
             </header>
 
             <?php if ($error): ?>
