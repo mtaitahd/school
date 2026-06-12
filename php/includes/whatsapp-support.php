@@ -8,7 +8,7 @@
         <div class="whatsapp-menu-header">Chat with us on WhatsApp</div>
         <a href="https://wa.me/255655879005" target="_blank" rel="noopener" class="whatsapp-item">
             <i class="fab fa-whatsapp"></i>
-            0655879005
+            
         </a>
         <a href="https://wa.me/255627486124" target="_blank" rel="noopener" class="whatsapp-item">
             <i class="fab fa-whatsapp"></i>

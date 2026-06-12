@@ -95,7 +95,7 @@ sec_send_headers();
                                 </div>
                                 <div style="flex: 1;">
                                     <p style="margin: 0; font-weight: 600;">Phone</p>
-                                    <p style="margin: 0; color: var(--text-light);">0655879005</p>
+                                    <p style="margin: 0; color: var(--text-light);"></p>
                                 </div>
                                 <a href="https://wa.me/255655879005" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 5px; background: #25D366; color: white; padding: 8px 16px; border-radius: 25px; text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap;">
                                     <i class="fab fa-whatsapp"></i> WhatsApp
