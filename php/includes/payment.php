@@ -11,6 +11,8 @@
 define('SNIPPE_API_BASE', 'https://api.snippe.sh/v1');
 define('SNIPPE_API_KEY', sec_env('SNIPPE_API_KEY', ''));
 
+require_once __DIR__ . '/subscription.php';
+
 define('MANUAL_PAYMENT_NUMBER', '440783070');
 define('MANUAL_PAYMENT_NAME', 'Smart Math Corner');
 define('MANUAL_PAYMENT_NETWORK', 'Mix by Yas Lipa');
