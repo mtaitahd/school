@@ -11,6 +11,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+$csrf_error = $_SESSION['_csrf_error'] ?? null;
+unset($_SESSION['_csrf_error']);
+
 $message = '';
 $message_type = '';
 
@@ -118,6 +121,11 @@ $lang_page = 'events.php';
         </div>
     </div>
     <div class="card-body">
+        <?php if ($csrf_error): ?>
+            <div class="alert alert-danger py-2 px-3 mb-3 text-center" style="border-radius:10px;font-size:0.9rem;border:none;">
+                <?php echo htmlspecialchars($csrf_error); ?>
+            </div>
+        <?php endif; ?>
         <?php if ($message): ?>
             <div class="alert alert-<?php echo $message_type === 'success' ? 'success' : 'danger'; ?> py-2 px-3 mb-3 text-center" style="border-radius:10px;font-size:0.9rem;border:none;">
                 <?php echo htmlspecialchars($message); ?>

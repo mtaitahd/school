@@ -172,9 +172,14 @@ if ($page > $total_pages) { $page = $total_pages; $offset = ($page - 1) * $per_p
 
 $announcements = $database->fetchAll("SELECT * FROM announcements ORDER BY created_at DESC LIMIT ? OFFSET ?", [$per_page, $offset]);
 
+// Clear edit state when creating fresh (prevents stale ?edit=X from polluting the form)
 $edit_announcement = null;
-if (isset($_GET['edit'])) {
+if (isset($_GET['edit']) && !isset($_POST['action'])) {
     $edit_announcement = $database->fetchOne("SELECT * FROM announcements WHERE announcement_id = ?", [(int)$_GET['edit']]);
+}
+// Force new state after successful create/update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $message_type === 'success') {
+    $edit_announcement = null;
 }
 
 require_once __DIR__ . '/../php/includes/lang.php';

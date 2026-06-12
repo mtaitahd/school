@@ -11,6 +11,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+$csrf_error = $_SESSION['_csrf_error'] ?? null;
+unset($_SESSION['_csrf_error']);
+
 $message = '';
 $message_type = '';
 
@@ -170,6 +173,11 @@ $dashboard_page_title = 'Manage Hero Slides';
         </div>
     </div>
     <div class="card-body">
+        <?php if ($csrf_error): ?>
+            <div class="alert alert-danger py-2 px-3 mb-3 text-center" style="border-radius:10px;font-size:0.9rem;border:none;">
+                <?php echo htmlspecialchars($csrf_error); ?>
+            </div>
+        <?php endif; ?>
         <?php if ($message): ?>
             <div class="alert alert-<?php echo $message_type === 'success' ? 'success' : 'danger'; ?> py-2 px-3 mb-3 text-center" style="border-radius:10px;font-size:0.9rem;border:none;">
                 <?php echo htmlspecialchars($message); ?>
@@ -232,6 +240,7 @@ $dashboard_page_title = 'Manage Hero Slides';
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="" enctype="multipart/form-data">
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="<?php echo $edit_slide ? 'update' : 'create'; ?>">
                 <?php if ($edit_slide): ?>
                     <input type="hidden" name="id" value="<?php echo $edit_slide['slide_id']; ?>">

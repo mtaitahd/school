@@ -79,6 +79,9 @@ function ensure_schema_v2($database): void {
     if (!in_array('updated_at', $has)) {
         $database->execute("ALTER TABLE announcements ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at");
     }
+    if (!in_array('is_urgent', $has)) {
+        $database->execute("ALTER TABLE announcements ADD COLUMN is_urgent TINYINT(1) DEFAULT 0 AFTER status");
+    }
 
     // Announcement Ticker table
     $database->execute("
