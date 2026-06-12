@@ -208,8 +208,6 @@ $dashboard_page_title = 'Payment';
                 </div>
             </div>
 
-        </form>
-
     </div>
 </div>
 
@@ -357,6 +355,8 @@ $dashboard_page_title = 'Payment';
         </div>
     </div>
 </div>
+
+        </form>
 
 <?php include 'php/includes/dashboard-end.php'; ?>
 
