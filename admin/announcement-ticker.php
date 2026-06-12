@@ -148,8 +148,8 @@ $lang_page = 'announcement-ticker.php';
                     <?php else: ?>
                         <?php foreach ($tickers as $t): ?>
                         <tr>
-                            <td style="font-weight:600;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="<?php echo htmlspecialchars($t['message']); ?>">
-                                <?php echo htmlspecialchars(mb_strlen($t['message']) > 60 ? mb_substr($t['message'], 0, 60) . '...' : $t['message']); ?>
+                            <td style="font-weight:600;max-width:400px;">
+                                <?php echo htmlspecialchars($t['message']); ?>
                                 <?php if ($t['url']): ?>
                                     <a href="<?php echo htmlspecialchars($t['url']); ?>" target="_blank" class="ms-1" style="color:var(--primary-blue);" title="<?php echo htmlspecialchars($t['url']); ?>">
                                         <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i>
