@@ -80,7 +80,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <h1 class="h3 mb-0 text-gray-800" style="font-family:'Poppins',sans-serif;font-weight:700;">Payments & Subscriptions</h1>
             <button type="button" class="btn btn-primary" style="background:var(--primary-blue);border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;" onclick="verifyPayments()">
-                <i class="fas fa-sync me-2"></i>Verify & Remind
+                <i class="fas fa-sync me-2"></i>Verify & Remind All
             </button>
         </div>
 
@@ -212,6 +212,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                             <th>Transaction ID</th>
                             <th>Status</th>
                             <th>Date</th>
+                            <th style="width:140px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -238,10 +239,19 @@ require_once __DIR__ . '/../php/includes/lang.php';
                                 <span class="status-badge <?= $statusClass ?>"><?= ucfirst(str_replace('_', ' ', $pmt['status'])) ?></span>
                             </td>
                             <td><small><?= date('d M Y H:i', strtotime($pmt['created_at'])) ?></small></td>
+                            <td>
+                                <?php if ($pmt['method'] === 'snippe' && $pmt['status'] === 'pending' && $pmt['transaction_id']): ?>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" style="border-radius:50px;font-size:0.75rem;padding:3px 12px;" onclick="verifySinglePayment(<?= (int)$pmt['id'] ?>, this)">
+                                        <i class="fas fa-sync me-1"></i> Verify
+                                    </button>
+                                <?php else: ?>
+                                    <span class="text-muted" style="font-size:0.8rem;">&mdash;</span>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($payments)): ?>
-                        <tr><td colspan="8" class="text-center py-4 text-muted">No payments yet</td></tr>
+                        <tr><td colspan="9" class="text-center py-4 text-muted">No payments yet</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -304,6 +314,8 @@ require_once __DIR__ . '/../php/includes/lang.php';
     <script src="../js/main.js"></script>
     <script src="../js/dashboard.js"></script>
     <script>
+    var API_BASE = <?php echo json_encode($base_path . 'api/'); ?>;
+
     function verifyPayments() {
         Swal.fire({
             title: 'Verify Payments & Send Reminders?',
@@ -324,7 +336,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                 allowOutsideClick: false,
                 didOpen: function() { Swal.showLoading(); }
             });
-            fetch('api/admin-verify-payments.php', {
+            fetch(API_BASE + 'admin-verify-payments.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: '_csrf_token=' + encodeURIComponent('<?= csrf_token() ?>')
@@ -352,6 +364,56 @@ require_once __DIR__ . '/../php/includes/lang.php';
             })
             .catch(function() {
                 Swal.fire({ icon: 'error', title: 'Network Error', confirmButtonColor: '#2563eb', customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' } });
+            });
+        });
+    }
+
+    function verifySinglePayment(paymentId, btn) {
+        Swal.fire({
+            title: 'Verify This Payment?',
+            text: 'Itaangalia malipo haya na kutuma ukumbusho ikiwa bado hajakamilika.',
+            icon: 'question',
+            iconColor: '#f59e0b',
+            showCancelButton: true,
+            confirmButtonText: 'Ndiyo, Endelea',
+            cancelButtonText: 'Ghairi',
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#64748b',
+            customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold', cancelButton: 'rounded-pill px-3' }
+        }).then(function(result) {
+            if (!result.isConfirmed) return;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>...';
+            fetch(API_BASE + 'admin-verify-payments.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: '_csrf_token=' + encodeURIComponent('<?= csrf_token() ?>') + '&payment_id=' + paymentId
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    var msg = '';
+                    if (data.updated > 0) msg += '<p class="text-success mb-1"><i class="fas fa-check-circle me-1"></i> Imekamilika</p>';
+                    if (data.reminded > 0) msg += '<p class="text-warning mb-1"><i class="fas fa-bell me-1"></i> Ukumbusho umetumwa</p>';
+                    if (data.errors > 0) msg += '<p class="text-danger mb-1"><i class="fas fa-exclamation-triangle me-1"></i> Hitilafu: ' + data.error_detail + '</p>';
+                    Swal.fire({
+                        title: 'Imekamilika',
+                        html: msg || '<p>Hakuna mabadiliko.</p>',
+                        icon: data.errors > 0 ? 'warning' : 'success',
+                        confirmButtonColor: '#2563eb',
+                        confirmButtonText: 'Sawa',
+                        customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' }
+                    }).then(function() { location.reload(); });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Hitilafu', text: data.error || 'Something went wrong', confirmButtonColor: '#2563eb', customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' } });
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sync me-1"></i> Verify';
+                }
+            })
+            .catch(function() {
+                Swal.fire({ icon: 'error', title: 'Network Error', confirmButtonColor: '#2563eb', customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' } });
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sync me-1"></i> Verify';
             });
         });
     }

@@ -23,15 +23,29 @@ $updated = 0;
 $reminded = 0;
 $errors = 0;
 $details = [];
+$error_detail = '';
 
-// Get all pending Snippe payments
-$pendingPayments = $database->fetchAll(
-    "SELECT p.*, u.first_name, u.last_name, u.phone AS parent_phone
-     FROM `payments` p
-     JOIN `users` u ON p.parent_id = u.user_id
-     WHERE p.status = 'pending' AND p.method = 'snippe' AND p.transaction_id IS NOT NULL
-     ORDER BY p.created_at ASC"
-);
+$paymentId = (int) ($_POST['payment_id'] ?? 0);
+
+if ($paymentId) {
+    $pendingPayments = $database->fetchAll(
+        "SELECT p.*, u.first_name, u.last_name, u.phone AS parent_phone
+         FROM `payments` p
+         JOIN `users` u ON p.parent_id = u.user_id
+         WHERE p.status = 'pending' AND p.method = 'snippe' AND p.transaction_id IS NOT NULL
+         AND p.id = ?
+         ORDER BY p.created_at ASC",
+        [$paymentId]
+    );
+} else {
+    $pendingPayments = $database->fetchAll(
+        "SELECT p.*, u.first_name, u.last_name, u.phone AS parent_phone
+         FROM `payments` p
+         JOIN `users` u ON p.parent_id = u.user_id
+         WHERE p.status = 'pending' AND p.method = 'snippe' AND p.transaction_id IS NOT NULL
+         ORDER BY p.created_at ASC"
+    );
+}
 
 foreach ($pendingPayments as $payment) {
     $transactionId = $payment['transaction_id'];
@@ -87,10 +101,12 @@ foreach ($pendingPayments as $payment) {
             $details[] = "Payment #{$payment['id']} ($ref): still failed, reminder sent";
         } else {
             $errors++;
+            $error_detail = "Unexpected status: {$verifyResult['status']}";
             $details[] = "Payment #{$payment['id']} ($ref): unexpected status ({$verifyResult['status']})";
         }
     } catch (Exception $e) {
         $errors++;
+        $error_detail = $e->getMessage();
         $details[] = "Payment #{$payment['id']} ($ref): error - " . $e->getMessage();
     }
 }
@@ -100,6 +116,7 @@ echo json_encode([
     'updated' => $updated,
     'reminded' => $reminded,
     'errors' => $errors,
+    'error_detail' => $error_detail,
     'total' => count($pendingPayments),
     'details' => $details,
     'message' => "Imekamilika: $updated zimesasishwa, $reminded zimetumwa ukumbusho, $errors hitilafu."
