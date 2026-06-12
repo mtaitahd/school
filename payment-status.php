@@ -125,7 +125,16 @@ if ($cancelled) {
 } elseif ($initialStatus === 'completed') {
     $statusMessage = 'Malipo yamefanikiwa. Usajili wako umewezeshwa.';
 } elseif ($initialStatus === 'failed') {
+    $failureReason = '';
+    $apiResp = $payment['api_response'] ? json_decode($payment['api_response'], true) : null;
+    if ($apiResp) {
+        $respData = $apiResp['data'] ?? $apiResp;
+        $failureReason = $respData['failure_reason'] ?? $apiResp['failure_reason'] ?? '';
+    }
     $statusMessage = 'Malipo hayajakamilika. Tafadhali jaribu tena.';
+    if ($failureReason) {
+        $statusMessage = 'Malipo yamekataliwa: ' . htmlspecialchars($failureReason);
+    }
 } elseif ($initialStatus === 'manual_review') {
     $statusMessage = 'Malipo yako yamewasilishwa kwa uhakiki. Utapokea SMS uthibitisho.';
 } elseif ($isMobile) {
@@ -181,7 +190,11 @@ function buildContentHtml(data, status, isCancelled) {
     } else if (completed) {
         messageHtml = '<div style="color:#16a34a"><i class="fas fa-check-circle" style="color:#16a34a;margin-right:0.5rem"></i> Malipo yamefanikiwa. Usajili wako umewezeshwa.</div>';
     } else if (failed) {
-        messageHtml = '<div style="color:#dc2626"><i class="fas fa-times-circle" style="color:#dc2626;margin-right:0.5rem"></i> Malipo hayajakamilika. Tafadhali jaribu tena.</div>';
+        let failMsg = 'Malipo hayajakamilika. Tafadhali jaribu tena.';
+        if (data.failure_reason) {
+            failMsg = 'Malipo yamekataliwa: ' + data.failure_reason;
+        }
+        messageHtml = '<div style="color:#dc2626"><i class="fas fa-times-circle" style="color:#dc2626;margin-right:0.5rem"></i> ' + failMsg + '</div>';
     } else if (review) {
         messageHtml = '<div style="color:#d97706"><i class="fas fa-clock" style="color:#d97706;margin-right:0.5rem"></i> Malipo yako yamewasilishwa kwa uhakiki. Utapokea SMS uthibitisho.</div>';
     } else if (isManual) {
@@ -430,7 +443,8 @@ document.addEventListener('DOMContentLoaded', function () {
         reference: ref,
         amount: '<?= $amount ?>',
         method: '<?= $payment['method'] ?>',
-        isCancelled: <?= $cancelled ? 'true' : 'false' ?>
+        isCancelled: <?= $cancelled ? 'true' : 'false' ?>,
+        failure_reason: '<?= isset($failureReason) && $failureReason ? htmlspecialchars(addslashes($failureReason)) : '' ?>'
     };
     showSwal(initialData);
 });

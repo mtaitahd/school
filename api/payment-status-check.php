@@ -40,6 +40,7 @@ if (!$payment) {
 }
 
 $status = $payment['status'];
+$failureReason = null;
 
 // If pending and older than 10 seconds, verify with Snippe API
 if ($status === 'pending' && $payment['method'] !== 'manual') {
@@ -71,6 +72,7 @@ if ($status === 'pending' && $payment['method'] !== 'manual') {
                 [json_encode($verifyResult['data']), $payment['id']]
             );
             $status = 'failed';
+            $failureReason = $verifyResult['failure_reason'];
         }
     }
 }
@@ -102,9 +104,16 @@ if ($status === 'completed') {
     $response['icon'] = 'ban';
     $response['color'] = 'secondary';
 } elseif ($status === 'failed') {
-    $response['message'] = 'Malipo hayajakamilika. Tafadhali jaribu tena.';
+    $msg = 'Malipo hayajakamilika. Tafadhali jaribu tena.';
+    if ($failureReason) {
+        $msg .= ' Sababu: ' . $failureReason;
+    }
+    $response['message'] = $msg;
     $response['icon'] = 'times-circle';
     $response['color'] = 'danger';
+    if ($failureReason) {
+        $response['failure_reason'] = $failureReason;
+    }
 } elseif ($status === 'manual_review') {
     $response['message'] = 'Malipo yako yamewasilishwa kwa uhakiki. Utapokea SMS uthibitisho.';
     $response['icon'] = 'clock';

@@ -18,10 +18,8 @@ define('MANUAL_PAYMENT_NETWORK', 'Mix by Yas Lipa');
 const SUBSCRIPTION_AMOUNT = 1500;
 const SUBSCRIPTION_CURRENCY = 'TZS';
 
-const SNIPPE_IP_WHITELIST = [
-    '34.xxx.xxx.xxx',
-    '35.xxx.xxx.xxx',
-];
+// IP whitelist not used — Snipe docs do not publish specific IPs.
+// Signature verification (below) is the authoritative security check.
 
 function pay_idempotency_key(string $reference): string {
     return 'pay-' . $reference;
@@ -156,6 +154,13 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
     $respStatus = $respData['status'] ?? $data['status'] ?? '';
     if ($respStatus === 'failed') {
         $errorMsg = $respData['message'] ?? $data['message'] ?? $data['error'] ?? 'Payment failed at Snippe';
+        // Try to get the actual failure_reason from Snippe via GET
+        if ($transactionId) {
+            $verifyResult = pay_verify_snippe_payment($transactionId);
+            if ($verifyResult['failure_reason']) {
+                $errorMsg = $verifyResult['failure_reason'];
+            }
+        }
         $database->execute(
             "UPDATE `payments` SET status = 'failed', transaction_id = ?, api_response = ? WHERE id = ?",
             [$transactionId, json_encode($data), $paymentId]
@@ -251,6 +256,7 @@ function pay_verify_snippe_payment(string $reference): array {
     return [
         'verified' => ($respData['status'] ?? '') === 'completed',
         'status' => $respData['status'] ?? 'unknown',
+        'failure_reason' => $respData['failure_reason'] ?? null,
         'data' => $data,
     ];
 }
@@ -308,13 +314,6 @@ function pay_process_webhook(): void {
                 exit('Invalid signature');
             }
         }
-    }
-
-    $remoteIp = $_SERVER['REMOTE_ADDR'] ?? '';
-    if ($remoteIp !== '' && !in_array($remoteIp, SNIPPE_IP_WHITELIST, true)) {
-        error_log('Snippe webhook: untrusted IP ' . $remoteIp);
-        http_response_code(401);
-        exit('Untrusted IP');
     }
 
     $input = json_decode($rawBody, true);
