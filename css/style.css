@@ -6193,7 +6193,7 @@ body {
     align-items: center;
     height: 100%;
     white-space: nowrap;
-    animation: kyhMarquee 320s linear infinite;
+    animation: kyhMarquee 200s linear infinite;
     will-change: transform;
 }
 
