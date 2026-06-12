@@ -2,6 +2,40 @@
  * Shared activity utilities
  */
 const ActivityCore = {
+    OBJECT_EMOJIS: {
+        apple: '🍎', mango: '🥭', ball: '⚽', car: '🚗',
+        cup: '🥤', fruit: '🍇', animal: '🐱', toy: '🧸',
+        star: '⭐', fish: '🐟', dog: '🐶', cat: '🐱',
+        bird: '🐦', bunny: '🐰', flower: '🌸', tree: '🌳',
+        balloon: '🎈', bike: '🚲', book: '📚', cake: '🎂',
+        candy: '🍬', car: '🚗', cookie: '🍪', duck: '🦆',
+        elephant: '🐘', frog: '🐸', grapes: '🍇', hat: '🎩',
+        icecream: '🍦', juice: '🧃', kite: '🪁', lion: '🦁',
+        monkey: '🐵', num: '🔢', orange: '🍊', penguin: '🐧',
+        queen: '👑', robot: '🤖', sun: '☀️', truck: '🛻',
+        umbrella: '☂️', van: '🚐', watermelon: '🍉', xylophone: '🔔',
+        yarn: '🧶', zebra: '🦓'
+    },
+
+    SHAPE_ICONS: {
+        circle: '⭕', square: '⬜', triangle: '🔺',
+        rectangle: '▬', diamond: '🔷', star: '⭐',
+        heart: '❤️', oval: '🥚', crescent: '🌙'
+    },
+
+    NUMBER_WORDS: [
+        '', 'One', 'Two', 'Three', 'Four', 'Five',
+        'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+        'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen',
+        'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen', 'Twenty'
+    ],
+
+    ENCOURAGEMENTS: [
+        'Great job!', 'Well done!', 'Awesome!', 'You are so smart!',
+        'Fantastic!', 'Amazing!', 'Super!', 'Wonderful!',
+        'Excellent!', 'Brilliant!', 'Good work!', 'Keep it up!'
+    ],
+
     shuffle(arr) {
         const a = [...arr];
         for (let i = a.length - 1; i > 0; i--) {
@@ -11,12 +45,27 @@ const ActivityCore = {
         return a;
     },
 
+    getDifficultyRange(config) {
+        const level = config.difficulty || 'easy';
+        if (level === 'easy') return { min: config.min ?? 1, max: config.max ?? 5 };
+        if (level === 'medium') return { min: config.min ?? 1, max: config.max ?? 10 };
+        return { min: config.min ?? 10, max: config.max ?? 20 };
+    },
+
+    randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+
+    pickRandom(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    },
+
     buildMCOptions(correct, poolMin, poolMax, count = 3) {
         const opts = [correct];
         let tries = 0;
         while (opts.length < count && tries < 50) {
             const n = Math.floor(Math.random() * (poolMax - poolMin + 1)) + poolMin;
-            if (!opts.includes(n)) opts.push(n);
+            if (!opts.includes(n) && n >= 0) opts.push(n);
             tries++;
         }
         return this.shuffle(opts);
@@ -43,10 +92,19 @@ const ActivityCore = {
         if (then) setTimeout(then, text && text.length > 50 ? 4000 : 2500);
     },
 
-    renderPrompt(text) {
+    sayNumber(num, then) {
+        const word = this.NUMBER_WORDS[num];
+        this.say(word ?? String(num), then);
+    },
+
+    sayEncouragement(then) {
+        this.say(this.pickRandom(this.ENCOURAGEMENTS), then);
+    },
+
+    renderPrompt(text, emoji) {
         const p = document.createElement('p');
         p.className = 'activity-prompt';
-        p.textContent = text;
+        p.textContent = emoji ? emoji + ' ' + text : text;
         return p;
     },
 
@@ -63,21 +121,42 @@ const ActivityCore = {
         });
     },
 
+    renderEmojiMC(choices, onSelect) {
+        const options = this.getOptions();
+        options.innerHTML = '';
+        choices.forEach(({ label, emoji }) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'answer-btn answer-btn-emoji';
+            btn.innerHTML = emoji ? `<span class="answer-emoji">${emoji}</span><span class="answer-label">${label}</span>` : label;
+            btn.onclick = () => onSelect(label, btn);
+            options.appendChild(btn);
+        });
+    },
+
     celebrate() {
         if (typeof showStarAnimation === 'function') showStarAnimation();
         const layer = document.createElement('div');
         layer.className = 'confetti-layer';
-        const colors = ['#FFD700', '#4A90E2', '#50C878', '#FF8C00', '#FF6B6B'];
-        for (let i = 0; i < 40; i++) {
+        const colors = ['#FFD700', '#4A90E2', '#50C878', '#FF8C00', '#FF6B6B', '#FF69B4', '#9B59B6'];
+        const emojis = ['⭐', '🌟', '✨', '🎉', '🎊', '💫', '🏆'];
+        for (let i = 0; i < 50; i++) {
             const piece = document.createElement('div');
             piece.className = 'confetti-piece';
             piece.style.left = Math.random() * 100 + '%';
-            piece.style.background = colors[i % colors.length];
-            piece.style.animationDelay = Math.random() * 0.8 + 's';
+            piece.style.animationDelay = Math.random() * 1.2 + 's';
+            piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+            if (i > 30) {
+                piece.textContent = emojis[i % emojis.length];
+                piece.style.fontSize = '1.5rem';
+                piece.style.background = 'none';
+            } else {
+                piece.style.background = colors[i % colors.length];
+            }
             layer.appendChild(piece);
         }
         document.body.appendChild(layer);
-        setTimeout(() => layer.remove(), 3000);
+        setTimeout(() => layer.remove(), 3500);
     },
 
     bindTopbarAudio(fn) {

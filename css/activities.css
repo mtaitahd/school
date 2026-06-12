@@ -1,4 +1,4 @@
-/* Interactive activity components */
+/* Interactive activity components — Nursery Edition */
 .activity-stage {
     width: 100%;
     min-height: 280px;
@@ -310,27 +310,6 @@
 .shape-btn.correct { border-color: var(--primary-green); animation: correctPulse 0.5s ease; }
 .shape-btn.wrong { border-color: var(--primary-red); animation: shake 0.4s ease; }
 
-.shape-sort-bins {
-    display: flex;
-    justify-content: center;
-    gap: 32px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-}
-
-.sort-bin {
-    width: 140px;
-    min-height: 140px;
-    border: 4px dashed var(--primary-blue);
-    border-radius: var(--border-radius-md);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 12px;
-    gap: 8px;
-    background: #f8f9fa;
-}
-
 .sort-bin-label {
     font-size: 2.5rem;
 }
@@ -469,8 +448,316 @@
     margin-bottom: 16px;
 }
 
+/* ---- Object Count Grid (universal mango style) ---- */
+.object-count-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.object-count-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    min-height: 80px;
+    min-width: 80px;
+    border: 4px solid transparent;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 8px;
+    border-radius: 20px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s, border-color 0.25s;
+}
+
+.object-count-item:hover {
+    transform: scale(1.08);
+    background: #f0f8ff;
+}
+
+.object-count-item .count-emoji {
+    font-size: 3rem;
+    line-height: 1;
+    filter: grayscale(0.15);
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.object-count-item.tapped {
+    background: rgba(255, 215, 0, 0.3);
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 24px rgba(255, 140, 0, 0.5);
+    transform: scale(1.08);
+}
+
+.object-count-item.tapped .count-emoji {
+    filter: none;
+    transform: scale(1.15);
+}
+
+.object-count-item .count-label {
+    position: absolute;
+    top: -6px;
+    right: 2px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary-orange);
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    z-index: 2;
+}
+
+.object-count-item.tapped .count-label {
+    display: flex;
+    animation: badgePop 0.4s ease;
+}
+
+/* ---- Number Tiles Large (nursery) ---- */
+.number-tiles.number-tiles-large .number-tile {
+    min-width: 90px;
+    min-height: 90px;
+    font-size: 2.8rem;
+    border-width: 5px;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.number-tiles.number-tiles-large .number-tile:hover {
+    transform: translateY(-6px) scale(1.05);
+}
+
+/* ---- Shape Sorting ---- */
+.shape-sort-bins {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.sort-bin {
+    width: 140px;
+    min-height: 150px;
+    border: 4px dashed var(--primary-blue);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    gap: 8px;
+    background: #f8f9fa;
+    transition: border-color 0.3s, background 0.3s;
+}
+
+.sort-bin:has(.sort-item) {
+    border-style: solid;
+    border-color: var(--primary-green);
+    background: #f0fff4;
+}
+
+.sort-bin-label {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.shape-sort-pool {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 16px;
+    background: #fff9e6;
+    border-radius: var(--border-radius-lg);
+    border: 3px dashed var(--primary-orange);
+    min-height: 80px;
+}
+
+.sort-item {
+    font-size: 3.5rem;
+    border: none;
+    background: white;
+    border-radius: 16px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: transform 0.25s, box-shadow 0.25s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.sort-item:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.sort-item.sorted {
+    opacity: 0.5;
+    transform: scale(0.9);
+}
+
+/* ---- Subtraction Grid ---- */
+.subtraction-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    max-width: 500px;
+    padding: 16px;
+}
+
+.subtraction-item {
+    width: 80px;
+    height: 80px;
+    font-size: 3rem;
+    border: 4px solid var(--primary-green);
+    border-radius: 20px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.subtraction-item:hover {
+    transform: scale(1.1);
+    border-color: var(--primary-blue);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.subtraction-item.removed {
+    border-color: var(--primary-red);
+    background: #fff0f0;
+    transform: scale(0.85);
+    opacity: 0.6;
+    cursor: default;
+    pointer-events: none;
+}
+
+.subtraction-item.highlight-remaining {
+    border-color: var(--primary-yellow);
+    animation: correctPulse 0.6s ease 2;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+/* ---- Object Recognition ---- */
+.recognition-emoji {
+    text-align: center;
+    padding: 16px;
+    animation: floatEmoji 2s ease-in-out infinite;
+}
+
+@keyframes floatEmoji {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.recognition-choices {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.recognition-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 24px;
+    border: 4px solid #ddd;
+    border-radius: var(--border-radius-lg);
+    background: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    min-width: 120px;
+}
+
+.recognition-btn:hover {
+    border-color: var(--primary-blue);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+}
+
+.recognition-btn .recog-emoji {
+    font-size: 3rem;
+}
+
+.recognition-btn .recog-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.recognition-btn.correct {
+    border-color: var(--primary-green);
+    background: #e8fff0;
+    animation: correctPulse 0.5s ease;
+}
+
+.recognition-btn.incorrect {
+    border-color: var(--primary-red);
+    background: #fff0f0;
+    animation: shake 0.4s ease;
+}
+
+/* ---- Answer Button with Emoji ---- */
+.answer-btn-emoji {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 20px;
+    min-width: 100px;
+}
+
+.answer-btn-emoji .answer-emoji {
+    font-size: 2.5rem;
+}
+
+.answer-btn-emoji .answer-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+/* ---- Enhanced animations ---- */
+@keyframes correctPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+}
+
+@keyframes badgePop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    50% { transform: translateX(8px); }
+    75% { transform: translateX(-4px); }
+}
+
 @media (max-width: 576px) {
-    .mango-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
-    .mango-item .mango-emoji { font-size: 2.2rem; }
+    .mango-grid,
+    .object-count-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .mango-item .mango-emoji,
+    .object-count-item .count-emoji { font-size: 2.2rem; }
+    .object-count-item { min-height: 64px; min-width: 64px; }
     .number-tile { min-width: 60px; min-height: 60px; font-size: 1.8rem; }
+    .number-tiles.number-tiles-large .number-tile { min-width: 72px; min-height: 72px; font-size: 2.2rem; }
+    .subtraction-item { width: 60px; height: 60px; font-size: 2.2rem; }
+    .sort-bin { width: 100px; min-height: 110px; }
+    .sort-item { font-size: 2.5rem; }
+    .recognition-btn { min-width: 90px; padding: 12px 16px; }
 }

@@ -48,7 +48,8 @@ $engine = $activity_data['engine'] ?? $activity['activity_type'];
 $isInteractiveEngine = in_array($engine, [
     'mango_counting', 'number_identification', 'number_sequencing', 'number_tracing',
     'missing_numbers', 'match_quantity', 'dot_to_dot', 'identify_shapes',
-    'shape_sorting', 'complete_pattern', 'drag_addition', 'visual_subtraction', 'number_line'
+    'shape_sorting', 'complete_pattern', 'drag_addition', 'visual_subtraction', 'number_line',
+    'object_recognition', 'objects', 'sorting'
 ], true);
 ?>
 <!DOCTYPE html>

@@ -17,12 +17,26 @@
             if (cfg.audioInstruction) {
                 setTimeout(() => playInstruction(), 400);
             }
+            saveInteractiveProgress();
             return;
         }
 
-        // Legacy quiz mode (5 questions)
         initLegacyQuiz(cfg);
     });
+
+    function saveInteractiveProgress() {
+        fetch(cfg.saveProgressUrl || '../api/save-progress.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                activity_id: cfg.activityId,
+                score: 100,
+                completed: 1,
+                stars: 3
+            })
+        }).catch(function () {});
+    }
 
     function initLegacyQuiz(cfg) {
         let currentQuestion = 0;
@@ -64,7 +78,7 @@
             correctAnswer = Math.floor(Math.random() * (max - min + 1)) + min;
             const container = document.createElement('div');
             container.className = 'activity-objects';
-            const emoji = { apple: '🍎', star: '⭐', ball: '⚽', mango: '🥭' }[object] || '🍎';
+            const emoji = ActivityCore.OBJECT_EMOJIS[object] || '🍎';
             for (let i = 0; i < correctAnswer; i++) {
                 const obj = document.createElement('span');
                 obj.className = 'activity-object';
