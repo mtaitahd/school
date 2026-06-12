@@ -307,7 +307,7 @@ include '../php/includes/dashboard-start.php';
                                                 <?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $assignment['status']))); ?>
                                             </span>
                                         </td>
-                                        <td class="text-muted"><?php echo $assignment['due_date'] ? date('M d, Y', strtotime($assignment['due_date'])) : 'â€”'; ?></td>
+                                        <td class="text-muted"><?php echo $assignment['due_date'] ? date('M d, Y', strtotime($assignment['due_date'])) : '&mdash;'; ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

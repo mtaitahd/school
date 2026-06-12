@@ -141,7 +141,7 @@ $activity_assignments = $database->fetchAll("
                     <img src="../assets/images/logo.png" alt="Kona Ya Hisabati Logo" class="navbar-logo">
                     <div class="navbar-brand-text">
                         <span class="brand-main">Kona Ya Hisabati</span>
-                        <span class="brand-subtitle">Jifunze ï¿½ Furahia ï¿½ Fanikiwa</span>
+                        <span class="brand-subtitle">Jifunze &mdash; Furahia &mdash; Fanikiwa</span>
                     </div>
                 </div>
 
@@ -310,7 +310,7 @@ $activity_assignments = $database->fetchAll("
                                 <span style="color:var(--text-light);">â€”</span>
                             <?php endif; ?>
                         </td>
-                        <td style="padding:10px;"><?php echo $as['due_date'] ? date('M d, Y', strtotime($as['due_date'])) : 'â€”'; ?></td>
+                        <td style="padding:10px;"><?php echo $as['due_date'] ? date('M d, Y', strtotime($as['due_date'])) : '&mdash;'; ?></td>
                         <td style="padding:10px;">
                             <?php if ($as['activity_id']): ?>
                                 <a href="activity-preview?activity_id=<?php echo (int) $as['activity_id']; ?>&child_id=<?php echo $child_id; ?>" 
@@ -353,13 +353,13 @@ $activity_assignments = $database->fetchAll("
                             <?php foreach ($activity_assignments as $aa): ?>
                                 <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 12px;"><?php echo htmlspecialchars($aa['activity_name']); ?></td>
-                                <td style="padding: 12px;"><?php echo htmlspecialchars($aa['module_name'] ?? 'ï¿½'); ?></td>
+                                <td style="padding: 12px;"><?php echo htmlspecialchars($aa['module_name'] ?? '&mdash;'); ?></td>
                                 <td style="padding: 12px;">
-                                    <?php echo htmlspecialchars(trim(($aa['teacher_first'] ?? '') . ' ' . ($aa['teacher_last'] ?? '')) ?: 'ï¿½'); ?>
+                                    <?php echo htmlspecialchars(trim(($aa['teacher_first'] ?? '') . ' ' . ($aa['teacher_last'] ?? '')) ?: '&mdash;'); ?>
                                 </td>
                                 <td style="padding: 12px;"><?php echo date('M d, Y H:i', strtotime($aa['assigned_at'])); ?></td>
                                 <td style="padding: 12px;"><span style="font-weight:600;"><?php echo htmlspecialchars(ucfirst($aa['status'])); ?></span></td>
-                                <td style="padding: 12px;"><?php echo !empty($aa['due_date']) ? date('M d, Y', strtotime($aa['due_date'])) : 'ï¿½'; ?></td>
+                                <td style="padding: 12px;"><?php echo !empty($aa['due_date']) ? date('M d, Y', strtotime($aa['due_date'])) : '&mdash;'; ?></td>
                                 <td style="padding: 12px;">
                                     <a href="activity-preview?activity_id=<?php echo (int) $aa['activity_id']; ?>&child_id=<?php echo $child_id; ?>" 
                                        class="btn-child btn-child-primary" style="min-height:35px;min-width:35px;font-size:0.85rem;padding:8px 12px;display:inline-block;text-decoration:none;">
