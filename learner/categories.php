@@ -99,6 +99,15 @@ $category_labels = [
         <button type="button" class="a11y-btn" id="toggleDyslexia" title="Dyslexia mode"><i class="fas fa-font"></i></button>
     </div>
 
+    <style>
+        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;}
+    </style>
+
+    <audio id="audioPlayer" preload="auto"></audio>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <?php include '../php/includes/paths-script.php'; ?>
+    <script src="../js/main.js"></script>
+
     <?php if ($need_payment): ?>
     <div class="modal-overlay" id="paymentModal" style="display:none;">
         <div class="modal-card" style="background:#fff;border-radius:16px;padding:40px;max-width:400px;margin:100px auto;text-align:center;position:relative;">
@@ -111,26 +120,12 @@ $category_labels = [
             <button type="button" class="btn btn-link d-block mt-3" style="color:#999;" onclick="document.getElementById('paymentModal').style.display='none'"><?php echo $current_lang === 'sw' ? 'Funga' : 'Close'; ?></button>
         </div>
     </div>
-    <style>
-        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;}
-    </style>
     <script>
-    (function(){
-        var needPayment = <?php echo json_encode($need_payment); ?>;
-        if (needPayment) {
-            var origSelect = window.selectModule;
-            window.selectModule = function(moduleId) {
-                document.getElementById('paymentModal').style.display = 'flex';
-            };
-        }
-    })();
+    window.selectModule = function() {
+        document.getElementById('paymentModal').style.display = 'flex';
+    };
     </script>
     <?php endif; ?>
-
-    <audio id="audioPlayer" preload="auto"></audio>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <?php include '../php/includes/paths-script.php'; ?>
-    <script src="../js/main.js"></script>
 </body>
 </html>
 
