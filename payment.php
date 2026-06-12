@@ -191,7 +191,8 @@ $dashboard_page_title = 'Payment';
 
         <form method="POST" id="paymentForm">
             <?= csrf_field() ?>
-            <input type="hidden" name="payment_method" id="paymentMethod" value="manual">
+            <input type="hidden" name="payment_method" id="paymentMethod" value="">
+            <input type="hidden" name="payment_submethod" id="paymentSubmethod" value="mobile">
             <input type="hidden" name="payment_type" id="paymentType" value="subscription">
             <input type="hidden" name="phone" id="phoneInput">
             <input type="hidden" name="email" id="emailInput">
@@ -202,14 +203,30 @@ $dashboard_page_title = 'Payment';
                 <div class="col-md-6">
                     <button type="button" class="btn btn-outline-primary w-100 py-4 rounded-4 shadow-sm d-flex align-items-center justify-content-center gap-3" style="border:2px dashed #93c5fd;font-size:1.05rem;" onclick="openTypeModal()">
                         <i class="fas fa-tag fa-lg"></i>
-                        <span class="fw-bold">Choose Payment Type</span>
+                        <span class="fw-bold">1. Choose Payment Type</span>
                     </button>
                 </div>
                 <div class="col-md-6">
-                    <button type="button" class="btn btn-outline-primary w-100 py-4 rounded-4 shadow-sm d-flex align-items-center justify-content-center gap-3" style="border:2px dashed #93c5fd;font-size:1.05rem;" onclick="openManualModal()">
+                    <button type="button" class="btn btn-outline-primary w-100 py-4 rounded-4 shadow-sm d-flex align-items-center justify-content-center gap-3" style="border:2px dashed #93c5fd;font-size:1.05rem;" onclick="openMethodModal()" id="chooseMethodBtn">
                         <i class="fas fa-credit-card fa-lg"></i>
-                        <span class="fw-bold">Choose Payment Method</span>
+                        <span class="fw-bold">2. Choose Payment Method</span>
                     </button>
+                </div>
+            </div>
+
+            <!-- ===== Selected Summary ===== -->
+            <div id="selectionSummary" class="d-none">
+                <div class="card border-0 shadow-sm rounded-4 bg-primary bg-opacity-10 mb-3">
+                    <div class="card-body d-flex align-items-center justify-content-between py-3">
+                        <div>
+                            <span class="badge bg-primary rounded-pill me-2" id="summaryTypeBadge">Subscription</span>
+                            <span class="badge bg-success rounded-pill" id="summaryMethodBadge">Mobile Money</span>
+                            <span class="ms-2 fw-bold text-dark" id="summaryAmount">1,500 TZS</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 px-5 fw-semibold shadow-sm" id="payNowBtn" disabled>
+                            <i class="fas fa-mobile-alt me-2"></i> Pay Now
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -240,6 +257,120 @@ $dashboard_page_title = 'Payment';
                         <span class="type-badge" style="background:#dcfce7;color:#15803d;">Flexible</span>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== PAYMENT METHOD MODAL (Mobile / Card / Manual) ===== -->
+<div class="modal fade modal-pform" id="methodModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Payment Method</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">Choose how you want to pay</p>
+                <div class="d-flex flex-column gap-3">
+                    <!-- Mobile Money Push -->
+                    <div class="method-card border-card d-flex align-items-center gap-3 p-3 rounded-4 border" onclick="selectMethod('mobile')" style="cursor:pointer;">
+                        <div class="mc-icon" style="background:linear-gradient(135deg,#059669,#10b981);width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-mobile-alt" style="color:#fff;font-size:1.2rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">Mobile Money Push</div>
+                            <div class="small text-muted">Lipa kwa M-Pesa, Airtel, Tigo, Halotel</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+
+                    <!-- Card Payment -->
+                    <div class="method-card border-card d-flex align-items-center gap-3 p-3 rounded-4 border" onclick="selectMethod('card')" style="cursor:pointer;">
+                        <div class="mc-icon" style="background:linear-gradient(135deg,#6d28d9,#8b5cf6);width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-credit-card" style="color:#fff;font-size:1.2rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">Card Payment</div>
+                            <div class="small text-muted">Visa, Mastercard, Amex</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+
+                    <!-- Manual (Lipa Number) -->
+                    <div class="method-card border-card d-flex align-items-center gap-3 p-3 rounded-4 border" onclick="selectMethod('manual')" style="cursor:pointer;">
+                        <div class="mc-icon" style="background:linear-gradient(135deg,#d97706,#f59e0b);width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-hand-holding-usd" style="color:#fff;font-size:1.2rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">Manual Payment</div>
+                            <div class="small text-muted">Mix by Yas Lipa (24h verification)</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MOBILE MONEY PUSH MODAL (Phone Input) ===== -->
+<div class="modal fade modal-pform" id="mobilePushModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="fas fa-mobile-alt me-2 text-success"></i>Mobile Money Push</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <div style="background:linear-gradient(135deg,#059669,#10b981);width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem;">
+                        <i class="fas fa-mobile-alt" style="color:#fff;font-size:1.8rem;"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Push Payment</h6>
+                    <p class="small text-muted mb-0">We'll send a USSD push request to your phone.<br>Enter your mobile money number below.</p>
+                </div>
+
+                <!-- Supported Networks -->
+                <div class="d-flex justify-content-center gap-3 mb-3">
+                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2"><i class="fas fa-check-circle text-success me-1"></i> M-Pesa</span>
+                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2"><i class="fas fa-check-circle text-success me-1"></i> Airtel</span>
+                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2"><i class="fas fa-check-circle text-success me-1"></i> Tigo</span>
+                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2"><i class="fas fa-check-circle text-success me-1"></i> Halotel</span>
+                </div>
+
+                <!-- Amount Display -->
+                <div class="bg-light rounded-3 p-3 mb-3 text-center">
+                    <span class="text-muted small">Amount to Pay</span>
+                    <div class="fw-bold" style="font-size:1.5rem;" id="pushAmountDisplay">1,500 TZS</div>
+                    <span class="text-muted small" id="pushTypeDisplay">Monthly Subscription</span>
+                </div>
+
+                <!-- Custom Amount (for wallet topup) -->
+                <div id="pushCustomAmount" class="mb-3 d-none">
+                    <label class="form-label fw-semibold text-muted small" for="pushCustomAmt">Enter Amount (TZS)</label>
+                    <div class="input-group">
+                        <span class="input-group-text fw-bold">TZS</span>
+                        <input type="number" class="form-control form-control-lg" id="pushCustomAmt" min="500" step="100" placeholder="e.g. 2000">
+                    </div>
+                </div>
+
+                <!-- Phone Number Input -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-muted small" for="pushPhone">Your Mobile Money Number</label>
+                    <div class="phone-prefix">
+                        <span class="prefix">+255</span>
+                        <input type="tel" class="form-control form-control-lg" id="pushPhone" placeholder="7XX XXX XXX" maxlength="9" inputmode="numeric" autocomplete="tel">
+                    </div>
+                    <div class="invalid-feedback" id="pushPhoneError">Tafadhali ingiza namba halali ya simu (Tanzania)</div>
+                </div>
+
+                <button type="button" class="btn btn-success w-100 btn-lg rounded-3 fw-semibold shadow-sm" onclick="submitMobilePush()" id="pushSubmitBtn">
+                    <i class="fas fa-paper-plane me-2"></i> Send Push Request
+                </button>
+                <p class="text-muted small text-center mt-2 mb-0">
+                    <i class="fas fa-shield-alt me-1 text-success"></i> Secured via Snippe API
+                </p>
             </div>
         </div>
     </div>
@@ -304,17 +435,124 @@ $dashboard_page_title = 'Payment';
 <script>
 const isWallet = () => document.getElementById('paymentType').value === 'wallet_topup';
 
-// ===== Auto-flow: Type â†’ Manual Payment (Lipa Number) =====
+// ===== Payment Type Selection =====
 function selectTypeAndProceed(type) {
     document.querySelectorAll('.type-card').forEach(o => o.classList.remove('active'));
     document.getElementById(type === 'subscription' ? 'typeSubCard' : 'typeWalletCard').classList.add('active');
     document.getElementById('paymentType').value = type;
-    document.getElementById('manualAmountLabel').textContent = type === 'wallet_topup' ? 'Custom Amount (Wallet Topup)' : '1,500 TZS (Subscription)';
 
     bootstrap.Modal.getInstance(document.getElementById('paymentTypeModal')).hide();
+    updateSummary();
     setTimeout(() => {
-        new bootstrap.Modal(document.getElementById('manualModal')).show();
+        new bootstrap.Modal(document.getElementById('methodModal')).show();
     }, 300);
+}
+
+// ===== Payment Method Selection =====
+function selectMethod(method) {
+    bootstrap.Modal.getInstance(document.getElementById('methodModal')).hide();
+
+    if (method === 'mobile') {
+        document.getElementById('paymentMethod').value = 'snippe';
+        document.getElementById('paymentSubmethod').value = 'mobile';
+        // Show mobile push modal
+        setTimeout(() => {
+            updatePushModal();
+            new bootstrap.Modal(document.getElementById('mobilePushModal')).show();
+        }, 300);
+    } else if (method === 'card') {
+        document.getElementById('paymentMethod').value = 'snippe';
+        document.getElementById('paymentSubmethod').value = 'card';
+        updateSummary();
+        // Submit immediately for card (redirects to Snippe checkout)
+        document.getElementById('paymentForm').submit();
+    } else if (method === 'manual') {
+        document.getElementById('paymentMethod').value = 'manual';
+        updateSummary();
+        setTimeout(() => {
+            new bootstrap.Modal(document.getElementById('manualModal')).show();
+        }, 300);
+    }
+}
+
+// ===== Update Push Modal =====
+function updatePushModal() {
+    const type = document.getElementById('paymentType').value;
+    const isTopup = type === 'wallet_topup';
+    document.getElementById('pushAmountDisplay').textContent = isTopup ? 'Custom Amount' : '1,500 TZS';
+    document.getElementById('pushTypeDisplay').textContent = isTopup ? 'Wallet Topup' : 'Monthly Subscription';
+    document.getElementById('pushCustomAmount').classList.toggle('d-none', !isTopup);
+    document.getElementById('pushPhone').value = '';
+    document.getElementById('pushPhone').classList.remove('is-invalid');
+}
+
+// ===== Submit Mobile Money Push =====
+function submitMobilePush() {
+    const phone = document.getElementById('pushPhone').value.trim();
+    const errorEl = document.getElementById('pushPhoneError');
+    const phoneInput = document.getElementById('pushPhone');
+
+    // Validate: 9 digits (after +255)
+    if (!/^\d{9}$/.test(phone)) {
+        phoneInput.classList.add('is-invalid');
+        errorEl.textContent = 'Tafadhali ingiza namba halali (7XX XXX XXX)';
+        phoneInput.focus();
+        return;
+    }
+
+    // Validate starting digit (Tanzania: 6 or 7)
+    if (phone[0] !== '7' && phone[0] !== '6') {
+        phoneInput.classList.add('is-invalid');
+        errorEl.textContent = 'Namba ya simu ya Tanzania inaanza na 7 au 6';
+        phoneInput.focus();
+        return;
+    }
+
+    // Handle custom amount for wallet topup
+    if (isWallet()) {
+        const amt = document.getElementById('pushCustomAmt').value.trim();
+        if (!amt || parseFloat(amt) < 500) {
+            document.getElementById('pushCustomAmt').classList.add('is-invalid');
+            document.getElementById('pushCustomAmt').focus();
+            return;
+        }
+        document.getElementById('amountInput').value = amt;
+    }
+
+    const fullPhone = '+255' + phone;
+    document.getElementById('phoneInput').value = fullPhone;
+
+    const btn = document.getElementById('pushSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Sending Push...';
+
+    updateSummary();
+    document.getElementById('paymentForm').submit();
+}
+
+// ===== Update Summary Bar =====
+function updateSummary() {
+    const type = document.getElementById('paymentType').value;
+    const method = document.getElementById('paymentMethod').value;
+    const submethod = document.getElementById('paymentSubmethod').value;
+
+    const typeLabel = type === 'wallet_topup' ? 'Wallet Topup' : 'Subscription';
+    let methodLabel = '';
+    if (method === 'manual') methodLabel = 'Manual (Lipa Number)';
+    else if (method === 'snippe' && submethod === 'mobile') methodLabel = 'Mobile Money Push';
+    else if (method === 'snippe' && submethod === 'card') methodLabel = 'Card Payment';
+
+    const amount = type === 'subscription' ? '1,500 TZS' : (document.getElementById('amountInput').value || 'Custom');
+
+    document.getElementById('summaryTypeBadge').textContent = typeLabel;
+    document.getElementById('summaryMethodBadge').textContent = methodLabel;
+    document.getElementById('summaryAmount').textContent = amount;
+
+    const summary = document.getElementById('selectionSummary');
+    if (method) {
+        summary.classList.remove('d-none');
+        document.getElementById('payNowBtn').disabled = false;
+    }
 }
 
 // ===== Modal Openers =====
@@ -322,9 +560,18 @@ function openTypeModal() {
     new bootstrap.Modal(document.getElementById('paymentTypeModal')).show();
 }
 
-function openManualModal() {
-    document.getElementById('paymentMethod').value = 'manual';
-    new bootstrap.Modal(document.getElementById('manualModal')).show();
+function openMethodModal() {
+    const type = document.getElementById('paymentType').value;
+    if (!type) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Select Payment Type First',
+            text: 'Tafadhali chagua aina ya malipo kwanza (Step 1)',
+            confirmButtonColor: '#2563eb'
+        });
+        return;
+    }
+    new bootstrap.Modal(document.getElementById('methodModal')).show();
 }
 
 // ===== Manual Payment (Lipa Number) =====
@@ -346,6 +593,27 @@ function submitManualPayment() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Submitting...';
     document.getElementById('paymentForm').submit();
 }
+
+// ===== Pay Now from Summary =====
+document.getElementById('payNowBtn')?.addEventListener('click', function(e) {
+    const method = document.getElementById('paymentMethod').value;
+    const submethod = document.getElementById('paymentSubmethod').value;
+
+    if (method === 'snippe' && submethod === 'mobile') {
+        e.preventDefault();
+        new bootstrap.Modal(document.getElementById('mobilePushModal')).show();
+    }
+});
+
+// ===== Phone input formatting =====
+document.getElementById('pushPhone')?.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '');
+    this.classList.remove('is-invalid');
+});
+
+document.getElementById('pushCustomAmt')?.addEventListener('input', function() {
+    this.classList.remove('is-invalid');
+});
 
 // ===== Form validation styling =====
 document.querySelectorAll('#manualModal input').forEach(i => {
