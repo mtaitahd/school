@@ -86,10 +86,10 @@ $dashboard_page_title = 'Payment Status';
         .swal-payment-detail .label { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#94a3b8; font-weight:600; }
         .swal-payment-detail .value { font-weight:700; color:#1e293b; }
         .swal-ref-box { font-family:'SF Mono',Consolas,monospace; font-size:0.9rem; color:#475569; letter-spacing:0.5px; }
-        .swal-badge { display:inline-flex; align-items:center; gap:0.375rem; padding:0.3rem 0.75rem; border-radius:50px; font-size:0.75rem; font-weight:600; }
-        .swal-badge-mobile { background:#e0f2fe; color:#0369a1; }
-        .swal-badge-card { background:#ede9fe; color:#6d28d9; }
-        .swal-badge-manual { background:#fef3c7; color:#b45309; }
+        .swal-badge { font-size:0.75rem; font-weight:600; }
+        .swal-badge-mobile { color:#0369a1; }
+        .swal-badge-card { color:#6d28d9; }
+        .swal-badge-manual { color:#b45309; }
         .swal-status-icon { font-size:3rem; margin-bottom:0.5rem; }
         .swal-status-icon.pending { color:#2563eb; animation:swal-pulse 1.5s infinite; }
         @keyframes swal-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
@@ -196,7 +196,7 @@ function buildContentHtml(data, status, isCancelled) {
     const method = data.method || '<?= $payment['method'] ?>';
     const badgeClass = method === 'snippe' ? 'swal-badge-mobile' : (method === 'snippe_card' ? 'swal-badge-card' : 'swal-badge-manual');
     const badgeIcon = method === 'snippe' ? 'fa-mobile-alt' : (method === 'snippe_card' ? 'fa-credit-card' : 'fa-hand-holding-usd');
-    const badgeLabel = method === 'snippe' ? 'Mobile Money' : (method === 'snippe_card' ? 'Card Payment' : 'Manual');
+    const badgeLabel = method === 'snippe' ? 'Instant Pay (USSD)' : (method === 'snippe_card' ? 'Card Payment' : 'Manual');
 
     return `
         <div style="text-align:left;max-width:380px;margin:0 auto">

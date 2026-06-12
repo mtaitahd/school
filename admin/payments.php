@@ -73,7 +73,6 @@ require_once __DIR__ . '/../php/includes/lang.php';
         .stat-card:hover { transform: translateY(-2px); }
         .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
     .badge-manual { background: #fef3c7; color: #92400e; }
-    .badge-snippe { background: #dbeafe; color: #1e40af; }
     .badge-completed { background: #d1fae5; color: #065f46; }
     .badge-pending { background: #fef3c7; color: #92400e; }
     .badge-failed { background: #fce4ec; color: #b91c1c; }
@@ -234,9 +233,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                             <td><strong><?= htmlspecialchars($pmt['first_name'] . ' ' . $pmt['last_name']) ?></strong><br><small class="text-muted"><?= htmlspecialchars($pmt['username']) ?></small></td>
                             <td><strong><?= number_format((float) $pmt['amount']) ?></strong> TZS</td>
                             <td>
-                                <span class="badge <?= $pmt['method'] === 'snippe' ? 'badge-snippe' : 'badge-manual' ?>">
-                                    <?= $pmt['method'] === 'snippe' ? 'Snippe' : 'Manual' ?>
-                                </span>
+                                <?= $pmt['method'] === 'snippe' ? 'Instant Pay (USSD)' : 'Manual' ?>
                             </td>
                             <td><small><?= htmlspecialchars($pmt['phone'] ?? '-') ?></small></td>
                             <td><code style="font-size:0.8rem;"><?= htmlspecialchars($pmt['transaction_id'] ?? '-') ?></code></td>
@@ -291,7 +288,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                             </td>
                             <td><small><?= $sub['current_period_start'] ? date('d M Y', strtotime($sub['current_period_start'])) : '-' ?></small></td>
                             <td><small><?= $sub['current_period_end'] ? date('d M Y', strtotime($sub['current_period_end'])) : '-' ?></small></td>
-                            <td><small><?= ucfirst($sub['payment_method'] ?? 'none') ?></small></td>
+                            <td><small><?= ($sub['payment_method'] ?? 'none') === 'snippe' ? 'Instant Pay (USSD)' : ucfirst($sub['payment_method'] ?? 'none') ?></small></td>
                             <td><small><?= date('d M Y', strtotime($sub['created_at'])) ?></small></td>
                         </tr>
                         <?php endforeach; ?>

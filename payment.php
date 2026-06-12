@@ -181,7 +181,7 @@ $dashboard_page_title = 'Payment';
             <input type="hidden" name="phone" id="phoneInput">
 
             <div class="text-center mb-3">
-                <span class="badge bg-primary rounded-pill px-4 py-2 fs-6">Monthly Subscription — 1,500 TZS</span>
+                <span class="fw-bold fs-6">Monthly Subscription — 1,500 TZS</span>
             </div>
 
             <!-- ===== Choose Payment Method ===== -->
@@ -197,8 +197,8 @@ $dashboard_page_title = 'Payment';
                 <div class="card border-0 shadow-sm rounded-4 bg-primary bg-opacity-10 mb-3">
                     <div class="card-body d-flex align-items-center justify-content-between py-3">
                         <div>
-                            <span class="badge bg-primary rounded-pill me-2" id="summaryTypeBadge">Subscription</span>
-                            <span class="badge bg-success rounded-pill" id="summaryMethodBadge">Mobile Money</span>
+                            <span class="fw-bold me-2" id="summaryTypeBadge">Subscription</span>
+                            <span id="summaryMethodBadge">Mobile Money</span>
                             <span class="ms-2 fw-bold text-dark" id="summaryAmount">1,500 TZS</span>
                         </div>
                         <button type="submit" class="btn btn-primary btn-lg rounded-3 px-5 fw-semibold shadow-sm" id="payNowBtn" disabled>
