@@ -262,7 +262,7 @@ $dashboard_page_title = 'Payment';
     </div>
 </div>
 
-<!-- ===== PAYMENT METHOD MODAL (Mobile / Card / Manual) ===== -->
+<!-- ===== PAYMENT METHOD MODAL (Mobile Push / Lipa Number) ===== -->
 <div class="modal fade modal-pform" id="methodModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
@@ -273,37 +273,25 @@ $dashboard_page_title = 'Payment';
             <div class="modal-body">
                 <p class="text-muted small mb-3">Choose how you want to pay</p>
                 <div class="d-flex flex-column gap-3">
-                    <!-- Mobile Money Push -->
+                    <!-- Mobile Number via Push -->
                     <div class="method-card border-card d-flex align-items-center gap-3 p-3 rounded-4 border" onclick="selectMethod('mobile')" style="cursor:pointer;">
                         <div class="mc-icon" style="background:linear-gradient(135deg,#059669,#10b981);width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="fas fa-mobile-alt" style="color:#fff;font-size:1.2rem;"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <div class="fw-bold">Mobile Money Push</div>
+                            <div class="fw-bold">Mobile Number via Push</div>
                             <div class="small text-muted">Lipa kwa M-Pesa, Airtel, Tigo, Halotel</div>
                         </div>
                         <i class="fas fa-chevron-right text-muted"></i>
                     </div>
 
-                    <!-- Card Payment -->
-                    <div class="method-card border-card d-flex align-items-center gap-3 p-3 rounded-4 border" onclick="selectMethod('card')" style="cursor:pointer;">
-                        <div class="mc-icon" style="background:linear-gradient(135deg,#6d28d9,#8b5cf6);width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <i class="fas fa-credit-card" style="color:#fff;font-size:1.2rem;"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="fw-bold">Card Payment</div>
-                            <div class="small text-muted">Visa, Mastercard, Amex</div>
-                        </div>
-                        <i class="fas fa-chevron-right text-muted"></i>
-                    </div>
-
-                    <!-- Manual (Lipa Number) -->
+                    <!-- Lipa Number -->
                     <div class="method-card border-card d-flex align-items-center gap-3 p-3 rounded-4 border" onclick="selectMethod('manual')" style="cursor:pointer;">
                         <div class="mc-icon" style="background:linear-gradient(135deg,#d97706,#f59e0b);width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="fas fa-hand-holding-usd" style="color:#fff;font-size:1.2rem;"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <div class="fw-bold">Manual Payment</div>
+                            <div class="fw-bold">Lipa Number</div>
                             <div class="small text-muted">Mix by Yas Lipa (24h verification)</div>
                         </div>
                         <i class="fas fa-chevron-right text-muted"></i>
@@ -455,17 +443,10 @@ function selectMethod(method) {
     if (method === 'mobile') {
         document.getElementById('paymentMethod').value = 'snippe';
         document.getElementById('paymentSubmethod').value = 'mobile';
-        // Show mobile push modal
         setTimeout(() => {
             updatePushModal();
             new bootstrap.Modal(document.getElementById('mobilePushModal')).show();
         }, 300);
-    } else if (method === 'card') {
-        document.getElementById('paymentMethod').value = 'snippe';
-        document.getElementById('paymentSubmethod').value = 'card';
-        updateSummary();
-        // Submit immediately for card (redirects to Snippe checkout)
-        document.getElementById('paymentForm').submit();
     } else if (method === 'manual') {
         document.getElementById('paymentMethod').value = 'manual';
         updateSummary();
@@ -538,9 +519,8 @@ function updateSummary() {
 
     const typeLabel = type === 'wallet_topup' ? 'Wallet Topup' : 'Subscription';
     let methodLabel = '';
-    if (method === 'manual') methodLabel = 'Manual (Lipa Number)';
-    else if (method === 'snippe' && submethod === 'mobile') methodLabel = 'Mobile Money Push';
-    else if (method === 'snippe' && submethod === 'card') methodLabel = 'Card Payment';
+    if (method === 'manual') methodLabel = 'Lipa Number';
+    else if (method === 'snippe') methodLabel = 'Mobile Number via Push';
 
     const amount = type === 'subscription' ? '1,500 TZS' : (document.getElementById('amountInput').value || 'Custom');
 
@@ -597,9 +577,7 @@ function submitManualPayment() {
 // ===== Pay Now from Summary =====
 document.getElementById('payNowBtn')?.addEventListener('click', function(e) {
     const method = document.getElementById('paymentMethod').value;
-    const submethod = document.getElementById('paymentSubmethod').value;
-
-    if (method === 'snippe' && submethod === 'mobile') {
+    if (method === 'snippe') {
         e.preventDefault();
         new bootstrap.Modal(document.getElementById('mobilePushModal')).show();
     }

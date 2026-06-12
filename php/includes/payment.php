@@ -182,6 +182,13 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
         );
     }
 
+    if ($method !== 'card' && $transactionId) {
+        $pushResult = pay_retry_push($transactionId);
+        if (!$pushResult['success']) {
+            error_log('Snippe push failed for payment ' . $reference . ': ' . ($pushResult['error'] ?? 'unknown'));
+        }
+    }
+
     return [
         'success' => true,
         'payment_id' => $paymentId,
@@ -197,6 +204,7 @@ function pay_retry_push(string $reference): array {
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => '{}',
         CURLOPT_HTTPHEADER => [
             'Authorization: Bearer ' . SNIPPE_API_KEY,
             'Content-Type: application/json',
