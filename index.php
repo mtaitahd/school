@@ -474,8 +474,8 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
             } else if (!data.can_access) {
                 Swal.fire({
                     icon: 'warning',
-                    title: '<?php echo $current_lang === 'sw' ? 'Haujawahi Kulipia' : 'Payment Required'; ?>',
-                    text: data.message || '<?php echo $current_lang === 'sw' ? 'Tafadhali mwambie mzazi wako alipe ada ya mtoto wako ili uweze kuendelea na masomo.' : 'Please tell your parent to pay your account.'; ?>',
+                    title: 'Malipo Yanahitajika',
+                    text: data.message || 'Tafadhali mwambie mzazi wako alipe ada yako ili uweze kuendelea na masomo.',
                     confirmButtonColor: '#f59e0b',
                     confirmButtonText: '<?php echo $current_lang === 'sw' ? 'Sawa' : 'OK'; ?>',
                     customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' }
