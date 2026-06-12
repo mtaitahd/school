@@ -12,12 +12,32 @@ auth_require_role(['admin'], '../index.php');
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     csrf_require();
     $paymentId = (int) ($_POST['payment_id'] ?? 0);
+
     if ($_POST['action'] === 'approve' && $paymentId) {
+        $pmt = $database->fetchOne("SELECT p.*, u.first_name, u.last_name, u.phone FROM `payments` p JOIN `users` u ON p.parent_id = u.user_id WHERE p.id = ?", [$paymentId]);
+        $smsText = '';
+        if ($pmt) {
+            $name = htmlspecialchars($pmt['first_name'] . ' ' . $pmt['last_name']);
+            $amount = number_format((float) $pmt['amount']);
+            $smsText = "Smart Math Corner: Malipo yako ya $amount TZS yamethibitishwa. Uanachama wako umeanzishwa kwa siku 30. Karibu $name!";
+        }
         pay_verify_manual($paymentId, 'approve');
         $_SESSION['flash_message'] = 'Payment approved and subscription activated.';
+        if ($smsText) {
+            $_SESSION['flash_sms'] = $smsText;
+        }
     } elseif ($_POST['action'] === 'reject' && $paymentId) {
+        $pmt = $database->fetchOne("SELECT p.*, u.first_name, u.last_name, u.phone FROM `payments` p JOIN `users` u ON p.parent_id = u.user_id WHERE p.id = ?", [$paymentId]);
+        $smsText = '';
+        if ($pmt) {
+            $amount = number_format((float) $pmt['amount']);
+            $smsText = "Smart Math Corner: Samahani, malipo yako ya $amount TZS hayakukubaliwa. Tafadhali wasiliana na usaidizi kwa maelezo zaidi.";
+        }
         pay_verify_manual($paymentId, 'reject');
         $_SESSION['flash_message'] = 'Payment rejected.';
+        if ($smsText) {
+            $_SESSION['flash_sms'] = $smsText;
+        }
     }
     header('Location: payments');
     exit;
@@ -84,9 +104,25 @@ require_once __DIR__ . '/../php/includes/lang.php';
             </button>
         </div>
 
-    <?php if ($flash): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?= htmlspecialchars($flash) ?>
+    <?php if ($flash):
+        $flashSms = $_SESSION['flash_sms'] ?? '';
+        unset($_SESSION['flash_sms']);
+    ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius:12px;border:none;">
+            <strong><i class="fas fa-check-circle me-1"></i><?= htmlspecialchars($flash) ?></strong>
+            <?php if ($flashSms): ?>
+            <div class="mt-2 p-3 bg-white rounded-3" style="border:1px solid #d1d5db;font-size:0.9rem;">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <small class="text-muted fw-bold">SMS sent to parent:</small>
+                        <p class="mb-0 mt-1" id="smsText" style="font-family:monospace;"><?= htmlspecialchars($flashSms) ?></p>
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm" style="border-radius:50px;flex-shrink:0;" onclick="copySms()">
+                        <i class="fas fa-copy me-1"></i> Copy
+                    </button>
+                </div>
+            </div>
+            <?php endif; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
@@ -314,6 +350,16 @@ require_once __DIR__ . '/../php/includes/lang.php';
     <script src="../js/main.js"></script>
     <script src="../js/dashboard.js"></script>
     <script>
+    function copySms() {
+        var el = document.getElementById('smsText');
+        if (el) {
+            navigator.clipboard.writeText(el.textContent).then(function() {
+                Swal.fire({ icon: 'success', title: 'Copied!', text: 'SMS text copied to clipboard', timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-4' } });
+            }).catch(function() {
+                alert(el.textContent);
+            });
+        }
+    }
     var API_BASE = <?php echo json_encode($base_path . 'api/'); ?>;
 
     function verifyPayments() {
