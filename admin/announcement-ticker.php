@@ -148,7 +148,7 @@ $lang_page = 'announcement-ticker.php';
                     <?php else: ?>
                         <?php foreach ($tickers as $t): ?>
                         <tr>
-                            <td style="font-weight:600;max-width:400px;">
+                            <td style="font-weight:600;max-width:400px;word-break:break-word;white-space:pre-wrap;">
                                 <?php echo htmlspecialchars($t['message']); ?>
                                 <?php if ($t['url']): ?>
                                     <a href="<?php echo htmlspecialchars($t['url']); ?>" target="_blank" class="ms-1" style="color:var(--primary-blue);" title="<?php echo htmlspecialchars($t['url']); ?>">
@@ -206,7 +206,7 @@ $lang_page = 'announcement-ticker.php';
                 <div class="modal-body" style="padding:20px 24px;">
                     <div class="mb-3">
                         <label class="form-label fw-semibold" for="message" style="font-size:0.85rem;color:var(--text-dark);">Message <span style="color:#e74a3b;">*</span></label>
-                        <textarea id="message" name="message" class="form-control" rows="3" required maxlength="500" style="border-radius:10px;"><?php echo htmlspecialchars($edit_ticker['message'] ?? ''); ?></textarea>
+                        <textarea id="message" name="message" class="form-control" rows="4" required maxlength="5000" style="border-radius:10px;"><?php echo htmlspecialchars($edit_ticker['message'] ?? ''); ?></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold" for="url" style="font-size:0.85rem;color:var(--text-dark);">URL <small style="color:var(--text-light);font-weight:400;">(optional - link users to more info)</small></label>

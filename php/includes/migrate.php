@@ -87,7 +87,7 @@ function ensure_schema_v2($database): void {
     $database->execute("
         CREATE TABLE IF NOT EXISTS announcement_ticker (
             ticker_id INT AUTO_INCREMENT PRIMARY KEY,
-            message VARCHAR(500) NOT NULL,
+            message TEXT NOT NULL,
             url VARCHAR(500) NULL,
             is_active TINYINT(1) DEFAULT 1,
             sort_order INT DEFAULT 0,
@@ -96,6 +96,21 @@ function ensure_schema_v2($database): void {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
+    // Migrate old VARCHAR(500) to TEXT if needed
+    $tickerCols = $database->fetchAll("SHOW COLUMNS FROM announcement_ticker");
+    $tickerHas = array_column($tickerCols, 'Field');
+    if (in_array('message', $tickerHas)) {
+        $tickerType = '';
+        foreach ($tickerCols as $col) {
+            if ($col['Field'] === 'message') {
+                $tickerType = $col['Type'];
+                break;
+            }
+        }
+        if ($tickerType && strpos($tickerType, 'varchar') !== false) {
+            $database->execute("ALTER TABLE announcement_ticker MODIFY message TEXT NOT NULL");
+        }
+    }
 
     // Hero Slides table
     $database->execute("
