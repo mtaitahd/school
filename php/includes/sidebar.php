@@ -8,53 +8,56 @@ $active = $sidebar_active ?? '';
 $items = [];
 $subtitle = '';
 
+$in_role_folder = app_in_role_folder($role);
+$role_prefix = $in_role_folder ? '' : $role . '/';
+
 switch ($role) {
     case 'teacher':
         $subtitle = 'TEACHER';
         $items = [
-            ['id' => 'dashboard', 'href' => 'dashboard', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
-            ['id' => 'classes', 'href' => 'manage-classes', 'icon' => 'fa-chalkboard-teacher', 'label' => 'Classes'],
-            ['id' => 'learners', 'href' => 'learners', 'icon' => 'fa-users', 'label' => 'Learners'],
-            ['id' => 'import', 'href' => 'import-students', 'icon' => 'fa-file-import', 'label' => 'Import Students'],
-            ['id' => 'assign', 'href' => 'assign-activity', 'icon' => 'fa-tasks', 'label' => 'Assign Activity'],
-            ['id' => 'progress', 'href' => 'learners', 'icon' => 'fa-chart-line', 'label' => 'Learner Progress'],
-            ['id' => 'lesson-plans', 'href' => 'lesson-plans', 'icon' => 'fa-book-open', 'label' => 'Lesson Plans'],
-            ['id' => 'all-activities', 'href' => 'all-activities', 'icon' => 'fa-list', 'label' => 'All Activities'],
-            ['id' => 'activity-library', 'href' => 'activity-library', 'icon' => 'fa-th-large', 'label' => 'Activity Summary'],
+            ['id' => 'dashboard', 'href' => $role_prefix . 'dashboard', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
+            ['id' => 'classes', 'href' => $role_prefix . 'manage-classes', 'icon' => 'fa-chalkboard-teacher', 'label' => 'Classes'],
+            ['id' => 'learners', 'href' => $role_prefix . 'learners', 'icon' => 'fa-users', 'label' => 'Learners'],
+            ['id' => 'import', 'href' => $role_prefix . 'import-students', 'icon' => 'fa-file-import', 'label' => 'Import Students'],
+            ['id' => 'assign', 'href' => $role_prefix . 'assign-activity', 'icon' => 'fa-tasks', 'label' => 'Assign Activity'],
+            ['id' => 'progress', 'href' => $role_prefix . 'learners', 'icon' => 'fa-chart-line', 'label' => 'Learner Progress'],
+            ['id' => 'lesson-plans', 'href' => $role_prefix . 'lesson-plans', 'icon' => 'fa-book-open', 'label' => 'Lesson Plans'],
+            ['id' => 'all-activities', 'href' => $role_prefix . 'all-activities', 'icon' => 'fa-list', 'label' => 'All Activities'],
+            ['id' => 'activity-library', 'href' => $role_prefix . 'activity-library', 'icon' => 'fa-th-large', 'label' => 'Activity Summary'],
         ];
         break;
     case 'parent':
         $subtitle = 'PARENT';
         $items = [
-            ['id' => 'dashboard', 'href' => 'dashboard', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
-            ['id' => 'claim', 'href' => 'dashboard?claim=1', 'icon' => 'fa-key', 'label' => 'Claim Child'],
-            ['id' => 'topup', 'href' => app_in_role_folder($role) ? '../payment' : 'payment', 'icon' => 'fa-wallet', 'label' => 'Payment'],
-            ['id' => 'guide', 'href' => 'guide?lang=' . urlencode($lang), 'icon' => 'fa-book-open', 'label' => 'Parent Guide'],
+            ['id' => 'dashboard', 'href' => $role_prefix . 'dashboard', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
+            ['id' => 'claim', 'href' => $role_prefix . 'dashboard?claim=1', 'icon' => 'fa-key', 'label' => 'Claim Child'],
+            ['id' => 'topup', 'href' => $in_role_folder ? '../payment' : 'payment', 'icon' => 'fa-wallet', 'label' => 'Payment'],
+            ['id' => 'guide', 'href' => $role_prefix . 'guide?lang=' . urlencode($lang), 'icon' => 'fa-book-open', 'label' => 'Parent Guide'],
         ];
         break;
     case 'learner':
         $subtitle = 'LEARNER';
         $items = [
-            ['id' => 'dashboard', 'href' => 'dashboard?lang=' . urlencode($lang), 'icon' => 'fa-star', 'label' => 'My Corner'],
-            ['id' => 'learn', 'href' => 'categories?lang=' . urlencode($lang), 'icon' => 'fa-play-circle', 'label' => 'Start Learning'],
-            ['id' => 'assigned', 'href' => 'assigned?lang=' . urlencode($lang), 'icon' => 'fa-clipboard-list', 'label' => 'Assigned Activities'],
+            ['id' => 'dashboard', 'href' => $role_prefix . 'dashboard?lang=' . urlencode($lang), 'icon' => 'fa-star', 'label' => 'My Corner'],
+            ['id' => 'learn', 'href' => $role_prefix . 'categories?lang=' . urlencode($lang), 'icon' => 'fa-play-circle', 'label' => 'Start Learning'],
+            ['id' => 'assigned', 'href' => $role_prefix . 'assigned?lang=' . urlencode($lang), 'icon' => 'fa-clipboard-list', 'label' => 'Assigned Activities'],
         ];
         break;
     case 'admin':
         $subtitle = 'ADMIN';
         $items = [
-            ['id' => 'dashboard', 'href' => 'dashboard', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
-            ['id' => 'announcements', 'href' => 'announcements', 'icon' => 'fa-bullhorn', 'label' => 'Announcements'],
-            ['id' => 'announcement-ticker', 'href' => 'announcement-ticker', 'icon' => 'fa-scroll', 'label' => 'Ticker Messages'],
-            ['id' => 'hero-slides', 'href' => 'hero-slides', 'icon' => 'fa-images', 'label' => 'Hero Slides'],
-            ['id' => 'notes', 'href' => 'notes', 'icon' => 'fa-sticky-note', 'label' => 'Notes Board'],
-            ['id' => 'events', 'href' => 'events', 'icon' => 'fa-calendar-alt', 'label' => 'Events Calendar'],
-            ['id' => 'governance', 'href' => 'governance', 'icon' => 'fa-users-cog', 'label' => 'Governance'],
-            ['id' => 'users', 'href' => 'users', 'icon' => 'fa-users-cog', 'label' => 'Manage Users'],
-            ['id' => 'modules', 'href' => 'modules', 'icon' => 'fa-cubes', 'label' => 'Modules'],
-            ['id' => 'payments', 'href' => 'payments', 'icon' => 'fa-credit-card', 'label' => 'Payments'],
-            ['id' => 'upload', 'href' => 'upload-content', 'icon' => 'fa-cloud-upload-alt', 'label' => 'Upload Content'],
-            ['id' => 'logs', 'href' => 'logs', 'icon' => 'fa-clipboard-list', 'label' => 'Error Logs'],
+            ['id' => 'dashboard', 'href' => $role_prefix . 'dashboard', 'icon' => 'fa-tachometer-alt', 'label' => 'Dashboard'],
+            ['id' => 'announcements', 'href' => $role_prefix . 'announcements', 'icon' => 'fa-bullhorn', 'label' => 'Announcements'],
+            ['id' => 'announcement-ticker', 'href' => $role_prefix . 'announcement-ticker', 'icon' => 'fa-scroll', 'label' => 'Ticker Messages'],
+            ['id' => 'hero-slides', 'href' => $role_prefix . 'hero-slides', 'icon' => 'fa-images', 'label' => 'Hero Slides'],
+            ['id' => 'notes', 'href' => $role_prefix . 'notes', 'icon' => 'fa-sticky-note', 'label' => 'Notes Board'],
+            ['id' => 'events', 'href' => $role_prefix . 'events', 'icon' => 'fa-calendar-alt', 'label' => 'Events Calendar'],
+            ['id' => 'governance', 'href' => $role_prefix . 'governance', 'icon' => 'fa-users-cog', 'label' => 'Governance'],
+            ['id' => 'users', 'href' => $role_prefix . 'users', 'icon' => 'fa-users-cog', 'label' => 'Manage Users'],
+            ['id' => 'modules', 'href' => $role_prefix . 'modules', 'icon' => 'fa-cubes', 'label' => 'Modules'],
+            ['id' => 'payments', 'href' => $role_prefix . 'payments', 'icon' => 'fa-credit-card', 'label' => 'Payments'],
+            ['id' => 'upload', 'href' => $role_prefix . 'upload-content', 'icon' => 'fa-cloud-upload-alt', 'label' => 'Upload Content'],
+            ['id' => 'logs', 'href' => $role_prefix . 'logs', 'icon' => 'fa-clipboard-list', 'label' => 'Error Logs'],
         ];
         break;
 }
