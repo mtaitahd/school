@@ -13,12 +13,7 @@ $current_lang = isset($_GET['lang']) ? $_GET['lang'] : 'en';
 $base_path = '../';
 $active_nav = 'learning';
 $lang_page = 'categories.php';
-$use_learner_dashboard = $learner_logged_in;
-if ($use_learner_dashboard) {
-    require_once __DIR__ . '/../php/includes/auth.php';
-    $dashboard_role = 'learner';
-    $sidebar_active = 'learn';
-}
+$use_learner_dashboard = false; // no sidebar nav in learning flow
 
 $modules = $database->fetchAll("SELECT * FROM modules WHERE is_active = 1 ORDER BY order_index ASC");
 
@@ -42,13 +37,13 @@ $category_labels = [
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="<?php echo $use_learner_dashboard ? 'dashboard-body' : 'page-child'; ?>">
-<?php if ($use_learner_dashboard): ?>
-    <?php include '../php/includes/dashboard-start.php'; ?>
-<?php else: ?>
-    <?php include '../php/includes/header.php'; ?>
+<body class="page-child">
+    <div class="activity-topbar">
+        <a href="../index.php?lang=<?php echo urlencode($current_lang); ?>" class="topbar-btn topbar-home">
+            <i class="fas fa-home"></i><span>Home</span>
+        </a>
+    </div>
     <main class="container-child mt-30 page-enter">
-<?php endif; ?>
         <?php if (isset($_GET['error']) && $_GET['error'] === 'module'): ?>
             <div class="alert-child alert-child-error mb-20">
                 <?php echo $current_lang === 'sw'
@@ -90,12 +85,7 @@ $category_labels = [
             </div>
             <?php endforeach; ?>
         </div>
-<?php if ($use_learner_dashboard): ?>
-    <?php include '../php/includes/dashboard-end.php'; ?>
-<?php else: ?>
     </main>
-
-<?php endif; ?>
 
     <div class="a11y-toolbar">
         <button type="button" class="a11y-btn" id="toggleContrast" title="High contrast"><i class="fas fa-adjust"></i></button>
@@ -106,7 +96,6 @@ $category_labels = [
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <?php include '../php/includes/paths-script.php'; ?>
     <script src="../js/main.js"></script>
-    <?php if ($use_learner_dashboard): ?><script src="../js/dashboard.js"></script><?php endif; ?>
 </body>
 </html>
 

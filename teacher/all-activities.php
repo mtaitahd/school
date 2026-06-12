@@ -69,31 +69,62 @@ $game_count = count(array_filter($activities, fn($a) => $a['activity_type'] === 
                             <th style="padding: 15px; text-align: left;">Activity</th>
                             <th style="padding: 15px; text-align: left;">Module</th>
                             <th style="padding: 15px; text-align: left;">Type</th>
-                            <th style="padding: 15px; text-align: left;">Difficulty</th>
+                            <th style="padding: 15px; text-align: left;">Engine</th>
+                            <th style="padding: 15px; text-align: left;">Level</th>
                             <th style="padding: 15px; text-align: left;">Status</th>
                             <th style="padding: 15px; text-align: left;">Order</th>
                             <th style="padding: 15px; text-align: left;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($activities as $activity): ?>
+                        <?php foreach ($activities as $activity):
+                            $adata = json_decode($activity['activity_data'], true) ?: [];
+                            $engine = $adata['engine'] ?? '';
+                            $level = '';
+                            if (isset($adata['min'], $adata['max'])) {
+                                if ($adata['min'] === 1 && $adata['max'] === 9) $level = 'L1 (1–9)';
+                                elseif ($adata['min'] === 10 && $adata['max'] === 20) $level = 'L2 (10–20)';
+                                else $level = $adata['min'] . '–' . $adata['max'];
+                            }
+                            $obj = $adata['object'] ?? '';
+                            $emojiMap = [
+                                'apple'=>'🍎','mango'=>'🥭','ball'=>'⚽','car'=>'🚗','cup'=>'🥤','duck'=>'🦆','star'=>'⭐',
+                                'dog'=>'🐶','cat'=>'🐱','bird'=>'🐦','flower'=>'🌸','balloon'=>'🎈','book'=>'📚','cake'=>'🎂',
+                                'candy'=>'🍬','elephant'=>'🐘','icecream'=>'🍦','lion'=>'🦁','monkey'=>'🐵','penguin'=>'🐧',
+                                'robot'=>'🤖','sun'=>'☀️','truck'=>'🛻','watermelon'=>'🍉','zebra'=>'🦓',
+                            ];
+                        ?>
                         <tr style="border-bottom: 1px solid #eee;">
                             <td style="padding: 15px;">
-                                <strong><?php echo htmlspecialchars($activity['activity_name']); ?></strong>
+                                <strong><?= htmlspecialchars($activity['activity_name']) ?></strong>
                                 <?php if (!empty($activity['activity_description'])): ?>
-                                <br><small style="color: var(--text-light);"><?php echo htmlspecialchars($activity['activity_description']); ?></small>
+                                <br><small style="color: var(--text-light);"><?= htmlspecialchars($activity['activity_description']) ?></small>
                                 <?php endif; ?>
                             </td>
-                            <td style="padding: 15px;"><?php echo htmlspecialchars($activity['module_name']); ?></td>
+                            <td style="padding: 15px;"><?= htmlspecialchars($activity['module_name']) ?></td>
                             <td style="padding: 15px;">
                                 <span style="background: var(--primary-blue); color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.8rem;">
-                                    <?php echo ucfirst($activity['activity_type']); ?>
+                                    <?= ucfirst($activity['activity_type']) ?>
                                 </span>
                             </td>
                             <td style="padding: 15px;">
-                                <span style="background: var(--primary-yellow); color: var(--text-dark); padding: 5px 10px; border-radius: 10px; font-size: 0.8rem;">
-                                    <?php echo ucfirst($activity['difficulty_level']); ?>
+                                <?php if ($engine): ?>
+                                <span style="background:#e8d5f5;color:#6b21a8;padding:3px 8px;border-radius:8px;font-size:0.75rem;">
+                                    <?= htmlspecialchars($engine) ?>
                                 </span>
+                                <?php if ($obj && isset($emojiMap[$obj])): ?>
+                                <span style="font-size:1.2rem;margin-left:4px;"><?= $emojiMap[$obj] ?></span>
+                                <?php endif; ?>
+                                <?php else: ?>
+                                <span style="color:var(--text-light);font-size:0.8rem;">—</span>
+                                <?php endif; ?>
+                            </td>
+                            <td style="padding: 15px;">
+                                <?php if ($level): ?>
+                                <span style="background:#dbeafe;color:#1e40af;padding:3px 8px;border-radius:8px;font-size:0.75rem;"><?= $level ?></span>
+                                <?php else: ?>
+                                <span style="color:var(--text-light);font-size:0.8rem;">—</span>
+                                <?php endif; ?>
                             </td>
                             <td style="padding: 15px;">
                                 <?php if ($activity['is_active']): ?>
@@ -102,7 +133,7 @@ $game_count = count(array_filter($activities, fn($a) => $a['activity_type'] === 
                                     <span style="color: var(--primary-red);"><i class="fas fa-times-circle"></i> Inactive</span>
                                 <?php endif; ?>
                             </td>
-                            <td style="padding: 15px;"><?php echo (int)$activity['order_index']; ?></td>
+                            <td style="padding: 15px;"><?= (int)$activity['order_index'] ?></td>
                             <td style="padding: 15px;">
                                 <a href="activity-library?edit=<?php echo $activity['activity_id']; ?>" 
                                    class="btn-child btn-child-warning" style="min-height: 35px; min-width: 35px; font-size: 0.8rem; padding: 0 10px; display: inline-block; text-decoration: none;">

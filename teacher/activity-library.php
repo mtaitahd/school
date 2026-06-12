@@ -27,10 +27,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $audio_success = trim($_POST['audio_success']);
             $audio_error = trim($_POST['audio_error']);
             $order_index = intval($_POST['order_index']);
+
+            $engine = trim($_POST['engine'] ?? '');
+            $level = intval($_POST['level'] ?? 1);
+            $activity_object = trim($_POST['activity_object'] ?? 'apple');
+            $activity_data = [];
+            if ($engine !== '') {
+                $activity_data['engine'] = $engine;
+                $activity_data['min'] = $level === 1 ? 1 : 10;
+                $activity_data['max'] = $level === 1 ? 9 : 20;
+                if ($activity_object !== '') {
+                    $activity_data['object'] = $activity_object;
+                }
+            }
+            $activity_data_json = !empty($activity_data) ? json_encode($activity_data) : null;
             
-            $sql = "INSERT INTO activities (module_id, activity_name, activity_description, activity_type, difficulty_level, audio_instruction, audio_success, audio_error, order_index) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            $params = [$module_id, $activity_name, $activity_description, $activity_type, $difficulty_level, $audio_instruction, $audio_success, $audio_error, $order_index];
+            $sql = "INSERT INTO activities (module_id, activity_name, activity_description, activity_type, difficulty_level, audio_instruction, audio_success, audio_error, order_index, activity_data) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $params = [$module_id, $activity_name, $activity_description, $activity_type, $difficulty_level, $audio_instruction, $audio_success, $audio_error, $order_index, $activity_data_json];
             
             if ($database->insert($sql, $params)) {
                 $success = "Activity created successfully!";
@@ -52,11 +66,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $audio_error = trim($_POST['audio_error']);
             $order_index = intval($_POST['order_index']);
             $is_active = isset($_POST['is_active']) ? 1 : 0;
+
+            $engine = trim($_POST['engine'] ?? '');
+            $level = intval($_POST['level'] ?? 1);
+            $activity_object = trim($_POST['activity_object'] ?? 'apple');
+            $activity_data = [];
+            if ($engine !== '') {
+                $activity_data['engine'] = $engine;
+                $activity_data['min'] = $level === 1 ? 1 : 10;
+                $activity_data['max'] = $level === 1 ? 9 : 20;
+                if ($activity_object !== '') {
+                    $activity_data['object'] = $activity_object;
+                }
+            }
+            $activity_data_json = !empty($activity_data) ? json_encode($activity_data) : null;
             
             $sql = "UPDATE activities SET module_id = ?, activity_name = ?, activity_description = ?, activity_type = ?, 
-                    difficulty_level = ?, audio_instruction = ?, audio_success = ?, audio_error = ?, order_index = ?, is_active = ? 
+                    difficulty_level = ?, audio_instruction = ?, audio_success = ?, audio_error = ?, order_index = ?, is_active = ?, activity_data = ? 
                     WHERE activity_id = ?";
-            $params = [$module_id, $activity_name, $activity_description, $activity_type, $difficulty_level, $audio_instruction, $audio_success, $audio_error, $order_index, $is_active, $activity_id];
+            $params = [$module_id, $activity_name, $activity_description, $activity_type, $difficulty_level, $audio_instruction, $audio_success, $audio_error, $order_index, $is_active, $activity_data_json, $activity_id];
             
             if ($database->execute($sql, $params)) {
                 $success = "Activity updated successfully!";
@@ -94,11 +122,15 @@ $activities = $database->fetchAll("
 
 // Fetch activity details if editing
 $editing_activity = null;
+$editing_adata = [];
 if (isset($_GET['edit'])) {
     $activity_id = intval($_GET['edit']);
     $editing_activity = $database->fetchOne("
         SELECT * FROM activities WHERE activity_id = ?
     ", [$activity_id]);
+    if ($editing_activity && $editing_activity['activity_data']) {
+        $editing_adata = json_decode($editing_activity['activity_data'], true) ?: [];
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -399,6 +431,74 @@ if (isset($_GET['edit'])) {
                         <label class="form-label-child">Order</label>
                         <input type="number" class="form-control-child" name="order_index" min="0" value="<?php echo $editing_activity ? (int)$editing_activity['order_index'] : 0; ?>">
                     </div>
+
+                    <!-- ===== Interactive Engine Config ===== -->
+                    <hr class="my-3" style="border-color:#e2e8f0;">
+                    <p class="fw-bold text-muted small mb-2"><i class="fas fa-robot me-1"></i> Interactive Engine (optional)</p>
+
+                    <div class="row-child">
+                        <div class="col-child-2">
+                            <div class="form-group-child">
+                                <label class="form-label-child">Engine Type</label>
+                                <select class="form-control-child" name="engine" id="engineSelect" onchange="toggleEngineConfig()">
+                                    <option value="">-- None (use type) --</option>
+                                    <option value="math_game" <?php echo ($editing_adata['engine'] ?? '') === 'math_game' ? 'selected' : ''; ?>>Math Game (mix)</option>
+                                    <option value="mango_counting" <?php echo ($editing_adata['engine'] ?? '') === 'mango_counting' ? 'selected' : ''; ?>>Counting Objects</option>
+                                    <option value="number_identification" <?php echo ($editing_adata['engine'] ?? '') === 'number_identification' ? 'selected' : ''; ?>>Number Identification</option>
+                                    <option value="number_sequencing" <?php echo ($editing_adata['engine'] ?? '') === 'number_sequencing' ? 'selected' : ''; ?>>Number Sequencing</option>
+                                    <option value="missing_numbers" <?php echo ($editing_adata['engine'] ?? '') === 'missing_numbers' ? 'selected' : ''; ?>>Missing Numbers</option>
+                                    <option value="match_quantity" <?php echo ($editing_adata['engine'] ?? '') === 'match_quantity' ? 'selected' : ''; ?>>Match Quantity</option>
+                                    <option value="identify_shapes" <?php echo ($editing_adata['engine'] ?? '') === 'identify_shapes' ? 'selected' : ''; ?>>Identify Shapes</option>
+                                    <option value="complete_pattern" <?php echo ($editing_adata['engine'] ?? '') === 'complete_pattern' ? 'selected' : ''; ?>>Complete Pattern</option>
+                                    <option value="drag_addition" <?php echo ($editing_adata['engine'] ?? '') === 'drag_addition' ? 'selected' : ''; ?>>Drag Addition</option>
+                                    <option value="visual_subtraction" <?php echo ($editing_adata['engine'] ?? '') === 'visual_subtraction' ? 'selected' : ''; ?>>Visual Subtraction</option>
+                                    <option value="object_recognition" <?php echo ($editing_adata['engine'] ?? '') === 'object_recognition' ? 'selected' : ''; ?>>Object Recognition</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-child-2">
+                            <div class="form-group-child">
+                                <label class="form-label-child">Level</label>
+                                <div class="d-flex gap-2" id="levelGroup">
+                                    <label class="btn-child <?php echo ($editing_adata['min'] ?? 1) === 1 ? 'btn-child-primary' : 'btn-child-secondary'; ?>" id="level1Label" style="cursor:pointer;flex:1;text-align:center;padding:8px 12px;font-size:0.85rem;">
+                                        <input type="radio" name="level" value="1" <?php echo ($editing_adata['min'] ?? 1) === 1 ? 'checked' : ''; ?> onchange="selectLevel(1)" style="display:none;">
+                                        Level 1 (1–9)
+                                    </label>
+                                    <label class="btn-child <?php echo ($editing_adata['min'] ?? 1) === 10 ? 'btn-child-primary' : 'btn-child-secondary'; ?>" id="level2Label" style="cursor:pointer;flex:1;text-align:center;padding:8px 12px;font-size:0.85rem;">
+                                        <input type="radio" name="level" value="2" <?php echo ($editing_adata['min'] ?? 1) === 10 ? 'checked' : ''; ?> onchange="selectLevel(2)" style="display:none;">
+                                        Level 2 (10–20)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group-child" id="emojiPickerGroup">
+                        <label class="form-label-child">Activity Object / Emoji</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <div id="selectedEmojiDisplay" style="font-size:2.5rem;line-height:1;width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:#f1f5f9;border-radius:12px;border:2px solid #e2e8f0;">
+                                <?php
+                                $emojiMap = [
+                                    'apple'=>'🍎','mango'=>'🥭','ball'=>'⚽','car'=>'🚗','cup'=>'🥤','duck'=>'🦆','star'=>'⭐','fish'=>'🐟',
+                                    'dog'=>'🐶','cat'=>'🐱','bird'=>'🐦','bunny'=>'🐰','flower'=>'🌸','balloon'=>'🎈','book'=>'📚','cake'=>'🎂',
+                                    'candy'=>'🍬','cookie'=>'🍪','elephant'=>'🐘','frog'=>'🐸','grapes'=>'🍇','icecream'=>'🍦','juice'=>'🧃',
+                                    'kite'=>'🪁','lion'=>'🦁','monkey'=>'🐵','orange'=>'🍊','penguin'=>'🐧','robot'=>'🤖','sun'=>'☀️',
+                                    'truck'=>'🛻','watermelon'=>'🍉','zebra'=>'🦓'
+                                ];
+                                $curObj = $editing_adata['object'] ?? 'apple';
+                                echo $emojiMap[$curObj] ?? '🍎';
+                                ?>
+                            </div>
+                            <input type="hidden" name="activity_object" id="activityObjectInput" value="<?php echo htmlspecialchars($editing_adata['object'] ?? 'apple'); ?>">
+                            <button type="button" class="btn-child btn-child-secondary" onclick="openEmojiPicker()">
+                                <i class="fas fa-icons me-1"></i> Choose Icon
+                            </button>
+                        </div>
+                    </div>
+                    <div id="engineConfigHint" class="small text-muted <?php echo ($editing_adata['engine'] ?? '') === '' ? '' : 'd-none'; ?>">
+                        <i class="fas fa-info-circle me-1"></i> Leave engine empty to use the default based on activity type.
+                    </div>
+
                     <?php if ($editing_activity): ?>
                     <div class="form-group-child">
                         <label><input type="checkbox" name="is_active" <?php echo $editing_activity['is_active'] ? 'checked' : ''; ?>> Active</label>
@@ -413,13 +513,129 @@ if (isset($_GET['edit'])) {
         </div>
     </div>
 
+    <!-- ===== Emoji Picker Modal ===== -->
+    <div class="kona-modal-overlay" id="emojiPickerModal" aria-hidden="true">
+        <div class="kona-modal kona-modal-lg" role="dialog" style="max-width:600px;">
+            <div class="kona-modal-header">
+                <h3><i class="fas fa-icons me-2"></i>Choose an Icon</h3>
+                <button type="button" class="kona-modal-close" onclick="closeEmojiPicker()">&times;</button>
+            </div>
+            <div class="kona-modal-body">
+                <div class="emoji-grid" id="emojiGrid">
+                    <?php
+                    $allEmojis = [
+                        'apple'=>'🍎','mango'=>'🥭','ball'=>'⚽','car'=>'🚗','cup'=>'🥤','duck'=>'🦆','star'=>'⭐','fish'=>'🐟',
+                        'dog'=>'🐶','cat'=>'🐱','bird'=>'🐦','bunny'=>'🐰','flower'=>'🌸','balloon'=>'🎈','book'=>'📚','cake'=>'🎂',
+                        'candy'=>'🍬','cookie'=>'🍪','elephant'=>'🐘','frog'=>'🐸','grapes'=>'🍇','icecream'=>'🍦','juice'=>'🧃',
+                        'kite'=>'🪁','lion'=>'🦁','monkey'=>'🐵','orange'=>'🍊','penguin'=>'🐧','robot'=>'🤖','sun'=>'☀️',
+                        'truck'=>'🛻','watermelon'=>'🍉','zebra'=>'🦓','hat'=>'🎩','umbrella'=>'☂️','bike'=>'🚲','van'=>'🚐',
+                        'yarn'=>'🧶','toy'=>'🧸','xylophone'=>'🔔','queen'=>'👑','tree'=>'🌳','mushroom'=>'🍄','pineapple'=>'🍍',
+                        'cherry'=>'🍒','banana'=>'🍌','peach'=>'🍑','lemon'=>'🍋','avocado'=>'🥑','tomato'=>'🍅','corn'=>'🌽',
+                        'bread'=>'🍞','pizza'=>'🍕','burger'=>'🍔','fries'=>'🍟','egg'=>'🥚','pancake'=>'🥞','donut'=>'🍩',
+                        'cookies'=>'🍪','chocolate'=>'🍫','milk'=>'🥛','coffee'=>'☕','tea'=>'🍵','horse'=>'🐴','cow'=>'🐮',
+                        'pig'=>'🐷','mouse'=>'🐭','bear'=>'🐻','panda'=>'🐼','koala'=>'🐨','tiger'=>'🐯','rabbit'=>'🐇',
+                        'chicken'=>'🐔','owl'=>'🦉','butterfly'=>'🦋','snail'=>'🐌','bee'=>'🐝','ant'=>'🐜','ladybug'=>'🐞',
+                        'whale'=>'🐳','dolphin'=>'🐬','octopus'=>'🐙','turtle'=>'🐢','crab'=>'🦀','shark'=>'🦈','rocket'=>'🚀',
+                        'globe'=>'🌍','moon'=>'🌙','rainbow'=>'🌈','cloud'=>'☁️','snowflake'=>'❄️','fire'=>'🔥','water'=>'💧',
+                        'heart'=>'❤️','smile'=>'😊','clap'=>'👏','thumbsup'=>'👍','pencil'=>'✏️','scissors'=>'✂️','lock'=>'🔒',
+                        'key'=>'🔑','bell'=>'🔔','gift'=>'🎁','crown'=>'👑','magic'=>'🪄','diamond'=>'💎','money'=>'💰',
+                    ];
+                    foreach ($allEmojis as $key => $emoji):
+                        $sel = ($editing_adata['object'] ?? 'apple') === $key ? ' selected' : '';
+                    ?>
+                    <div class="emoji-item<?= $sel ?>" data-key="<?= htmlspecialchars($key) ?>" data-emoji="<?= htmlspecialchars($emoji) ?>" onclick="pickEmoji(this)">
+                        <?= $emoji ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <?php include '../php/includes/dashboard-end.php'; ?>
+
+<style>
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 6px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 4px;
+}
+.emoji-item {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 2px solid transparent;
+}
+.emoji-item:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    transform: scale(1.15);
+}
+.emoji-item.selected {
+    background: #dbeafe;
+    border-color: #2563eb;
+    transform: scale(1.15);
+}
+</style>
+
+<script>
+// ===== Engine Config Toggle =====
+function toggleEngineConfig() {
+    const val = document.getElementById('engineSelect').value;
+    const hint = document.getElementById('engineConfigHint');
+    if (val) {
+        hint.classList.add('d-none');
+    } else {
+        hint.classList.remove('d-none');
+    }
+}
+
+// ===== Level Selection =====
+function selectLevel(lvl) {
+    const base = 'btn-child';
+    document.getElementById('level1Label').className = base + (lvl === 1 ? ' btn-child-primary' : ' btn-child-secondary');
+    document.getElementById('level2Label').className = base + (lvl === 2 ? ' btn-child-primary' : ' btn-child-secondary');
+}
+
+// ===== Emoji Picker =====
+function openEmojiPicker() {
+    document.getElementById('emojiPickerModal').setAttribute('aria-hidden', 'false');
+    document.getElementById('emojiPickerModal').style.display = 'flex';
+}
+
+function closeEmojiPicker() {
+    document.getElementById('emojiPickerModal').setAttribute('aria-hidden', 'true');
+    document.getElementById('emojiPickerModal').style.display = 'none';
+}
+
+function pickEmoji(el) {
+    document.querySelectorAll('.emoji-item').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('selectedEmojiDisplay').textContent = el.dataset.emoji;
+    document.getElementById('activityObjectInput').value = el.dataset.key;
+    closeEmojiPicker();
+}
+
+// Close picker on overlay click
+document.getElementById('emojiPickerModal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeEmojiPicker();
+});
+</script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/modals.js"></script>
     <script src="../js/dashboard.js"></script>
-    <?php if ($editing_activity): ?><script>document.addEventListener('DOMContentLoaded',function(){openModal('createActivityModal');});</script><?php endif; ?>
+    <?php if ($editing_activity): ?><script>document.addEventListener('DOMContentLoaded',function(){openModal('createActivityModal');toggleEngineConfig();});</script><?php endif; ?>
 </body>
 </html>
 

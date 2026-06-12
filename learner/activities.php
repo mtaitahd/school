@@ -15,12 +15,7 @@ $current_lang = isset($_GET['lang']) ? $_GET['lang'] : 'en';
 $base_path = '../';
 $active_nav = 'learning';
 $lang_page = 'activities.php' . ($module_id ? '?module_id=' . $module_id : '');
-$use_learner_dashboard = $learner_logged_in;
-if ($use_learner_dashboard) {
-    require_once __DIR__ . '/../php/includes/auth.php';
-    $dashboard_role = 'learner';
-    $sidebar_active = 'learn';
-}
+$use_learner_dashboard = false; // no sidebar nav in learning flow
 
 if ($module_id === 0) {
     header('Location: categories?lang=' . $current_lang);
@@ -50,25 +45,13 @@ $activities = $database->fetchAll(
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/activities.css">
 </head>
-<body class="<?php echo $use_learner_dashboard ? 'dashboard-body' : 'page-child'; ?>">
-<?php if ($use_learner_dashboard): ?>
-    <?php include '../php/includes/dashboard-start.php'; ?>
-<?php else: ?>
-    <?php include '../php/includes/header.php'; ?>
+<body class="page-child">
     <main class="container-child mt-30 page-enter">
         <?php
         $back_url = 'categories.php?lang=' . $current_lang;
         $home_url = '../index.php';
         include '../php/includes/activity-topbar.php';
         ?>
-<?php endif; ?>
-        <?php if ($use_learner_dashboard): ?>
-        <p class="mb-20">
-            <a href="categories?lang=<?php echo urlencode($current_lang); ?>" class="btn-child btn-child-yellow">
-                <i class="fas fa-arrow-left me-2"></i><?php echo $t['activity_back'] ?? 'Back'; ?>
-            </a>
-        </p>
-        <?php endif; ?>
 
         <div class="section-heading">
             <div class="module-card-icon-wrap" style="display:inline-flex; border: 4px solid <?php echo htmlspecialchars($module['module_color']); ?>; margin-bottom: 16px;">
@@ -102,19 +85,12 @@ $activities = $database->fetchAll(
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
-<?php if ($use_learner_dashboard): ?>
-    <?php include '../php/includes/dashboard-end.php'; ?>
-<?php else: ?>
     </main>
-
-
-<?php endif; ?>
 
     <audio id="audioPlayer" preload="auto"></audio>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <?php include '../php/includes/paths-script.php'; ?>
     <script src="../js/main.js"></script>
-    <?php if ($use_learner_dashboard): ?><script src="../js/dashboard.js"></script><?php endif; ?>
 </body>
 </html>
 
