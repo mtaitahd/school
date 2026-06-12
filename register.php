@@ -176,7 +176,7 @@ include 'php/includes/auth-split-start.php';
                     </div>
 
                     <div class="form-group-child">
-                        <label class="form-label-child" for="phone">Phone Number <?php echo $_POST['role'] === 'parent' || ($_POST['role'] ?? 'parent') === 'parent' ? '' : '(Optional)'; ?></label>
+                        <label class="form-label-child" for="phone">Phone Number <?php echo ($_POST['role'] ?? 'parent') === 'parent' ? '' : '(Optional)'; ?></label>
                         <div class="auth-input-wrap">
                             <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-phone"></i></span>
                             <input type="tel"

@@ -145,7 +145,7 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
         ?? $data['payment']['id']
         ?? $data['id']
         ?? null;
-    $snippePaymentId = $respData['id'] !== ($transactionId ?? '')
+    $snippePaymentId = ($respData['id'] ?? '') !== ($transactionId ?? '')
         ? ($respData['id'] ?? null)
         : null;
     $paymentUrl = $respData['payment_url'] ?? $data['checkout_url'] ?? $data['redirect_url'] ?? null;
@@ -301,7 +301,7 @@ function pay_process_webhook(): void {
             $message = $timestamp . '.' . $rawBody;
             $expectedSig = hash_hmac('sha256', $message, $webhookSecret);
             if (!hash_equals($expectedSig, $signature)) {
-                error_log('Snippe webhook: invalid signature');
+                error_log('Snippe webhook: invalid signature (expected=' . substr($expectedSig, 0, 16) . '..., received=' . substr($signature, 0, 16) . '..., ts=' . $timestamp . ')');
                 http_response_code(401);
                 exit('Invalid signature');
             }
