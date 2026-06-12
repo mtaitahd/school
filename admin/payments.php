@@ -72,8 +72,14 @@ require_once __DIR__ . '/../php/includes/lang.php';
         .stat-card { border-radius: 12px; border: none; transition: transform 0.15s; }
         .stat-card:hover { transform: translateY(-2px); }
         .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-        .badge-manual { background: #fef3c7; color: #92400e; }
-        .badge-snippe { background: #dbeafe; color: #1e40af; }
+    .badge-manual { background: #fef3c7; color: #92400e; }
+    .badge-snippe { background: #dbeafe; color: #1e40af; }
+    .badge-completed { background: #d1fae5; color: #065f46; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+    .badge-failed { background: #fce4ec; color: #b91c1c; }
+    .badge-review { background: #e8d5f5; color: #6b21a8; }
+    .badge-refunded { background: #f1f5f9; color: #475569; }
+    .status-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 600; display: inline-block; }
     </style>
 </head>
 <body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>
@@ -206,14 +212,23 @@ require_once __DIR__ . '/../php/includes/lang.php';
                             <th>Parent</th>
                             <th>Amount</th>
                             <th>Method</th>
-                            <th>Type</th>
+                            <th>Phone</th>
                             <th>Transaction ID</th>
                             <th>Status</th>
                             <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($payments as $pmt): ?>
+                        <?php foreach ($payments as $pmt):
+                            $statusClass = match ($pmt['status']) {
+                                'completed' => 'badge-completed',
+                                'pending' => 'badge-pending',
+                                'failed' => 'badge-failed',
+                                'manual_review' => 'badge-review',
+                                'refunded' => 'badge-refunded',
+                                default => 'badge-pending'
+                            };
+                        ?>
                         <tr>
                             <td>#<?= $pmt['id'] ?></td>
                             <td><strong><?= htmlspecialchars($pmt['first_name'] . ' ' . $pmt['last_name']) ?></strong><br><small class="text-muted"><?= htmlspecialchars($pmt['username']) ?></small></td>
@@ -223,10 +238,10 @@ require_once __DIR__ . '/../php/includes/lang.php';
                                     <?= $pmt['method'] === 'snippe' ? 'Snippe' : 'Manual' ?>
                                 </span>
                             </td>
-                            <td><small><?= ucfirst($pmt['payment_type']) ?></small></td>
+                            <td><small><?= htmlspecialchars($pmt['phone'] ?? '-') ?></small></td>
                             <td><code style="font-size:0.8rem;"><?= htmlspecialchars($pmt['transaction_id'] ?? '-') ?></code></td>
                             <td>
-                                <span class="small text-muted"><?= ucfirst(str_replace('_', ' ', $pmt['status'])) ?></span>
+                                <span class="status-badge <?= $statusClass ?>"><?= ucfirst(str_replace('_', ' ', $pmt['status'])) ?></span>
                             </td>
                             <td><small><?= date('d M Y H:i', strtotime($pmt['created_at'])) ?></small></td>
                         </tr>
@@ -263,7 +278,17 @@ require_once __DIR__ . '/../php/includes/lang.php';
                         <tr>
                             <td>#<?= $sub['id'] ?></td>
                             <td><strong><?= htmlspecialchars($sub['first_name'] . ' ' . $sub['last_name']) ?></strong><br><small class="text-muted"><?= htmlspecialchars($sub['username']) ?></small></td>
-                            <td><span class="small text-muted"><?= ucfirst($sub['status']) ?></span></td>
+                            <td>
+                                <?php
+                                $subClass = match ($sub['status']) {
+                                    'active' => 'badge-completed',
+                                    'trial' => 'badge-pending',
+                                    'expired' => 'badge-failed',
+                                    default => 'badge-pending'
+                                };
+                                ?>
+                                <span class="status-badge <?= $subClass ?>"><?= ucfirst($sub['status']) ?></span>
+                            </td>
                             <td><small><?= $sub['current_period_start'] ? date('d M Y', strtotime($sub['current_period_start'])) : '-' ?></small></td>
                             <td><small><?= $sub['current_period_end'] ? date('d M Y', strtotime($sub['current_period_end'])) : '-' ?></small></td>
                             <td><small><?= ucfirst($sub['payment_method'] ?? 'none') ?></small></td>

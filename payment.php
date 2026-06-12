@@ -36,38 +36,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $paymentMethod = $_POST['payment_method'] ?? '';
     $paymentType = $_POST['payment_type'] ?? 'subscription';
-    $submethod = $_POST['payment_submethod'] ?? 'mobile';
     $phone = $_POST['phone'] ?? '';
-    $emailAddr = $_POST['email'] ?? '';
     $transactionId = $_POST['transaction_id'] ?? '';
-    $customAmount = (float) ($_POST['amount'] ?? 0);
 
     if ($paymentMethod === 'snippe') {
-        if ($submethod === 'card') {
-            require_once __DIR__ . '/php/includes/SnippeCardPaymentService.php';
-            $service = new SnippeCardPaymentService($database);
-            $result = $service->createPayment($parentId, $emailAddr, $paymentType, $customAmount);
-            if ($result['success'] && $result['payment_url']) {
-                header('Location: ' . $result['payment_url']);
-                exit;
-            }
-            $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
+        $normalized = pay_normalize_phone($phone);
+        if (!preg_match('/^255\d{9}$/', $normalized)) {
+            $error = 'Tafadhali ingiza namba halali ya simu (Tanzania)';
         } else {
-            $normalized = pay_normalize_phone($phone);
-            if (!preg_match('/^255\d{9}$/', $normalized)) {
-                $error = 'Tafadhali ingiza namba halali ya simu (Tanzania)';
-                } else {
-                    $result = pay_create_snippe_payment($parentId, $normalized, '', $paymentType);
-                    if ($result['success']) {
-                        if ($result['payment_url']) {
-                            header('Location: ' . $result['payment_url']);
-                            exit;
-                        }
-                        header('Location: payment-status?ref=' . urlencode($result['reference']));
-                        exit;
-                    } else {
-                        $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
-                    }
+            $result = pay_create_snippe_payment($parentId, $normalized, '', $paymentType);
+            if ($result['success']) {
+                if ($result['payment_url']) {
+                    header('Location: ' . $result['payment_url']);
+                    exit;
+                }
+                header('Location: payment-status?ref=' . urlencode($result['reference']));
+                exit;
+            } else {
+                $error = $result['error'] ?? 'Hitilafu ya malipo. Jaribu tena.';
             }
         }
     } elseif ($paymentMethod === 'manual') {
@@ -84,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$userEmailStored = $_SESSION['email'] ?? $database->fetchOne("SELECT email FROM users WHERE user_id = ?", [$parentId])['email'] ?? '';
 $current_lang = $_SESSION['lang'] ?? 'en';
 $active_nav = 'topup';
 $dashboard_role = 'parent';
@@ -192,26 +177,19 @@ $dashboard_page_title = 'Payment';
         <form method="POST" id="paymentForm">
             <?= csrf_field() ?>
             <input type="hidden" name="payment_method" id="paymentMethod" value="">
-            <input type="hidden" name="payment_submethod" id="paymentSubmethod" value="mobile">
             <input type="hidden" name="payment_type" id="paymentType" value="subscription">
             <input type="hidden" name="phone" id="phoneInput">
-            <input type="hidden" name="email" id="emailInput">
-            <input type="hidden" name="amount" id="amountInput">
 
-            <!-- ===== Selection Buttons ===== -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <button type="button" class="btn btn-outline-primary w-100 py-4 rounded-4 shadow-sm d-flex align-items-center justify-content-center gap-3" style="border:2px dashed #93c5fd;font-size:1.05rem;" onclick="openTypeModal()">
-                        <i class="fas fa-tag fa-lg"></i>
-                        <span class="fw-bold">1. Choose Payment Type</span>
-                    </button>
-                </div>
-                <div class="col-md-6">
-                    <button type="button" class="btn btn-outline-primary w-100 py-4 rounded-4 shadow-sm d-flex align-items-center justify-content-center gap-3" style="border:2px dashed #93c5fd;font-size:1.05rem;" onclick="openMethodModal()" id="chooseMethodBtn">
-                        <i class="fas fa-credit-card fa-lg"></i>
-                        <span class="fw-bold">2. Choose Payment Method</span>
-                    </button>
-                </div>
+            <div class="text-center mb-3">
+                <span class="badge bg-primary rounded-pill px-4 py-2 fs-6">Monthly Subscription — 1,500 TZS</span>
+            </div>
+
+            <!-- ===== Choose Payment Method ===== -->
+            <div class="text-center mb-4">
+                <button type="button" class="btn btn-outline-primary py-4 rounded-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-3 px-5" style="border:2px dashed #93c5fd;font-size:1.05rem;" onclick="openMethodModal()" id="chooseMethodBtn">
+                    <i class="fas fa-credit-card fa-lg"></i>
+                    <span class="fw-bold">Choose Payment Method</span>
+                </button>
             </div>
 
             <!-- ===== Selected Summary ===== -->
@@ -232,33 +210,6 @@ $dashboard_page_title = 'Payment';
 
         </form>
 
-    </div>
-</div>
-
-<!-- ===== PAYMENT TYPE MODAL ===== -->
-<div class="modal fade modal-pform" id="paymentTypeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold"><i class="fas fa-tag me-2 text-primary"></i>Payment Type</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted small mb-3">Choose what you're paying for</p>
-                <div class="d-flex flex-column gap-3">
-                    <div class="type-card active d-flex flex-column align-items-center justify-content-center py-4" onclick="selectTypeAndProceed('subscription')" id="typeSubCard">
-                        <div class="type-amt">1,500 TZS</div>
-                        <div class="type-lbl">Monthly Subscription</div>
-                        <span class="type-badge">Recommended</span>
-                    </div>
-                    <div class="type-card d-flex flex-column align-items-center justify-content-center py-4" onclick="selectTypeAndProceed('wallet_topup')" id="typeWalletCard">
-                        <div class="type-amt">Custom</div>
-                        <div class="type-lbl">Wallet Topup</div>
-                        <span class="type-badge" style="background:#dcfce7;color:#15803d;">Flexible</span>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -332,15 +283,6 @@ $dashboard_page_title = 'Payment';
                     <span class="text-muted small">Amount to Pay</span>
                     <div class="fw-bold" style="font-size:1.5rem;" id="pushAmountDisplay">1,500 TZS</div>
                     <span class="text-muted small" id="pushTypeDisplay">Monthly Subscription</span>
-                </div>
-
-                <!-- Custom Amount (for wallet topup) -->
-                <div id="pushCustomAmount" class="mb-3 d-none">
-                    <label class="form-label fw-semibold text-muted small" for="pushCustomAmt">Enter Amount (TZS)</label>
-                    <div class="input-group">
-                        <span class="input-group-text fw-bold">TZS</span>
-                        <input type="number" class="form-control form-control-lg" id="pushCustomAmt" min="500" step="100" placeholder="e.g. 2000">
-                    </div>
                 </div>
 
                 <!-- Phone Number Input -->
@@ -421,28 +363,12 @@ $dashboard_page_title = 'Payment';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-const isWallet = () => document.getElementById('paymentType').value === 'wallet_topup';
-
-// ===== Payment Type Selection =====
-function selectTypeAndProceed(type) {
-    document.querySelectorAll('.type-card').forEach(o => o.classList.remove('active'));
-    document.getElementById(type === 'subscription' ? 'typeSubCard' : 'typeWalletCard').classList.add('active');
-    document.getElementById('paymentType').value = type;
-
-    bootstrap.Modal.getInstance(document.getElementById('paymentTypeModal')).hide();
-    updateSummary();
-    setTimeout(() => {
-        new bootstrap.Modal(document.getElementById('methodModal')).show();
-    }, 300);
-}
-
 // ===== Payment Method Selection =====
 function selectMethod(method) {
     bootstrap.Modal.getInstance(document.getElementById('methodModal')).hide();
 
     if (method === 'mobile') {
         document.getElementById('paymentMethod').value = 'snippe';
-        document.getElementById('paymentSubmethod').value = 'mobile';
         setTimeout(() => {
             updatePushModal();
             new bootstrap.Modal(document.getElementById('mobilePushModal')).show();
@@ -458,11 +384,8 @@ function selectMethod(method) {
 
 // ===== Update Push Modal =====
 function updatePushModal() {
-    const type = document.getElementById('paymentType').value;
-    const isTopup = type === 'wallet_topup';
-    document.getElementById('pushAmountDisplay').textContent = isTopup ? 'Custom Amount' : '1,500 TZS';
-    document.getElementById('pushTypeDisplay').textContent = isTopup ? 'Wallet Topup' : 'Monthly Subscription';
-    document.getElementById('pushCustomAmount').classList.toggle('d-none', !isTopup);
+    document.getElementById('pushAmountDisplay').textContent = '1,500 TZS';
+    document.getElementById('pushTypeDisplay').textContent = 'Monthly Subscription';
     document.getElementById('pushPhone').value = '';
     document.getElementById('pushPhone').classList.remove('is-invalid');
 }
@@ -489,17 +412,6 @@ function submitMobilePush() {
         return;
     }
 
-    // Handle custom amount for wallet topup
-    if (isWallet()) {
-        const amt = document.getElementById('pushCustomAmt').value.trim();
-        if (!amt || parseFloat(amt) < 500) {
-            document.getElementById('pushCustomAmt').classList.add('is-invalid');
-            document.getElementById('pushCustomAmt').focus();
-            return;
-        }
-        document.getElementById('amountInput').value = amt;
-    }
-
     const fullPhone = '+255' + phone;
     document.getElementById('phoneInput').value = fullPhone;
 
@@ -513,20 +425,13 @@ function submitMobilePush() {
 
 // ===== Update Summary Bar =====
 function updateSummary() {
-    const type = document.getElementById('paymentType').value;
     const method = document.getElementById('paymentMethod').value;
-    const submethod = document.getElementById('paymentSubmethod').value;
-
-    const typeLabel = type === 'wallet_topup' ? 'Wallet Topup' : 'Subscription';
     let methodLabel = '';
     if (method === 'manual') methodLabel = 'Lipa Number';
     else if (method === 'snippe') methodLabel = 'Mobile Number via Push';
 
-    const amount = type === 'subscription' ? '1,500 TZS' : (document.getElementById('amountInput').value || 'Custom');
-
-    document.getElementById('summaryTypeBadge').textContent = typeLabel;
     document.getElementById('summaryMethodBadge').textContent = methodLabel;
-    document.getElementById('summaryAmount').textContent = amount;
+    document.getElementById('summaryAmount').textContent = '1,500 TZS';
 
     const summary = document.getElementById('selectionSummary');
     if (method) {
@@ -535,22 +440,8 @@ function updateSummary() {
     }
 }
 
-// ===== Modal Openers =====
-function openTypeModal() {
-    new bootstrap.Modal(document.getElementById('paymentTypeModal')).show();
-}
-
+// ===== Modal Opener =====
 function openMethodModal() {
-    const type = document.getElementById('paymentType').value;
-    if (!type) {
-        Swal.fire({
-            icon: 'info',
-            title: 'Select Payment Type First',
-            text: 'Tafadhali chagua aina ya malipo kwanza (Step 1)',
-            confirmButtonColor: '#2563eb'
-        });
-        return;
-    }
     new bootstrap.Modal(document.getElementById('methodModal')).show();
 }
 
@@ -586,10 +477,6 @@ document.getElementById('payNowBtn')?.addEventListener('click', function(e) {
 // ===== Phone input formatting =====
 document.getElementById('pushPhone')?.addEventListener('input', function() {
     this.value = this.value.replace(/\D/g, '');
-    this.classList.remove('is-invalid');
-});
-
-document.getElementById('pushCustomAmt')?.addEventListener('input', function() {
     this.classList.remove('is-invalid');
 });
 

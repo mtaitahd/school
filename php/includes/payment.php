@@ -50,7 +50,6 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
     $amount = ($type === 'wallet_topup') ? (float) ($_POST['amount'] ?? SUBSCRIPTION_AMOUNT) : SUBSCRIPTION_AMOUNT;
     $reference = strtoupper(bin2hex(random_bytes(8)));
     $idempotencyKey = pay_idempotency_key($reference);
-    $method = $_POST['payment_submethod'] ?? 'mobile';
     $rawAppUrl = rtrim(sec_env('APP_URL', 'https://smartmathconner.co.tz'), '/');
     // Never allow localhost URLs in production API calls
     if (preg_match('/localhost/i', $rawAppUrl)) {
@@ -58,7 +57,7 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
     }
     $appUrl = preg_replace('/^http:/i', 'https:', $rawAppUrl);
 
-    $user = $database->fetchOne("SELECT first_name, last_name, email, parent_phone FROM `users` WHERE user_id = ?", [$parentId]);
+    $user = $database->fetchOne("SELECT first_name, last_name, email FROM `users` WHERE user_id = ?", [$parentId]);
     $firstName = $user['first_name'] ?? 'Parent';
     $lastName = $user['last_name'] ?? 'User';
     $userEmail = trim($user['email'] ?? '');
@@ -66,18 +65,15 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
         $userEmail = $email !== '' ? $email : 'parent' . $parentId . '@smartmathconner.co.tz';
     }
 
-    if ($method !== 'card') {
-        $phone = pay_normalize_phone($phone);
-    }
+    $phone = pay_normalize_phone($phone);
 
     $paymentId = $database->insert(
         "INSERT INTO `payments` (parent_id, amount, currency, method, payment_type, phone, email, reference, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')",
-        [$parentId, $amount, SUBSCRIPTION_CURRENCY, $method === 'card' ? 'snippe_card' : 'snippe', $type, $phone, $userEmail, $reference]
+         VALUES (?, ?, ?, 'snippe', ?, ?, ?, ?, 'pending')",
+        [$parentId, $amount, SUBSCRIPTION_CURRENCY, $type, $phone, $userEmail, $reference]
     );
 
     $webhookUrl = $appUrl . '/webhooks/snippe';
-    // Force HTTPS for webhook URL
     $webhookUrl = preg_replace('/^http:/i', 'https:', $webhookUrl);
 
     $metadata = [
@@ -86,51 +82,21 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
         'type' => $type,
     ];
 
-    if ($method === 'card') {
-        $payload = [
-            'payment_type' => 'card',
-            'details' => [
-                'amount' => (int) $amount,
-                'currency' => SUBSCRIPTION_CURRENCY,
-                'redirect_url' => $appUrl . '/payment-status?ref=' . $reference,
-                'cancel_url' => $appUrl . '/payment?cancelled=1',
-            ],
-            'customer' => [
-                'firstname' => $firstName,
-                'lastname' => $lastName,
-                'email' => $userEmail,
-                'phone' => $phone ?: ($user['parent_phone'] ?? ''),
-                'address' => 'Dar es Salaam',
-                'city' => 'Dar es Salaam',
-                'state' => 'DSM',
-                'postcode' => '14101',
-                'country' => 'TZ',
-            ],
-            'webhook_url' => $webhookUrl,
-            'metadata' => $metadata,
-        ];
-        if ($phone !== '') {
-            $payload['phone_number'] = $phone;
-        } elseif (!empty($user['parent_phone'])) {
-            $payload['phone_number'] = $user['parent_phone'];
-        }
-    } else {
-        $payload = [
-            'payment_type' => 'mobile',
-            'details' => [
-                'amount' => (int) $amount,
-                'currency' => SUBSCRIPTION_CURRENCY,
-            ],
-            'phone_number' => $phone,
-            'customer' => [
-                'firstname' => $firstName,
-                'lastname' => $lastName,
-                'email' => $userEmail,
-            ],
-            'webhook_url' => $webhookUrl,
-            'metadata' => $metadata,
-        ];
-    }
+    $payload = [
+        'payment_type' => 'mobile',
+        'details' => [
+            'amount' => (int) $amount,
+            'currency' => SUBSCRIPTION_CURRENCY,
+        ],
+        'phone_number' => $phone,
+        'customer' => [
+            'firstname' => $firstName,
+            'lastname' => $lastName,
+            'email' => $userEmail,
+        ],
+        'webhook_url' => $webhookUrl,
+        'metadata' => $metadata,
+    ];
 
     $ch = curl_init(SNIPPE_API_BASE . '/payments');
     curl_setopt_array($ch, [
@@ -182,7 +148,7 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
         );
     }
 
-    if ($method !== 'card' && $transactionId) {
+    if ($transactionId) {
         $pushResult = pay_retry_push($transactionId);
         if (!$pushResult['success']) {
             error_log('Snippe push failed for payment ' . $reference . ': ' . ($pushResult['error'] ?? 'unknown'));
@@ -381,10 +347,36 @@ function pay_verify_manual(int $paymentId, string $action = 'approve'): bool {
     if ($action === 'approve') {
         $database->execute("UPDATE `payments` SET status = 'completed' WHERE id = ?", [$paymentId]);
         sub_activate_after_payment((int) $payment['parent_id'], $paymentId, 'manual');
+
+        try {
+            require_once __DIR__ . '/../sms_service.php';
+            $sms = new SmsService();
+            $user = $database->fetchOne("SELECT phone FROM `users` WHERE user_id = ?", [(int) $payment['parent_id']]);
+            if ($user && $user['phone']) {
+                $msg = "Smart Math Corner: Malipo yako ya " . number_format((float) $payment['amount']) . " TZS yamethibitishwa. Uanachama wako umeanzishwa kwa siku 30. Karibu!";
+                $sms->sendSMS($user['phone'], $msg, 'payment_success', 'parent', (int) $payment['parent_id']);
+            }
+        } catch (Exception $e) {
+            error_log('Manual approve SMS error: ' . $e->getMessage());
+        }
+
         return true;
     }
 
     $database->execute("UPDATE `payments` SET status = 'failed' WHERE id = ?", [$paymentId]);
+
+    try {
+        require_once __DIR__ . '/../sms_service.php';
+        $sms = new SmsService();
+        $user = $database->fetchOne("SELECT phone FROM `users` WHERE user_id = ?", [(int) $payment['parent_id']]);
+        if ($user && $user['phone']) {
+            $msg = "Smart Math Corner: Samahani, malipo yako ya " . number_format((float) $payment['amount']) . " TZS hayakukubaliwa. Tafadhali wasiliana na usaidizi kwa maelezo zaidi.";
+            $sms->sendSMS($user['phone'], $msg, 'payment_rejected', 'parent', (int) $payment['parent_id']);
+        }
+    } catch (Exception $e) {
+        error_log('Manual reject SMS error: ' . $e->getMessage());
+    }
+
     return false;
 }
 
