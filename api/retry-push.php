@@ -50,8 +50,27 @@ if ($payment['method'] !== 'snippe') {
     exit;
 }
 
-$snippeRef = $payment['transaction_id'] ?: $payment['reference'];
-$result = pay_retry_push($snippeRef);
+// Determine the Snippe reference for the push API
+// Push endpoint uses {id} (pymt_xxx format), not the reference UUID
+$snippeRef = $payment['transaction_id'];
+$apiResp = $payment['api_response'] ? json_decode($payment['api_response'], true) : null;
+if ($apiResp) {
+    $respData = $apiResp['data'] ?? $apiResp;
+    // First try the payment ID (push endpoint uses {id} not {reference})
+    $paymentIdFromApi = $respData['id'] ?? $apiResp['payment_id'] ?? $apiResp['payment']['id'] ?? null;
+    if ($paymentIdFromApi) {
+        $snippeRef = $paymentIdFromApi;
+    } else {
+        // Fallback to reference/UUID
+        $snippeRef = $respData['reference']
+            ?? $apiResp['transaction_id']
+            ?? $snippeRef
+            ?? null;
+    }
+}
+if (!$snippeRef) {
+    $snippeRef = $payment['reference'];
+}
 
 if ($result['success']) {
     echo json_encode(['ok' => true, 'message' => 'USSD push resent to your phone']);

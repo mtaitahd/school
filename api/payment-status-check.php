@@ -46,7 +46,18 @@ if ($status === 'pending' && $payment['method'] !== 'manual') {
     $created = strtotime($payment['created_at']);
     $elapsed = time() - $created;
     if ($elapsed > 10) {
-        $snippeRef = $payment['transaction_id'] ?: $payment['reference'];
+        // Find the Snippe reference (transaction_id from DB, or fallback to api_response extraction)
+        $snippeRef = $payment['transaction_id'];
+        if (!$snippeRef) {
+            $apiResp = $payment['api_response'] ? json_decode($payment['api_response'], true) : null;
+            if ($apiResp) {
+                $respData = $apiResp['data'] ?? $apiResp;
+                $snippeRef = $respData['reference'] ?? $apiResp['transaction_id'] ?? $respData['id'] ?? $respData['payment_id'] ?? $apiResp['payment']['reference'] ?? $apiResp['payment']['id'] ?? $apiResp['id'] ?? null;
+            }
+        }
+        if (!$snippeRef) {
+            $snippeRef = $payment['reference'];
+        }
         $verifyResult = pay_verify_snippe_payment($snippeRef);
         if ($verifyResult['verified']) {
             $database->execute(

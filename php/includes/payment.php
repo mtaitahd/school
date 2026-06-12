@@ -137,22 +137,44 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
         return ['success' => false, 'error' => $errorMsg];
     }
 
+    // Try to extract the Snippe identifiers from the response
+    // - reference/UUID: used for verify (GET) and void endpoints
+    // - id (pymt_xxx): used for push endpoint (POST /v1/payments/{id}/push)
     $respData = $data['data'] ?? $data;
-    $transactionId = $respData['reference'] ?? $data['transaction_id'] ?? $respData['id'] ?? null;
+    $transactionId = $respData['reference']
+        ?? $data['transaction_id']
+        ?? $respData['id']
+        ?? $respData['payment_id']
+        ?? $data['payment']['reference']
+        ?? $data['payment']['id']
+        ?? $data['id']
+        ?? null;
+    // Also capture the payment ID (push endpoint uses {id}, verify/void use {reference})
+    $snippePaymentId = $respData['id'] !== ($transactionId ?? '')
+        ? ($respData['id'] ?? null)
+        : null;
     $paymentUrl = $respData['payment_url'] ?? $data['checkout_url'] ?? $data['redirect_url'] ?? null;
+
+    // Always save api_response so we can debug identifier extraction
+    $database->execute(
+        "UPDATE `payments` SET api_response = ? WHERE id = ?",
+        [json_encode($data), $paymentId]
+    );
 
     if ($transactionId) {
         $database->execute(
-            "UPDATE `payments` SET transaction_id = ?, api_response = ? WHERE id = ?",
-            [$transactionId, json_encode($data), $paymentId]
+            "UPDATE `payments` SET transaction_id = ? WHERE id = ?",
+            [$transactionId, $paymentId]
         );
-    }
 
-    if ($transactionId) {
-        $pushResult = pay_retry_push($transactionId);
+        // Use specific payment ID for push if available, otherwise use the reference
+        $pushRef = $snippePaymentId ?: $transactionId;
+        $pushResult = pay_retry_push($pushRef);
         if (!$pushResult['success']) {
-            error_log('Snippe initial push failed for payment ' . $reference . ' (ref ' . $transactionId . '): ' . ($pushResult['error'] ?? 'unknown'));
+            error_log('Snippe initial push failed for payment ' . $reference . ' (push_ref ' . $pushRef . ', snippe_ref ' . $transactionId . '): ' . ($pushResult['error'] ?? 'unknown'));
         }
+    } else {
+        error_log('Snippe create payment success but NO transaction_id extracted for local ref ' . $reference . '. API response: ' . substr(json_encode($data), 0, 1000));
     }
 
     return [
@@ -190,7 +212,7 @@ function pay_retry_push(string $reference): array {
     if ($curlError || $httpCode >= 400) {
         $errMsg = $curlError ?: ('HTTP ' . $httpCode . ' — ' . $responseBody);
         error_log('Snippe retry-push failed for ref ' . $reference . ': ' . $errMsg);
-        return ['success' => false, 'error' => $errMsg];
+        return ['success' => false, 'error' => $errMsg, 'http_code' => $httpCode, 'response' => $responseBody];
     }
 
     error_log('Snippe retry-push success for ref ' . $reference . ' (HTTP ' . $httpCode . ')');

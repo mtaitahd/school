@@ -339,11 +339,28 @@ function cancelPayment() {
         cancelButtonColor: '#64748b'
     }).then(result => {
         if (result.isConfirmed) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.innerHTML = '<input type="hidden" name="csrf_token" value="' + csrfToken + '"><input type="hidden" name="cancel_payment" value="1">';
-            document.body.appendChild(form);
-            form.submit();
+            stopPolling = true;
+            fetch('api/cancel-payment.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'ref=' + encodeURIComponent(ref) + '&_csrf_token=' + encodeURIComponent(csrfToken)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    updateSwal({
+                        status: 'cancelled',
+                        reference: data.reference || ref,
+                        amount: '<?= $amount ?>',
+                        method: '<?= $payment['method'] ?>'
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Failed', text: data.error || 'Cancellation failed.' });
+                }
+            })
+            .catch(() => {
+                Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server.' });
+            });
         }
     });
 }
