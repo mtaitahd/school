@@ -384,30 +384,35 @@ include '../php/includes/dashboard-start.php';
     <script src="../js/dashboard.js"></script>
     <script>
         <?php if (!empty($_GET['claim'])): ?>
-        document.addEventListener('DOMContentLoaded', function(){ $('#claimChildModal').modal('show'); });
+        document.addEventListener('DOMContentLoaded', function(){ new bootstrap.Modal('#claimChildModal').show(); });
         <?php endif; ?>
         function showClaimChildModal() {
-            $('#claimChildModal').modal('show');
+            new bootstrap.Modal('#claimChildModal').show();
         }
 
         function viewChildProgress(childId) {
-            <?php if (!$canAccess): ?>
+            <?php if (!$canAccess):
+                $payTitle = $current_lang === 'sw' ? 'Malipo Yanahitajika' : 'Payment Required';
+                $payText = $current_lang === 'sw' ? 'Tafadhali lipa ada ya mtoto wako ili kuona maendeleo yake.' : "Please pay for your subscription to view your child's progress.";
+                $payConfirm = $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now';
+                $payCancel = $current_lang === 'sw' ? 'Sasa' : 'Later';
+            ?>
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     icon: 'warning',
-                    title: '<?php echo $current_lang === 'sw' ? 'Malipo Yanahitajika' : 'Payment Required'; ?>',
-                    text: '<?php echo $current_lang === 'sw' ? 'Tafadhali lipa ada ya mtoto wako ili kuona maendeleo yake.' : 'Please pay for your subscription to view your child\'s progress.'; ?>',
-                    confirmButtonText: '<?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?>',
+                    title: <?php echo json_encode($payTitle); ?>,
+                    text: <?php echo json_encode($payText); ?>,
+                    confirmButtonText: <?php echo json_encode($payConfirm); ?>,
                     confirmButtonColor: '#2563eb',
                     showCancelButton: true,
-                    cancelButtonText: '<?php echo $current_lang === 'sw' ? 'Sasa' : 'Later'; ?>',
+                    cancelButtonText: <?php echo json_encode($payCancel); ?>,
                     cancelButtonColor: '#64748b',
                     customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold', cancelButton: 'rounded-pill px-3' }
                 }).then(function(r) {
                     if (r.isConfirmed) window.location.href = '../payment';
                 });
             } else {
-                alert('<?php echo $current_lang === 'sw' ? 'Tafadhali lipa ada ya mtoto wako ili kuona maendeleo yake.' : 'Please pay for your subscription to view your child\'s progress.'; ?>');
+                alert(<?php echo json_encode($payText); ?>);
             }
             return;
             <?php endif; ?>
