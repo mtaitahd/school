@@ -41,7 +41,7 @@
 
     if (btnWA) {
         btnWA.addEventListener('click', function() {
-            window.open('https://wa.me/255616591639?text=Hi%20Kona%20Ya%20Hisabati', '_blank');
+            window.open('https://wa.me/255655879005?text=Hi%20Kona%20Ya%20Hisabati', '_blank');
         });
     }
     if (btnFont) {

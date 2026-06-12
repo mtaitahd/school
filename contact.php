@@ -93,10 +93,13 @@ sec_send_headers();
                                 <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-green); display: flex; align-items: center; justify-content: center; color: white;">
                                     <i class="fas fa-phone"></i>
                                 </div>
-                                <div>
+                                <div style="flex: 1;">
                                     <p style="margin: 0; font-weight: 600;">Phone</p>
-                                    <p style="margin: 0; color: var(--text-light);">+255 XXX XXX XXX</p>
+                                    <p style="margin: 0; color: var(--text-light);">0655879005</p>
                                 </div>
+                                <a href="https://wa.me/255655879005" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 5px; background: #25D366; color: white; padding: 8px 16px; border-radius: 25px; text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap;">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </a>
                             </div>
                             
                             <div style="display: flex; align-items: center; gap: 15px;">
