@@ -79,6 +79,9 @@ require_once __DIR__ . '/../php/includes/lang.php';
 
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <h1 class="h3 mb-0 text-gray-800" style="font-family:'Poppins',sans-serif;font-weight:700;">Payments & Subscriptions</h1>
+            <button type="button" class="btn btn-primary" style="background:var(--primary-blue);border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;" onclick="verifyPayments()">
+                <i class="fas fa-sync me-2"></i>Verify & Remind
+            </button>
         </div>
 
     <?php if ($flash): ?>
@@ -297,7 +300,61 @@ require_once __DIR__ . '/../php/includes/lang.php';
 
 <?php include '../php/includes/dashboard-end.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../js/main.js"></script>
     <script src="../js/dashboard.js"></script>
+    <script>
+    function verifyPayments() {
+        Swal.fire({
+            title: 'Verify Payments & Send Reminders?',
+            text: 'Itaangalia malipo yote yanayosubiri na kutuma ukumbusho kwa wazazi.',
+            icon: 'question',
+            iconColor: '#f59e0b',
+            showCancelButton: true,
+            confirmButtonText: 'Ndiyo, Endelea',
+            cancelButtonText: 'Ghairi',
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#64748b',
+            customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold', cancelButton: 'rounded-pill px-3' }
+        }).then(function(result) {
+            if (!result.isConfirmed) return;
+            Swal.fire({
+                title: 'Inasindika...',
+                text: 'Tafadhali subiri',
+                allowOutsideClick: false,
+                didOpen: function() { Swal.showLoading(); }
+            });
+            fetch('api/admin-verify-payments.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: '_csrf_token=' + encodeURIComponent('<?= csrf_token() ?>')
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    var html = '<div style="text-align:left;font-size:0.9rem;">';
+                    html += '<p class="mb-2"><strong>Jumla:</strong> ' + data.total + '</p>';
+                    html += '<p class="mb-2 text-success"><strong>Zimesasishwa:</strong> ' + data.updated + '</p>';
+                    html += '<p class="mb-2 text-warning"><strong>Ukumbusho zimetumwa:</strong> ' + data.reminded + '</p>';
+                    if (data.errors > 0) html += '<p class="mb-2 text-danger"><strong>Hitilafu:</strong> ' + data.errors + '</p>';
+                    html += '</div>';
+                    Swal.fire({
+                        title: 'Imekamilika',
+                        html: html,
+                        icon: 'success',
+                        confirmButtonColor: '#2563eb',
+                        confirmButtonText: 'Sawa',
+                        customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' }
+                    }).then(function() { location.reload(); });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Hitilafu', text: data.error || 'Something went wrong', confirmButtonColor: '#2563eb', customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' } });
+                }
+            })
+            .catch(function() {
+                Swal.fire({ icon: 'error', title: 'Network Error', confirmButtonColor: '#2563eb', customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' } });
+            });
+        });
+    }
+    </script>
 </body>
 </html>
