@@ -35,9 +35,17 @@ $lang_page = 'users.php';
 
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <h1 class="h3 mb-0 text-gray-800" style="font-family:'Poppins',sans-serif;font-weight:700;">Manage Users</h1>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal" style="background:var(--primary-blue);border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;">
-                <i class="fas fa-user-plus me-2"></i>Add User
-            </button>
+            <div class="d-flex gap-2">
+                <a href="export-learners?mode=all" class="btn btn-success" style="border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;">
+                    <i class="fas fa-file-excel me-1"></i> Export All Learners
+                </a>
+                <a href="export-learners?mode=paid" class="btn btn-info text-white" style="border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;">
+                    <i class="fas fa-file-excel me-1"></i> Export Paid Learners
+                </a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal" style="background:var(--primary-blue);border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;">
+                    <i class="fas fa-user-plus me-2"></i>Add User
+                </button>
+            </div>
         </div>
 
         <div class="card mb-4">
