@@ -151,7 +151,7 @@ function pay_create_snippe_payment(int $parentId, string $phone, string $email =
     if ($transactionId) {
         $pushResult = pay_retry_push($transactionId);
         if (!$pushResult['success']) {
-            error_log('Snippe push failed for payment ' . $reference . ': ' . ($pushResult['error'] ?? 'unknown'));
+            error_log('Snippe initial push failed for payment ' . $reference . ' (ref ' . $transactionId . '): ' . ($pushResult['error'] ?? 'unknown'));
         }
     }
 
@@ -182,14 +182,18 @@ function pay_retry_push(string $reference): array {
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $curlError = curl_error($ch);
+    $responseBody = $response ? substr($response, 0, 500) : '(empty)';
     curl_close($ch);
 
     $data = $response ? json_decode($response, true) : null;
 
     if ($curlError || $httpCode >= 400) {
-        return ['success' => false, 'error' => $curlError ?: ('HTTP ' . $httpCode)];
+        $errMsg = $curlError ?: ('HTTP ' . $httpCode . ' — ' . $responseBody);
+        error_log('Snippe retry-push failed for ref ' . $reference . ': ' . $errMsg);
+        return ['success' => false, 'error' => $errMsg];
     }
 
+    error_log('Snippe retry-push success for ref ' . $reference . ' (HTTP ' . $httpCode . ')');
     return ['success' => true, 'data' => $data];
 }
 
@@ -240,21 +244,43 @@ function pay_create_manual_payment(int $parentId, string $phone, string $transac
 
 /**
  * Process incoming Snippe webhook.
+ * Supports both legacy (2026-01-01) and new (2026-01-25) envelope formats.
  * Only call this from /webhooks/snippe — never trust frontend alone.
  */
 function pay_process_webhook(): void {
     global $database;
 
-    $signature = $_SERVER['HTTP_X_SNIPPE_SIGNATURE'] ?? '';
     $rawBody = file_get_contents('php://input');
+    $timestamp = $_SERVER['HTTP_X_WEBHOOK_TIMESTAMP'] ?? '';
+    $signature = $_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] ?? $_SERVER['HTTP_X_SNIPPE_SIGNATURE'] ?? '';
+    $eventHeader = $_SERVER['HTTP_X_WEBHOOK_EVENT'] ?? '';
 
+    // Signature verification — new format: hex(HMAC-SHA256(key, "{timestamp}.{raw_body}"))
     $webhookSecret = sec_env('SNIPPE_WEBHOOK_SECRET', '');
     if ($webhookSecret !== '') {
-        $expectedSig = hash_hmac('sha256', $rawBody, $webhookSecret);
-        if (!hash_equals($expectedSig, $signature)) {
-            error_log('Snippe webhook: invalid signature');
-            http_response_code(401);
-            exit('Invalid signature');
+        if ($timestamp !== '' && $signature !== '') {
+            // New format (2026-01-25)
+            $currentTime = time();
+            if (abs($currentTime - (int)$timestamp) > 300) {
+                error_log('Snippe webhook: timestamp too old');
+                http_response_code(401);
+                exit('Timestamp too old');
+            }
+            $message = $timestamp . '.' . $rawBody;
+            $expectedSig = hash_hmac('sha256', $message, $webhookSecret);
+            if (!hash_equals($expectedSig, $signature)) {
+                error_log('Snippe webhook: invalid signature');
+                http_response_code(401);
+                exit('Invalid signature');
+            }
+        } else {
+            // Legacy format — signature over raw body
+            $expectedSig = hash_hmac('sha256', $rawBody, $webhookSecret);
+            if (!hash_equals($expectedSig, $signature)) {
+                error_log('Snippe webhook: invalid signature (legacy)');
+                http_response_code(401);
+                exit('Invalid signature');
+            }
         }
     }
 
@@ -271,12 +297,20 @@ function pay_process_webhook(): void {
         exit('Invalid payload');
     }
 
-    $event = $input['event'] ?? '';
+    // Detect format: new (2026-01-25) envelope or legacy flat
+    $event = $eventHeader ?: $input['type'] ?? $input['event'] ?? '';
     $data = $input['data'] ?? $input;
     $reference = $data['reference'] ?? $input['reference'] ?? '';
     $transactionId = $data['transaction_id'] ?? $data['id'] ?? $input['transaction_id'] ?? '';
     $paymentStatus = $data['status'] ?? $input['status'] ?? '';
-    $metadata = $data['metadata'] ?? $input['metadata'] ?? [];
+
+    // Parse amount from new format object: {"value": 50000, "currency": "TZS"}
+    $amountValue = null;
+    if (is_array($data['amount'] ?? null)) {
+        $amountValue = $data['amount']['value'] ?? null;
+    } elseif (is_array($input['amount'] ?? null)) {
+        $amountValue = $input['amount']['value'] ?? null;
+    }
 
     if (!$reference) {
         http_response_code(400);
@@ -295,20 +329,37 @@ function pay_process_webhook(): void {
     }
 
     $parentId = (int) $payment['parent_id'];
-
     $newStatus = $payment['status'];
     $isCompleted = false;
+    $isVoided = false;
 
-    if ($event === 'payment.completed' || $paymentStatus === 'completed') {
+    // Normalise event name (strip "payment." prefix if present in type field)
+    $eventName = str_replace('payment.', '', $event);
+    $eventName = $eventName ?: $paymentStatus;
+
+    if ($eventName === 'completed' || $paymentStatus === 'completed') {
         $newStatus = 'completed';
         $isCompleted = true;
-    } elseif ($event === 'payment.failed' || $paymentStatus === 'failed') {
+    } elseif ($eventName === 'failed' || $paymentStatus === 'failed') {
+        $newStatus = 'failed';
+    } elseif ($eventName === 'voided') {
+        $newStatus = 'failed';
+        $isVoided = true;
+    } elseif ($eventName === 'expired') {
         $newStatus = 'failed';
     }
 
+    // Update amount from webhook if provided (new format sends amount as object)
+    $amountUpdate = '';
+    $amountParams = [];
+    if ($amountValue !== null) {
+        $amountUpdate = ', amount = ?';
+        $amountParams = [(int) $amountValue];
+    }
+
     $database->execute(
-        "UPDATE `payments` SET status = ?, transaction_id = COALESCE(?, transaction_id), api_response = ? WHERE id = ?",
-        [$newStatus, $transactionId, json_encode($input), $payment['id']]
+        "UPDATE `payments` SET status = ?, transaction_id = COALESCE(?, transaction_id), api_response = ?" . $amountUpdate . " WHERE id = ?",
+        array_merge([$newStatus, $transactionId, json_encode($input)], $amountParams, [$payment['id']])
     );
 
     if ($isCompleted) {
@@ -317,7 +368,7 @@ function pay_process_webhook(): void {
         if ($paymentType === 'subscription') {
             sub_activate_after_payment($parentId, (int) $payment['id'], 'snippe');
         } elseif ($paymentType === 'wallet_topup') {
-            pay_topup_wallet($parentId, (float) $payment['amount']);
+            pay_topup_wallet($parentId, (float) ($amountValue ?? $payment['amount']));
         }
 
         try {
@@ -326,13 +377,16 @@ function pay_process_webhook(): void {
             $user = $database->fetchOne("SELECT phone FROM `users` WHERE user_id = ?", [$parentId]);
             if ($user && $user['phone']) {
                 $msg = ($paymentType === 'subscription')
-                    ? "Smart Math Corner: Malipo yako ya " . number_format((float) $payment['amount']) . " TZS yamethibitishwa. Uanachama wako umeanzishwa kwa siku 30. Karibu!"
-                    : "Smart Math Corner: Umefanikiwa kujaza salio la wallet yako. Kiasi: " . number_format((float) $payment['amount']) . " TZS.";
+                    ? "Smart Math Corner: Malipo yako ya " . number_format((float) ($amountValue ?? $payment['amount'])) . " TZS yamethibitishwa. Uanachama wako umeanzishwa kwa siku 30. Karibu!"
+                    : "Smart Math Corner: Umefanikiwa kujaza salio la wallet yako. Kiasi: " . number_format((float) ($amountValue ?? $payment['amount'])) . " TZS.";
                 $sms->sendSMS($user['phone'], $msg, 'payment_success', 'parent', $parentId);
             }
         } catch (Exception $e) {
             error_log('Payment SMS error: ' . $e->getMessage());
         }
+    } elseif ($isVoided) {
+        // Payment was cancelled/voided — just log it
+        error_log('Snippe webhook: payment ' . $reference . ' voided by user');
     }
 
     http_response_code(200);
@@ -378,6 +432,48 @@ function pay_verify_manual(int $paymentId, string $action = 'approve'): bool {
     }
 
     return false;
+}
+
+/**
+ * Cancel/void a pending Snippe mobile payment.
+ * Calls Snippe API to void, updates local DB.
+ */
+function pay_cancel_snippe_payment(int $paymentId, string $snippeRef): array {
+    global $database;
+
+    $ch = curl_init(SNIPPE_API_BASE . '/payments/' . urlencode($snippeRef) . '/void');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => '{}',
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . SNIPPE_API_KEY,
+            'Content-Type: application/json',
+        ],
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_SSL_VERIFYPEER => true,
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    $data = $response ? json_decode($response, true) : null;
+
+    $apiSuccess = !$curlError && $httpCode < 400;
+    $apiError = $curlError ?: ($data['message'] ?? $data['error'] ?? ('HTTP ' . $httpCode));
+
+    $database->execute(
+        "UPDATE `payments` SET status = 'failed', admin_note = 'cancelled_by_user', api_response = ? WHERE id = ?",
+        [json_encode(['api_result' => $data, 'http_code' => $httpCode, 'curl_error' => $curlError]), $paymentId]
+    );
+
+    return [
+        'success' => $apiSuccess,
+        'api_cancelled' => $apiSuccess,
+        'error' => $apiSuccess ? null : $apiError,
+    ];
 }
 
 function pay_get_wallet_balance(int $parentId): float {

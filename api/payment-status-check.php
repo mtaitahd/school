@@ -46,7 +46,8 @@ if ($status === 'pending' && $payment['method'] !== 'manual') {
     $created = strtotime($payment['created_at']);
     $elapsed = time() - $created;
     if ($elapsed > 10) {
-        $verifyResult = pay_verify_snippe_payment($payment['reference']);
+        $snippeRef = $payment['transaction_id'] ?: $payment['reference'];
+        $verifyResult = pay_verify_snippe_payment($snippeRef);
         if ($verifyResult['verified']) {
             $database->execute(
                 "UPDATE `payments` SET status = 'completed', api_response = ? WHERE id = ?",

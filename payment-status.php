@@ -43,10 +43,18 @@ $cancelled = $payment['admin_note'] === 'cancelled_by_user';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_payment'])) {
     csrf_require();
     if (in_array($payment['status'], ['pending', 'manual_review'])) {
-        $database->execute(
-            "UPDATE `payments` SET status = 'failed', admin_note = 'cancelled_by_user' WHERE id = ? AND parent_id = ?",
-            [$payment['id'], $parentId]
-        );
+        if ($payment['method'] === 'snippe' && $payment['transaction_id']) {
+            // Call Snippe API to void the payment
+            $cancelResult = pay_cancel_snippe_payment((int) $payment['id'], $payment['transaction_id']);
+            if (!$cancelResult['api_cancelled']) {
+                error_log('Snippe void API failed for ' . $payment['reference'] . ': ' . ($cancelResult['error'] ?? 'unknown'));
+            }
+        } else {
+            $database->execute(
+                "UPDATE `payments` SET status = 'failed', admin_note = 'cancelled_by_user' WHERE id = ? AND parent_id = ?",
+                [$payment['id'], $parentId]
+            );
+        }
         $payment['status'] = 'failed';
         $cancelled = true;
     }

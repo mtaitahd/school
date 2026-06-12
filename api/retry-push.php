@@ -50,7 +50,8 @@ if ($payment['method'] !== 'snippe') {
     exit;
 }
 
-$result = pay_retry_push($payment['reference']);
+$snippeRef = $payment['transaction_id'] ?: $payment['reference'];
+$result = pay_retry_push($snippeRef);
 
 if ($result['success']) {
     echo json_encode(['ok' => true, 'message' => 'USSD push resent to your phone']);
