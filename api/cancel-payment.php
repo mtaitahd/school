@@ -56,6 +56,8 @@ if ($payment['method'] === 'snippe' && $payment['transaction_id']) {
         "UPDATE `payments` SET status = 'failed', admin_note = 'cancelled_by_user' WHERE id = ? AND parent_id = ?",
         [$payment['id'], $parentId]
     );
+    // Notify admins of cancelled payment
+    pay_notify_admins('cancelled', $payment['reference'], (float) $payment['amount'], $payment['currency'] ?? 'TZS', $payment['phone']);
 }
 
 echo json_encode([

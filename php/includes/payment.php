@@ -406,9 +406,14 @@ function pay_process_webhook(): void {
         } catch (Exception $e) {
             error_log('Payment SMS error: ' . $e->getMessage());
         }
+
+        // Notify admins of completed payment
+        pay_notify_admins('completed', $reference, (float) ($amountValue ?? $payment['amount']), 'TZS', $payment['phone']);
+
     } elseif ($isVoided) {
-        // Payment was cancelled/voided — just log it
         error_log('Snippe webhook: payment ' . $reference . ' voided by user');
+        // Notify admins of cancelled payment
+        pay_notify_admins('cancelled', $payment['reference'] ?: $reference ?: 'unknown', (float) ($amountValue ?? $payment['amount']), 'TZS', $payment['phone']);
     }
 
     http_response_code(200);
@@ -436,6 +441,9 @@ function pay_verify_manual(int $paymentId, string $action = 'approve'): bool {
             error_log('Manual approve SMS error: ' . $e->getMessage());
         }
 
+        // Notify admins of manual approval
+        pay_notify_admins('completed', $payment['reference'], (float) $payment['amount'], 'TZS', $payment['phone']);
+
         return true;
     }
 
@@ -452,6 +460,9 @@ function pay_verify_manual(int $paymentId, string $action = 'approve'): bool {
     } catch (Exception $e) {
         error_log('Manual reject SMS error: ' . $e->getMessage());
     }
+
+    // Notify admins of rejected payment
+    pay_notify_admins('rejected', $payment['reference'], (float) $payment['amount'], 'TZS', $payment['phone']);
 
     return false;
 }
@@ -491,11 +502,48 @@ function pay_cancel_snippe_payment(int $paymentId, string $snippeRef): array {
         [json_encode(['api_result' => $data, 'http_code' => $httpCode, 'curl_error' => $curlError]), $paymentId]
     );
 
+    // Notify admins of cancelled payment
+    $payment = $database->fetchOne("SELECT reference, amount, currency, phone FROM `payments` WHERE id = ?", [$paymentId]);
+    if ($payment) {
+        pay_notify_admins('cancelled', $payment['reference'], (float) $payment['amount'], $payment['currency'], $payment['phone']);
+    }
+
     return [
         'success' => $apiSuccess,
         'api_cancelled' => $apiSuccess,
         'error' => $apiSuccess ? null : $apiError,
     ];
+}
+
+/**
+ * Send SMS notification to admin numbers for payment events.
+ */
+function pay_notify_admins(string $event, string $reference, float $amount, string $currency, string $phone = ''): void {
+    $adminPhones = ['+255616591639', '+255627955715'];
+    $eventLabel = match ($event) {
+        'completed' => 'Malipo yamekamilika',
+        'cancelled' => 'Malipo yameghairiwa',
+        'rejected'  => 'Malipo yamekataliwa',
+        default     => 'Malipo (' . $event . ')',
+    };
+    $msg = "Smart Math Corner: {$eventLabel}. Rejea: {$reference}. Kiasi: " . number_format($amount) . " {$currency}.";
+    if ($phone) {
+        $msg .= " Simu: {$phone}.";
+    }
+
+    try {
+        require_once __DIR__ . '/../sms_service.php';
+        $sms = new SmsService();
+        foreach ($adminPhones as $adminPhone) {
+            try {
+                $sms->sendSMS($adminPhone, $msg, 'payment_admin', 'admin', 0);
+            } catch (Exception $e) {
+                error_log('SMS to admin ' . $adminPhone . ' failed: ' . $e->getMessage());
+            }
+        }
+    } catch (Exception $e) {
+        error_log('Admin SMS notification error: ' . $e->getMessage());
+    }
 }
 
 function pay_get_wallet_balance(int $parentId): float {
