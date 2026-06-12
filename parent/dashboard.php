@@ -390,6 +390,22 @@ include '../php/includes/dashboard-start.php';
         }
 
         function viewChildProgress(childId) {
+            <?php if (!$canAccess): ?>
+            Swal.fire({
+                icon: 'warning',
+                title: '<?php echo $current_lang === 'sw' ? 'Malipo Yanahitajika' : 'Payment Required'; ?>',
+                text: '<?php echo $current_lang === 'sw' ? 'Tafadhali lipa ada ya mtoto wako ili kuona maendeleo yake.' : 'Please pay for your subscription to view your child\'s progress.'; ?>',
+                confirmButtonText: '<?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?>',
+                confirmButtonColor: '#2563eb',
+                showCancelButton: true,
+                cancelButtonText: '<?php echo $current_lang === 'sw' ? 'Sasa' : 'Later'; ?>',
+                cancelButtonColor: '#64748b',
+                customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold', cancelButton: 'rounded-pill px-3' }
+            }).then(function(r) {
+                if (r.isConfirmed) window.location.href = '../payment';
+            });
+            return;
+            <?php endif; ?>
             window.location.href = 'child-progress?child_id=' + childId;
         }
     </script>
