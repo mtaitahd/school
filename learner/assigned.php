@@ -66,15 +66,16 @@ $assignments = $database->fetchAll(
             <?php endif; ?>
         </div>
 
-        <?php if (!$trialInfo['is_active'] && $trialInfo['status'] !== 'none'): ?>
-            <div class="alert alert-danger py-2 px-4 mb-4" style="border-radius:10px;border:none;font-size:0.9rem;">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <?php echo $current_lang === 'sw' ? 'Huduma yako imezuiwa. Tafadhali lipa 1,500 TZS ili kuendelea na masomo.' : 'Your subscription has expired. Please pay 1,500 TZS to continue learning.'; ?>
-                <a href="../payment" class="btn btn-danger btn-sm fw-bold ms-2 px-3" style="border-radius:50px;"><?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?></a>
+        <?php if (!$trialInfo['is_active']): ?>
+            <div class="text-center py-5">
+                <i class="fas fa-lock mb-3" style="font-size:4rem;color:#dc2626;"></i>
+                <h4><?php echo $current_lang === 'sw' ? 'Huduma Imezuiwa' : 'Access Blocked'; ?></h4>
+                <p class="text-muted mb-4"><?php echo $current_lang === 'sw' ? 'Tafadhali lipa 1,500 TZS ili kuendelea na masomo.' : 'Please pay 1,500 TZS to continue learning.'; ?></p>
+                <a href="../payment" class="btn btn-danger btn-lg fw-bold px-5" style="border-radius:50px;">
+                    <i class="fas fa-wallet me-2"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?>
+                </a>
             </div>
-        <?php endif; ?>
-
-        <?php if (empty($assignments)): ?>
+        <?php elseif (empty($assignments)): ?>
             <div class="dashboard-card text-center">
                 <i class="fas fa-clipboard-check" style="font-size:4rem;color:var(--primary-green);"></i>
                 <p class="mt-20 activity-instruction"><?php echo $current_lang === 'sw' ? 'Hakuna shughuli zilizopangwa bado. Anza kujifunza!' : 'No assignments yet. Start learning!'; ?></p>
@@ -116,7 +117,6 @@ $assignments = $database->fetchAll(
                         <?php endif; ?>
 
                         <?php if ($is_completed): ?>
-                            <!-- Review button for completed -->
                             <?php if (!is_null($a['score'])): ?>
                                 <p class="mt-10 mb-0"><small><?php echo $current_lang === 'sw' ? 'Alama' : 'Score'; ?>: <strong><?php echo (int) ($a['score'] ?? 0); ?>%</strong></small></p>
                             <?php endif; ?>
@@ -127,13 +127,11 @@ $assignments = $database->fetchAll(
                                 <i class="fas fa-eye me-1"></i><?php echo $current_lang === 'sw' ? 'Angalia Matokeo' : 'Review'; ?>
                             </a>
                         <?php elseif ($is_quiz && $has_questions): ?>
-                            <!-- Quiz type with questions -> take-assignment -->
                             <a href="take-assignment?sa_id=<?php echo (int) $a['student_assignment_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
                                 <i class="fas fa-<?php echo $has_started ? 'play-circle' : 'play'; ?> me-1"></i>
                                 <?php echo $current_lang === 'sw' ? ($has_started ? 'Endelea' : 'Anza') : ($has_started ? 'Continue' : 'Start'); ?>
                             </a>
                         <?php elseif ($a['activity_id']): ?>
-                            <!-- Activity type -> activity.php -->
                             <a href="activity?activity_id=<?php echo (int) $a['activity_id']; ?>&lang=<?php echo $current_lang; ?>" class="btn-child btn-child-primary mt-10" style="display:inline-block; text-decoration:none; font-size:0.85rem; padding:6px 14px;">
                                 <i class="fas fa-<?php echo $has_started ? 'play-circle' : 'play'; ?> me-1"></i>
                                 <?php echo $current_lang === 'sw' ? ($has_started ? 'Endelea' : 'Anza') : ($has_started ? 'Continue' : 'Start'); ?>

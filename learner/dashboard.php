@@ -104,7 +104,18 @@ $recent_assignments = $database->fetchAll(
                     <i class="fas fa-wallet me-1"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?>
                 </a>
             </div>
-        <?php endif; ?>
+        <?php elseif ($trialInfo['is_active']): ?><!-- intentionally empty --><?php endif; ?>
+
+        <?php if (!$trialInfo['is_active']): ?>
+            <div class="text-center py-5">
+                <i class="fas fa-lock mb-3" style="font-size:4rem;color:#dc2626;"></i>
+                <h4><?php echo $current_lang === 'sw' ? 'Huduma Imezuiwa' : 'Access Blocked'; ?></h4>
+                <p class="text-muted mb-4"><?php echo $current_lang === 'sw' ? 'Tafadhali lipa 1,500 TZS ili kuendelea na masomo.' : 'Please pay 1,500 TZS to continue learning.'; ?></p>
+                <a href="../payment" class="btn btn-danger btn-lg fw-bold px-5" style="border-radius:50px;">
+                    <i class="fas fa-wallet me-2"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?>
+                </a>
+            </div>
+        <?php else: ?>
 
         <div class="row g-4 mb-4">
             <div class="col-xl-3 col-md-6">
@@ -235,6 +246,7 @@ $recent_assignments = $database->fetchAll(
                 <p class="activity-instruction mt-20"><?php echo $current_lang === 'sw' ? 'Hakuna shughuli zilizopangwa kwa sasa' : 'No assignments at the moment'; ?></p>
             </div>
         </div>
+        <?php endif; ?>
         <?php endif; ?>
 
 <?php include '../php/includes/dashboard-end.php'; ?>

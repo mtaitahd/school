@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/lang.php';
 require_once __DIR__ . '/../php/includes/learner-session.php';
+require_once __DIR__ . '/../php/includes/SubscriptionMiddleware.php';
 
 if (!empty($_SERVER['REQUEST_URI']) && preg_match('#/learner/learner/#', $_SERVER['REQUEST_URI'])) {
     $fixed = preg_replace('#/learner/learner/#', '/learner/', $_SERVER['REQUEST_URI']);
@@ -14,6 +15,12 @@ $base_path = '../';
 $active_nav = 'learning';
 $lang_page = 'categories.php';
 $use_learner_dashboard = false; // no sidebar nav in learning flow
+
+$need_payment = false;
+if ($learner_logged_in) {
+    $trialInfo = SubscriptionMiddleware::getLearnerTrialInfo((int) $_SESSION['user_id']);
+    $need_payment = !$trialInfo['is_active'];
+}
 
 $modules = $database->fetchAll("SELECT * FROM modules WHERE is_active = 1 ORDER BY order_index ASC");
 
@@ -91,6 +98,34 @@ $category_labels = [
         <button type="button" class="a11y-btn" id="toggleContrast" title="High contrast"><i class="fas fa-adjust"></i></button>
         <button type="button" class="a11y-btn" id="toggleDyslexia" title="Dyslexia mode"><i class="fas fa-font"></i></button>
     </div>
+
+    <?php if ($need_payment): ?>
+    <div class="modal-overlay" id="paymentModal" style="display:none;">
+        <div class="modal-card" style="background:#fff;border-radius:16px;padding:40px;max-width:400px;margin:100px auto;text-align:center;position:relative;">
+            <i class="fas fa-lock" style="font-size:4rem;color:#dc2626;margin-bottom:16px;"></i>
+            <h3 style="margin-bottom:12px;"><?php echo $current_lang === 'sw' ? 'Malipo Yanahitajika' : 'Payment Required'; ?></h3>
+            <p style="color:#666;margin-bottom:24px;"><?php echo $current_lang === 'sw' ? 'Tafadhali mwambie mzazi wako alipe ada yako ili uweze kuendelea na masomo.' : 'Please ask your parent to pay for your subscription to continue learning.'; ?></p>
+            <button type="button" class="btn btn-danger btn-lg fw-bold px-5" style="border-radius:50px;" onclick="window.location.href='../payment'">
+                <i class="fas fa-wallet me-2"></i> <?php echo $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now'; ?>
+            </button>
+            <button type="button" class="btn btn-link d-block mt-3" style="color:#999;" onclick="document.getElementById('paymentModal').style.display='none'"><?php echo $current_lang === 'sw' ? 'Funga' : 'Close'; ?></button>
+        </div>
+    </div>
+    <style>
+        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;}
+    </style>
+    <script>
+    (function(){
+        var needPayment = <?php echo json_encode($need_payment); ?>;
+        if (needPayment) {
+            var origSelect = window.selectModule;
+            window.selectModule = function(moduleId) {
+                document.getElementById('paymentModal').style.display = 'flex';
+            };
+        }
+    })();
+    </script>
+    <?php endif; ?>
 
     <audio id="audioPlayer" preload="auto"></audio>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

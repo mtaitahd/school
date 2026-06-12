@@ -46,7 +46,7 @@ class SubscriptionMiddleware {
                  LIMIT 1",
                 [$userId]
             );
-            if (!$parent) return true; // unlinked learners get free access
+            if (!$parent) return false; // unlinked learners have no payer
             $parentId = (int) $parent['parent_id'];
         } elseif ($role === 'parent') {
             $parentId = $userId;
@@ -64,7 +64,7 @@ class SubscriptionMiddleware {
             [$parentId]
         );
 
-        if (!$sub) return true; // no subscription record yet = allow
+        if (!$sub) return false; // no subscription = blocked
 
         if ($sub['status'] === 'active') return true;
 
@@ -99,7 +99,7 @@ class SubscriptionMiddleware {
                 'days_remaining' => 0,
                 'label' => 'No subscription',
                 'expiry_date' => null,
-                'is_active' => true,
+                'is_active' => false,
             ];
         }
 
@@ -144,7 +144,7 @@ class SubscriptionMiddleware {
                 'days_remaining' => 0,
                 'label' => '',
                 'expiry_date' => null,
-                'is_active' => true,
+                'is_active' => false,
             ];
         }
 
