@@ -954,33 +954,19 @@ const ActivityEngines = {
                 '<h2 class="finish-title">' + level.name + ' Complete!</h2>' +
                 '<p class="finish-subtitle">You got ' + correctCount + ' out of ' + ROUNDS_PER_LEVEL + ' correct!</p></div>';
 
-            const nextDiv = document.createElement('div');
-            nextDiv.className = 'math-game-next-level';
+            ActivityCore.celebrate();
+            ActivityCore.say('Great job! You completed ' + level.name + '!');
 
             if (currentLevel < LEVELS.length - 1) {
-                const nextBtn = document.createElement('button');
-                nextBtn.type = 'button';
-                nextBtn.className = 'btn-child btn-child-green btn-child-large btn-bounce';
-                nextBtn.innerHTML = '<i class="fas fa-arrow-right me-2"></i>Next: ' + LEVELS[currentLevel + 1].name;
-                nextBtn.onclick = function () {
+                setTimeout(function () {
                     currentLevel++;
                     currentRound = 0;
                     correctCount = 0;
                     startRound();
-                };
-                nextDiv.appendChild(nextBtn);
+                }, 3000);
+            } else {
+                setTimeout(showLevelSelect, 3500);
             }
-
-            const againBtn = document.createElement('button');
-            againBtn.type = 'button';
-            againBtn.className = 'btn-child btn-child-primary btn-child-large btn-bounce';
-            againBtn.innerHTML = '<i class="fas fa-redo me-2"></i>Play Again';
-            againBtn.onclick = showLevelSelect;
-            nextDiv.appendChild(againBtn);
-
-            display.appendChild(nextDiv);
-            ActivityCore.celebrate();
-            ActivityCore.say('Great job! You completed ' + level.name + '!');
         }
 
         showLevelSelect();
