@@ -1,0 +1,77 @@
+<?php
+require_once __DIR__ . '/../php/includes/session.php';
+require_once __DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/db_connection.php';
+
+header('Content-Type: application/json');
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not allowed']);
+    exit;
+}
+
+$username = trim($_POST['username'] ?? '');
+if (empty($username)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Username is required']);
+    exit;
+}
+
+// Look up learner
+$learner = $database->fetchOne(
+    "SELECT user_id, first_name, last_name, username, parent_id FROM users WHERE username = ? AND role = 'learner' AND is_active = 1",
+    [$username]
+);
+
+if (!$learner) {
+    echo json_encode([
+        'exists' => false,
+        'message' => 'Jina la mtumiaji halipo. Muulize mwalimu au mzazi wako.'
+    ]);
+    exit;
+}
+
+// Find parent linked to this learner
+$parentId = $learner['parent_id'];
+if (!$parentId) {
+    // Try parent_student_links
+    $link = $database->fetchOne(
+        "SELECT parent_id FROM parent_student_links WHERE student_id = ? AND is_active = 1 LIMIT 1",
+        [(int) $learner['user_id']]
+    );
+    if ($link) {
+        $parentId = (int) $link['parent_id'];
+    }
+}
+
+if (!$parentId) {
+    // No parent linked — allow access (teacher-managed)
+    echo json_encode([
+        'exists' => true,
+        'can_access' => true,
+        'redirect' => 'learner/login.php?username=' . urlencode($username),
+        'message' => ''
+    ]);
+    exit;
+}
+
+// Check parent subscription
+require_once __DIR__ . '/../php/includes/subscription.php';
+$subStatus = sub_get_status($parentId);
+
+if ($subStatus['is_active']) {
+    $_SESSION['temp_learner_username'] = $username;
+    echo json_encode([
+        'exists' => true,
+        'can_access' => true,
+        'redirect' => 'learner/login.php?username=' . urlencode($username),
+        'message' => ''
+    ]);
+} else {
+    echo json_encode([
+        'exists' => true,
+        'can_access' => false,
+        'message' => 'Tafadhali mwambie mzazi wako alipe ada ya mtoto wako ili uweze kuendelea na masomo.'
+    ]);
+}

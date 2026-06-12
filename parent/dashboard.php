@@ -214,7 +214,8 @@ include '../php/includes/dashboard-start.php';
                                 <div class="icon-circle mb-3" style="background:var(--primary-blue);width:72px;height:72px;font-size:1.8rem;margin:0 auto;">
                                     <i class="fas fa-child text-white"></i>
                                 </div>
-                                <h5 class="fw-bold mb-2"><?php echo htmlspecialchars($child['first_name']); ?></h5>
+                                <h5 class="fw-bold mb-1"><?php echo htmlspecialchars($child['first_name']); ?></h5>
+                                <p class="mb-1" style="font-size:0.8rem;color:var(--text-light);"><i class="fas fa-user me-1"></i><?php echo htmlspecialchars($child['username']); ?></p>
                                 <p class="mb-1"><i class="fas fa-check-circle me-1" style="color:var(--primary-green);"></i> Activities: <?php echo $child['completed_activities']; ?></p>
                                 <p class="mb-2"><i class="fas fa-star me-1" style="color:var(--primary-yellow);"></i> Stars: <?php echo $child['total_stars']; ?></p>
                                 <?php if (isset($badges[$child['user_id']]) && !empty($badges[$child['user_id']])): ?>

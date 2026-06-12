@@ -31,6 +31,7 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@400;600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="page-child">
     <?php include 'php/includes/header.php'; ?>
@@ -98,10 +99,10 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
                             </div>
                         </div>
                         <div class="hero-actions" style="margin-top:28px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                            <a href="learner/categories?lang=<?php echo $current_lang; ?>" class="btn-child btn-child-yellow" style="text-decoration:none;min-height:52px;font-size:1.05rem;border-radius:50px;">
+                            <button type="button" onclick="promptUsername()" class="btn-child btn-child-yellow" style="text-decoration:none;min-height:52px;font-size:1.05rem;border-radius:50px;border:none;cursor:pointer;">
                                 <i class="fas fa-play-circle" aria-hidden="true"></i>
                                 <?php echo htmlspecialchars($t['btn_start']); ?>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -421,6 +422,68 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
             var scrollAmount = el.clientWidth * 0.8;
             el.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
         }
+    }
+
+    function promptUsername() {
+        Swal.fire({
+            title: '<?php echo $current_lang === 'sw' ? 'Ingiza Jina Lako la Mtumiaji' : 'Enter Your Username'; ?>',
+            text: '<?php echo $current_lang === 'sw' ? 'Weka jina lako la mtumiaji ulilopewa na mwalimu au mzazi wako' : 'Enter the username given by your teacher or parent'; ?>',
+            input: 'text',
+            inputPlaceholder: '<?php echo $current_lang === 'sw' ? 'Jina la mtumiaji' : 'Username'; ?>',
+            showCancelButton: true,
+            confirmButtonText: '<?php echo $current_lang === 'sw' ? 'Anza Kujifunza' : 'Start Learning'; ?>',
+            cancelButtonText: '<?php echo $current_lang === 'sw' ? 'Ghairi' : 'Cancel'; ?>',
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#64748b',
+            inputAttributes: { autocapitalize: 'off', autocomplete: 'off' },
+            customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold', cancelButton: 'rounded-pill px-3' },
+            buttonsStyling: true,
+            preConfirm: function(username) {
+                if (!username || !username.trim()) {
+                    Swal.showValidationMessage('<?php echo $current_lang === 'sw' ? 'Tafadhali ingiza jina lako la mtumiaji' : 'Please enter your username'; ?>');
+                    return false;
+                }
+                return fetch('api/check-learner.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'username=' + encodeURIComponent(username.trim())
+                }).then(function(r) { return r.json(); }).then(function(data) {
+                    if (data.error) {
+                        Swal.showValidationMessage(data.error);
+                        return false;
+                    }
+                    return data;
+                }).catch(function() {
+                    Swal.showValidationMessage('<?php echo $current_lang === 'sw' ? 'Hitilafu ya mtandao. Tafadhali jaribu tena.' : 'Network error. Please try again.'; ?>');
+                    return false;
+                });
+            },
+            allowOutsideClick: function() { return !Swal.isLoading(); }
+        }).then(function(result) {
+            if (!result.value) return;
+            var data = result.value;
+            if (!data.exists) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '<?php echo $current_lang === 'sw' ? 'Jina Halijulikani' : 'Unknown Username'; ?>',
+                    text: data.message || '<?php echo $current_lang === 'sw' ? 'Jina la mtumiaji halipo. Muulize mwalimu au mzazi wako.' : 'Username not found. Ask your teacher or parent.'; ?>',
+                    confirmButtonColor: '#2563eb',
+                    confirmButtonText: '<?php echo $current_lang === 'sw' ? 'Sawa' : 'OK'; ?>',
+                    customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' }
+                });
+            } else if (!data.can_access) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '<?php echo $current_lang === 'sw' ? 'Haujawahi Kulipia' : 'Payment Required'; ?>',
+                    text: data.message || '<?php echo $current_lang === 'sw' ? 'Tafadhali mwambie mzazi wako alipe ada ya mtoto wako ili uweze kuendelea na masomo.' : 'Please tell your parent to pay your account.'; ?>',
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: '<?php echo $current_lang === 'sw' ? 'Sawa' : 'OK'; ?>',
+                    customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill px-4 fw-bold' }
+                });
+            } else if (data.redirect) {
+                window.location.href = data.redirect;
+            }
+        });
     }
 
     </script>

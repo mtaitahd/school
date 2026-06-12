@@ -17,7 +17,7 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_require();
 
-    $username = trim($_POST['username'] ?? '');
+    $username = trim($_POST['username'] ?? ($_GET['username'] ?? ''));
 
     if (empty($username)) {
         $error = 'Please enter your username.';
@@ -91,7 +91,7 @@ include '../php/includes/auth-split-start.php';
                                placeholder="Enter your username"
                                required
                                autocomplete="username"
-                               value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
+                               value="<?php echo htmlspecialchars($_POST['username'] ?? ($_GET['username'] ?? '')); ?>">
                     </div>
                 </div>
 
