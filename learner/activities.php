@@ -106,7 +106,8 @@ $activities = $database->fetchAll(
     <?php include '../php/includes/dashboard-end.php'; ?>
 <?php else: ?>
     </main>
-    <?php include '../php/includes/footer.php'; ?>
+
+
 <?php endif; ?>
 
     <audio id="audioPlayer" preload="auto"></audio>

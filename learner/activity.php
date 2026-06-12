@@ -102,7 +102,8 @@ $isInteractiveEngine = in_array($engine, [
         </div>
     </main>
 
-    <?php include '../php/includes/footer.php'; ?>
+
+
 
     <div class="a11y-toolbar">
         <button type="button" class="a11y-btn" id="toggleContrast" title="High contrast"><i class="fas fa-adjust"></i></button>
