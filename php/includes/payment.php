@@ -390,10 +390,15 @@ function pay_process_webhook(): void {
     if ($isCompleted) {
         $paymentType = $payment['payment_type'];
 
-        if ($paymentType === 'subscription') {
-            sub_activate_after_payment($parentId, (int) $payment['id'], 'snippe');
-        } elseif ($paymentType === 'wallet_topup') {
-            pay_topup_wallet($parentId, (float) ($amountValue ?? $payment['amount']));
+        try {
+            if ($paymentType === 'subscription') {
+                sub_activate_after_payment($parentId, (int) $payment['id'], 'snippe');
+            } elseif ($paymentType === 'wallet_topup') {
+                pay_topup_wallet($parentId, (float) ($amountValue ?? $payment['amount']));
+            }
+        } catch (\Throwable $e) {
+            error_log('Webhook sub_activate_after_payment error: ' . $e->getMessage());
+            throw $e;
         }
 
         try {
@@ -430,7 +435,13 @@ function pay_verify_manual(int $paymentId, string $action = 'approve'): bool {
 
     if ($action === 'approve') {
         $database->execute("UPDATE `payments` SET status = 'completed' WHERE id = ?", [$paymentId]);
-        sub_activate_after_payment((int) $payment['parent_id'], $paymentId, 'manual');
+
+        try {
+            sub_activate_after_payment((int) $payment['parent_id'], $paymentId, 'manual');
+        } catch (\Throwable $e) {
+            error_log('Manual approve sub_activate_after_payment error: ' . $e->getMessage());
+            throw $e;
+        }
 
         try {
             require_once __DIR__ . '/../sms_service.php';

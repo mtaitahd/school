@@ -9,6 +9,7 @@ require_once __DIR__ . '/../php/includes/security.php';
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/auth.php';
 require_once __DIR__ . '/../php/includes/payment.php';
+require_once __DIR__ . '/../php/includes/subscription.php';
 
 sec_require_rate_limit();
 
@@ -65,6 +66,8 @@ if ($status === 'pending' && $payment['method'] !== 'manual') {
                 "UPDATE `payments` SET status = 'completed', api_response = ? WHERE id = ?",
                 [json_encode($verifyResult['data']), $payment['id']]
             );
+            // Activate subscription immediately
+            sub_activate_after_payment((int) $payment['parent_id'], (int) $payment['id'], 'snippe');
             $status = 'completed';
         } elseif ($verifyResult['status'] === 'failed') {
             $database->execute(

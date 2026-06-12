@@ -23,10 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $amount = number_format((float) $pmt['amount']);
                 $smsText = "Smart Math Corner: Malipo yako ya $amount TZS yamethibitishwa. Uanachama wako umeanzishwa kwa siku 30. Karibu $name!";
             }
-            pay_verify_manual($paymentId, 'approve');
-            $_SESSION['flash_message'] = 'Payment approved and subscription activated.';
-            if ($smsText) {
-                $_SESSION['flash_sms'] = $smsText;
+            $result = pay_verify_manual($paymentId, 'approve');
+            if ($result) {
+                $_SESSION['flash_message'] = 'Payment approved and subscription activated.';
+                if ($smsText) {
+                    $_SESSION['flash_sms'] = $smsText;
+                }
+            } else {
+                $_SESSION['flash_error'] = 'Approval failed — payment not in manual_review status or not found.';
             }
         } elseif ($_POST['action'] === 'reject' && $paymentId) {
             $pmt = $database->fetchOne("SELECT * FROM `payments` WHERE id = ?", [$paymentId]);
@@ -35,10 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $amount = number_format((float) $pmt['amount']);
                 $smsText = "Smart Math Corner: Samahani, malipo yako ya $amount TZS hayakukubaliwa. Tafadhali wasiliana na usaidizi kwa maelezo zaidi.";
             }
-            pay_verify_manual($paymentId, 'reject');
-            $_SESSION['flash_message'] = 'Payment rejected.';
-            if ($smsText) {
-                $_SESSION['flash_sms'] = $smsText;
+            $result = pay_verify_manual($paymentId, 'reject');
+            if ($result) {
+                $_SESSION['flash_message'] = 'Payment rejected.';
+                if ($smsText) {
+                    $_SESSION['flash_sms'] = $smsText;
+                }
+            } else {
+                $_SESSION['flash_error'] = 'Rejection failed — payment not in manual_review status or not found.';
             }
         }
         header('Location: payments');
