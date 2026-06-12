@@ -13,34 +13,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     csrf_require();
     $paymentId = (int) ($_POST['payment_id'] ?? 0);
 
-    if ($_POST['action'] === 'approve' && $paymentId) {
-        $pmt = $database->fetchOne("SELECT p.*, u.first_name, u.last_name, u.phone FROM `payments` p JOIN `users` u ON p.parent_id = u.user_id WHERE p.id = ?", [$paymentId]);
-        $smsText = '';
-        if ($pmt) {
-            $name = htmlspecialchars($pmt['first_name'] . ' ' . $pmt['last_name']);
-            $amount = number_format((float) $pmt['amount']);
-            $smsText = "Smart Math Corner: Malipo yako ya $amount TZS yamethibitishwa. Uanachama wako umeanzishwa kwa siku 30. Karibu $name!";
+    try {
+        if ($_POST['action'] === 'approve' && $paymentId) {
+            $pmt = $database->fetchOne("SELECT * FROM `payments` WHERE id = ?", [$paymentId]);
+            $smsText = '';
+            if ($pmt) {
+                $user = $database->fetchOne("SELECT first_name, last_name FROM `users` WHERE user_id = ?", [(int) $pmt['parent_id']]);
+                $name = $user ? htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) : '';
+                $amount = number_format((float) $pmt['amount']);
+                $smsText = "Smart Math Corner: Malipo yako ya $amount TZS yamethibitishwa. Uanachama wako umeanzishwa kwa siku 30. Karibu $name!";
+            }
+            pay_verify_manual($paymentId, 'approve');
+            $_SESSION['flash_message'] = 'Payment approved and subscription activated.';
+            if ($smsText) {
+                $_SESSION['flash_sms'] = $smsText;
+            }
+        } elseif ($_POST['action'] === 'reject' && $paymentId) {
+            $pmt = $database->fetchOne("SELECT * FROM `payments` WHERE id = ?", [$paymentId]);
+            $smsText = '';
+            if ($pmt) {
+                $amount = number_format((float) $pmt['amount']);
+                $smsText = "Smart Math Corner: Samahani, malipo yako ya $amount TZS hayakukubaliwa. Tafadhali wasiliana na usaidizi kwa maelezo zaidi.";
+            }
+            pay_verify_manual($paymentId, 'reject');
+            $_SESSION['flash_message'] = 'Payment rejected.';
+            if ($smsText) {
+                $_SESSION['flash_sms'] = $smsText;
+            }
         }
-        pay_verify_manual($paymentId, 'approve');
-        $_SESSION['flash_message'] = 'Payment approved and subscription activated.';
-        if ($smsText) {
-            $_SESSION['flash_sms'] = $smsText;
-        }
-    } elseif ($_POST['action'] === 'reject' && $paymentId) {
-        $pmt = $database->fetchOne("SELECT p.*, u.first_name, u.last_name, u.phone FROM `payments` p JOIN `users` u ON p.parent_id = u.user_id WHERE p.id = ?", [$paymentId]);
-        $smsText = '';
-        if ($pmt) {
-            $amount = number_format((float) $pmt['amount']);
-            $smsText = "Smart Math Corner: Samahani, malipo yako ya $amount TZS hayakukubaliwa. Tafadhali wasiliana na usaidizi kwa maelezo zaidi.";
-        }
-        pay_verify_manual($paymentId, 'reject');
-        $_SESSION['flash_message'] = 'Payment rejected.';
-        if ($smsText) {
-            $_SESSION['flash_sms'] = $smsText;
-        }
+        header('Location: payments');
+        exit;
+    } catch (\Throwable $e) {
+        error_log('Payment approve/reject error: ' . $e->getMessage());
+        $_SESSION['flash_error'] = 'System error: ' . $e->getMessage();
+        header('Location: payments');
+        exit;
     }
-    header('Location: payments');
-    exit;
 }
 
 $stats = [
@@ -69,7 +77,8 @@ $subscriptions = $database->fetchAll("
 ");
 
 $flash = $_SESSION['flash_message'] ?? '';
-unset($_SESSION['flash_message']);
+$flashError = $_SESSION['flash_error'] ?? '';
+unset($_SESSION['flash_message'], $_SESSION['flash_error']);
 
 $base_path = '../';
 $dashboard_role = 'admin';
@@ -103,6 +112,14 @@ require_once __DIR__ . '/../php/includes/lang.php';
                 <i class="fas fa-sync me-2"></i>Verify & Remind All
             </button>
         </div>
+
+    <?php if ($flashError): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius:12px;border:none;">
+            <strong><i class="fas fa-exclamation-triangle me-1"></i><?= htmlspecialchars($flashError) ?></strong>
+            <p class="mb-0 mt-1 small">Angalia error log kwa maelezo zaidi.</p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 
     <?php if ($flash):
         $flashSms = $_SESSION['flash_sms'] ?? '';
