@@ -73,10 +73,16 @@ function sub_get_status(int $parentId): array {
             $sub['status'] = 'expired';
         }
     } elseif ($sub['status'] === 'active') {
-        $periodEnd = strtotime($sub['current_period_end']);
-        $isActive = $periodEnd >= $now;
-        $daysRemaining = max(0, floor(($periodEnd - $now) / 86400));
-        if (!$isActive) {
+        // Validate that active subscription has a valid completed payment
+        $validPayment = false;
+        if (!empty($sub['last_payment_id'])) {
+            $payment = $database->fetchOne(
+                "SELECT status FROM `payments` WHERE id = ?",
+                [(int) $sub['last_payment_id']]
+            );
+            $validPayment = $payment && $payment['status'] === 'completed';
+        }
+        if (!$validPayment) {
             $database->execute(
                 "UPDATE `subscriptions` SET status = 'expired' WHERE id = ?",
                 [$sub['id']]
@@ -86,6 +92,23 @@ function sub_get_status(int $parentId): array {
                 [$parentId]
             );
             $sub['status'] = 'expired';
+            $isActive = false;
+            $daysRemaining = 0;
+        } else {
+            $periodEnd = strtotime($sub['current_period_end']);
+            $isActive = $periodEnd >= $now;
+            $daysRemaining = max(0, floor(($periodEnd - $now) / 86400));
+            if (!$isActive) {
+                $database->execute(
+                    "UPDATE `subscriptions` SET status = 'expired' WHERE id = ?",
+                    [$sub['id']]
+                );
+                $database->execute(
+                    "UPDATE `users` SET subscription_status = 'expired' WHERE user_id = ?",
+                    [$parentId]
+                );
+                $sub['status'] = 'expired';
+            }
         }
     }
 
