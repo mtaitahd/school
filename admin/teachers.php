@@ -106,7 +106,7 @@ $lang_page = 'teachers.php';
         function toggleUser(userId) {
             confirmAction('Confirm', 'Toggle teacher active status?').then(function(c) { if (!c) return;
                 const fd = new FormData(); fd.append('user_id', userId);
-                postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+                postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else toastError(res.message); });
             });
         }
     </script>
@@ -171,7 +171,7 @@ $lang_page = 'teachers.php';
         document.getElementById('editUserForm').addEventListener('submit', function(e) {
             e.preventDefault();
             postUser('update', new FormData(this)).then(res => {
-                if (res.ok) location.reload(); else alert(res.message);
+                if (res.ok) location.reload(); else toastError(res.message);
             });
         });
     </script>

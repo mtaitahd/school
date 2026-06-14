@@ -30,7 +30,7 @@ function confirmAction(title, text, okText) {
         showCancelButton: true,
         confirmButtonText: okText || 'Yes',
         cancelButtonText: 'Cancel',
-        position: 'top-end',
+        position: 'center',
         customClass: {
             popup: 'rounded-4 shadow-lg border-0',
             confirmButton: 'btn btn-success rounded-pill px-4 fw-bold',
@@ -40,6 +40,22 @@ function confirmAction(title, text, okText) {
         reverseButtons: true,
         focusCancel: true
     }).then(function(r) { return r.isConfirmed; });
+}
+
+// SweetAlert2 Bootstrap-style error toast (replaces alert())
+function toastError(message) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: message,
+        position: 'center',
+        confirmButtonText: 'OK',
+        customClass: {
+            popup: 'rounded-4 shadow-lg border-0',
+            confirmButton: 'btn btn-primary rounded-pill px-4 fw-bold'
+        },
+        buttonsStyling: false
+    });
 }
 
 // Global click handler for data-confirm attributes (inline onclick confirm replacements)

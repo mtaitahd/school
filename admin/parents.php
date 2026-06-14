@@ -149,7 +149,7 @@ $lang_page = 'parents.php';
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'mark_paid', user_id: parentId, days: 30, _csrf_token: token }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
                     .then(r => r.json())
-                    .then(res => { if (res.ok) location.reload(); else alert(res.message); });
+                    .then(res => { if (res.ok) location.reload(); else toastError(res.message); });
             });
         }
 
@@ -158,7 +158,7 @@ $lang_page = 'parents.php';
                 const fd = new FormData(); fd.append('user_id', userId);
                 fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'toggle', user_id: userId }) })
                     .then(r => r.json())
-                    .then(res => { if (res.ok) location.reload(); else alert(res.message); });
+                    .then(res => { if (res.ok) location.reload(); else toastError(res.message); });
             });
         }
 
