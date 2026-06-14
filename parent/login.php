@@ -24,7 +24,7 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_require();
 
-    $username = trim($_POST['username'] ?? '');
+    $username = strtolower(trim($_POST['username'] ?? ''));
     $password = $_POST['password'] ?? '';
 
     if (empty($username) || empty($password)) {
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Check database for parent user
         $user = $database->fetchOne(
-            "SELECT * FROM users WHERE username = ? AND role = 'parent' AND is_active = 1",
+            "SELECT * FROM users WHERE LOWER(username) = LOWER(?) AND role = 'parent' AND is_active = 1",
             [$username]
         );
 

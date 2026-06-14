@@ -20,7 +20,7 @@ if (empty($username)) {
 
 // Look up learner
 $learner = $database->fetchOne(
-    "SELECT user_id, first_name, last_name, username, parent_id, subscription_status FROM users WHERE username = ? AND role = 'learner' AND is_active = 1",
+    "SELECT user_id, first_name, last_name, username, parent_id, subscription_status FROM users WHERE LOWER(username) = LOWER(?) AND role = 'learner' AND is_active = 1",
     [$username]
 );
 

@@ -35,7 +35,7 @@ function json_err(string $message): void {
 
 switch ($action) {
     case 'create':
-        $username = trim($_POST['username'] ?? '');
+        $username = strtolower(trim($_POST['username'] ?? ''));
         $first_name = trim($_POST['first_name'] ?? '');
         $last_name = trim($_POST['last_name'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -48,7 +48,7 @@ switch ($action) {
         if (!in_array($role, ['admin', 'teacher', 'parent', 'learner'], true)) {
             json_err('Invalid role.');
         }
-        if ($database->fetchOne('SELECT user_id FROM users WHERE username = ?', [$username])) {
+        if ($database->fetchOne('SELECT user_id FROM users WHERE LOWER(username) = LOWER(?)', [$username])) {
             json_err('Username already exists.');
         }
         $id = $database->insert(

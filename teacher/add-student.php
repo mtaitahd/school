@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($username, '.');
             $base_username = $username;
             $suffix = 1;
-            while ($database->fetchOne("SELECT user_id FROM users WHERE username = ?", [$username])) {
+            while ($database->fetchOne("SELECT user_id FROM users WHERE LOWER(username) = LOWER(?)", [$username])) {
                 $username = $base_username . '.' . $suffix;
                 $suffix++;
             }
@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($username, '.');
             $base_username = $username;
             $suffix = 1;
-            while ($database->fetchOne("SELECT user_id FROM users WHERE username = ?", [$username])) {
+            while ($database->fetchOne("SELECT user_id FROM users WHERE LOWER(username) = LOWER(?)", [$username])) {
                 $username = $base_username . '.' . $suffix;
                 $suffix++;
             }

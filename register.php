@@ -30,9 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($password !== $confirm_password) {
             $error = 'Passwords do not match.';
         } else {
-            // Check if username already exists
+            $username = strtolower(trim($username));
+            // Check if username already exists (case-insensitive)
             $existing_user = $database->fetchOne(
-                "SELECT user_id FROM users WHERE username = ?",
+                "SELECT user_id FROM users WHERE LOWER(username) = LOWER(?)",
                 [$username]
             );
 
@@ -42,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Check if email already exists (if provided)
                 if (!empty($email)) {
                     $existing_email = $database->fetchOne(
-                        "SELECT user_id FROM users WHERE email = ?",
+                        "SELECT user_id FROM users WHERE LOWER(email) = LOWER(?)",
                         [$email]
                     );
 
@@ -55,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Hash password
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-                    // Insert new user
+                    // Insert new user (username stored lowercase)
                     $user_id = $database->insert(
                         "INSERT INTO users (username, email, password, role, first_name, last_name, phone) VALUES (?, ?, ?, ?, ?, ?, ?)",
                         [$username, $email ?: null, $hashed_password, $role, $first_name, $last_name, $phone ?: null]

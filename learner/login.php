@@ -17,7 +17,7 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_require();
 
-    $username = trim($_POST['username'] ?? ($_GET['username'] ?? ''));
+    $username = strtolower(trim($_POST['username'] ?? ($_GET['username'] ?? '')));
 
     if (empty($username)) {
         $error = 'Please enter your username.';
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Check for learner account (no password required)
         $learner = $database->fetchOne(
-            "SELECT * FROM users WHERE username = ? AND role = 'learner' AND is_active = 1",
+            "SELECT * FROM users WHERE LOWER(username) = LOWER(?) AND role = 'learner' AND is_active = 1",
             [$username]
         );
 

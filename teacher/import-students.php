@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $results = [];
 
         foreach ($preview_data as $index => $row) {
-            $username = trim($row['username'] ?? '');
+            $username = strtolower(trim($row['username'] ?? ''));
             $first_name = trim($row['first_name']);
             $last_name = trim($row['last_name']);
             $password = trim($row['password']);
@@ -73,13 +73,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $username = 'SMART/chil/' . str_pad((string) $maxNum, 3, '0', STR_PAD_LEFT);
                 $suffix = 0;
                 $base = $username;
-                while ($database->fetchOne('SELECT user_id FROM users WHERE username = ?', [$username])) {
+                while ($database->fetchOne('SELECT user_id FROM users WHERE LOWER(username) = LOWER(?)', [$username])) {
                     $suffix++;
                     $username = $base . '.' . $suffix;
                 }
             }
 
-            $existing = $database->fetchOne("SELECT user_id FROM users WHERE username = ?", [$username]);
+            $existing = $database->fetchOne("SELECT user_id FROM users WHERE LOWER(username) = LOWER(?)", [$username]);
             if ($existing) {
                 $error_count++;
                 $results[] = "Row " . ($index + 1) . ": Username '$username' already exists";

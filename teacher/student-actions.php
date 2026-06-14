@@ -48,7 +48,7 @@ $username = 'SMART/chil/' . str_pad((string) $maxNum, 3, '0', STR_PAD_LEFT);
 // Ensure uniqueness (race condition guard)
 $suffix = 0;
 $base = $username;
-while ($database->fetchOne('SELECT user_id FROM users WHERE username = ?', [$username])) {
+while ($database->fetchOne('SELECT user_id FROM users WHERE LOWER(username) = LOWER(?)', [$username])) {
     $suffix++;
     $username = $base . '.' . $suffix;
 }
