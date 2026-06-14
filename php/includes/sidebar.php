@@ -53,7 +53,12 @@ switch ($role) {
             ['id' => 'notes', 'href' => $role_prefix . 'notes', 'icon' => 'fa-sticky-note', 'label' => 'Notes Board'],
             ['id' => 'events', 'href' => $role_prefix . 'events', 'icon' => 'fa-calendar-alt', 'label' => 'Events Calendar'],
             ['id' => 'governance', 'href' => $role_prefix . 'governance', 'icon' => 'fa-users-cog', 'label' => 'Governance'],
-            ['id' => 'users', 'href' => $role_prefix . 'users', 'icon' => 'fa-users-cog', 'label' => 'Manage Users'],
+            ['id' => 'users', 'label' => 'Manage Users', 'icon' => 'fa-users-cog', 'children' => [
+                ['id' => 'all-users', 'href' => $role_prefix . 'users', 'label' => 'All Users'],
+                ['id' => 'parents', 'href' => $role_prefix . 'parents', 'label' => 'Parents'],
+                ['id' => 'learners', 'href' => $role_prefix . 'learners', 'label' => 'Learners'],
+                ['id' => 'teachers', 'href' => $role_prefix . 'teachers', 'label' => 'Teachers'],
+            ]],
             ['id' => 'modules', 'href' => $role_prefix . 'modules', 'icon' => 'fa-cubes', 'label' => 'Modules'],
             ['id' => 'payments', 'href' => $role_prefix . 'payments', 'icon' => 'fa-credit-card', 'label' => 'Payments'],
             ['id' => 'upload', 'href' => $role_prefix . 'upload-content', 'icon' => 'fa-cloud-upload-alt', 'label' => 'Upload Content'],
@@ -77,12 +82,28 @@ $role_label = ucfirst($role);
     <hr class="sidebar-divider">
     <div class="sidebar-heading"><?php echo htmlspecialchars($role_label); ?> Menu</div>
     <?php foreach ($items as $item): ?>
-    <li class="nav-item<?php echo $active === $item['id'] ? ' active' : ''; ?>">
-        <a class="nav-link" href="<?php echo htmlspecialchars($item['href']); ?>">
-            <i class="fas fa-fw <?php echo htmlspecialchars($item['icon']); ?>"></i>
-            <span><?php echo htmlspecialchars($item['label']); ?></span>
-        </a>
-    </li>
+        <?php if (isset($item['children'])): ?>
+        <li class="nav-item">
+            <a class="nav-link<?php echo in_array($active, array_column($item['children'], 'id')) ? '' : ' collapsed'; ?>" href="#" data-bs-toggle="collapse" data-bs-target="#collapse<?php echo $item['id']; ?>">
+                <i class="fas fa-fw <?php echo htmlspecialchars($item['icon']); ?>"></i>
+                <span><?php echo htmlspecialchars($item['label']); ?></span>
+            </a>
+            <div id="collapse<?php echo $item['id']; ?>" class="collapse<?php echo in_array($active, array_column($item['children'], 'id')) ? ' show' : ''; ?>" data-bs-parent="#accordionSidebar">
+                <div class="collapse-inner">
+                    <?php foreach ($item['children'] as $child): ?>
+                    <a class="collapse-item<?php echo $active === $child['id'] ? ' active' : ''; ?>" href="<?php echo htmlspecialchars($child['href']); ?>"><?php echo htmlspecialchars($child['label']); ?></a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </li>
+        <?php else: ?>
+        <li class="nav-item<?php echo $active === $item['id'] ? ' active' : ''; ?>">
+            <a class="nav-link" href="<?php echo htmlspecialchars($item['href']); ?>">
+                <i class="fas fa-fw <?php echo htmlspecialchars($item['icon']); ?>"></i>
+                <span><?php echo htmlspecialchars($item['label']); ?></span>
+            </a>
+        </li>
+        <?php endif; ?>
     <?php endforeach; ?>
     <hr class="sidebar-divider">
     <li class="nav-item">
