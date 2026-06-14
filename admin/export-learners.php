@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../php/includes/session.php';
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/auth.php';
+require_once __DIR__ . '/../php/includes/subscription.php';
 
 auth_require_role(['admin'], 'index');
 
@@ -10,27 +11,41 @@ if (!in_array($mode, ['all', 'paid'], true)) {
     $mode = 'all';
 }
 
-// Build query
-$columns = "u.user_id, u.first_name, u.last_name, u.username, u.email, u.is_active, u.created_at,
-            COALESCE(p.first_name, lp.first_name) AS parent_first,
-            COALESCE(p.last_name, lp.last_name) AS parent_last,
-            COALESCE(p.phone, lp.phone) AS parent_phone";
+// Fetch all learners with parent info
+$learners = $database->fetchAll("
+    SELECT DISTINCT u.user_id, u.first_name, u.last_name, u.username, u.email, u.is_active, u.created_at,
+        COALESCE(p.first_name, lp.first_name) AS parent_first,
+        COALESCE(p.last_name, lp.last_name) AS parent_last,
+        COALESCE(p.phone, lp.phone) AS parent_phone
+    FROM users u
+    LEFT JOIN parent_student_links psl ON u.user_id = psl.student_id AND psl.is_active = 1
+    LEFT JOIN users p ON psl.parent_id = p.user_id
+    LEFT JOIN users lp ON u.parent_id = lp.user_id
+    WHERE u.role = 'learner'
+    ORDER BY u.last_name, u.first_name
+");
 
-$joins  = "FROM users u
-           LEFT JOIN parent_student_links psl ON u.user_id = psl.student_id AND psl.is_active = 1
-           LEFT JOIN users p ON psl.parent_id = p.user_id
-           LEFT JOIN users lp ON u.parent_id = lp.user_id";
-
-$where  = "WHERE u.role = 'learner'";
-
+// For paid mode, filter using the same logic as sub_get_status()
 if ($mode === 'paid') {
-    $joins .= " LEFT JOIN subscriptions s ON s.parent_id = COALESCE(psl.parent_id, u.parent_id) AND s.status = 'active'";
-    $where .= " AND s.id IS NOT NULL";
+    $paid = [];
+    foreach ($learners as $l) {
+        $parentId = $database->fetchOne(
+            "SELECT COALESCE(psl.parent_id, u.parent_id) AS pid
+             FROM users u
+             LEFT JOIN parent_student_links psl ON u.user_id = psl.student_id AND psl.is_active = 1
+             WHERE u.user_id = ?
+             LIMIT 1",
+            [(int) $l['user_id']]
+        );
+        if ($parentId && $parentId['pid']) {
+            $status = sub_get_status((int) $parentId['pid']);
+            if ($status['is_active']) {
+                $paid[] = $l;
+            }
+        }
+    }
+    $learners = $paid;
 }
-
-$order = "ORDER BY u.last_name, u.first_name";
-
-$learners = $database->fetchAll("SELECT $columns $joins $where $order");
 
 // Build filename
 $filename = $mode === 'all' ? 'wanafunzi_wote' : 'wanafunzi_waliolipa';
