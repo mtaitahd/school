@@ -15,7 +15,10 @@ $stats = [
     'parents' => $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE role = 'parent'")['count'],
     'modules' => $database->fetchOne("SELECT COUNT(*) as count FROM modules WHERE is_active = 1")['count'],
     'activities' => $database->fetchOne("SELECT COUNT(*) as count FROM activities WHERE is_active = 1")['count'],
-    'completed' => $database->fetchOne("SELECT COUNT(*) as count FROM progress WHERE completed = 1")['count']
+    'completed' => $database->fetchOne("SELECT COUNT(*) as count FROM progress WHERE completed = 1")['count'],
+    'revenue' => $database->fetchOne("SELECT COALESCE(SUM(amount), 0) as c FROM payments WHERE status = 'completed'")['c'],
+    'active_subs' => $database->fetchOne("SELECT COUNT(*) as c FROM subscriptions WHERE status = 'active'")['c'],
+    'pending_payments' => $database->fetchOne("SELECT COUNT(*) as c FROM payments WHERE status IN ('pending','manual_review')")['c']
 ];
 
 $recent_users = $database->fetchAll("SELECT * FROM users ORDER BY created_at DESC LIMIT 10");
@@ -153,6 +156,54 @@ $lang_page = 'dashboard.php';
                             </div>
                             <div class="col-auto">
                                 <div class="icon-circle" style="background:var(--primary-green);"><i class="fas fa-check-circle text-white"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2" style="border-left:4px solid #1cc88a;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-uppercase mb-1" style="color:#1cc88a;">Total Revenue</div>
+                                <div class="h3 mb-0 fw-bold" style="color:#1cc88a;"><?php echo number_format($stats['revenue']); ?> TZS</div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon-circle" style="background:#1cc88a;"><i class="fas fa-money-bill-wave text-white"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2" style="border-left:4px solid #36b9cc;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-uppercase mb-1" style="color:#36b9cc;">Active Subscriptions</div>
+                                <div class="h3 mb-0 fw-bold" style="color:#36b9cc;"><?php echo $stats['active_subs']; ?></div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon-circle" style="background:#36b9cc;"><i class="fas fa-credit-card text-white"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card h-100 py-2" style="border-left:4px solid #f6c23e;">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-uppercase mb-1" style="color:#f6c23e;">Pending Payments</div>
+                                <div class="h3 mb-0 fw-bold" style="color:#f6c23e;"><?php echo $stats['pending_payments']; ?></div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon-circle" style="background:#f6c23e;"><i class="fas fa-clock text-white"></i></div>
                             </div>
                         </div>
                     </div>

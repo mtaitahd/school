@@ -37,7 +37,7 @@ class SubscriptionMiddleware {
         // Admins and teachers always have access
         if (in_array($role, ['admin', 'teacher'], true)) return true;
 
-        // Learners get access through their parent
+        // Learners get access through their parent (or their own subscription if unlinked)
         if ($role === 'learner') {
             $parent = $database->fetchOne(
                 "SELECT psl.parent_id FROM parent_student_links psl
@@ -53,7 +53,15 @@ class SubscriptionMiddleware {
                     [$userId]
                 );
             }
-            if (!$parent) return false; // unlinked learners have no payer
+            if (!$parent) {
+                // Unlinked learner: check if they have their own subscription record
+                $learnerSub = $database->fetchOne(
+                    "SELECT status, current_period_end FROM subscriptions WHERE parent_id = ? ORDER BY id DESC LIMIT 1",
+                    [$userId]
+                );
+                if ($learnerSub && $learnerSub['status'] === 'active') return true;
+                return false;
+            }
             $parentId = (int) $parent['parent_id'];
         } elseif ($role === 'parent') {
             $parentId = $userId;
@@ -154,6 +162,23 @@ class SubscriptionMiddleware {
         }
 
         if (!$parent) {
+            // Unlinked learner: check their own subscription record
+            $learnerSub = $database->fetchOne(
+                "SELECT status, current_period_end FROM subscriptions WHERE parent_id = ? ORDER BY id DESC LIMIT 1",
+                [$learnerId]
+            );
+            if ($learnerSub) {
+                $now = time();
+                $endTs = $learnerSub['current_period_end'] ? strtotime($learnerSub['current_period_end']) : $now;
+                $daysRemaining = max(0, (int) floor(($endTs - $now) / 86400));
+                return [
+                    'status' => $learnerSub['status'],
+                    'days_remaining' => $daysRemaining,
+                    'label' => $learnerSub['status'] === 'active' ? "Subscription Expires In: $daysRemaining Days" : ucfirst($learnerSub['status']),
+                    'expiry_date' => $learnerSub['current_period_end'],
+                    'is_active' => $learnerSub['status'] === 'active' && $endTs > $now,
+                ];
+            }
             return [
                 'status' => 'none',
                 'days_remaining' => 0,

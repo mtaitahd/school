@@ -146,10 +146,12 @@ switch ($action) {
                  WHERE u.user_id = ? LIMIT 1",
                 [$user_id]
             );
-            if (!$parent || !$parent['parent_id']) {
-                json_err('Learner has no linked parent. Link a parent first.');
+            if ($parent && $parent['parent_id']) {
+                $parentId = (int) $parent['parent_id'];
+            } else {
+                // Unlinked learner: activate subscription on their own user_id
+                $parentId = $user_id;
             }
-            $parentId = (int) $parent['parent_id'];
         } elseif ($user['role'] === 'parent') {
             $parentId = $user_id;
         } else {
