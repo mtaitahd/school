@@ -275,7 +275,7 @@ $lang_page = 'announcements.php';
                                 <a href="?toggle_status=<?php echo $a['announcement_id']; ?>" class="btn btn-info btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;font-weight:600;margin-left:2px;" title="Toggle published/draft">
                                     <i class="fas <?php echo $a['status'] === 'published' ? 'fa-eye-slash' : 'fa-eye'; ?>"></i>
                                 </a>
-                                <a href="?delete=<?php echo $a['announcement_id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;font-weight:600;margin-left:2px;" onclick="return confirm('Delete this announcement? This cannot be undone.');">
+                                <a href="?delete=<?php echo $a['announcement_id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;font-weight:600;margin-left:2px;" data-confirm="Delete this announcement? This cannot be undone." data-confirm-title="Delete Announcement" data-confirm-ok="Delete">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </td>

@@ -206,7 +206,7 @@ $dashboard_page_title = 'Manage Governance & Leadership';
                                 <a href="?edit=<?php echo $l['id']; ?>" class="btn btn-warning btn-sm" style="border:none;border-radius:50px;padding:4px 14px;font-size:0.8rem;font-weight:600;">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="?delete=<?php echo $l['id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 14px;font-size:0.8rem;font-weight:600;margin-left:4px;" onclick="return confirm('Delete this leader?');">
+                                <a href="?delete=<?php echo $l['id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 14px;font-size:0.8rem;font-weight:600;margin-left:4px;" data-confirm="Delete this leader?" data-confirm-title="Delete Leader" data-confirm-ok="Delete">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </td>

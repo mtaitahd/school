@@ -167,7 +167,7 @@ $lang_page = 'events.php';
                                 <a href="?toggle_status=<?php echo $e['id']; ?>" class="btn btn-info btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;font-weight:600;margin-left:2px;" title="Toggle published/draft">
                                     <i class="fas <?php echo $e['status'] === 'published' ? 'fa-eye-slash' : 'fa-eye'; ?>"></i>
                                 </a>
-                                <a href="?delete=<?php echo $e['id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;font-weight:600;margin-left:2px;" onclick="return confirm('Delete this event? This cannot be undone.');">
+                                <a href="?delete=<?php echo $e['id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;font-weight:600;margin-left:2px;" data-confirm="Delete this event? This cannot be undone." data-confirm-title="Delete Event" data-confirm-ok="Delete">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </td>

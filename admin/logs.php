@@ -146,17 +146,17 @@ $lang_page = 'logs.php';
             <i class="fas fa-clipboard-list me-2" style="color:var(--primary-blue);"></i>Error Logs
         </h1>
         <div class="d-flex gap-2">
-            <form method="POST" style="display:inline;" onsubmit="return confirm('Clear all rate limits? Users will be able to login immediately.')">
+            <form method="POST" style="display:inline;">
                 <?= csrf_field() ?>
                 <input type="hidden" name="action" value="clear_rate_limits">
-                <button type="submit" class="btn btn-warning btn-sm" style="border:none;border-radius:50px;padding:6px 18px;font-size:0.85rem;font-weight:600;">
+                <button type="submit" class="btn btn-warning btn-sm" style="border:none;border-radius:50px;padding:6px 18px;font-size:0.85rem;font-weight:600;" data-confirm="Clear all rate limits? Users will be able to login immediately." data-confirm-title="Clear Rate Limits" data-confirm-ok="Clear" data-confirm-action="submit">
                     <i class="fas fa-trash-alt me-1"></i>Clear Rate Limits
                 </button>
             </form>
-            <form method="POST" style="display:inline;" onsubmit="return confirm('Delete the entire error log file?')">
+            <form method="POST" style="display:inline;">
                 <?= csrf_field() ?>
                 <input type="hidden" name="action" value="clear_error_log">
-                <button type="submit" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:6px 18px;font-size:0.85rem;font-weight:600;">
+                <button type="submit" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:6px 18px;font-size:0.85rem;font-weight:600;" data-confirm="Delete the entire error log file?" data-confirm-title="Delete Error Log" data-confirm-ok="Delete" data-confirm-action="submit">
                     <i class="fas fa-eraser me-1"></i>Clear Error Log
                 </button>
             </form>
@@ -288,11 +288,11 @@ $lang_page = 'logs.php';
                             <td><?= number_format($lf['size'] / 1024, 1) ?> KB</td>
                             <td><?= date('Y-m-d H:i:s', $lf['mtime']) ?></td>
                             <td>
-                                <form method="POST" style="display:inline;" onsubmit="return confirm('Delete <?= htmlspecialchars($lf['name']) ?>?')">
+                                <form method="POST" style="display:inline;">
                                     <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="delete_log">
                                     <input type="hidden" name="file" value="<?= htmlspecialchars($lf['name']) ?>">
-                                    <button type="submit" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:2px 10px;font-size:0.75rem;">
+                                    <button type="submit" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:2px 10px;font-size:0.75rem;" data-confirm="Delete <?= htmlspecialchars($lf['name']) ?>?" data-confirm-title="Delete Log" data-confirm-ok="Delete" data-confirm-action="submit">
                                         <i class="fas fa-trash"></i> Delete
                                     </button>
                                 </form>

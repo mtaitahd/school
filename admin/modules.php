@@ -85,7 +85,7 @@ $lang_page = 'modules.php';
     <script src="../js/dashboard.js"></script>
     <script>
         function toggleModule(moduleId) {
-            if (confirm('Toggle module status?')) window.location.href = 'admin-toggle-module?module_id=' + moduleId;
+            confirmAction('Toggle Module', 'Toggle module status?', 'Toggle').then(function(c) { if (c) window.location.href = 'admin-toggle-module?module_id=' + moduleId; });
         }
         function editModule(moduleId) {
             alert('Edit module functionality coming soon');

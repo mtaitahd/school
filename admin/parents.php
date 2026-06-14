@@ -145,19 +145,21 @@ $lang_page = 'parents.php';
         }
 
         function markPaid(parentId) {
-            if (!confirm('Activate 30-day subscription for this parent?')) return;
-            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'mark_paid', user_id: parentId, days: 30, _csrf_token: token }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-                .then(r => r.json())
-                .then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            confirmAction('Activate Subscription', 'Activate 30-day subscription for this parent?', 'Activate').then(function(c) { if (!c) return;
+                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'mark_paid', user_id: parentId, days: 30, _csrf_token: token }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                    .then(r => r.json())
+                    .then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            });
         }
 
         function toggleUser(userId) {
-            if (!confirm('Toggle parent active status?')) return;
-            const fd = new FormData(); fd.append('user_id', userId);
-            fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'toggle', user_id: userId }) })
-                .then(r => r.json())
-                .then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            confirmAction('Confirm', 'Toggle parent active status?').then(function(c) { if (!c) return;
+                const fd = new FormData(); fd.append('user_id', userId);
+                fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'toggle', user_id: userId }) })
+                    .then(r => r.json())
+                    .then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            });
         }
 
         function escapeHtml(str) {

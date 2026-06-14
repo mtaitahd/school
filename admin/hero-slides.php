@@ -215,7 +215,7 @@ $dashboard_page_title = 'Manage Hero Slides';
                                 <a href="?toggle_active=<?php echo $s['slide_id']; ?>" class="btn btn-sm <?php echo $s['is_active'] ? 'btn-secondary' : 'btn-success'; ?>" style="border:none;border-radius:50px;padding:4px 14px;font-size:0.8rem;font-weight:600;margin-left:4px;">
                                     <i class="fas <?php echo $s['is_active'] ? 'fa-eye-slash' : 'fa-eye'; ?>"></i>
                                 </a>
-                                <a href="?delete=<?php echo $s['slide_id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 14px;font-size:0.8rem;font-weight:600;margin-left:4px;" onclick="return confirm('Delete this slide?');">
+                                <a href="?delete=<?php echo $s['slide_id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 14px;font-size:0.8rem;font-weight:600;margin-left:4px;" data-confirm="Delete this slide?" data-confirm-title="Delete Slide" data-confirm-ok="Delete">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </td>

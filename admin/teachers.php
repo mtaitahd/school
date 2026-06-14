@@ -104,9 +104,10 @@ $lang_page = 'teachers.php';
             new bootstrap.Modal('#editUserModal').show();
         }
         function toggleUser(userId) {
-            if (!confirm('Toggle teacher active status?')) return;
-            const fd = new FormData(); fd.append('user_id', userId);
-            postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            confirmAction('Confirm', 'Toggle teacher active status?').then(function(c) { if (!c) return;
+                const fd = new FormData(); fd.append('user_id', userId);
+                postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            });
         }
     </script>
 

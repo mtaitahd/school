@@ -131,17 +131,19 @@ $lang_page = 'learners.php';
             new bootstrap.Modal('#editUserModal').show();
         }
         function markPaidLearner(learnerId) {
-            if (!confirm('Activate 30-day subscription for this learner\'s parent?')) return;
-            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'mark_paid', user_id: learnerId, days: 30, _csrf_token: token }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-                .then(r => r.json())
-                .then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            confirmAction('Activate Subscription', 'Activate 30-day subscription for this learner\'s parent?', 'Activate').then(function(c) { if (!c) return;
+                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'mark_paid', user_id: learnerId, days: 30, _csrf_token: token }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                    .then(r => r.json())
+                    .then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            });
         }
 
         function toggleUser(userId) {
-            if (!confirm('Toggle learner active status?')) return;
-            const fd = new FormData(); fd.append('user_id', userId);
-            postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            confirmAction('Confirm', 'Toggle learner active status?').then(function(c) { if (!c) return;
+                const fd = new FormData(); fd.append('user_id', userId);
+                postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            });
         }
     </script>
 

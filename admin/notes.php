@@ -240,7 +240,7 @@ $lang_page = 'notes.php';
                                 <a href="?toggle_status=<?php echo $n['id']; ?>" class="btn btn-info btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;font-weight:600;margin-left:2px;" title="Toggle published/draft">
                                     <i class="fas <?php echo $n['status'] === 'published' ? 'fa-eye-slash' : 'fa-eye'; ?>"></i>
                                 </a>
-                                <a href="?delete=<?php echo $n['id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;font-weight:600;margin-left:2px;" onclick="return confirm('Delete this note? This cannot be undone.');">
+                                <a href="?delete=<?php echo $n['id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;font-weight:600;margin-left:2px;" data-confirm="Delete this note? This cannot be undone." data-confirm-title="Delete Note" data-confirm-ok="Delete">
                                     <i class="fas fa-trash"></i>
                                 </a>
                                 <a href="../notes/<?php echo htmlspecialchars($n['slug']); ?>" class="btn btn-secondary btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;font-weight:600;margin-left:2px;" target="_blank" title="Preview">

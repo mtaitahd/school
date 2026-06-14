@@ -244,10 +244,10 @@ require_once __DIR__ . '/../php/includes/lang.php';
                                 <form method="POST" style="display:inline;">
                                     <?= csrf_field() ?>
                                     <input type="hidden" name="payment_id" value="<?= $pmt['id'] ?>">
-                                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm" onclick="return confirm('Approve this payment and activate subscription?')">
+                                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm" data-confirm="Approve this payment and activate subscription?" data-confirm-title="Approve Payment" data-confirm-ok="Approve" data-confirm-action="submit">
                                         <i class="fas fa-check"></i> Approve
                                     </button>
-                                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm" onclick="return confirm('Reject this payment?')">
+                                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm" data-confirm="Reject this payment?" data-confirm-title="Reject Payment" data-confirm-ok="Reject" data-confirm-action="submit">
                                         <i class="fas fa-times"></i> Reject
                                     </button>
                                 </form>

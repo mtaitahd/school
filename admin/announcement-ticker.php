@@ -173,7 +173,7 @@ $lang_page = 'announcement-ticker.php';
                                 <a href="?toggle=<?php echo $t['ticker_id']; ?>" class="btn btn-sm <?php echo $t['is_active'] ? 'btn-secondary' : 'btn-success'; ?>" style="border:none;border-radius:50px;padding:4px 14px;font-size:0.8rem;font-weight:600;margin-left:4px;">
                                     <i class="fas <?php echo $t['is_active'] ? 'fa-pause' : 'fa-play'; ?>"></i> <?php echo $t['is_active'] ? 'Deactivate' : 'Activate'; ?>
                                 </a>
-                                <a href="?delete=<?php echo $t['ticker_id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 14px;font-size:0.8rem;font-weight:600;margin-left:4px;" onclick="return confirm('Delete this ticker message?');">
+                                <a href="?delete=<?php echo $t['ticker_id']; ?>" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 14px;font-size:0.8rem;font-weight:600;margin-left:4px;" data-confirm="Delete this ticker message?" data-confirm-title="Delete Ticker" data-confirm-ok="Delete">
                                     <i class="fas fa-trash"></i> Delete
                                 </a>
                             </td>

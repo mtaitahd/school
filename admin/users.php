@@ -241,24 +241,28 @@ $lang_page = 'users.php';
             new bootstrap.Modal('#editUserModal').show();
         }
         function toggleUser(userId) {
-            if (!confirm('Toggle user active status?')) return;
-            const fd = new FormData(); fd.append('user_id', userId);
-            postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            confirmAction('Confirm', 'Toggle user active status?').then(function(c) { if (!c) return;
+                const fd = new FormData(); fd.append('user_id', userId);
+                postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            });
         }
         function deleteUser(userId, name) {
-            if (!confirm('Delete user ' + name + '? This cannot be undone.')) return;
-            const fd = new FormData(); fd.append('user_id', userId);
-            postUser('delete', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            confirmAction('Delete User', 'Delete user ' + name + '? This cannot be undone.', 'Delete').then(function(c) { if (!c) return;
+                const fd = new FormData(); fd.append('user_id', userId);
+                postUser('delete', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            });
         }
         function lockUser(userId) {
-            if (!confirm('Lock this user out of login for 15 minutes?')) return;
-            const fd = new FormData(); fd.append('user_id', userId);
-            postUser('locklogin', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            confirmAction('Lock Login', 'Lock this user out of login for 15 minutes?', 'Lock').then(function(c) { if (!c) return;
+                const fd = new FormData(); fd.append('user_id', userId);
+                postUser('locklogin', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            });
         }
         function unlockUser(userId) {
-            if (!confirm('Clear rate limit and unlock login for this user?')) return;
-            const fd = new FormData(); fd.append('user_id', userId);
-            postUser('unlocklogin', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            confirmAction('Unlock Login', 'Clear rate limit and unlock login for this user?', 'Unlock').then(function(c) { if (!c) return;
+                const fd = new FormData(); fd.append('user_id', userId);
+                postUser('unlocklogin', fd).then(res => { if (res.ok) location.reload(); else alert(res.message); });
+            });
         }
     </script>
 </body>
