@@ -221,13 +221,13 @@ $lang_page = 'users.php';
         document.getElementById('addUserForm').addEventListener('submit', function(e) {
             e.preventDefault();
             postUser('create', new FormData(this)).then(res => {
-                if (res.ok) location.reload(); else toastError(res.message);
+                if (res.ok) location.reload(); else showToast(res.message);
             });
         });
         document.getElementById('editUserForm').addEventListener('submit', function(e) {
             e.preventDefault();
             postUser('update', new FormData(this)).then(res => {
-                if (res.ok) location.reload(); else toastError(res.message);
+                if (res.ok) location.reload(); else showToast(res.message);
             });
         });
         function editUser(user) {
@@ -243,25 +243,25 @@ $lang_page = 'users.php';
         function toggleUser(userId) {
             confirmAction('Confirm', 'Toggle user active status?').then(function(c) { if (!c) return;
                 const fd = new FormData(); fd.append('user_id', userId);
-                postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else toastError(res.message); });
+                postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else showToast(res.message); });
             });
         }
         function deleteUser(userId, name) {
             confirmAction('Delete User', 'Delete user ' + name + '? This cannot be undone.', 'Delete').then(function(c) { if (!c) return;
                 const fd = new FormData(); fd.append('user_id', userId);
-                postUser('delete', fd).then(res => { if (res.ok) location.reload(); else toastError(res.message); });
+                postUser('delete', fd).then(res => { if (res.ok) location.reload(); else showToast(res.message); });
             });
         }
         function lockUser(userId) {
             confirmAction('Lock Login', 'Lock this user out of login for 15 minutes?', 'Lock').then(function(c) { if (!c) return;
                 const fd = new FormData(); fd.append('user_id', userId);
-                postUser('locklogin', fd).then(res => { if (res.ok) location.reload(); else toastError(res.message); });
+                postUser('locklogin', fd).then(res => { if (res.ok) location.reload(); else showToast(res.message); });
             });
         }
         function unlockUser(userId) {
             confirmAction('Unlock Login', 'Clear rate limit and unlock login for this user?', 'Unlock').then(function(c) { if (!c) return;
                 const fd = new FormData(); fd.append('user_id', userId);
-                postUser('unlocklogin', fd).then(res => { if (res.ok) location.reload(); else toastError(res.message); });
+                postUser('unlocklogin', fd).then(res => { if (res.ok) location.reload(); else showToast(res.message); });
             });
         }
     </script>

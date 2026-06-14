@@ -135,14 +135,14 @@ $lang_page = 'learners.php';
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'mark_paid', user_id: learnerId, days: 30, _csrf_token: token }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
                     .then(r => r.json())
-                    .then(res => { if (res.ok) location.reload(); else toastError(res.message); });
+                    .then(res => { if (res.ok) location.reload(); else showToast(res.message); });
             });
         }
 
         function toggleUser(userId) {
             confirmAction('Confirm', 'Toggle learner active status?').then(function(c) { if (!c) return;
                 const fd = new FormData(); fd.append('user_id', userId);
-                postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else toastError(res.message); });
+                postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else showToast(res.message); });
             });
         }
     </script>
@@ -207,7 +207,7 @@ $lang_page = 'learners.php';
         document.getElementById('editUserForm').addEventListener('submit', function(e) {
             e.preventDefault();
             postUser('update', new FormData(this)).then(res => {
-                if (res.ok) location.reload(); else toastError(res.message);
+                if (res.ok) location.reload(); else showToast(res.message);
             });
         });
     </script>
