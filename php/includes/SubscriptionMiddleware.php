@@ -46,6 +46,13 @@ class SubscriptionMiddleware {
                  LIMIT 1",
                 [$userId]
             );
+            if (!$parent) {
+                // Fallback to legacy users.parent_id column
+                $parent = $database->fetchOne(
+                    "SELECT parent_id FROM users WHERE user_id = ? AND role = 'learner' AND parent_id IS NOT NULL",
+                    [$userId]
+                );
+            }
             if (!$parent) return false; // unlinked learners have no payer
             $parentId = (int) $parent['parent_id'];
         } elseif ($role === 'parent') {
@@ -137,6 +144,14 @@ class SubscriptionMiddleware {
              LIMIT 1",
             [$learnerId]
         );
+
+        if (!$parent) {
+            // Fallback to legacy users.parent_id column
+            $parent = $database->fetchOne(
+                "SELECT parent_id FROM users WHERE user_id = ? AND role = 'learner' AND parent_id IS NOT NULL",
+                [$learnerId]
+            );
+        }
 
         if (!$parent) {
             return [
