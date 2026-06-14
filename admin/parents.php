@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/includes/csrf.php';
 if (session_status() === PHP_SESSION_NONE) {
     sec_session_start();
 }
@@ -36,6 +37,7 @@ $lang_page = 'parents.php';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
+    <?php echo csrf_meta(); ?>
 </head>
 <body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>
 
@@ -79,6 +81,7 @@ $lang_page = 'parents.php';
                                 </td>
                                 <td>
                                     <button type="button" class="btn btn-primary btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;" onclick="viewChildren(<?php echo (int)$parent['user_id']; ?>, '<?php echo htmlspecialchars(addslashes($parent['first_name'] . ' ' . $parent['last_name'])); ?>')"><i class="fas fa-eye me-1"></i>View</button>
+                                    <button type="button" class="btn btn-success btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="markPaid(<?php echo (int)$parent['user_id']; ?>)"><i class="fas fa-check-circle me-1"></i>Mark Paid</button>
                                     <button type="button" class="btn btn-warning btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="toggleUser(<?php echo (int)$parent['user_id']; ?>)"><i class="fas fa-power-off"></i></button>
                                 </td>
                             </tr>
@@ -139,6 +142,14 @@ $lang_page = 'parents.php';
                 .catch(function() {
                     document.getElementById('childrenList').innerHTML = '<p class="text-danger">Failed to load children.</p>';
                 });
+        }
+
+        function markPaid(parentId) {
+            if (!confirm('Activate 30-day subscription for this parent?')) return;
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'mark_paid', user_id: parentId, days: 30, _csrf_token: token }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                .then(r => r.json())
+                .then(res => { if (res.ok) location.reload(); else alert(res.message); });
         }
 
         function toggleUser(userId) {

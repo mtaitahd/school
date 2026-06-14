@@ -4,6 +4,7 @@ require_once __DIR__ . '/../php/includes/security.php';
 require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/auth.php';
+require_once __DIR__ . '/../php/includes/subscription.php';
 
 sec_require_rate_limit();
 
@@ -126,6 +127,36 @@ switch ($action) {
         sec_admin_unlock($user['username']);
         sec_clear_login_rate_limit_all($user['username']);
         json_ok('User login unlocked.');
+
+    case 'mark_paid':
+        $user_id = (int) ($_POST['user_id'] ?? 0);
+        $days = max(1, (int) ($_POST['days'] ?? 30));
+        if ($user_id < 1) {
+            json_err('Invalid user.');
+        }
+        $user = $database->fetchOne('SELECT user_id, role FROM users WHERE user_id = ?', [$user_id]);
+        if (!$user) {
+            json_err('User not found.');
+        }
+        if ($user['role'] === 'learner') {
+            $parent = $database->fetchOne(
+                "SELECT COALESCE(psl.parent_id, u.parent_id) AS parent_id
+                 FROM users u
+                 LEFT JOIN parent_student_links psl ON u.user_id = psl.student_id AND psl.is_active = 1
+                 WHERE u.user_id = ? LIMIT 1",
+                [$user_id]
+            );
+            if (!$parent || !$parent['parent_id']) {
+                json_err('Learner has no linked parent. Link a parent first.');
+            }
+            $parentId = (int) $parent['parent_id'];
+        } elseif ($user['role'] === 'parent') {
+            $parentId = $user_id;
+        } else {
+            json_err('Only parents and learners can be marked as paid.');
+        }
+        sub_add_days($parentId, $days);
+        json_ok('Subscription activated for ' . $days . ' days.');
 
     default:
         json_err('Unknown action.');

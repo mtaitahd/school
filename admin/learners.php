@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/includes/csrf.php';
 if (session_status() === PHP_SESSION_NONE) {
     sec_session_start();
 }
@@ -40,6 +41,7 @@ $lang_page = 'learners.php';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
+    <?php echo csrf_meta(); ?>
 </head>
 <body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>
 
@@ -93,6 +95,7 @@ $lang_page = 'learners.php';
                                 </td>
                                 <td>
                                     <button type="button" class="btn btn-primary btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;" onclick='editUser(<?php echo json_encode($learner, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'><i class="fas fa-edit"></i></button>
+                                    <button type="button" class="btn btn-success btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="markPaidLearner(<?php echo (int)$learner['user_id']; ?>)"><i class="fas fa-check-circle me-1"></i>Mark Paid</button>
                                     <button type="button" class="btn btn-warning btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="toggleUser(<?php echo (int)$learner['user_id']; ?>)"><i class="fas fa-power-off"></i></button>
                                 </td>
                             </tr>
@@ -127,6 +130,14 @@ $lang_page = 'learners.php';
             document.getElementById('edit_is_active').checked = user.is_active == 1;
             new bootstrap.Modal('#editUserModal').show();
         }
+        function markPaidLearner(learnerId) {
+            if (!confirm('Activate 30-day subscription for this learner\'s parent?')) return;
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            fetch('user-actions', { method: 'POST', body: new URLSearchParams({ action: 'mark_paid', user_id: learnerId, days: 30, _csrf_token: token }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                .then(r => r.json())
+                .then(res => { if (res.ok) location.reload(); else alert(res.message); });
+        }
+
         function toggleUser(userId) {
             if (!confirm('Toggle learner active status?')) return;
             const fd = new FormData(); fd.append('user_id', userId);
