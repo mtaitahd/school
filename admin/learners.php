@@ -76,12 +76,12 @@ $lang_page = 'learners.php';
                         <tbody>
                             <?php foreach ($learners as $learner): ?>
                             <tr>
-                                <td style="font-weight:600;"><?php echo htmlspecialchars($learner['first_name'] . ' ' . $learner['last_name']); ?></td>
-                                <td style="text-transform:lowercase"><?php echo htmlspecialchars($learner['username']); ?></td>
+                                <td style="font-weight:600;text-transform:lowercase"><?php echo htmlspecialchars($learner['first_name'] . ' ' . $learner['last_name']); ?></td>
+                                <td><?php echo htmlspecialchars($learner['username']); ?></td>
                                 <td>
                                     <?php if ($learner['parent_user_id']): ?>
                                         <span class="text-primary"><?php echo htmlspecialchars($learner['parent_first'] . ' ' . $learner['parent_last']); ?></span>
-                                        <br><small class="text-muted" style="text-transform:lowercase"><?php echo htmlspecialchars($learner['parent_username']); ?></small>
+                                        <br><small class="text-muted"><?php echo htmlspecialchars($learner['parent_username']); ?></small>
                                     <?php else: ?>
                                         <span class="text-muted fst-italic">No parent</span>
                                     <?php endif; ?>

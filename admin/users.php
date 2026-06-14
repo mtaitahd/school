@@ -67,8 +67,8 @@ $lang_page = 'users.php';
                         <tbody>
                             <?php foreach ($all_users as $user): ?>
                             <tr>
-                                <td style="font-weight:600;"><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></td>
-                                <td style="text-transform:lowercase"><?php echo htmlspecialchars($user['username']); ?></td>
+                                <td style="font-weight:600;text-transform:lowercase"><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></td>
+                                <td><?php echo htmlspecialchars($user['username']); ?></td>
                                 <td><span class="text-primary fw-semibold"><?php echo ucfirst($user['role']); ?></span></td>
                                 <td>
                                     <?php if ($user['is_active']): ?>
@@ -80,7 +80,7 @@ $lang_page = 'users.php';
                                 <td>
                                     <button type="button" class="btn btn-primary btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;" onclick='editUser(<?php echo json_encode($user, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'><i class="fas fa-edit"></i></button>
                                     <?php if ($user['user_id'] != $_SESSION['user_id']): ?>
-                                        <button type="button" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="deleteUser(<?php echo (int)$user['user_id']; ?>, '<?php echo htmlspecialchars(addslashes(strtolower($user['username']))); ?>')"><i class="fas fa-trash"></i></button>
+                                        <button type="button" class="btn btn-danger btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="deleteUser(<?php echo (int)$user['user_id']; ?>, '<?php echo htmlspecialchars(addslashes($user['username'])); ?>')"><i class="fas fa-trash"></i></button>
                                         <button type="button" class="btn btn-warning btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="toggleUser(<?php echo (int)$user['user_id']; ?>)"><i class="fas fa-power-off"></i></button>
                                         <button type="button" class="btn btn-info btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;color:#fff;" onclick="unlockUser(<?php echo (int)$user['user_id']; ?>)" title="Clear rate limit"><i class="fas fa-unlock"></i></button>
                                         <button type="button" class="btn btn-secondary btn-sm" style="border:none;border-radius:50px;padding:4px 12px;font-size:0.8rem;margin-left:4px;" onclick="lockUser(<?php echo (int)$user['user_id']; ?>)" title="Lock login for 15 min"><i class="fas fa-lock"></i></button>

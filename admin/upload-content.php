@@ -175,7 +175,7 @@ $uploads = $database->fetchAll(
                                 <tr>
                                     <td><a href="../<?php echo htmlspecialchars($u['file_path']); ?>" target="_blank" style="color:var(--primary-blue);text-decoration:none;font-weight:600;"><?php echo htmlspecialchars($u['file_name']); ?></a></td>
                                     <td><?php echo htmlspecialchars($u['related_type']); ?></td>
-                                    <td><?php echo htmlspecialchars($u['first_name']); ?></td>
+                                    <td style="text-transform:lowercase"><?php echo htmlspecialchars($u['first_name']); ?></td>
                                     <td style="color:var(--text-light);"><?php echo date('M d, Y', strtotime($u['created_at'])); ?></td>
                                 </tr>
                                 <?php endforeach; ?>
