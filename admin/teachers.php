@@ -58,7 +58,7 @@ $lang_page = 'teachers.php';
                             <?php foreach ($teachers as $teacher): ?>
                             <tr>
                                 <td style="font-weight:600;"><?php echo htmlspecialchars($teacher['first_name'] . ' ' . $teacher['last_name']); ?></td>
-                                <td><?php echo htmlspecialchars($teacher['username']); ?></td>
+                                <td style="text-transform:lowercase"><?php echo htmlspecialchars($teacher['username']); ?></td>
                                 <td><?php echo htmlspecialchars($teacher['email'] ?? '-'); ?></td>
                                 <td>
                                     <?php if ($teacher['is_active']): ?>

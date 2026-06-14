@@ -229,7 +229,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                         <?php foreach ($manualPending as $pmt): ?>
                         <tr>
                             <td>#<?= $pmt['id'] ?></td>
-                            <td><strong><?= htmlspecialchars($pmt['first_name'] . ' ' . $pmt['last_name']) ?></strong><br><small class="text-muted"><?= htmlspecialchars($pmt['username']) ?></small></td>
+                            <td><strong><?= htmlspecialchars($pmt['first_name'] . ' ' . $pmt['last_name']) ?></strong><br><small class="text-muted" style="text-transform:lowercase"><?= htmlspecialchars($pmt['username']) ?></small></td>
                             <td><strong><?= number_format((float) $pmt['amount']) ?></strong> TZS</td>
                             <td><?= htmlspecialchars($pmt['phone'] ?? '-') ?></td>
                             <td>
@@ -295,7 +295,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                         ?>
                         <tr>
                             <td>#<?= $pmt['id'] ?></td>
-                            <td><strong><?= htmlspecialchars($pmt['first_name'] . ' ' . $pmt['last_name']) ?></strong><br><small class="text-muted"><?= htmlspecialchars($pmt['username']) ?></small></td>
+                            <td><strong><?= htmlspecialchars($pmt['first_name'] . ' ' . $pmt['last_name']) ?></strong><br><small class="text-muted" style="text-transform:lowercase"><?= htmlspecialchars($pmt['username']) ?></small></td>
                             <td><strong><?= number_format((float) $pmt['amount']) ?></strong> TZS</td>
                             <td>
                                 <?= $pmt['method'] === 'snippe' ? 'Instant Pay (USSD)' : 'Manual' ?>
@@ -354,7 +354,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
                         <?php foreach ($subscriptions as $sub): ?>
                         <tr>
                             <td>#<?= $sub['id'] ?></td>
-                            <td><strong><?= htmlspecialchars($sub['first_name'] . ' ' . $sub['last_name']) ?></strong><br><small class="text-muted"><?= htmlspecialchars($sub['username']) ?></small></td>
+                            <td><strong><?= htmlspecialchars($sub['first_name'] . ' ' . $sub['last_name']) ?></strong><br><small class="text-muted" style="text-transform:lowercase"><?= htmlspecialchars($sub['username']) ?></small></td>
                             <td>
                                 <?php
                                 $subClass = match ($sub['status']) {

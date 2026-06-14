@@ -68,7 +68,7 @@ $lang_page = 'parents.php';
                             <?php $totalChildren = (int) $parent['linked_children'] + (int) $parent['legacy_children']; ?>
                             <tr>
                                 <td style="font-weight:600;"><?php echo htmlspecialchars($parent['first_name'] . ' ' . $parent['last_name']); ?></td>
-                                <td><?php echo htmlspecialchars($parent['username']); ?></td>
+                                <td style="text-transform:lowercase"><?php echo htmlspecialchars($parent['username']); ?></td>
                                 <td><?php echo htmlspecialchars($parent['email'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($parent['phone'] ?? '-'); ?></td>
                                 <td><span class="badge bg-info"><?php echo $totalChildren; ?></span></td>

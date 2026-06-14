@@ -84,7 +84,7 @@ header('Expires: 0');
                 <td><?= $i + 1 ?></td>
                 <td><?= htmlspecialchars($l['first_name']) ?></td>
                 <td><?= htmlspecialchars($l['last_name']) ?></td>
-                <td><?= htmlspecialchars($l['username']) ?></td>
+                <td style="text-transform:lowercase"><?= htmlspecialchars($l['username']) ?></td>
                 <td><?= htmlspecialchars($l['email'] ?? '-') ?></td>
                 <td><?= $l['is_active'] ? 'Active' : 'Inactive' ?></td>
                 <td><?= htmlspecialchars($l['parent_first'] ?? '-') ?></td>
