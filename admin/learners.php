@@ -68,6 +68,7 @@ $lang_page = 'learners.php';
                             <tr>
                                 <th>Name</th>
                                 <th>Username</th>
+                                <th>Claim Code</th>
                                 <th>Parent</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -78,6 +79,14 @@ $lang_page = 'learners.php';
                             <tr>
                                 <td style="font-weight:600;text-transform:lowercase"><?php echo htmlspecialchars($learner['first_name'] . ' ' . $learner['last_name']); ?></td>
                                 <td><?php echo htmlspecialchars($learner['username']); ?></td>
+                                <td>
+                                    <?php if (!empty($learner['claim_code'])): ?>
+                                        <code style="background:#f0f4ff;padding:3px 8px;border-radius:4px;font-size:0.85rem;letter-spacing:0.5px;"><?php echo htmlspecialchars($learner['claim_code']); ?></code>
+                                        <button class="btn btn-sm btn-outline-secondary" style="border:none;padding:2px 6px;font-size:0.75rem;" onclick="copyCode('<?php echo htmlspecialchars($learner['claim_code']); ?>')" title="Copy code"><i class="fas fa-copy"></i></button>
+                                    <?php else: ?>
+                                        <span class="text-muted">&mdash;</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <?php if ($learner['parent_user_id']): ?>
                                         <span class="text-primary"><?php echo htmlspecialchars($learner['parent_first'] . ' ' . $learner['parent_last']); ?></span>
@@ -111,6 +120,14 @@ $lang_page = 'learners.php';
     <script src="../js/main.js"></script>
     <script src="../js/dashboard.js"></script>
     <script>
+        function copyCode(code) {
+            navigator.clipboard.writeText(code).then(function() {
+                if (typeof showToast !== 'undefined') showToast('Code copied: ' + code);
+            }).catch(function() {
+                prompt('Copy this code:', code);
+            });
+        }
+
         function postUser(action, data) {
             data.append('action', action);
             return fetch('user-actions', { method: 'POST', body: data }).then(r => r.json());
