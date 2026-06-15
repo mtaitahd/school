@@ -86,7 +86,7 @@ class ClaimCodeGenerator {
         $code = strtoupper(trim($code));
         
         return $this->database->fetchOne(
-            "SELECT user_id, first_name, last_name, parent_claimed, parent_phone, claim_code_created_at 
+            "SELECT user_id, first_name, last_name, parent_claimed, parent_id, parent_phone, claim_code_created_at 
              FROM users 
              WHERE claim_code = ? AND role = 'learner'",
             [$code]

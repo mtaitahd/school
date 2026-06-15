@@ -98,6 +98,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['claim_code'])) {
             }
         }
     }
+    
+    // If we got here, there was an error — redirect back with the message
+    header('Location: dashboard?error=' . urlencode($error));
+    exit;
 }
 
 // Redirect to dashboard if not POST request
