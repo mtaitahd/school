@@ -247,74 +247,75 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
     </section>
 
     <?php $gov_count = !empty($kyh_governance) ? count($kyh_governance) : 0; ?>
-    <section class="container text-center" style="padding-top:2rem;padding-bottom:1rem;">
-        <h3 class="text-primary fw-bold mb-0" style="font-size:1.75rem;">
-            <?php echo $current_lang === 'sw' ? 'Usimamizi na Walimu' : 'Management & Teachers'; ?>
-        </h3>
-        <div style="width:80px;height:3px;background-color:#007bff;margin:0.75rem auto 1.5rem auto;border-radius:2px;"></div>
-
-        <div class="governance-carousel position-relative">
-            <button type="button" class="governance-arrow governance-arrow-left" onclick="scrollGovernance(-1)" aria-label="Previous">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4 flex-nowrap overflow-auto governance-scroll" id="governanceScroll">
-            <?php
-            $color_map = [
-                'blue'   => '#007bff',
-                'green'  => '#28a745',
-                'red'    => '#dc3545',
-                'yellow' => '#ffc107',
-                'purple' => '#6f42c1',
-            ];
-            $tint_map = [
-                'blue'   => 'rgba(0, 123, 255, 0.05)',
-                'green'  => 'rgba(40, 167, 69, 0.05)',
-                'red'    => 'rgba(220, 53, 69, 0.05)',
-                'yellow' => 'rgba(255, 193, 7, 0.08)',
-                'purple' => 'rgba(111, 66, 193, 0.05)',
-            ];
-            ?>
-            <?php foreach ($kyh_governance as $g): ?>
-            <?php
-                $bc = $g['border_color'] ?? 'blue';
-                $border_hex = $color_map[$bc] ?? '#007bff';
-                $tint = $tint_map[$bc] ?? 'rgba(0, 123, 255, 0.05)';
-            ?>
-            <div class="col">
-                <div class="card h-100 text-center leadership-card" style="border-bottom:4px solid <?php echo $border_hex; ?>;">
-                    <div class="image-frame p-3">
-                        <?php if ($g['image_path']): ?>
-                            <img src="<?php echo htmlspecialchars($g['image_path']); ?>" alt="<?php echo htmlspecialchars($g['name']); ?>" loading="lazy">
-                        <?php else: ?>
-                            <div class="fallback-icon"><i class="fas fa-user"></i></div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="card-body p-0">
-                        <h5 class="fw-bold text-dark mt-3 px-2 mb-1"><?php echo htmlspecialchars($g['name']); ?></h5>
-                        <div class="role-box p-2 mt-auto" style="background-color:<?php echo $tint; ?>;">
-                            <p class="role-text"><?php echo htmlspecialchars($g['title']); ?></p>
+    <?php
+    $color_map = [
+        'blue'   => '#007bff',
+        'green'  => '#28a745',
+        'red'    => '#dc3545',
+        'yellow' => '#ffc107',
+        'purple' => '#6f42c1',
+    ];
+    $tint_map = [
+        'blue'   => 'rgba(0, 123, 255, 0.05)',
+        'green'  => 'rgba(40, 167, 69, 0.05)',
+        'red'    => 'rgba(220, 53, 69, 0.05)',
+        'yellow' => 'rgba(255, 193, 7, 0.08)',
+        'purple' => 'rgba(111, 66, 193, 0.05)',
+    ];
+    ?>
+    <section class="governance-section">
+        <div class="container-child">
+            <div class="section-heading-center">
+                <h2 class="why-choose-title"><?php echo $current_lang === 'sw' ? 'Usimamizi na Walimu' : 'Management & Teachers'; ?></h2>
+                <div class="title-underline"></div>
+            </div>
+            <div class="governance-carousel position-relative">
+                <button type="button" class="governance-arrow governance-arrow-left" onclick="scrollGovernance(-1)" aria-label="Previous">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4 flex-nowrap overflow-auto governance-scroll" id="governanceScroll">
+                <?php foreach ($kyh_governance as $g): ?>
+                <?php
+                    $bc = $g['border_color'] ?? 'blue';
+                    $border_hex = $color_map[$bc] ?? '#007bff';
+                    $tint = $tint_map[$bc] ?? 'rgba(0, 123, 255, 0.05)';
+                ?>
+                <div class="col">
+                    <div class="card h-100 text-center leadership-card" style="border-bottom:4px solid <?php echo $border_hex; ?>;">
+                        <div class="image-frame p-3">
+                            <?php if ($g['image_path']): ?>
+                                <img src="<?php echo htmlspecialchars($g['image_path']); ?>" alt="<?php echo htmlspecialchars($g['name']); ?>" loading="lazy">
+                            <?php else: ?>
+                                <div class="fallback-icon"><i class="fas fa-user"></i></div>
+                            <?php endif; ?>
                         </div>
-                        <?php if ($g['profile_link']): ?>
-                            <a href="<?php echo htmlspecialchars($g['profile_link']); ?>" class="d-block text-muted text-decoration-none small pb-3" target="_blank" rel="noopener">view profile</a>
-                        <?php else: ?>
-                            <span class="d-block text-muted small pb-3" style="cursor:default;">view profile</span>
-                        <?php endif; ?>
+                        <div class="card-body p-0">
+                            <h5 class="fw-bold text-dark mt-3 px-2 mb-1"><?php echo htmlspecialchars($g['name']); ?></h5>
+                            <div class="role-box p-2 mt-auto" style="background-color:<?php echo $tint; ?>;">
+                                <p class="role-text"><?php echo htmlspecialchars($g['title']); ?></p>
+                            </div>
+                            <?php if ($g['profile_link']): ?>
+                                <a href="<?php echo htmlspecialchars($g['profile_link']); ?>" class="d-block text-muted text-decoration-none small pb-3" target="_blank" rel="noopener">view profile</a>
+                            <?php else: ?>
+                                <span class="d-block text-muted small pb-3" style="cursor:default;">view profile</span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
+                <?php endforeach; ?>
             </div>
-            <?php endforeach; ?>
+                <button type="button" class="governance-arrow governance-arrow-right" onclick="scrollGovernance(1)" aria-label="Next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <?php if ($gov_count > 5): ?>
+            <div class="text-center mt-4">
+                <button type="button" class="kyh-board-card-btn" data-bs-toggle="modal" data-bs-target="#governanceAllModal">
+                    <?php echo $current_lang === 'sw' ? 'Wote' : 'View All'; ?> (<?php echo $gov_count; ?>) <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            <?php endif; ?>
         </div>
-            <button type="button" class="governance-arrow governance-arrow-right" onclick="scrollGovernance(1)" aria-label="Next">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        <?php if ($gov_count > 5): ?>
-        <div class="text-center mt-4">
-            <button type="button" class="kyh-board-card-btn" data-bs-toggle="modal" data-bs-target="#governanceAllModal">
-                <?php echo $current_lang === 'sw' ? 'Wote' : 'View All'; ?> (<?php echo $gov_count; ?>) <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>
-        <?php endif; ?>
     </section>
 
     <!-- View All Governance Modal -->

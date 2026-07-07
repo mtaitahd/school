@@ -3666,6 +3666,11 @@ body.dashboard-body .dashboard-main .container-child {
 /* =====================================================
    Governance & Leadership Cards
    ===================================================== */
+.governance-section {
+    padding: 48px 0 32px;
+    background: var(--background-light);
+}
+
 .leadership-card {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
