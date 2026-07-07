@@ -8,6 +8,8 @@
  *   SubscriptionMiddleware::getTrialInfo();    // returns array for UI
  */
 
+require_once __DIR__ . '/settings.php';
+
 class SubscriptionMiddleware {
 
     /**
@@ -15,6 +17,7 @@ class SubscriptionMiddleware {
      * Call early in any protected page (learner/parent content).
      */
     public static function requireAccess(): void {
+        if (!is_payment_enabled()) return;
         if (!self::canAccess()) {
             $_SESSION['subscription_blocked'] = true;
             header('Location: ' . self::paymentUrl());
@@ -27,6 +30,8 @@ class SubscriptionMiddleware {
      * Handles both parent and learner accounts.
      */
     public static function canAccess(): bool {
+        if (!is_payment_enabled()) return true;
+
         global $database;
 
         $userId = auth_user_id();

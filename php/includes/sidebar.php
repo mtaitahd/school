@@ -62,6 +62,7 @@ switch ($role) {
             ]],
             ['id' => 'modules', 'href' => $role_prefix . 'modules', 'icon' => 'fa-cubes', 'label' => 'Modules'],
             ['id' => 'payments', 'href' => $role_prefix . 'payments', 'icon' => 'fa-credit-card', 'label' => 'Payments'],
+            ['id' => 'settings', 'href' => $role_prefix . 'settings', 'icon' => 'fa-cog', 'label' => 'Settings'],
             ['id' => 'upload', 'href' => $role_prefix . 'upload-content', 'icon' => 'fa-cloud-upload-alt', 'label' => 'Upload Content'],
             ['id' => 'logs', 'href' => $role_prefix . 'logs', 'icon' => 'fa-clipboard-list', 'label' => 'Error Logs'],
         ];

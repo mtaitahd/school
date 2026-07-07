@@ -11,8 +11,14 @@ require_once __DIR__ . '/php/includes/security.php';
 require_once __DIR__ . '/php/db_connection.php';
 require_once __DIR__ . '/php/includes/auth.php';
 require_once __DIR__ . '/php/includes/subscription.php';
+require_once __DIR__ . '/php/includes/settings.php';
 
 sec_send_headers();
+
+if (!is_payment_enabled()) {
+    header('Location: parent/dashboard');
+    exit;
+}
 
 $parentId = auth_user_id();
 $role = auth_role();

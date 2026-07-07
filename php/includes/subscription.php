@@ -3,6 +3,8 @@
  * Subscription & Trial access control
  */
 
+require_once __DIR__ . '/settings.php';
+
 function sub_init_trial(int $parentId): void {
     global $database;
     $now = date('Y-m-d H:i:s');
@@ -126,11 +128,13 @@ function sub_get_status(int $parentId): array {
 }
 
 function sub_can_access(int $parentId): bool {
+    if (!is_payment_enabled()) return true;
     $status = sub_get_status($parentId);
     return $status['is_active'];
 }
 
 function sub_require_access(): void {
+    if (!is_payment_enabled()) return;
     if (session_status() === PHP_SESSION_NONE) {
         sec_session_start();
     }
