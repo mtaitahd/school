@@ -3,6 +3,7 @@ require_once __DIR__ . '/../php/includes/session.php';
 require_once __DIR__ . '/../php/includes/security.php';
 require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/settings.php';
 
 sec_require_rate_limit();
 sec_send_headers();
@@ -31,12 +32,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
 
         if ($learner) {
-            // Check subscription access
-            require_once __DIR__ . '/../php/includes/SubscriptionMiddleware.php';
-            $trialInfo = SubscriptionMiddleware::getLearnerTrialInfo((int) $learner['user_id']);
-            if (!$trialInfo['is_active']) {
-                $error = 'Tafadhali mwambie mzazi wako alipe ada yako ili uweze kuendelea na masomo.';
-            } else {
+            // Bypass subscription check if payment is disabled
+            if (is_payment_enabled()) {
+                require_once __DIR__ . '/../php/includes/SubscriptionMiddleware.php';
+                $trialInfo = SubscriptionMiddleware::getLearnerTrialInfo((int) $learner['user_id']);
+                if (!$trialInfo['is_active']) {
+                    $error = 'Tafadhali mwambie mzazi wako alipe ada yako ili uweze kuendelea na masomo.';
+                }
+            }
+            if (empty($error)) {
                 sec_clear_login_rate_limit($username);
                 sec_session_regenerate();
                 $_SESSION['user_id'] = (int) $learner['user_id'];

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/php/db_connection.php';
 require_once __DIR__ . '/php/includes/lang.php';
 require_once __DIR__ . '/php/includes/announcements-data.php';
+require_once __DIR__ . '/php/includes/settings.php';
 
 $current_lang = isset($_GET['lang']) ? $_GET['lang'] : 'en';
 $base_path = '';
@@ -102,7 +103,7 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
                             </div>
                         </div>
                         <div class="hero-actions" style="margin-top:28px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                            <button type="button" onclick="promptUsername()" class="btn-child btn-child-yellow" style="text-decoration:none;min-height:52px;font-size:1.05rem;border-radius:50px;border:none;cursor:pointer;">
+                            <button type="button" onclick="handleStartLearning()" class="btn-child btn-child-yellow" style="text-decoration:none;min-height:52px;font-size:1.05rem;border-radius:50px;border:none;cursor:pointer;">
                                 <i class="fas fa-play-circle" aria-hidden="true"></i>
                                 <?php echo htmlspecialchars($t['btn_start']); ?>
                             </button>
@@ -440,6 +441,16 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
         if (el) {
             var scrollAmount = el.clientWidth * 0.8;
             el.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+        }
+    }
+
+    var startLearningRestricted = <?php echo is_start_learning_restricted() ? 'true' : 'false'; ?>;
+
+    function handleStartLearning() {
+        if (startLearningRestricted) {
+            promptUsername();
+        } else {
+            window.location.href = 'learner/categories?lang=<?php echo $current_lang; ?>';
         }
     }
 

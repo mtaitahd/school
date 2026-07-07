@@ -33,8 +33,19 @@ if (!$learner) {
     exit;
 }
 
-// If start learning restriction is OFF, allow access without subscription check
+// If start learning restriction is OFF, allow access without any checks
 if (!is_start_learning_restricted()) {
+    echo json_encode([
+        'exists' => true,
+        'can_access' => true,
+        'redirect' => 'learner/categories?lang=' . ($_SESSION['lang'] ?? 'en'),
+        'message' => ''
+    ]);
+    exit;
+}
+
+// If payment is OFF, allow access without subscription check
+if (!is_payment_enabled()) {
     echo json_encode([
         'exists' => true,
         'can_access' => true,
