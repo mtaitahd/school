@@ -18,6 +18,9 @@ $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_tim
 
 // Total registered students count
 $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE role = 'learner'")['count'] ?? 0;
+
+// Benefit cards
+$benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_active = 1 ORDER BY sort_order ASC, id ASC");
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang === 'sw' ? 'sw' : 'en'; ?>">
@@ -195,35 +198,29 @@ $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE
                 <h2 class="why-choose-title"><?php echo $current_lang === 'sw' ? 'Kwa Nini Kona Ya Hisabati?' : 'Why Kona Ya Hisabati?'; ?></h2>
                 <div class="title-underline"></div>
             </div>
-            <div class="row-child mt-30">
-                <div class="col-child-3">
-                    <div class="why-choose-item">
-                        <div class="why-choose-icon"><i class="fas fa-shield-alt"></i></div>
-                        <h4 class="why-choose-item-title"><?php echo $current_lang === 'sw' ? 'Salama kwa Watoto' : 'Child Safe'; ?></h4>
-                        <p class="why-choose-item-description"><?php echo $current_lang === 'sw' ? 'Hakuna barua pepe kwa wanafunzi.' : 'No email required for learners.'; ?></p>
+            <div class="benefit-cards-grid">
+                <?php if (empty($benefit_cards)): ?>
+                    <div class="col-child-3">
+                        <div class="benefit-card">
+                            <div class="benefit-card-icon"><i class="fas fa-shield-alt"></i></div>
+                            <h4 class="benefit-card-title"><?php echo $current_lang === 'sw' ? 'Salama kwa Watoto' : 'Child Safe'; ?></h4>
+                            <p class="benefit-card-desc"><?php echo $current_lang === 'sw' ? 'Hakuna barua pepe kwa wanafunzi.' : 'No email required for learners.'; ?></p>
+                        </div>
                     </div>
-                </div>
-                <div class="col-child-3">
-                    <div class="why-choose-item">
-                        <div class="why-choose-icon"><i class="fas fa-hand-pointer"></i></div>
-                        <h4 class="why-choose-item-title"><?php echo $current_lang === 'sw' ? 'Rahisi Kutumia' : 'Easy to Use'; ?></h4>
-                        <p class="why-choose-item-description"><?php echo $current_lang === 'sw' ? 'Kiolesura kinachofaa watoto.' : 'Child-friendly, icon-based interface.'; ?></p>
+                <?php else: ?>
+                    <?php foreach ($benefit_cards as $card): ?>
+                    <div class="benefit-card-wrap">
+                        <div class="benefit-card<?php echo $card['bg_image'] ? ' has-bg' : ''; ?>"<?php echo $card['bg_image'] ? ' style="background-image:url(' . htmlspecialchars($card['bg_image']) . ');"' : ''; ?>>
+                            <div class="benefit-card-overlay"></div>
+                            <div class="benefit-card-content">
+                                <div class="benefit-card-icon"><i class="fas <?php echo htmlspecialchars($card['icon']); ?>"></i></div>
+                                <h4 class="benefit-card-title"><?php echo htmlspecialchars($current_lang === 'sw' ? $card['title_sw'] : $card['title_en']); ?></h4>
+                                <p class="benefit-card-desc"><?php echo htmlspecialchars($current_lang === 'sw' ? $card['description_sw'] : $card['description_en']); ?></p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-child-3">
-                    <div class="why-choose-item">
-                        <div class="why-choose-icon"><i class="fas fa-mobile-alt"></i></div>
-                        <h4 class="why-choose-item-title"><?php echo $current_lang === 'sw' ? 'Kila Kifaa' : 'Any Device'; ?></h4>
-                        <p class="why-choose-item-description"><?php echo $current_lang === 'sw' ? 'Simu, kompyuta kibao, au PC.' : 'Phone, tablet, or computer.'; ?></p>
-                    </div>
-                </div>
-                <div class="col-child-3">
-                    <div class="why-choose-item">
-                        <div class="why-choose-icon"><i class="fas fa-graduation-cap"></i></div>
-                        <h4 class="why-choose-item-title"><?php echo $current_lang === 'sw' ? 'Mtaala wa Tanzania' : 'Tanzania Curriculum'; ?></h4>
-                        <p class="why-choose-item-description"><?php echo $current_lang === 'sw' ? 'Pre-Primary hisabati.' : 'Aligned with Pre-Primary numeracy.'; ?></p>
-                    </div>
-                </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </section>
