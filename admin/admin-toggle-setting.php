@@ -18,21 +18,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 csrf_require();
 
 $setting = $_POST['setting'] ?? '';
-if ($setting === 'payment_enabled') {
-    $current = is_payment_enabled();
+
+$allowedSettings = ['payment_enabled', 'start_learning_restricted'];
+
+if (in_array($setting, $allowedSettings)) {
+    $current = setting_get($setting) === '1';
     $newValue = $current ? '0' : '1';
     $existing = $database->fetchOne(
-        "SELECT id FROM `settings` WHERE setting_key = 'payment_enabled'"
+        "SELECT id FROM `settings` WHERE setting_key = ?",
+        [$setting]
     );
     if ($existing) {
         $database->execute(
-            "UPDATE `settings` SET setting_value = ? WHERE setting_key = 'payment_enabled'",
-            [$newValue]
+            "UPDATE `settings` SET setting_value = ? WHERE setting_key = ?",
+            [$newValue, $setting]
         );
     } else {
         $database->execute(
-            "INSERT INTO `settings` (setting_key, setting_value) VALUES ('payment_enabled', ?)",
-            [$newValue]
+            "INSERT INTO `settings` (setting_key, setting_value) VALUES (?, ?)",
+            [$setting, $newValue]
         );
     }
 }

@@ -16,3 +16,7 @@ function setting_get(string $key, string $default = ''): string {
 function is_payment_enabled(): bool {
     return setting_get('payment_enabled', '1') === '1';
 }
+
+function is_start_learning_restricted(): bool {
+    return setting_get('start_learning_restricted', '0') === '1';
+}

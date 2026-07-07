@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../php/includes/session.php';
 require_once __DIR__ . '/../php/includes/security.php';
 require_once __DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/settings.php';
 
 header('Content-Type: application/json');
 
@@ -28,6 +29,17 @@ if (!$learner) {
     echo json_encode([
         'exists' => false,
         'message' => 'Jina la mtumiaji halipo. Muulize mwalimu au mzazi wako.'
+    ]);
+    exit;
+}
+
+// If start learning restriction is OFF, allow access without subscription check
+if (!is_start_learning_restricted()) {
+    echo json_encode([
+        'exists' => true,
+        'can_access' => true,
+        'redirect' => 'learner/categories?lang=' . ($_SESSION['lang'] ?? 'en'),
+        'message' => ''
     ]);
     exit;
 }
