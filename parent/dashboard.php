@@ -6,6 +6,7 @@ require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/includes/migrate.php';
 require_once __DIR__ . '/../php/includes/subscription.php';
 require_once __DIR__ . '/../php/includes/payment.php';
+require_once __DIR__ . '/../php/includes/settings.php';
 
 ensure_schema_v2($database);
 
@@ -185,7 +186,7 @@ include '../php/includes/dashboard-start.php';
                     <i class="fas fa-wallet me-1"></i> <?= $current_lang === 'sw' ? 'Jaza Salio' : 'Topup' ?>
                 </a>
             </div>
-        <?php elseif ($subStatus['status'] === 'expired' || !$canAccess): ?>
+        <?php elseif (is_payment_enabled() && ($subStatus['status'] === 'expired' || !$canAccess)): ?>
             <div class="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
                     <i class="fas fa-exclamation-triangle me-2"></i>
@@ -398,7 +399,7 @@ include '../php/includes/dashboard-start.php';
         }
 
         function viewChildProgress(childId) {
-            <?php if (!$canAccess):
+            <?php if (is_payment_enabled() && !$canAccess):
                 $payTitle = $current_lang === 'sw' ? 'Malipo Yanahitajika' : 'Payment Required';
                 $payText = $current_lang === 'sw' ? 'Tafadhali lipa ada ya mtoto wako ili kuona maendeleo yake.' : "Please pay for your subscription to view your child's progress.";
                 $payConfirm = $current_lang === 'sw' ? 'Lipa Sasa' : 'Pay Now';

@@ -3,6 +3,7 @@ require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/lang.php';
 require_once __DIR__ . '/../php/includes/learner-session.php';
 require_once __DIR__ . '/../php/includes/SubscriptionMiddleware.php';
+require_once __DIR__ . '/../php/includes/settings.php';
 
 if (!empty($_SERVER['REQUEST_URI']) && preg_match('#/learner/learner/#', $_SERVER['REQUEST_URI'])) {
     $fixed = preg_replace('#/learner/learner/#', '/learner/', $_SERVER['REQUEST_URI']);
@@ -19,7 +20,7 @@ $use_learner_dashboard = false; // no sidebar nav in learning flow
 $need_payment = false;
 if ($learner_logged_in) {
     $trialInfo = SubscriptionMiddleware::getLearnerTrialInfo((int) $_SESSION['user_id']);
-    $need_payment = !$trialInfo['is_active'];
+    $need_payment = is_payment_enabled() && !$trialInfo['is_active'];
 }
 
 $modules = $database->fetchAll("SELECT * FROM modules WHERE is_active = 1 ORDER BY order_index ASC");

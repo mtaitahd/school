@@ -5,6 +5,7 @@ require_once __DIR__ . '/../php/includes/lang.php';
 require_once __DIR__ . '/../php/includes/auth.php';
 require_once __DIR__ . '/../php/includes/migrate.php';
 require_once __DIR__ . '/../php/includes/SubscriptionMiddleware.php';
+require_once __DIR__ . '/../php/includes/settings.php';
 ensure_schema_v2($database);
 
 auth_require_role(['learner'], 'login.php');
@@ -67,6 +68,7 @@ $recent_assignments = $database->fetchAll(
 <body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>
 
         <!-- Trial / Subscription Banner -->
+        <?php if (is_payment_enabled()): ?>
         <?php if ($trialInfo['status'] === 'trial'): ?>
             <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4 mb-4" style="border-radius:10px;border:none;">
                 <div>
@@ -105,8 +107,9 @@ $recent_assignments = $database->fetchAll(
                 </a>
             </div>
         <?php elseif ($trialInfo['is_active']): ?><!-- intentionally empty --><?php endif; ?>
+        <?php endif; ?>
 
-        <?php if (!$trialInfo['is_active']): ?>
+        <?php if (is_payment_enabled() && !$trialInfo['is_active']): ?>
             <div class="text-center py-5">
                 <i class="fas fa-lock mb-3" style="font-size:4rem;color:#dc2626;"></i>
                 <h4><?php echo $current_lang === 'sw' ? 'Huduma Imezuiwa' : 'Access Blocked'; ?></h4>
