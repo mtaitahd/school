@@ -200,11 +200,32 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
             </div>
             <div class="benefit-cards-grid">
                 <?php if (empty($benefit_cards)): ?>
-                    <div class="col-child-3">
+                    <div class="benefit-card-wrap">
                         <div class="benefit-card">
                             <div class="benefit-card-icon"><i class="fas fa-shield-alt"></i></div>
                             <h4 class="benefit-card-title"><?php echo $current_lang === 'sw' ? 'Salama kwa Watoto' : 'Child Safe'; ?></h4>
                             <p class="benefit-card-desc"><?php echo $current_lang === 'sw' ? 'Hakuna barua pepe kwa wanafunzi.' : 'No email required for learners.'; ?></p>
+                        </div>
+                    </div>
+                    <div class="benefit-card-wrap">
+                        <div class="benefit-card">
+                            <div class="benefit-card-icon"><i class="fas fa-hand-pointer"></i></div>
+                            <h4 class="benefit-card-title"><?php echo $current_lang === 'sw' ? 'Rahisi Kutumia' : 'Easy to Use'; ?></h4>
+                            <p class="benefit-card-desc"><?php echo $current_lang === 'sw' ? 'Kiolesura kinachofaa watoto.' : 'Child-friendly, icon-based interface.'; ?></p>
+                        </div>
+                    </div>
+                    <div class="benefit-card-wrap">
+                        <div class="benefit-card">
+                            <div class="benefit-card-icon"><i class="fas fa-mobile-alt"></i></div>
+                            <h4 class="benefit-card-title"><?php echo $current_lang === 'sw' ? 'Kila Kifaa' : 'Any Device'; ?></h4>
+                            <p class="benefit-card-desc"><?php echo $current_lang === 'sw' ? 'Simu, kompyuta kibao, au PC.' : 'Phone, tablet, or computer.'; ?></p>
+                        </div>
+                    </div>
+                    <div class="benefit-card-wrap">
+                        <div class="benefit-card">
+                            <div class="benefit-card-icon"><i class="fas fa-graduation-cap"></i></div>
+                            <h4 class="benefit-card-title"><?php echo $current_lang === 'sw' ? 'Mtaala wa Tanzania' : 'Tanzania Curriculum'; ?></h4>
+                            <p class="benefit-card-desc"><?php echo $current_lang === 'sw' ? 'Pre-Primary hisabati.' : 'Aligned with Pre-Primary numeracy.'; ?></p>
                         </div>
                     </div>
                 <?php else: ?>
