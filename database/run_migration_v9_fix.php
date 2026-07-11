@@ -1,7 +1,7 @@
 <?php
 /**
- * Diagnostic + Fix: Validate lessons, upsert all 80 activities with
- * curriculum-based activity_data, and validate results.
+ * Diagnostic + Fix: Update lessons to match spec, upsert all 80 activities
+ * with curriculum-based activity_data, and validate results.
  *
  * Run:  php database/run_migration_v9_fix.php
  */
@@ -27,6 +27,13 @@ if (count($lessons) === 0) {
   $lessons = $db->fetchAll("SELECT lesson_id, lesson_code FROM lessons ORDER BY lesson_code");
   echo "After schema: " . count($lessons) . " lessons\n";
 }
+
+// Update lessons to match curriculum spec
+echo "\n=== Update Lessons to Match Spec ===\n";
+require __DIR__ . '/run_migration_v9c.php';
+
+// Refresh lesson list after update
+$lessons = $db->fetchAll("SELECT lesson_id, lesson_code, lesson_name FROM lessons ORDER BY lesson_code");
 
 // Build $L map
 $L = [];
@@ -67,9 +74,9 @@ foreach ($acts as $a) {
 echo "Processed $cnt activities.\n";
 
 echo "\n=== Validation ===\n";
-foreach (['NUM-01-L01','NUM-01-L02','NUM-01-L03','NUM-01-L04','NUM-01-L05','NUM-01-L06','NUM-01-L07','NUM-01-L08'] as $c) {
-  $r = $db->fetchOne("SELECT COUNT(*) AS cnt FROM activities WHERE lesson_id=?", [$L[$c]]);
-  echo "  $c: {$r['cnt']} activities\n";
+foreach ($L as $code => $lid) {
+  $r = $db->fetchOne("SELECT COUNT(*) AS cnt FROM activities WHERE lesson_id=?", [$lid]);
+  echo "  $code: {$r['cnt']} activities\n";
 }
 $t = $db->fetchOne("SELECT COUNT(*) AS cnt FROM activities WHERE module_id=14 AND lesson_id IS NOT NULL");
 echo "  Total: {$t['cnt']}\n";
@@ -83,7 +90,19 @@ foreach ($db->fetchAll("SELECT activity_id, activity_data FROM activities WHERE 
 }
 echo ($bad ? "  FAIL: $bad errors\n" : "  ✓ All have valid JSON with required fields\n");
 
-echo "\n✓ Fix complete. Activities are ready for children to access via:\n";
-echo "  learner/categories.php → Module 14\n";
+// Verify engines load
+echo "\n=== Engine Check ===\n";
+$engines = [];
+foreach ($db->fetchAll("SELECT activity_data FROM activities WHERE module_id=14 AND lesson_id IS NOT NULL") as $r) {
+  $d = json_decode($r['activity_data'], true);
+  if ($d && isset($d['engine'])) $engines[$d['engine']] = true;
+}
+$valid = ['mango_counting','number_identification','number_sequencing','missing_numbers','match_quantity','dot_to_dot','math_game'];
+foreach (array_keys($engines) as $e) {
+  echo "  $e: " . (in_array($e, $valid) ? '✓' : '✗ UNKNOWN') . "\n";
+}
+
+echo "\n✓ Fix complete. Children can access activities via:\n";
+echo "  learner/categories.php → Module 14: Recognising and Counting Numbers 1-9\n";
 echo "  learner/activities.php?module_id=14 → 8 lessons × 10 activities\n";
-echo "  learner/activity.php?activity_id={id} → Individual activity\n";
+echo "  learner/activity.php?activity_id={id} → Individual activity with engine\n";

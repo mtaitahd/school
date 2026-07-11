@@ -1,7 +1,7 @@
 <?php
 /**
  * Part A: Migration v9 — Schema + Structure
- * Run: php database/run_migration_v9.php (includes this via require)
+ * Run: php database/run_migration_v9_main.php (includes this via require)
  */
 require_once __DIR__ . '/../php/includes/migrate.php';
 require_once __DIR__ . '/../php/db_connection.php';
@@ -18,14 +18,14 @@ $db->execute("INSERT IGNORE INTO topics (strand_id,module_id,topic_name,topic_co
 $t = $db->fetchOne("SELECT topic_id FROM topics WHERE topic_code='NUM-01'")['topic_id'];
 $L = [];
 $defs = [
-  ['NUM-01-L01','Numbers 1, 2, 3','...recognise count trace 1,2,3.','Identifies 1,2,3 counts to 3 traces.',20,null,1],
-  ['NUM-01-L02','Numbers 4, 5','...recognise count trace 4,5.','Identifies 4,5 counts 4-5 traces.',20,'["NUM-01-L01"]',2],
-  ['NUM-01-L03','Numbers 6, 7','...recognise count trace 6,7.','Identifies 6,7 counts 6-7 traces.',20,'["NUM-01-L02"]',3],
-  ['NUM-01-L04','Numbers 8, 9','...recognise count trace 8,9.','Identifies 8,9 counts 8-9 traces.',20,'["NUM-01-L03"]',4],
-  ['NUM-01-L05','Counting 1-9','...count 1-9 order match.','Counts 1-9 matches arranges.',20,'["NUM-01-L04"]',5],
-  ['NUM-01-L06','Comparing 1-9','...compare more fewer.','Identifies more/less within 1-9.',20,'["NUM-01-L05"]',6],
-  ['NUM-01-L07','Missing 1-9','...find missing in sequence.','Finds missing number 1-9.',20,'["NUM-01-L06"]',7],
-  ['NUM-01-L08','Revision 1-9','...mastery of 1-9.','Scores >=80%.',25,'["NUM-01-L07"]',8],
+  ['NUM-01-L01','Recognising Number 1','Colour, count, trace, and match number 1.','Identifies number 1, counts one object, traces 1, matches one object.',15,null,1],
+  ['NUM-01-L02','Recognising Number 2','Colour, count, trace, and match number 2.','Identifies number 2, counts two objects, traces 2, matches quantity 2.',15,'["NUM-01-L01"]',2],
+  ['NUM-01-L03','Recognising Number 3','Shape of number 3, count objects to 3.','Identifies number 3 shape, counts three objects.',15,'["NUM-01-L02"]',3],
+  ['NUM-01-L04','Recognising Number 4','Counting objects to 4, matching numbers.','Counts objects to 4, matches number to quantity.',15,'["NUM-01-L03"]',4],
+  ['NUM-01-L05','Recognising Number 5','Butterfly counting, trace and write 5.','Counts butterflies 1-5, traces and writes number 5.',15,'["NUM-01-L04"]',5],
+  ['NUM-01-L06','Recognising Number 6','Animal counting, object matching for 6.','Counts rabbits, goats, ducks; matches quantity 6.',15,'["NUM-01-L05"]',6],
+  ['NUM-01-L07','Recognising Numbers 7 and 8','Books, erasers, animals for 7 and 8.','Counts books and erasers to 7-8, matches quantities.',20,'["NUM-01-L06"]',7],
+  ['NUM-01-L08','Recognising Number 9','Rabbits, missing numbers, number games.','Counts rabbits to 9, finds missing numbers, plays number games.',20,'["NUM-01-L07"]',8],
 ];
 foreach ($defs as $d) {
   $db->execute("INSERT IGNORE INTO lessons (topic_id,lesson_code,lesson_name,learning_objective,success_criteria,estimated_minutes,prerequisite_lesson_ids,order_index) VALUES (?,?,?,?,?,?,?,?)",array_merge([$t],$d));
