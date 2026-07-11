@@ -83,7 +83,8 @@ const ActivityEngines = {
         const { min, max } = ActivityCore.getDifficultyRange(config);
         const nurseryMin = Math.max(1, min);
         const nurseryMax = Math.min(Math.max(max, nurseryMin), 20);
-        const poolSize = config.poolSize || Math.min(6, nurseryMax - nurseryMin + 1);
+        const range = nurseryMax - nurseryMin + 1;
+        const poolSize = Math.min(config.poolSize || Math.min(6, range), range);
         const fixedTarget = config.target_number || null;
 
         function round() {
