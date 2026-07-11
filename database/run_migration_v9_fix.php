@@ -60,14 +60,15 @@ foreach ($acts as $a) {
 
   $data = json_decode($djson, true);
   $diff = $data['difficulty'] ?? 'easy';
+  $audio = $data['instruction'] ?? $desc;
 
   $existing = $db->fetchOne("SELECT activity_id FROM activities WHERE lesson_id=? AND step_type=? AND step_order=?", [$lid, $st, $so]);
   if ($existing) {
     $db->execute("UPDATE activities SET activity_name=?, activity_description=?, activity_data=?, audio_instruction=?, difficulty_level=? WHERE activity_id=?",
-      [$name, $desc, $djson, $desc, $diff, $existing['activity_id']]);
+      [$name, $desc, $djson, $audio, $diff, $existing['activity_id']]);
   } else {
     $db->execute("INSERT INTO activities (module_id,lesson_id,step_type,step_order,activity_name,activity_description,activity_type,difficulty_level,activity_data,audio_instruction) VALUES (14,?,?,?,?,?,'counting',?,?,?)",
-      [$lid, $st, $so, $name, $desc, $diff, $djson, $desc]);
+      [$lid, $st, $so, $name, $desc, $diff, $djson, $audio]);
   }
   $cnt++;
 }

@@ -11,6 +11,7 @@ const ActivityEngines = {
         const { min, max } = ActivityCore.getDifficultyRange(config);
         const total = config.count || ActivityCore.randomInt(min, max);
         const objectName = obj.charAt(0).toUpperCase() + obj.slice(1);
+        const prompt = config.instruction || ('Tap each ' + obj + ' as you count!');
         let tapped = 0;
 
         function reset() {
@@ -23,7 +24,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt('Tap each ' + obj + ' as you count!', emoji));
+            display.appendChild(ActivityCore.renderPrompt(prompt, emoji));
             const grid = document.createElement('div');
             grid.className = 'object-count-grid';
             grid.setAttribute('role', 'group');
@@ -81,11 +82,12 @@ const ActivityEngines = {
         ActivityCore.hideMultiRoundUI();
         const { min, max } = ActivityCore.getDifficultyRange(config);
         const nurseryMin = Math.max(1, min);
-        const nurseryMax = Math.min(Math.max(max, 5), 20);
+        const nurseryMax = Math.min(Math.max(max, nurseryMin), 20);
         const poolSize = config.poolSize || Math.min(6, nurseryMax - nurseryMin + 1);
+        const fixedTarget = config.target_number || null;
 
         function round() {
-            const target = ActivityCore.randomInt(nurseryMin, nurseryMax);
+            const target = fixedTarget || ActivityCore.randomInt(nurseryMin, nurseryMax);
             const pool = new Set([target]);
             while (pool.size < poolSize) {
                 pool.add(ActivityCore.randomInt(nurseryMin, nurseryMax));
@@ -95,7 +97,8 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt('Find number ' + target, '🔢'));
+            const prompt = config.instruction || ('Find number ' + target);
+            display.appendChild(ActivityCore.renderPrompt(prompt, '🔢'));
             const tiles = document.createElement('div');
             tiles.className = 'number-tiles number-tiles-large';
 
@@ -126,9 +129,9 @@ const ActivityEngines = {
             display.appendChild(tiles);
 
             ActivityCore.bindTopbarAudio(() => {
-                ActivityCore.say('Can you find number ' + target + '? Tap number ' + target + '.');
+                ActivityCore.say(prompt);
             });
-            ActivityCore.say('Can you find number ' + target + '? Tap number ' + target + '.');
+            ActivityCore.say(prompt);
         }
         round();
     },
@@ -146,7 +149,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt('Put numbers in order from 1 to ' + seqMax, '🔢'));
+            display.appendChild(ActivityCore.renderPrompt(config.instruction || ('Put numbers in order from 1 to ' + seqMax), '🔢'));
 
             const ws = document.createElement('div');
             ws.className = 'sequence-workspace';
@@ -239,7 +242,7 @@ const ActivityEngines = {
             const { display, options } = ActivityCore.clearStage();
             display.className = 'activity-display activity-stage';
 
-            display.appendChild(ActivityCore.renderPrompt('What number is missing?', '❓'));
+            display.appendChild(ActivityCore.renderPrompt(config.instruction || 'What number is missing?', '❓'));
             const row = document.createElement('div');
             row.className = 'number-line-row';
             [seq[0], seq[1], null, seq[2], seq[3]].forEach((n, i) => {
@@ -290,7 +293,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt('Find the group with ' + target + ' ' + obj + 's', emoji));
+            display.appendChild(ActivityCore.renderPrompt(config.instruction || ('Find the group with ' + target + ' ' + obj + 's'), emoji));
             const badge = document.createElement('div');
             badge.className = 'target-number-badge';
             badge.textContent = target;
