@@ -61,6 +61,7 @@ switch ($role) {
                 ['id' => 'link-children', 'href' => $role_prefix . 'link-children', 'label' => 'Link Children'],
             ]],
             ['id' => 'modules', 'href' => $role_prefix . 'modules', 'icon' => 'fa-cubes', 'label' => 'Modules'],
+            ['id' => 'lessons', 'href' => $role_prefix . 'lessons', 'icon' => 'fa-book', 'label' => 'Lessons'],
             ['id' => 'benefit-cards', 'href' => $role_prefix . 'benefit-cards', 'icon' => 'fa-layer-group', 'label' => 'Benefit Cards'],
             ['id' => 'payments', 'href' => $role_prefix . 'payments', 'icon' => 'fa-credit-card', 'label' => 'Payments'],
             ['id' => 'settings', 'href' => $role_prefix . 'settings', 'icon' => 'fa-cog', 'label' => 'Settings'],

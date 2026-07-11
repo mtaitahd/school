@@ -24,6 +24,13 @@ if (!is_dir($upload_dir)) {
 }
 
 $modules = $database->fetchAll("SELECT module_id, module_name FROM modules ORDER BY order_index");
+$lessons = $database->fetchAll(
+    "SELECT l.lesson_id, l.lesson_name, l.lesson_code, m.module_name
+     FROM lessons l
+     JOIN topics t ON l.topic_id = t.topic_id
+     JOIN modules m ON t.module_id = m.module_id
+     ORDER BY m.order_index, l.order_index"
+);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_require();
@@ -48,10 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $type = $_POST['activity_type'] ?? 'game';
         if ($module_id > 0 && $name !== '') {
             $database->insert(
-                "INSERT INTO activities (module_id, activity_name, activity_description, activity_type, difficulty_level, activity_data, order_index)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO activities (module_id, lesson_id, activity_name, activity_description, activity_type, difficulty_level, activity_data, order_index)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 [
                     $module_id,
+                    !empty($_POST['lesson_id']) ? (int) $_POST['lesson_id'] : null,
                     $name,
                     trim($_POST['activity_description'] ?? ''),
                     $type,
@@ -237,6 +245,15 @@ $uploads = $database->fetchAll(
                             <select name="module_id" class="form-select" required style="border-radius:10px;">
                                 <?php foreach ($modules as $m): ?>
                                     <option value="<?php echo (int)$m['module_id']; ?>"><?php echo htmlspecialchars($m['module_name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.85rem;color:var(--text-dark);">Lesson (optional)</label>
+                            <select name="lesson_id" class="form-select" style="border-radius:10px;">
+                                <option value="">— No lesson —</option>
+                                <?php foreach ($lessons as $ls): ?>
+                                    <option value="<?php echo (int)$ls['lesson_id']; ?>"><?php echo htmlspecialchars($ls['lesson_code'] . ' — ' . $ls['lesson_name'] . ' (' . $ls['module_name'] . ')'); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>

@@ -28,10 +28,37 @@ if (!$module) {
     exit;
 }
 
-$activities = $database->fetchAll(
-    "SELECT * FROM activities WHERE module_id = ? AND is_active = 1 ORDER BY order_index ASC",
+// Fetch lessons for this module if using the new hierarchy
+$lessons = $database->fetchAll(
+    "SELECT l.* FROM lessons l
+     JOIN topics t ON l.topic_id = t.topic_id
+     WHERE t.module_id = ? AND l.is_active = 1
+     ORDER BY l.order_index ASC",
     [$module_id]
 );
+
+$activities_by_lesson = [];
+$activities_flat = [];
+
+if (!empty($lessons)) {
+    // New hierarchy: group activities by lesson
+    foreach ($lessons as $lesson) {
+        $lesson_activities = $database->fetchAll(
+            "SELECT * FROM activities WHERE lesson_id = ? AND is_active = 1 ORDER BY order_index ASC",
+            [$lesson['lesson_id']]
+        );
+        $activities_by_lesson[$lesson['lesson_id']] = [
+            'lesson' => $lesson,
+            'activities' => $lesson_activities,
+        ];
+    }
+} else {
+    // Legacy: fetch activities directly under module
+    $activities_flat = $database->fetchAll(
+        "SELECT * FROM activities WHERE module_id = ? AND is_active = 1 ORDER BY order_index ASC",
+        [$module_id]
+    );
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang; ?>">
@@ -62,12 +89,45 @@ $activities = $database->fetchAll(
         </div>
 
         <div class="row-child">
-            <?php if (empty($activities)): ?>
-                <div class="col-child-1 text-center">
-                    <p class="activity-instruction"><?php echo $current_lang === 'sw' ? 'Hakuna shughuli bado.' : 'No activities available yet for this module.'; ?></p>
-                </div>
-            <?php else: ?>
-                <?php foreach ($activities as $activity): ?>
+            <?php if (!empty($activities_by_lesson)): ?>
+                <?php foreach ($activities_by_lesson as $entry): ?>
+                    <?php $lesson = $entry['lesson']; $lesson_activities = $entry['activities']; ?>
+                    <div class="col-child-1">
+                        <div class="lesson-section" style="margin-bottom: 24px;">
+                            <div class="lesson-header" style="border-left: 4px solid <?php echo htmlspecialchars($module['module_color']); ?>; padding-left: 16px; margin-bottom: 12px;">
+                                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px;">
+                                    <?php echo htmlspecialchars($lesson['lesson_name']); ?>
+                                </h3>
+                                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 2px;">
+                                    <?php echo htmlspecialchars($lesson['learning_objective']); ?>
+                                </p>
+                                <p style="font-size: 0.8rem; color: var(--text-light);">
+                                    <i class="fas fa-clock" aria-hidden="true"></i> <?php echo (int)$lesson['estimated_minutes']; ?> min
+                                </p>
+                            </div>
+                            <div class="row-child" style="margin-top: 8px;">
+                                <?php foreach ($lesson_activities as $activity): ?>
+                                <div class="col-child-3">
+                                    <article class="module-card" tabindex="0" role="button"
+                                         onclick="selectActivity(<?php echo (int)$activity['activity_id']; ?>)"
+                                         onkeydown="if(event.key==='Enter')selectActivity(<?php echo (int)$activity['activity_id']; ?>)">
+                                        <div class="activity-card-icon" style="color: <?php echo htmlspecialchars($module['module_color']); ?>;">
+                                            <i class="fas fa-play-circle" aria-hidden="true"></i>
+                                        </div>
+                                        <h3 class="activity-card-title"><?php echo htmlspecialchars($activity['activity_name']); ?></h3>
+                                        <p class="activity-card-description"><?php echo htmlspecialchars($activity['activity_description']); ?></p>
+                                        <button type="button" class="audio-btn" onclick="event.stopPropagation(); playAudio('<?php echo htmlspecialchars($activity['audio_instruction'], ENT_QUOTES); ?>')">
+                                            <i class="fas fa-volume-up" aria-hidden="true"></i>
+                                        </button>
+                                    </article>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php elseif (!empty($activities_flat)): ?>
+                <?php foreach ($activities_flat as $activity): ?>
                 <div class="col-child-3">
                     <article class="module-card" tabindex="0" role="button"
                          onclick="selectActivity(<?php echo (int)$activity['activity_id']; ?>)"
@@ -83,6 +143,10 @@ $activities = $database->fetchAll(
                     </article>
                 </div>
                 <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-child-1 text-center">
+                    <p class="activity-instruction"><?php echo $current_lang === 'sw' ? 'Hakuna shughuli bado.' : 'No activities available yet for this module.'; ?></p>
+                </div>
             <?php endif; ?>
         </div>
     </main>

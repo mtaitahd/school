@@ -386,3 +386,93 @@ function ensure_schema_v2($database): void {
 
     $done = true;
 }
+
+/**
+ * Ensures v3 tables exist (domains, strands, topics, lessons, lesson_id FK)
+ * Safe to call on every dashboard load.
+ */
+function ensure_schema_v3($database): void {
+    static $done = false;
+    if ($done) {
+        return;
+    }
+
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS domains (
+            domain_id INT AUTO_INCREMENT PRIMARY KEY,
+            domain_name VARCHAR(100) NOT NULL,
+            domain_code VARCHAR(20) NOT NULL UNIQUE,
+            domain_icon VARCHAR(255) NOT NULL DEFAULT 'fa-book',
+            domain_color VARCHAR(50) DEFAULT '#4A90E2',
+            description TEXT,
+            order_index INT DEFAULT 0,
+            is_active TINYINT(1) DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS strands (
+            strand_id INT AUTO_INCREMENT PRIMARY KEY,
+            domain_id INT NOT NULL,
+            strand_name VARCHAR(100) NOT NULL,
+            strand_code VARCHAR(20) NOT NULL UNIQUE,
+            strand_icon VARCHAR(255) DEFAULT 'fa-star',
+            description TEXT,
+            learning_hours DECIMAL(4,1) DEFAULT 0,
+            order_index INT DEFAULT 0,
+            is_active TINYINT(1) DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (domain_id) REFERENCES domains(domain_id) ON DELETE CASCADE,
+            INDEX idx_strand_domain (domain_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS topics (
+            topic_id INT AUTO_INCREMENT PRIMARY KEY,
+            strand_id INT NOT NULL,
+            module_id INT NULL,
+            topic_name VARCHAR(100) NOT NULL,
+            topic_code VARCHAR(20) NOT NULL UNIQUE,
+            age_range VARCHAR(20) DEFAULT '4-5',
+            description TEXT,
+            prerequisites JSON NULL,
+            estimated_sessions INT DEFAULT 1,
+            order_index INT DEFAULT 0,
+            is_active TINYINT(1) DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (strand_id) REFERENCES strands(strand_id) ON DELETE CASCADE,
+            FOREIGN KEY (module_id) REFERENCES modules(module_id) ON DELETE SET NULL,
+            INDEX idx_topic_strand (strand_id),
+            INDEX idx_topic_module (module_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    $database->execute("
+        CREATE TABLE IF NOT EXISTS lessons (
+            lesson_id INT AUTO_INCREMENT PRIMARY KEY,
+            topic_id INT NOT NULL,
+            lesson_code VARCHAR(20) NOT NULL UNIQUE,
+            lesson_name VARCHAR(100) NOT NULL,
+            learning_objective TEXT NOT NULL,
+            success_criteria TEXT NOT NULL,
+            estimated_minutes INT DEFAULT 20,
+            prerequisite_lesson_ids JSON NULL,
+            order_index INT DEFAULT 0,
+            is_active TINYINT(1) DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (topic_id) REFERENCES topics(topic_id) ON DELETE CASCADE,
+            INDEX idx_lesson_topic (topic_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    // Add lesson_id column to activities if missing
+    $actCols = $database->fetchAll("SHOW COLUMNS FROM activities");
+    $actFields = array_column($actCols, 'Field');
+    if (!in_array('lesson_id', $actFields)) {
+        $database->execute("ALTER TABLE activities ADD COLUMN lesson_id INT NULL AFTER module_id, ADD INDEX idx_activity_lesson (lesson_id)");
+    }
+
+    $done = true;
+}
