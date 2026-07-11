@@ -130,10 +130,10 @@ $isInteractiveEngine = in_array($engine, [
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/activities/core.js"></script>
-    <script src="../js/activities/engines.js"></script>
-    <script src="../js/activities/registry.js"></script>
-    <script src="../js/activity-runner.js"></script>
+    <script src="../js/activities/core.js?v=20260712"></script>
+    <script src="../js/activities/engines.js?v=20260712"></script>
+    <script src="../js/activities/registry.js?v=20260712"></script>
+    <script src="../js/activity-runner.js?v=20260712"></script>
 </body>
 </html>
 
