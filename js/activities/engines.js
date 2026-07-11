@@ -78,6 +78,11 @@ const ActivityEngines = {
     },
 
     /* ----- Number identification (nursery 1–9, large buttons, audio) ----- */
+    /*  Modes:
+     *  - default: number tiles (find the number)
+     *  - shape:   object emojis (find the object shaped like the number)
+     *  - coloring/trace: canvas outline + marker brush to trace the number
+     */
     number_identification(config) {
         ActivityCore.hideMultiRoundUI();
         const { min, max } = ActivityCore.getDifficultyRange(config);
@@ -86,9 +91,46 @@ const ActivityEngines = {
         const range = nurseryMax - nurseryMin + 1;
         const poolSize = Math.min(config.poolSize || Math.min(6, range), range);
         const fixedTarget = config.target_number || null;
+        const isShape = !!config.shape_object;
+        const isTrace = config.mode === 'trace' || config.interaction === 'coloring';
+        const ROUNDS = 3;
+        let roundsDone = 0;
+
+        const SHAPE_MAP = {
+            1: { emoji: '✏️', name: 'pencil' },
+            2: { emoji: '🦆', name: 'duck' },
+            3: { emoji: '🦋', name: 'butterfly' },
+            4: { emoji: '🪑', name: 'chair' },
+            5: { emoji: '🪝', name: 'hook' },
+            6: { emoji: '🥄', name: 'spoon' },
+            7: { emoji: '🌾', name: 'hoe' },
+            8: { emoji: '🐌', name: 'snail' },
+            9: { emoji: '👁️', name: 'eye' }
+        };
+        const ALL_SHAPE_EMOJIS = Object.values(SHAPE_MAP);
+
+        function finishOrNext() {
+            roundsDone++;
+            if (roundsDone >= ROUNDS) {
+                ActivityCore.finishActivity();
+            } else {
+                setTimeout(round, 1500);
+            }
+        }
 
         function round() {
             const target = fixedTarget || ActivityCore.randomInt(nurseryMin, nurseryMax);
+
+            if (isTrace) {
+                roundTrace(target);
+                return;
+            }
+            if (isShape) {
+                roundShape(target);
+                return;
+            }
+
+            /* default: number tiles */
             const pool = new Set([target]);
             while (pool.size < poolSize) {
                 pool.add(ActivityCore.randomInt(nurseryMin, nurseryMax));
@@ -113,7 +155,7 @@ const ActivityEngines = {
                         btn.classList.add('correct');
                         ActivityCore.celebrate();
                         ActivityCore.sayNumber(target, () => {
-                            ActivityCore.sayEncouragement(() => setTimeout(round, 1500));
+                            ActivityCore.sayEncouragement(finishOrNext);
                         });
                     } else {
                         btn.classList.add('incorrect');
@@ -134,6 +176,160 @@ const ActivityEngines = {
             });
             ActivityCore.say(prompt);
         }
+
+        function roundShape(target) {
+            const correctShape = SHAPE_MAP[target] || ALL_SHAPE_EMOJIS[0];
+            const distractors = ALL_SHAPE_EMOJIS.filter((s) => s.name !== correctShape.name);
+            const pick = ActivityCore.shuffle(distractors).slice(0, 2);
+            const options_list = ActivityCore.shuffle([correctShape, ...pick]);
+
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+
+            const prompt = config.instruction || ('Find the object shaped like number ' + target + '!');
+            display.appendChild(ActivityCore.renderPrompt(prompt, correctShape.emoji));
+
+            /* show the number large as reference */
+            const numRef = document.createElement('div');
+            numRef.style.cssText = 'font-size:6rem;font-weight:800;color:var(--primary-blue);margin:0.3rem 0;opacity:0.35;';
+            numRef.textContent = target;
+            display.appendChild(numRef);
+
+            const grid = document.createElement('div');
+            grid.className = 'number-tiles number-tiles-large';
+
+            options_list.forEach((shape) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'number-tile';
+                btn.innerHTML = '<span style="font-size:3rem">' + shape.emoji + '</span><br><span style="font-size:0.9rem">' + shape.name + '</span>';
+                btn.onclick = () => {
+                    if (shape.name === correctShape.name) {
+                        btn.classList.add('correct');
+                        ActivityCore.celebrate();
+                        ActivityCore.say('Yes! Number ' + target + ' looks like a ' + correctShape.name + '!', finishOrNext);
+                    } else {
+                        btn.classList.add('incorrect');
+                        ActivityCore.say('That is a ' + shape.name + '. Try again!');
+                        setTimeout(() => btn.classList.remove('incorrect'), 600);
+                    }
+                };
+                grid.appendChild(btn);
+            });
+            display.appendChild(grid);
+
+            ActivityCore.bindTopbarAudio(() => {
+                ActivityCore.say(prompt);
+            });
+            ActivityCore.say(prompt);
+        }
+
+        function roundTrace(target) {
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+
+            const prompt = config.instruction || ('Trace the number ' + target + '!');
+            display.appendChild(ActivityCore.renderPrompt(prompt, '✏️'));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 320;
+            canvas.height = 320;
+            canvas.style.cssText = 'width:100%;max-width:320px;height:auto;border:3px dashed var(--primary-blue,#4A90E2);border-radius:16px;touch-action:none;cursor:crosshair;display:block;margin:0.5rem auto;background:#fff;';
+            display.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+
+            /* draw faint outline of the number */
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 240px sans-serif';
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 4;
+            ctx.strokeText(String(target), 160, 165);
+
+            /* thick outline for tracing guide */
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 8;
+            ctx.setLineDash([12, 8]);
+            ctx.strokeText(String(target), 160, 165);
+            ctx.setLineDash([]);
+
+            let painting = false;
+            let lastX = 0, lastY = 0;
+            let totalPixels = 0;
+            const threshold = 150;
+
+            ctx.strokeStyle = '#4A90E2';
+            ctx.lineWidth = 18;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.globalCompositeOperation = 'source-over';
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const touch = e.touches ? e.touches[0] : e;
+                return [(touch.clientX - rect.left) * scaleX, (touch.clientY - rect.top) * scaleY];
+            }
+
+            function startPaint(e) {
+                e.preventDefault();
+                painting = true;
+                const [x, y] = getPos(e);
+                lastX = x;
+                lastY = y;
+            }
+
+            function paint(e) {
+                if (!painting) return;
+                e.preventDefault();
+                const [x, y] = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                totalPixels++;
+                lastX = x;
+                lastY = y;
+
+                if (totalPixels >= threshold) {
+                    painting = false;
+                    canvas.removeEventListener('pointerdown', startPaint);
+                    canvas.removeEventListener('pointermove', paint);
+                    canvas.removeEventListener('pointerup', endPaint);
+                    canvas.removeEventListener('touchstart', startPaint);
+                    canvas.removeEventListener('touchmove', paint);
+                    canvas.removeEventListener('touchend', endPaint);
+                    ActivityCore.celebrate();
+                    ActivityCore.sayNumber(target, () => {
+                        ActivityCore.sayEncouragement(finishOrNext);
+                    });
+                }
+            }
+
+            function endPaint() { painting = false; }
+
+            canvas.addEventListener('pointerdown', startPaint);
+            canvas.addEventListener('pointermove', paint);
+            canvas.addEventListener('pointerup', endPaint);
+            canvas.addEventListener('touchstart', startPaint, { passive: false });
+            canvas.addEventListener('touchmove', paint, { passive: false });
+            canvas.addEventListener('touchend', endPaint);
+
+            const hint = document.createElement('p');
+            hint.style.cssText = 'text-align:center;color:#888;font-size:0.85rem;margin-top:0.3rem;';
+            hint.textContent = 'Drag your finger over the number to trace it!';
+            display.appendChild(hint);
+
+            ActivityCore.bindTopbarAudio(() => {
+                ActivityCore.say(prompt);
+            });
+            ActivityCore.say(prompt);
+        }
+
         round();
     },
 
@@ -214,7 +410,9 @@ const ActivityEngines = {
                     selectedTile = null;
                     if (document.querySelectorAll('.sequence-slot.filled').length >= seqMax) {
                         ActivityCore.celebrate();
-                        ActivityCore.say('Good job! You arranged the numbers correctly!');
+                        ActivityCore.say('Good job! You arranged the numbers correctly!', () => {
+                            setTimeout(() => ActivityCore.finishActivity(), 1500);
+                        });
                     } else {
                         ActivityCore.sayNumber(expected);
                     }
@@ -233,6 +431,8 @@ const ActivityEngines = {
     missing_numbers(config) {
         ActivityCore.hideMultiRoundUI();
         const { min, max } = ActivityCore.getDifficultyRange(config);
+        const ROUNDS = 3;
+        let roundsDone = 0;
 
         function round() {
             const range = max - min;
@@ -262,7 +462,14 @@ const ActivityEngines = {
                     row.querySelector('.number-line-item.missing').classList.remove('missing');
                     ActivityCore.celebrate();
                     ActivityCore.sayNumber(correct, () => {
-                        ActivityCore.sayEncouragement(() => setTimeout(round, 2000));
+                        ActivityCore.sayEncouragement(() => {
+                            roundsDone++;
+                            if (roundsDone >= ROUNDS) {
+                                ActivityCore.finishActivity();
+                            } else {
+                                setTimeout(round, 2000);
+                            }
+                        });
                     });
                 } else {
                     btn.classList.add('incorrect');
@@ -285,6 +492,8 @@ const ActivityEngines = {
         const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🍎';
         const { min, max } = ActivityCore.getDifficultyRange(config);
         const target = config.target || ActivityCore.randomInt(Math.max(2, min), Math.min(max, 10));
+        const ROUNDS = 3;
+        let roundsDone = 0;
 
         function round() {
             const counts = ActivityCore.shuffle(
@@ -319,7 +528,14 @@ const ActivityEngines = {
                     if (count === target) {
                         g.classList.add('selected-correct');
                         ActivityCore.celebrate();
-                        ActivityCore.sayEncouragement();
+                        ActivityCore.sayEncouragement(() => {
+                            roundsDone++;
+                            if (roundsDone >= ROUNDS) {
+                                ActivityCore.finishActivity();
+                            } else {
+                                setTimeout(round, 1500);
+                            }
+                        });
                     } else {
                         g.classList.add('selected-wrong');
                         ActivityCore.say('Almost! Let us count together.');
