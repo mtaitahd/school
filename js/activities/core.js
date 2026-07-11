@@ -8,13 +8,17 @@ const ActivityCore = {
         star: '⭐', fish: '🐟', dog: '🐶', cat: '🐱',
         bird: '🐦', bunny: '🐰', flower: '🌸', tree: '🌳',
         balloon: '🎈', bike: '🚲', book: '📚', cake: '🎂',
-        candy: '🍬', car: '🚗', cookie: '🍪', duck: '🦆',
+        candy: '🍬', cookie: '🍪', duck: '🦆',
         elephant: '🐘', frog: '🐸', grapes: '🍇', hat: '🎩',
         icecream: '🍦', juice: '🧃', kite: '🪁', lion: '🦁',
         monkey: '🐵', num: '🔢', orange: '🍊', penguin: '🐧',
         queen: '👑', robot: '🤖', sun: '☀️', truck: '🛻',
         umbrella: '☂️', van: '🚐', watermelon: '🍉', xylophone: '🔔',
-        yarn: '🧶', zebra: '🦓'
+        yarn: '🧶', zebra: '🦓',
+        pencil: '✏️', ruler: '📏', eraser: '🧽', desk: '🪑',
+        chair: '🪑', table: '🍽️', board: '📋', mushroom: '🍄',
+        butterfly: '🦋', rabbit: '🐇', goat: '🐐', chicken: '🐔',
+        mosquito: '🦟', bee: '🐝', fly: '🪰', stick: '🥢'
     },
 
     SHAPE_ICONS: {

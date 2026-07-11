@@ -1,12 +1,13 @@
 <?php
 /**
- * Diagnostic + Fix: Check lessons and activities state,
- * then insert/upsert all 80 activities with rich activity_data.
- * Run: php database/run_migration_v9_fix.php
+ * Diagnostic + Fix: Validate lessons, upsert all 80 activities with
+ * curriculum-based activity_data, and validate results.
+ *
+ * Run:  php database/run_migration_v9_fix.php
  */
 require_once __DIR__ . '/../php/includes/migrate.php';
 require_once __DIR__ . '/../php/db_connection.php';
-require __DIR__ . '/run_migration_v9b.php'; // Only loads the function + $acts
+require __DIR__ . '/run_migration_v9b.php'; // loads act_json() + $acts array
 
 $db = new Database();
 
@@ -21,10 +22,10 @@ foreach ($lessons as $l) {
 
 // If no lessons, create them
 if (count($lessons) === 0) {
-  echo "\nNo lessons found. Creating structure from a.php...\n";
+  echo "\nNo lessons found. Running schema migration...\n";
   require __DIR__ . '/run_migration_v9a.php';
   $lessons = $db->fetchAll("SELECT lesson_id, lesson_code FROM lessons ORDER BY lesson_code");
-  echo "After a.php: " . count($lessons) . " lessons\n";
+  echo "After schema: " . count($lessons) . " lessons\n";
 }
 
 // Build $L map
@@ -42,8 +43,6 @@ if (count($L) < 8) {
 }
 
 echo "\n=== Phase 2: Activity Data ===\n";
-// $acts is already loaded from run_migration_v9b.php
-
 echo "Total activity definitions loaded: " . count($acts) . "\n";
 
 $cnt = 0;
@@ -51,20 +50,19 @@ foreach ($acts as $a) {
   [$code, $st, $so, $name, $desc, $djson] = $a;
   $lid = $L[$code] ?? null;
   if (!$lid) { echo "ERROR: Missing lesson for $code\n"; continue; }
-  
+
   $data = json_decode($djson, true);
   $diff = $data['difficulty'] ?? 'easy';
-  
+
   $existing = $db->fetchOne("SELECT activity_id FROM activities WHERE lesson_id=? AND step_type=? AND step_order=?", [$lid, $st, $so]);
   if ($existing) {
     $db->execute("UPDATE activities SET activity_name=?, activity_description=?, activity_data=?, audio_instruction=?, difficulty_level=? WHERE activity_id=?",
       [$name, $desc, $djson, $desc, $diff, $existing['activity_id']]);
-    $cnt++;
   } else {
     $db->execute("INSERT INTO activities (module_id,lesson_id,step_type,step_order,activity_name,activity_description,activity_type,difficulty_level,activity_data,audio_instruction) VALUES (14,?,?,?,?,?,'counting',?,?,?)",
       [$lid, $st, $so, $name, $desc, $diff, $djson, $desc]);
-    $cnt++;
   }
+  $cnt++;
 }
 echo "Processed $cnt activities.\n";
 
@@ -80,9 +78,12 @@ $bad = 0;
 foreach ($db->fetchAll("SELECT activity_id, activity_data FROM activities WHERE module_id=14 AND lesson_id IS NOT NULL") as $r) {
   $d = json_decode($r['activity_data'], true);
   if (!$d) { echo "  INVALID JSON: {$r['activity_id']}\n"; $bad++; continue; }
-  $missing = array_diff(['instruction','objective','content','answer','feedback'], array_keys($d));
+  $missing = array_diff(['engine','instruction','objective','content','answer','feedback'], array_keys($d));
   if ($missing) { echo "  Missing ({$r['activity_id']}): " . implode(',',$missing) . "\n"; $bad++; }
 }
 echo ($bad ? "  FAIL: $bad errors\n" : "  ✓ All have valid JSON with required fields\n");
 
-echo "\n✓ Fix complete.\n";
+echo "\n✓ Fix complete. Activities are ready for children to access via:\n";
+echo "  learner/categories.php → Module 14\n";
+echo "  learner/activities.php?module_id=14 → 8 lessons × 10 activities\n";
+echo "  learner/activity.php?activity_id={id} → Individual activity\n";
