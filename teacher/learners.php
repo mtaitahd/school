@@ -103,17 +103,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Fetch teacher's assigned learners
+// Pagination
+$page = max(1, intval($_GET['page'] ?? 1));
+$perPage = 50;
+$offset = ($page - 1) * $perPage;
+
+$totalLearners = $database->fetchOne("SELECT COUNT(*) as c FROM users WHERE role = 'learner'");
+$totalRows = (int)($totalLearners['c'] ?? 0);
+$totalPages = max(1, ceil($totalRows / $perPage));
+
+// Fetch teacher's assigned learners (paginated, optimized with LEFT JOINs)
 $learners = $database->fetchAll("
-    SELECT u.*, 
-           (SELECT COUNT(*) FROM progress p WHERE p.user_id = u.user_id AND p.completed = 1) as completed_activities,
-           (SELECT SUM(p.stars_earned) FROM progress p WHERE p.user_id = u.user_id) as total_stars,
-           (SELECT ROUND(AVG(sa.score), 0) FROM student_assignments sa JOIN assignments a ON sa.assignment_id = a.assignment_id WHERE sa.student_id = u.user_id AND sa.score IS NOT NULL) as avg_assignment_score,
-           (SELECT COUNT(*) FROM student_assignments sa WHERE sa.student_id = u.user_id AND sa.status = 'completed') as completed_assignments,
-           (SELECT COUNT(*) FROM student_assignments sa WHERE sa.student_id = u.user_id) as total_assignments
-    FROM users u 
-    WHERE u.role = 'learner' 
+    SELECT u.*,
+           COALESCE(p.completed_count, 0) as completed_activities,
+           COALESCE(p.total_stars, 0) as total_stars,
+           COALESCE(sa.avg_score, 0) as avg_assignment_score,
+           COALESCE(sa.completed_count, 0) as completed_assignments,
+           COALESCE(sa.total_count, 0) as total_assignments
+    FROM users u
+    LEFT JOIN (
+        SELECT user_id, COUNT(*) as completed_count, SUM(stars_earned) as total_stars
+        FROM progress WHERE completed = 1 GROUP BY user_id
+    ) p ON p.user_id = u.user_id
+    LEFT JOIN (
+        SELECT student_id,
+               ROUND(AVG(CASE WHEN score IS NOT NULL THEN score END), 0) as avg_score,
+               SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count,
+               COUNT(*) as total_count
+        FROM student_assignments GROUP BY student_id
+    ) sa ON sa.student_id = u.user_id
+    WHERE u.role = 'learner'
     ORDER BY u.created_at DESC
+    LIMIT $perPage OFFSET $offset
 ");
 
 // Fetch learner details if editing
@@ -358,6 +379,23 @@ if (isset($_GET['edit'])) {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 0; flex-wrap:wrap; gap:10px;">
+                <span style="color:var(--text-light); font-size:0.9rem;">Showing <?php echo $offset + 1; ?>–<?php echo min($offset + $perPage, $totalRows); ?> of <?php echo $totalRows; ?> learners</span>
+                <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                    <?php if ($page > 1): ?>
+                        <a href="?page=<?php echo $page - 1; ?>" class="btn-child btn-child-secondary" style="padding:6px 14px; font-size:0.85rem;"><i class="fas fa-chevron-left me-1"></i>Prev</a>
+                    <?php endif; ?>
+                    <?php
+                    $startPage = max(1, $page - 3);
+                    $endPage = min($totalPages, $page + 3);
+                    for ($p = $startPage; $p <= $endPage; $p++): ?>
+                        <a href="?page=<?php echo $p; ?>" class="btn-child <?php echo $p === $page ? 'btn-child-primary' : 'btn-child-secondary'; ?>" style="padding:6px 12px; font-size:0.85rem;"><?php echo $p; ?></a>
+                    <?php endfor; ?>
+                    <?php if ($page < $totalPages): ?>
+                        <a href="?page=<?php echo $page + 1; ?>" class="btn-child btn-child-secondary" style="padding:6px 14px; font-size:0.85rem;">Next<i class="fas fa-chevron-right ms-1"></i></a>
+                    <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
     </div>
