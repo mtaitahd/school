@@ -346,14 +346,10 @@ const ActivityEngines = {
             let painting = false;
             let lastX = 0, lastY = 0;
             let totalPixels = 0;
-            let validPixels = 0;
-            const threshold = 400;
-            const validThreshold = 200;
-            const startTime = Date.now();
-            const minTimeMs = 3000;
             let finished = false;
+            let hasDrawn = false;
 
-            /* bounding box of the number (roughly ±120px from center) */
+            /* bounding box of the number */
             const cx = 160, cy = 165, halfW = 130, halfH = 130;
             function isInNumberArea(x, y) {
                 return x >= cx - halfW && x <= cx + halfW && y >= cy - halfH && y <= cy + halfH;
@@ -365,10 +361,27 @@ const ActivityEngines = {
             ctx.lineJoin = 'round';
             ctx.globalCompositeOperation = 'source-over';
 
+            /* hint text */
             const hint = document.createElement('p');
-            hint.style.cssText = 'text-align:center;color:#888;font-size:0.85rem;margin-top:0.3rem;';
-            hint.textContent = 'Drag your finger over the number to trace it!';
+            hint.style.cssText = 'text-align:center;color:#888;font-size:0.9rem;margin-top:0.3rem;min-height:1.4em;';
+            hint.textContent = 'Draw over the number with your finger!';
             display.appendChild(hint);
+
+            /* progress bar */
+            const progressWrap = document.createElement('div');
+            progressWrap.style.cssText = 'width:80%;max-width:280px;height:10px;background:#e0e0e0;border-radius:5px;margin:6px auto;overflow:hidden;';
+            const progressBar = document.createElement('div');
+            progressBar.style.cssText = 'width:0%;height:100%;background:linear-gradient(90deg,#4A90E2,#27ae60);border-radius:5px;transition:width 0.3s;';
+            progressWrap.appendChild(progressBar);
+            display.appendChild(progressWrap);
+
+            /* Done button — always visible */
+            const doneBtn = document.createElement('button');
+            doneBtn.type = 'button';
+            doneBtn.className = 'number-tile';
+            doneBtn.textContent = '✅ Done';
+            doneBtn.style.cssText = 'font-size:1.3rem;padding:14px 36px;margin:8px auto;display:none;background:var(--primary-green,#27ae60);color:#fff;border:none;border-radius:16px;cursor:pointer;min-height:52px;';
+            display.appendChild(doneBtn);
 
             function getPos(e) {
                 const rect = canvas.getBoundingClientRect();
@@ -399,36 +412,54 @@ const ActivityEngines = {
                 lastX = x;
                 lastY = y;
 
-                if (isInNumberArea(x, y)) {
-                    validPixels++;
-                } else {
-                    hint.textContent = 'Try tracing on the dotted line!';
-                    hint.style.color = '#e67e22';
-                    setTimeout(() => {
-                        hint.textContent = 'Drag your finger over the number to trace it!';
-                        hint.style.color = '#888';
-                    }, 1500);
+                if (!hasDrawn && totalPixels >= 5) {
+                    hasDrawn = true;
+                    hint.textContent = 'Good! Keep drawing!';
+                    hint.style.color = '#27ae60';
+                    doneBtn.style.display = 'block';
                 }
 
-                if (!finished && validPixels >= validThreshold && totalPixels >= threshold && (Date.now() - startTime) >= minTimeMs) {
-                    finished = true;
-                    painting = false;
-                    canvas.removeEventListener('pointerdown', startPaint);
-                    canvas.removeEventListener('pointermove', paint);
-                    canvas.removeEventListener('pointerup', endPaint);
-                    canvas.removeEventListener('touchstart', startPaint);
-                    canvas.removeEventListener('touchmove', paint);
-                    canvas.removeEventListener('touchend', endPaint);
-                    hint.textContent = 'Well done! Great tracing!';
+                /* update progress */
+                const pct = Math.min(100, Math.round((totalPixels / 120) * 100));
+                progressBar.style.width = pct + '%';
+
+                if (totalPixels >= 50 && totalPixels < 120) {
+                    hint.textContent = 'Great tracing! Keep going!';
+                } else if (totalPixels >= 120) {
+                    hint.textContent = 'Well done! Tap ✅ Done when ready!';
                     hint.style.color = '#27ae60';
-                    ActivityCore.celebrate();
-                    ActivityCore.sayNumber(target, () => {
-                        ActivityCore.sayEncouragement(finishOrNext);
-                    });
+                    progressBar.style.background = '#27ae60';
                 }
             }
 
             function endPaint() { painting = false; }
+
+            function finishTrace() {
+                if (finished) return;
+                finished = true;
+                painting = false;
+                canvas.removeEventListener('pointerdown', startPaint);
+                canvas.removeEventListener('pointermove', paint);
+                canvas.removeEventListener('pointerup', endPaint);
+                canvas.removeEventListener('touchstart', startPaint);
+                canvas.removeEventListener('touchmove', paint);
+                canvas.removeEventListener('touchend', endPaint);
+
+                canvas.style.borderColor = '#27ae60';
+                canvas.style.borderStyle = 'solid';
+                hint.textContent = 'Well done! Great tracing! 🌟';
+                hint.style.color = '#27ae60';
+                progressBar.style.width = '100%';
+                progressBar.style.background = '#27ae60';
+                doneBtn.style.display = 'none';
+
+                ActivityCore.celebrate();
+                ActivityCore.sayNumber(target, () => {
+                    ActivityCore.sayEncouragement(finishOrNext);
+                });
+            }
+
+            doneBtn.onclick = finishTrace;
 
             canvas.addEventListener('pointerdown', startPaint);
             canvas.addEventListener('pointermove', paint);
