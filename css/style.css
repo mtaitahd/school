@@ -6327,7 +6327,8 @@ body {
     position: relative;
     z-index: 999;
     width: 100%;
-    height: 46px;
+    min-height: 46px;
+    height: auto;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
@@ -6358,6 +6359,8 @@ body {
     max-width: 1400px;
     padding: 0 56px 0 0;
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .kyh-ticker-track {
@@ -6383,6 +6386,7 @@ body {
     font-weight: 600;
     color: #007bff;
     flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .kyh-ticker-item strong {
@@ -6415,6 +6419,8 @@ body {
     font-size: 0.85rem;
     animation: kyhPulse 2s ease-in-out infinite;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    max-width: 32px;
+    max-height: 32px;
 }
 
 .kyh-ticker-spacer {

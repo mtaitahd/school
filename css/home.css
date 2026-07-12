@@ -917,6 +917,34 @@
     transform: translateY(-4px);
 }
 
+/* ── Ticker on Homepage (dark nav context) ─────────── */
+.kyh-ticker-wrap {
+    background: rgba(12, 12, 29, 0.95);
+    border-color: rgba(245, 166, 35, 0.4);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+.kyh-ticker-item {
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+}
+.kyh-ticker-item strong {
+    background: var(--home-gold);
+    color: var(--home-dark);
+}
+.kyh-ticker-spacer {
+    color: rgba(255,255,255,0.2);
+}
+.kyh-ticker-icon {
+    background: var(--home-gold);
+    color: var(--home-dark);
+}
+.kyh-ticker-wrap::before {
+    background: linear-gradient(90deg, rgba(12, 12, 29, 0.98), transparent);
+}
+.kyh-ticker-wrap::after {
+    background: linear-gradient(-90deg, rgba(12, 12, 29, 0.98), transparent);
+}
+
 /* ── Responsive ────────────────────────────────────── */
 @media (max-width: 992px) {
     .hero-visual { display: none; }
