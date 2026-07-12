@@ -3,6 +3,7 @@
  */
 const ActivityRegistry = {
     mango_counting: (c) => ActivityEngines.mango_counting(c),
+    pattern_counting: (c) => ActivityEngines.pattern_counting(c),
     number_identification: (c) => ActivityEngines.number_identification(c),
     number_sequencing: (c) => ActivityEngines.number_sequencing(c),
     number_tracing: (c) => ActivityEngines.number_identification({ ...c, min: 1, max: 9 }),

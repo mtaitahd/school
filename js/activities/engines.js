@@ -6,6 +6,12 @@ const ActivityEngines = {
     /* ----- Counting with objects (1–10, multi-object, difficulty) ----- */
     mango_counting(config) {
         ActivityCore.hideMultiRoundUI();
+        const isPattern = Array.isArray(config.pattern_objects) && config.pattern_objects.length > 0;
+
+        if (isPattern) {
+            return ActivityEngines.pattern_counting(config);
+        }
+
         const obj = config.object || 'mango';
         const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🥭';
         const { min, max } = ActivityCore.getDifficultyRange(config);
@@ -75,6 +81,86 @@ const ActivityEngines = {
         }
 
         runIntro();
+    },
+
+    /* ----- Pattern Counting (mixed objects, 1→N rows) ----- */
+    /*  Used when config.pattern_objects is set, e.g.:
+     *  ['fly','butterfly','bird','mosquito','bee']
+     *  Shows rows: 1 fly, 2 butterflies, 3 birds... child counts each row. */
+    pattern_counting(config) {
+        ActivityCore.hideMultiRoundUI();
+        const objects = config.pattern_objects;
+        const totalRows = objects.length;
+        let currentRow = 0;
+
+        function showRow() {
+            if (currentRow >= totalRows) {
+                showFinalAnswer();
+                return;
+            }
+            const count = currentRow + 1;
+            const obj = objects[currentRow];
+            const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '❓';
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+
+            display.appendChild(ActivityCore.renderPrompt('Count the ' + obj + 's!', emoji));
+            const grid = document.createElement('div');
+            grid.className = 'object-count-grid';
+            let tapped = 0;
+
+            for (let i = 0; i < count; i++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'object-count-item';
+                btn.innerHTML = '<span class="count-label"></span><span class="count-emoji">' + emoji + '</span>';
+                const label = btn.querySelector('.count-label');
+                btn.onclick = () => {
+                    if (btn.classList.contains('tapped')) return;
+                    tapped++;
+                    btn.classList.add('tapped');
+                    label.textContent = tapped;
+                    ActivityCore.sayNumber(tapped);
+                    if (tapped >= count) {
+                        ActivityCore.sayEncouragement(() => {
+                            currentRow++;
+                            setTimeout(showRow, 1200);
+                        });
+                    }
+                };
+                grid.appendChild(btn);
+            }
+            display.appendChild(grid);
+            ActivityCore.say('Row ' + count + ': Count the ' + obj + 's!');
+        }
+
+        function showFinalAnswer() {
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+
+            display.appendChild(ActivityCore.renderPrompt(config.instruction || 'How many rows did you count?', '🔢'));
+            const total = totalRows;
+            const choices = ActivityCore.buildMCOptions(total, Math.max(1, total - 2), total + 2);
+            ActivityCore.renderMC(choices, (selected, btn) => {
+                if (selected === total) {
+                    btn.classList.add('correct');
+                    ActivityCore.celebrate();
+                    ActivityCore.sayNumber(total, () => {
+                        ActivityCore.sayEncouragement(() => {
+                            setTimeout(() => ActivityCore.finishActivity(), 1500);
+                        });
+                    });
+                } else {
+                    btn.classList.add('incorrect');
+                    ActivityCore.say('Try again. Count the rows!');
+                }
+            });
+            ActivityCore.say('You counted ' + total + ' rows! Choose the number.');
+        }
+
+        showRow();
     },
 
     /* ----- Number identification (nursery 1–9, large buttons, audio) ----- */

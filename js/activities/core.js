@@ -37,7 +37,13 @@ const ActivityCore = {
     ENCOURAGEMENTS: [
         'Great job!', 'Well done!', 'Awesome!', 'You are so smart!',
         'Fantastic!', 'Amazing!', 'Super!', 'Wonderful!',
-        'Excellent!', 'Brilliant!', 'Good work!', 'Keep it up!'
+        'Excellent!', 'Brilliant!', 'Good work!', 'Keep it up!',
+        'You did it!', 'Great counting!', 'Fantastic work!', 'Star!'
+    ],
+
+    FINISH_MESSAGES: [
+        'Excellent!', 'You did it!', 'Great counting!', 'Fantastic!',
+        'Wonderful!', 'Amazing!', 'Super star!', 'Well done!'
     ],
 
     shuffle(arr) {
@@ -177,11 +183,20 @@ const ActivityCore = {
     finishActivity() {
         const { display, options } = this.clearStage();
         display.className = 'activity-display activity-stage';
+        const finishMsg = this.pickRandom(this.FINISH_MESSAGES);
+        const emojiRow = ['⭐', '🌟', '✨', '🏆', '🎉'];
+        const starsHtml = '⭐⭐⭐';
+
         display.innerHTML = '<div class="finish-screen text-center">' +
             '<div class="finish-trophy">🏆</div>' +
-            '<h2 class="finish-title">Wonderful!</h2>' +
+            '<div class="finish-stars">' + starsHtml + '</div>' +
+            '<h2 class="finish-title">' + finishMsg + '</h2>' +
+            '<div class="finish-emoji-row">' +
+            emojiRow.map(function(e) { return '<span>' + e + '</span>'; }).join('') +
+            '</div>' +
             '<p class="finish-subtitle">You did a great job!</p></div>';
         options.innerHTML = '';
+
         const bar = document.getElementById('nextActivityBar');
         if (bar) {
             bar.style.display = 'flex';
@@ -194,7 +209,8 @@ const ActivityCore = {
             }
         }
         this.celebrate();
-        this.say('Wonderful!');
+        this.say(finishMsg);
+
         const cfg = window.ACTIVITY_CONFIG || {};
         if (cfg.activityId && cfg.saveProgressUrl) {
             fetch(cfg.saveProgressUrl, {

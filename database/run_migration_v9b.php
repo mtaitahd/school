@@ -12,7 +12,9 @@
 function act_json($engine, $extra, $instruction, $objective, $content, $choices, $answer, $feedback, $difficulty, $time) {
   return json_encode(array_merge([
     'engine'=>$engine,'instruction'=>$instruction,'objective'=>$objective,'content'=>$content,
-    'choices'=>$choices,'answer'=>$answer,'feedback'=>$feedback,'difficulty'=>$difficulty,'estimated_time'=>$time
+    'choices'=>$choices,'answer'=>$answer,'feedback'=>$feedback,'difficulty'=>$difficulty,'estimated_time'=>$time,
+    'audio'=>['instruction'=>$instruction,'number_name'=>'','enabled'=>false],
+    'visual'=>['theme'=>'numbers','background'=>'light','show_progress'=>true,'large_numbers'=>true,'large_objects'=>true,'animation'=>'fade']
   ], $extra), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
 }
 
@@ -134,7 +136,7 @@ $c='NUM-01-L05';
 // 1. Number Coloring
 $acts[]=[$c,'intro',0,'Colour Number 5','Outline number 5 for colouring!',act_json('number_identification',['min'=>5,'max'=>5,'poolSize'=>3,'interaction'=>'coloring','target_number'=>5,'difficulty'=>2],'Colour the number 5!','Recognise the shape of 5.','Number 5 has a round tummy. Tap to colour it!',[4,5,6],5,'Yes! 5 has a round tummy!','easy',2)];
 // 2. Pattern Counting (1 fly, 2 butterflies, 3 birds, 4 mosquitoes, 5 bees)
-$acts[]=[$c,'warmup',1,'Pattern: Count 1 to 5','Count the pattern: 1 fly, 2 butterflies, 3 birds, 4 mosquitoes, 5 bees!',act_json('mango_counting',['min'=>1,'max'=>5,'object'=>'butterfly','mode'=>'count','difficulty'=>2],'Count the pattern!','Recognise increasing quantity.','Pattern: 1 fly, 2 butterflies, 3 birds, 4 mosquitoes, 5 bees!',[],5,'Pattern complete!','easy',3)];
+$acts[]=[$c,'warmup',1,'Pattern: Count 1 to 5','Count the pattern: 1 fly, 2 butterflies, 3 birds, 4 mosquitoes, 5 bees!',act_json('mango_counting',['min'=>1,'max'=>5,'pattern_objects'=>['fly','butterfly','bird','mosquito','bee'],'mode'=>'count','difficulty'=>2],'Count the pattern!','Recognise increasing quantity.','Pattern: 1 fly, 2 butterflies, 3 birds, 4 mosquitoes, 5 bees!',[],5,'Pattern complete!','easy',3)];
 // 3. Count and Write Number
 $acts[]=[$c,'i_do',2,'Count 5 Butterflies','Count five butterflies!',act_json('mango_counting',['min'=>5,'max'=>5,'object'=>'butterfly','mode'=>'count','difficulty'=>2],'Count the butterflies!','Count five objects.','Five butterflies — tap and count 1, 2, 3, 4, 5!',[],5,'Yes, 5 butterflies!','easy',2)];
 // 4. Match Objects With Numbers

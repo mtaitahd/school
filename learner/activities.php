@@ -85,7 +85,7 @@ if (!empty($lessons)) {
                 <i class="fas <?php echo htmlspecialchars($module['module_icon']); ?> module-card-icon" style="color: <?php echo htmlspecialchars($module['module_color']); ?>;" aria-hidden="true"></i>
             </div>
             <h1><?php echo htmlspecialchars($module['module_name']); ?></h1>
-            <p><?php echo htmlspecialchars($module['module_description']); ?></p>
+            <p style="font-size: 1.1rem; color: var(--text-light); max-width: 600px; margin: 0 auto;"><?php echo htmlspecialchars($module['module_description']); ?></p>
         </div>
 
         <div class="row-child">
@@ -93,30 +93,35 @@ if (!empty($lessons)) {
                 <?php foreach ($activities_by_lesson as $entry): ?>
                     <?php $lesson = $entry['lesson']; $lesson_activities = $entry['activities']; ?>
                     <div class="col-child-1">
-                        <div class="lesson-section" style="margin-bottom: 24px;">
-                            <div class="lesson-header" style="border-left: 4px solid <?php echo htmlspecialchars($module['module_color']); ?>; padding-left: 16px; margin-bottom: 12px;">
-                                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px;">
+                        <div class="lesson-section" style="margin-bottom: 32px;">
+                            <div class="lesson-header" style="border-left: 5px solid <?php echo htmlspecialchars($module['module_color']); ?>; padding: 12px 16px; margin-bottom: 16px; background: rgba(255,255,255,0.7); border-radius: 0 12px 12px 0;">
+                                <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-dark); margin-bottom: 6px;">
                                     <?php echo htmlspecialchars($lesson['lesson_name']); ?>
                                 </h3>
-                                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 2px;">
+                                <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 4px;">
                                     <?php echo htmlspecialchars($lesson['learning_objective']); ?>
                                 </p>
-                                <p style="font-size: 0.8rem; color: var(--text-light);">
+                                <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0;">
                                     <i class="fas fa-clock" aria-hidden="true"></i> <?php echo (int)$lesson['estimated_minutes']; ?> min
+                                    &middot;
+                                    <i class="fas fa-list" aria-hidden="true"></i> <?php echo count($lesson_activities); ?> activities
                                 </p>
                             </div>
                             <div class="row-child" style="margin-top: 8px;">
-                                <?php foreach ($lesson_activities as $activity): ?>
+                                <?php foreach ($lesson_activities as $idx => $activity): ?>
                                 <div class="col-child-3">
                                     <article class="module-card" tabindex="0" role="button"
                                          onclick="selectActivity(<?php echo (int)$activity['activity_id']; ?>)"
                                          onkeydown="if(event.key==='Enter')selectActivity(<?php echo (int)$activity['activity_id']; ?>)">
+                                        <div style="font-size:0.8rem; font-weight:700; color: var(--text-light); margin-bottom:4px;">
+                                            <?php echo $idx + 1; ?> / <?php echo count($lesson_activities); ?>
+                                        </div>
                                         <div class="activity-card-icon" style="color: <?php echo htmlspecialchars($module['module_color']); ?>;">
                                             <i class="fas fa-play-circle" aria-hidden="true"></i>
                                         </div>
                                         <h3 class="activity-card-title"><?php echo htmlspecialchars($activity['activity_name']); ?></h3>
                                         <p class="activity-card-description"><?php echo htmlspecialchars($activity['activity_description']); ?></p>
-                                        <button type="button" class="audio-btn" onclick="event.stopPropagation(); playAudio('<?php echo htmlspecialchars($activity['audio_instruction'], ENT_QUOTES); ?>')">
+                                        <button type="button" class="audio-btn" onclick="event.stopPropagation(); playAudio('<?php echo htmlspecialchars($activity['audio_instruction'], ENT_QUOTES); ?>')" aria-label="Listen to instruction">
                                             <i class="fas fa-volume-up" aria-hidden="true"></i>
                                         </button>
                                     </article>

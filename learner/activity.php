@@ -46,11 +46,23 @@ $home_url = '../index.php';
 
 $engine = $activity_data['engine'] ?? $activity['activity_type'];
 $isInteractiveEngine = in_array($engine, [
-    'mango_counting', 'number_identification', 'number_sequencing', 'number_tracing',
+    'mango_counting', 'pattern_counting', 'number_identification', 'number_sequencing', 'number_tracing',
     'missing_numbers', 'match_quantity', 'dot_to_dot', 'identify_shapes',
     'shape_sorting', 'complete_pattern', 'drag_addition', 'visual_subtraction', 'number_line',
     'object_recognition', 'objects', 'sorting', 'math_game'
 ], true);
+
+/* Phase 6: Lesson progress info */
+$lesson_name = '';
+$lesson_id = (int)($activity['lesson_id'] ?? 0);
+$activity_position = 0;
+$total_in_lesson = 0;
+if ($lesson_id > 0) {
+    $lesson_row = $database->fetchOne("SELECT lesson_name FROM lessons WHERE lesson_id = ?", [$lesson_id]);
+    $lesson_name = $lesson_row['lesson_name'] ?? '';
+    $total_in_lesson = (int)$database->fetchOne("SELECT COUNT(*) as cnt FROM activities WHERE lesson_id = ? AND is_active = 1", [$lesson_id])['cnt'];
+    $activity_position = (int)$database->fetchOne("SELECT COUNT(*) as cnt FROM activities WHERE lesson_id = ? AND is_active = 1 AND order_index <= ?", [$lesson_id, $activity['order_index'] ?? 0])['cnt'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang; ?>">
@@ -75,6 +87,25 @@ $isInteractiveEngine = in_array($engine, [
                 <h1 class="activity-title"><?php echo htmlspecialchars($activity['activity_name']); ?></h1>
                 <p class="activity-instruction"><?php echo htmlspecialchars($activity['activity_description']); ?></p>
             </div>
+
+            <?php if ($lesson_name && $total_in_lesson > 0): ?>
+            <div class="activity-progress-inline" role="status" aria-label="Activity progress">
+                <div class="activity-progress-label">
+                    <?php echo $current_lang === 'sw' ? 'Somoo' : 'Lesson'; ?>:
+                    <strong><?php echo htmlspecialchars($lesson_name); ?></strong>
+                    &mdash;
+                    <?php echo $activity_position; ?> / <?php echo $total_in_lesson; ?>
+                </div>
+                <div class="activity-progress-track">
+                    <div class="activity-progress-fill" style="width: <?php echo round(($activity_position / $total_in_lesson) * 100); ?>%"></div>
+                </div>
+            </div>
+            <div class="activity-step-dots" aria-hidden="true">
+                <?php for ($i = 1; $i <= $total_in_lesson; $i++): ?>
+                <span class="activity-step-dot <?php echo $i < $activity_position ? 'done' : ($i === $activity_position ? 'active' : ''); ?>"></span>
+                <?php endfor; ?>
+            </div>
+            <?php endif; ?>
 
             <?php if (!$isInteractiveEngine): ?>
             <div class="progress-bar-child">
@@ -122,7 +153,10 @@ $isInteractiveEngine = in_array($engine, [
             activityId: <?php echo (int)$activity_id; ?>,
             saveProgressUrl: '../api/save-progress.php',
             lang: <?php echo json_encode($current_lang); ?>,
-            totalQuestions: 5
+            totalQuestions: 5,
+            lessonName: <?php echo json_encode($lesson_name); ?>,
+            activityPosition: <?php echo $activity_position; ?>,
+            totalInLesson: <?php echo $total_in_lesson; ?>
         };
         function goBack() {
             window.location.href = 'activities?module_id=' + ACTIVITY_CONFIG.moduleId + '&lang=' + ACTIVITY_CONFIG.lang;
@@ -130,10 +164,10 @@ $isInteractiveEngine = in_array($engine, [
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/activities/core.js?v=20260712c"></script>
-    <script src="../js/activities/engines.js?v=20260712c"></script>
-    <script src="../js/activities/registry.js?v=20260712c"></script>
-    <script src="../js/activity-runner.js?v=20260712c"></script>
+    <script src="../js/activities/core.js?v=20260712e"></script>
+    <script src="../js/activities/engines.js?v=20260712e"></script>
+    <script src="../js/activities/registry.js?v=20260712e"></script>
+    <script src="../js/activity-runner.js?v=20260712e"></script>
 </body>
 </html>
 
