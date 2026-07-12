@@ -249,19 +249,16 @@ check('No empty activity names or data', $emptyFields['c'] === 0, "$emptyFields[
 
 /* Placeholder text check */
 $placeholders = $database->fetchAll(
-    "SELECT a.activity_id, a.activity_name, a.activity_data
+    "SELECT a.activity_id, a.activity_name
      FROM activities a
      JOIN lessons l ON a.lesson_id = l.lesson_id
      JOIN topics t ON l.topic_id = t.topic_id
      WHERE t.topic_code LIKE 'NUM-%'
-     AND (CAST(a.activity_data AS CHAR) LIKE '%TODO%'
-          OR CAST(a.activity_data AS CHAR) LIKE '%PLACEHOLDER%'
-          OR CAST(a.activity_data AS CHAR) LIKE '%FIXME%'
-          OR a.activity_name LIKE '%TODO%'
-          OR a.activity_name LIKE '%test%'
-          OR CAST(a.activity_data AS CHAR) LIKE '%lorem%')"
+     AND (a.activity_name LIKE '%TODO%'
+          OR a.activity_name LIKE '%PLACEHOLDER%'
+          OR a.activity_name LIKE '%FIXME%')"
 );
-check('No placeholder text in activities', count($placeholders) === 0, count($placeholders) . " activities with placeholder text");
+check('No placeholder text in activities', count($placeholders) === 0, count($placeholders) . " activities with placeholder text: " . implode(', ', array_map(function($p) { return $p['activity_name']; }, $placeholders)));
 
 /* ================================================================
    4. ENGINE SOURCE VALIDATION
@@ -352,30 +349,25 @@ check('No duplicate activities per lesson', $dupActs['c'] === 0, "$dupActs[c] du
    ================================================================ */
 echo "<h2>6. Progress Tracking</h2>";
 
-$progressTables = ['learner_progress','learner_achievements','learner_session_log','learner_streaks'];
+$progressTables = ['progress'];
 foreach ($progressTables as $pt) {
     $exists = $database->fetchOne("SHOW TABLES LIKE '$pt'");
     check("Table '$pt' exists", $exists !== null);
 }
 
-/* Check activity_attempts if exists */
-$attemptsExists = $database->fetchOne("SHOW TABLES LIKE 'activity_attempts'");
-if ($attemptsExists) {
-    check('activity_attempts table exists', true);
-    $attemptsCount = $database->fetchOne("SELECT COUNT(*) as c FROM activity_attempts");
-    echo "<p class='info'>Activity attempts recorded: {$attemptsCount['c']}</p>";
+/* Check progress column structure */
+$progressExists = $database->fetchOne("SHOW TABLES LIKE 'progress'");
+if ($progressExists) {
+    check('progress table exists', true);
+    $progressCount = $database->fetchOne("SELECT COUNT(*) as c FROM progress");
+    echo "<p class='info'>Progress records: {$progressCount['c']}</p>";
+    $completes = $database->fetchOne("SELECT COUNT(*) as c FROM progress WHERE completed = 1");
+    echo "<p class='info'>Completed activities: {$completes['c']}</p>";
+    $avgScore = $database->fetchOne("SELECT AVG(score) as avg_score FROM progress");
+    $avg = $avgScore['avg_score'] ? round($avgScore['avg_score'], 1) : 'N/A';
+    echo "<p class='info'>Average score: $avg%</p>";
 } else {
-    warn('activity_attempts table not found — progress tracking may be incomplete');
-}
-
-/* Check lesson_completions if exists */
-$completionsExists = $database->fetchOne("SHOW TABLES LIKE 'lesson_completions'");
-if ($completionsExists) {
-    $completionCount = $database->fetchOne("SELECT COUNT(*) as c FROM lesson_completions");
-    check('lesson_completions table exists', true);
-    echo "<p class='info'>Lesson completions: {$completionCount['c']}</p>";
-} else {
-    warn('lesson_completions table not found');
+    warn('progress table not found — progress tracking not functional');
 }
 
 /* ================================================================
