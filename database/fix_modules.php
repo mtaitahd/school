@@ -69,6 +69,14 @@ foreach (array_keys($orphanTopics) as $tc) {
 
 foreach ($orphanTopics as $tc => $newModId) {
     if (!$newModId) continue;
+
+    /* Also update topics.module_id — activities.php queries t.module_id */
+    $topics = $database->fetchAll("SELECT topic_id FROM topics WHERE topic_code LIKE ?", [$tc . '%']);
+    foreach ($topics as $t) {
+        $database->execute("UPDATE topics SET module_id = ? WHERE topic_id = ? AND module_id = 14", [$newModId, $t['topic_id']]);
+    }
+    echo "  Re-assigned " . count($topics) . " topic(s) for $tc → module_id=$newModId\n";
+
     $lessons = $database->fetchAll("SELECT lesson_id FROM lessons WHERE lesson_code LIKE ?", [$tc . '-%']);
     $ids = array_column($lessons, 'lesson_id');
     if (empty($ids)) continue;

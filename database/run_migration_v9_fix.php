@@ -62,13 +62,17 @@ foreach ($acts as $a) {
   $diff = $data['difficulty'] ?? 'easy';
   $audio = $data['instruction'] ?? $desc;
 
+  /* Get correct module_id for NUM-01 */
+  $mod = $db->fetchOne("SELECT m.module_id FROM modules m JOIN topics t ON t.module_id = m.module_id JOIN lessons l ON l.topic_id = t.topic_id WHERE l.lesson_id = ? LIMIT 1", [$lid]);
+  $mod_id = $mod ? (int)$mod['module_id'] : 14;
+
   $existing = $db->fetchOne("SELECT activity_id FROM activities WHERE lesson_id=? AND step_type=? AND step_order=?", [$lid, $st, $so]);
   if ($existing) {
     $db->execute("UPDATE activities SET activity_name=?, activity_description=?, activity_data=?, audio_instruction=?, difficulty_level=? WHERE activity_id=?",
       [$name, $desc, $djson, $audio, $diff, $existing['activity_id']]);
   } else {
-    $db->execute("INSERT INTO activities (module_id,lesson_id,step_type,step_order,activity_name,activity_description,activity_type,difficulty_level,activity_data,audio_instruction) VALUES (14,?,?,?,?,?,'counting',?,?,?)",
-      [$lid, $st, $so, $name, $desc, $diff, $djson, $audio]);
+    $db->execute("INSERT INTO activities (module_id,lesson_id,step_type,step_order,activity_name,activity_description,activity_type,difficulty_level,activity_data,audio_instruction) VALUES (?,?,?,?,?,?,'counting',?,?,?)",
+      [$mod_id, $lid, $st, $so, $name, $desc, $diff, $djson, $audio]);
   }
   $cnt++;
 }

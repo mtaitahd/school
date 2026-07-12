@@ -15,6 +15,11 @@ echo "=== Phase 6 Fix: NUM-03 Upsert + Validate ===\n\n";
 require __DIR__ . '/run_migration_v11a.php';
 echo "\n";
 
+/* 1b. Get correct module_id */
+$mod = $database->fetchOne("SELECT module_id FROM modules WHERE module_name = 'Number Ten' LIMIT 1");
+$module_id = $mod ? (int)$mod['module_id'] : 14;
+echo "module_id = $module_id\n\n";
+
 /* 2. Load activity definitions */
 require __DIR__ . '/run_migration_v11b.php';
 
@@ -51,8 +56,8 @@ foreach ($acts as [$lesson_code, $step_type, $step_order, $name, $desc, $json]) 
         $updated++;
     } else {
         $database->execute(
-            "INSERT INTO activities (module_id,lesson_id,step_type,step_order,activity_name,activity_description,activity_type,difficulty_level,activity_data,audio_instruction) VALUES (14,?,?,?,?,?,'counting',?,?,?)",
-            [$lid, $step_type, $step_order, $name, $desc, $diff, $json, $data['instruction']]
+            "INSERT INTO activities (module_id,lesson_id,step_type,step_order,activity_name,activity_description,activity_type,difficulty_level,activity_data,audio_instruction) VALUES (?,?,?,?,?,?,'counting',?,?,?)",
+            [$module_id, $lid, $step_type, $step_order, $name, $desc, $diff, $json, $data['instruction']]
         );
         $inserted++;
     }

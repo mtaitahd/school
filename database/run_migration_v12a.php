@@ -17,11 +17,16 @@ if (!$strand) { echo "ERROR: strand NUM not found\n"; exit(1); }
 $strand_id = $strand['strand_id'];
 echo "strand_id = $strand_id\n";
 
-/* 2. Create topic NUM-04 */
+/* 2. Get module_id for "Numbers 11–20" */
+$mod = $database->fetchOne("SELECT module_id FROM modules WHERE module_name = 'Numbers 11–20' LIMIT 1");
+$module_id = $mod ? (int)$mod['module_id'] : 14;
+echo "module_id = $module_id\n";
+
+/* 3. Create topic NUM-04 */
 $database->execute(
     "INSERT IGNORE INTO topics (strand_id, module_id, topic_name, topic_code, age_range, description, estimated_sessions, order_index)
-     VALUES (?, 14, 'Counting Objects and Numbers 11–20', 'NUM-04', '4-5', 'Count objects and learn numbers 11 to 20: recognise, read, write, count, match, and play snake and ladder.', 8, 4)",
-    [$strand_id]
+     VALUES (?, ?, 'Counting Objects and Numbers 11–20', 'NUM-04', '4-5', 'Count objects and learn numbers 11 to 20: recognise, read, write, count, match, and play snake and ladder.', 8, 4)",
+    [$strand_id, $module_id]
 );
 $topic = $database->fetchOne("SELECT topic_id FROM topics WHERE topic_code = 'NUM-04'");
 if (!$topic) { echo "ERROR: topic NUM-04 not created\n"; exit(1); }
