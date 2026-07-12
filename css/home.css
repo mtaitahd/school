@@ -59,17 +59,15 @@
     .custom-cursor { display: none; }
 }
 
-/* ── NAVBAR Redesign ───────────────────────────────── */
+/* ── NAVBAR Redesign — blue like other pages ────────── */
 .navbar-home {
-    background: rgba(12, 12, 29, 0.92) !important;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: 0 4px 30px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.05);
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06), 0 12px 30px rgba(0, 0, 0, 0.12);
     transition: all 0.5s var(--home-transition);
     padding: 6px 0;
 }
 .navbar-home .navbar-link {
-    color: rgba(255,255,255,0.8) !important;
+    color: rgba(255,255,255,0.9) !important;
     font-family: var(--font-body);
     font-weight: 500;
     letter-spacing: 0.02em;
@@ -84,7 +82,7 @@
     left: 16px;
     right: 16px;
     height: 2px;
-    background: var(--home-gold);
+    background: #fff;
     transform: scaleX(0);
     transform-origin: right;
     transition: transform 0.3s var(--home-transition);
@@ -97,17 +95,15 @@
 }
 .navbar-home .navbar-link:hover {
     color: #fff !important;
-    background: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.12);
 }
 .navbar-home .brand-main {
     font-family: var(--font-display);
     font-size: 1.3rem;
     font-weight: 700;
     letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #fff 0%, var(--home-gold-light) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff;
 }
 
 /* ── Hero Section ──────────────────────────────────── */
@@ -924,14 +920,14 @@
     transform: translateY(-4px);
 }
 
-/* ── Ticker on Homepage (dark nav context) ─────────── */
+/* ── Ticker on Homepage (blue, matches navbar) ──────── */
 .kyh-ticker-wrap {
-    background: rgba(12, 12, 29, 0.95);
-    border-color: rgba(245, 166, 35, 0.4);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, #0069d9 0%, #004a99 100%);
+    border-color: rgba(255,255,255,0.25);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .kyh-ticker-item {
-    color: rgba(255,255,255,0.85);
+    color: rgba(255,255,255,0.9);
     font-weight: 500;
 }
 .kyh-ticker-item strong {
@@ -939,17 +935,17 @@
     color: var(--home-dark);
 }
 .kyh-ticker-spacer {
-    color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.35);
 }
 .kyh-ticker-icon {
-    background: var(--home-gold);
-    color: var(--home-dark);
+    background: #fff;
+    color: #007bff;
 }
 .kyh-ticker-wrap::before {
-    background: linear-gradient(90deg, rgba(12, 12, 29, 0.98), transparent);
+    background: linear-gradient(90deg, #0069d9, transparent);
 }
 .kyh-ticker-wrap::after {
-    background: linear-gradient(-90deg, rgba(12, 12, 29, 0.98), transparent);
+    background: linear-gradient(-90deg, #0069d9, transparent);
 }
 
 /* ── Responsive ────────────────────────────────────── */
