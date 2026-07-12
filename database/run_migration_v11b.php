@@ -116,7 +116,7 @@ $acts[]=[$c,'warmup',1,'Count Ten Mangoes','Count all the mangoes!',act_json('ma
 // 3. Count Ten Objects
 $acts[]=[$c,'i_do',2,'Count Ten Objects','Count exactly ten objects.',act_json('mango_counting',['min'=>10,'max'=>10,'object'=>'book','difficulty'=>1],'Count ten books!','Count and stop at ten.','Count the books — stop at ten!',[10],10,'Ten books!','easy',2)];
 // 4. Count and Choose
-$acts[]=[$c,'we_do',3,'Count and Choose','How many? Choose the right number!',act_json('mango_counting',['min'=>10,'max'=>10,'object'=>'pencil','difficulty'=>1],'How many pencils?','Count and identify.','Count the pencils and choose the number!',[10],10,'Ten pencils!','easy',2)];
+$acts[]=[$c,'we_do',3,'Count and Choose','How many? Choose the right number!',act_json('mango_counting',['min'=>10,'max'=>10,'object'=>'ruler','difficulty'=>1],'How many rulers?','Count and identify.','Count the rulers and choose the number!',[10],10,'Ten rulers!','easy',2)];
 // 5. Count Ten Chairs
 $acts[]=[$c,'you_do',4,'Count Ten Chairs','Count the chairs on your own.',act_json('mango_counting',['min'=>10,'max'=>10,'object'=>'chair','difficulty'=>2],'Count the chairs!','Independent counting.','Count the chairs — how many?',[10],10,'Ten chairs!','easy',2)];
 // 6. Check
@@ -146,7 +146,7 @@ $acts[]=[$c,'i_do',2,'Circle Number 10','Find and tap all the number 10s!',act_j
 // 4. Match Ten Books
 $acts[]=[$c,'we_do',3,'Match Ten Books','Which group has ten books?',act_json('match_quantity',['min'=>10,'max'=>10,'object'=>'book','target'=>10,'difficulty'=>1],'Find 10 books!','Match ten books.','Find the group with exactly ten books!',[10],10,'Ten books!','easy',2)];
 // 5. Match Ten Pencils
-$acts[]=[$c,'you_do',4,'Match Ten Pencils','Find ten pencils on your own.',act_json('match_quantity',['min'=>10,'max'=>10,'object'=>'pencil','target'=>10,'difficulty'=>2],'Find 10 pencils!','Independent matching.','Which group has exactly ten pencils?',[10],10,'Ten pencils!','easy',2)];
+$acts[]=[$c,'you_do',4,'Match Ten Sticks','Find ten sticks on your own.',act_json('match_quantity',['min'=>10,'max'=>10,'object'=>'stick','target'=>10,'difficulty'=>2],'Find 10 sticks!','Independent matching.','Which group has exactly ten sticks?',[10],10,'Ten sticks!','easy',2)];
 // 6. Check
 $acts[]=[$c,'check',5,'Find 10','Tap number 10.',act_json('number_identification',['min'=>7,'max'=>10,'poolSize'=>4,'difficulty'=>1],'Find number 10!','Identify 10.','Which number is 10?',[7,8,9,10],10,'Yes! 10!','easy',1)];
 // 7. Matching Game
@@ -200,7 +200,7 @@ $acts[]=[$c,'warmup',1,'Review: Count to Ten','Count the objects!',act_json('man
 // 3. Review: Write 10
 $acts[]=[$c,'i_do',2,'Review: Write 10','Write number 10 with a marker.',act_json('number_identification',['min'=>10,'max'=>10,'poolSize'=>1,'mode'=>'trace','target_number'=>10,'difficulty'=>1],'Write number 10!','Review writing.','Trace number 10 — 1 then 0!',[10],10,'Well written!','easy',2)];
 // 4. Review: Match 10
-$acts[]=[$c,'we_do',3,'Review: Match 10','Find the group with ten objects.',act_json('match_quantity',['min'=>10,'max'=>10,'object'=>'rabbit','target'=>10,'difficulty'=>1],'Find 10 rabbits!','Review matching.','Which group has ten rabbits?',[10],10,'Ten rabbits!','easy',2)];
+$acts[]=[$c,'we_do',3,'Review: Match 10','Find the group with ten objects.',act_json('match_quantity',['min'=>10,'max'=>10,'object'=>'butterfly','target'=>10,'difficulty'=>1],'Find 10 butterflies!','Review matching.','Which group has ten butterflies?',[10],10,'Ten butterflies!','easy',2)];
 // 5. Review: Read 10
 $acts[]=[$c,'you_do',4,'Review: Read 10','Read the number aloud!',act_json('number_identification',['min'=>7,'max'=>10,'poolSize'=>4,'target_number'=>10,'difficulty'=>2],'Read: find TEN!','Review reading.','Read "ten" and find the number!',[7,8,9,10],10,'Ten!','easy',2)];
 // 6. Check
