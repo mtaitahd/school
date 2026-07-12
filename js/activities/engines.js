@@ -176,7 +176,7 @@ const ActivityEngines = {
         const nurseryMax = Math.min(Math.max(max, nurseryMin), 20);
         const range = nurseryMax - nurseryMin + 1;
         const poolSize = Math.min(config.poolSize || Math.min(6, range), range);
-        const fixedTarget = config.target_number || null;
+        const fixedTarget = (config.target_number != null && config.target_number !== undefined) ? config.target_number : null;
         const isShape = !!config.shape_object;
         const isTrace = config.mode === 'trace' || config.interaction === 'coloring';
         const ROUNDS = 3;
@@ -578,7 +578,7 @@ const ActivityEngines = {
         const obj = config.object || 'apple';
         const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🍎';
         const { min, max } = ActivityCore.getDifficultyRange(config);
-        const target = config.target || ActivityCore.randomInt(Math.max(2, min), Math.min(max, 10));
+        const target = (config.target != null && config.target !== undefined) ? config.target : ActivityCore.randomInt(Math.max(0, min), Math.min(max, 10));
         const ROUNDS = 3;
         let roundsDone = 0;
 
@@ -641,7 +641,10 @@ const ActivityEngines = {
                         setTimeout(() => {
                             g.classList.remove('selected-wrong');
                             [...groups.children].forEach((el) => {
-                                if (+el.querySelectorAll('.objects-row span').length === target) {
+                                const emojiCount = el.querySelectorAll('.objects-row span[aria-label!="empty"]').length;
+                                const isEmpty = el.querySelector('.objects-row span[aria-label="empty"]');
+                                const groupCount = isEmpty ? 0 : emojiCount;
+                                if (groupCount === target) {
                                     el.classList.add('selected-correct');
                                 }
                             });

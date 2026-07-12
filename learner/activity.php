@@ -74,7 +74,7 @@ if ($lesson_id > 0) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/activities.css?v=20260712f">
+    <link rel="stylesheet" href="../css/activities.css?v=20260712g">
 </head>
 <body class="page-child activity-fullscreen">
     <?php if (!$learner_logged_in): include '../php/includes/header.php'; endif; ?>
@@ -89,6 +89,14 @@ if ($lesson_id > 0) {
         </span>
         <?php endif; ?>
     </div>
+
+    <?php $instr = $activity_data['instruction'] ?? ''; ?>
+    <?php if ($instr): ?>
+    <div class="activity-instruction-bar" id="activityInstructionBar">
+        <span class="instruction-icon">📋</span>
+        <span class="instruction-text"><?php echo htmlspecialchars($instr); ?></span>
+    </div>
+    <?php endif; ?>
 
     <div class="activity-display" id="activityDisplay"></div>
 
@@ -132,10 +140,10 @@ if ($lesson_id > 0) {
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/activities/core.js?v=20260712f"></script>
-    <script src="../js/activities/engines.js?v=20260712f"></script>
-    <script src="../js/activities/registry.js?v=20260712f"></script>
-    <script src="../js/activity-runner.js?v=20260712f"></script>
+    <script src="../js/activities/core.js?v=20260712g"></script>
+    <script src="../js/activities/engines.js?v=20260712g"></script>
+    <script src="../js/activities/registry.js?v=20260712g"></script>
+    <script src="../js/activity-runner.js?v=20260712g"></script>
 </body>
 </html>
 

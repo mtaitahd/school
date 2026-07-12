@@ -1217,6 +1217,29 @@ body.activity-fullscreen .activity-topbar-simple {
     border-radius: 50px;
 }
 
+/* Activity instruction bar */
+body.activity-fullscreen .activity-instruction-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(74, 144, 226, 0.08);
+    border-bottom: 2px solid rgba(74, 144, 226, 0.12);
+    flex-shrink: 0;
+}
+
+body.activity-fullscreen .instruction-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+body.activity-fullscreen .instruction-text {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-dark, #333);
+    line-height: 1.4;
+}
+
 /* Activity display fills remaining space */
 body.activity-fullscreen .activity-display {
     flex: 1;
