@@ -176,6 +176,7 @@
 .hero-content {
     position: relative;
     z-index: 3;
+    text-align: center;
 }
 .hero-eyebrow {
     display: inline-flex;
@@ -224,7 +225,9 @@
     font-family: var(--font-body);
     font-size: clamp(1rem, 1.8vw, 1.2rem);
     color: rgba(255,255,255,0.9);
-    max-width: 520px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
     line-height: 1.7;
     margin-bottom: 36px;
     text-shadow: 0 1px 8px rgba(0,0,0,0.6), 0 2px 20px rgba(0,0,0,0.3);
@@ -236,6 +239,7 @@
     display: flex;
     gap: 14px;
     flex-wrap: wrap;
+    justify-content: center;
     animation: fadeInUp 0.8s 0.8s both;
 }
 .hero-btn {
@@ -290,10 +294,11 @@
     display: flex;
     gap: 32px;
     margin-top: 48px;
+    justify-content: center;
     animation: fadeInUp 0.8s 1s both;
 }
 .hero-stat {
-    text-align: left;
+    text-align: center;
 }
 .hero-stat-number {
     font-family: var(--font-display);
