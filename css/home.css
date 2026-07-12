@@ -61,16 +61,11 @@
 
 /* ── NAVBAR Redesign ───────────────────────────────── */
 .navbar-home {
-    background: transparent !important;
-    box-shadow: none !important;
-    transition: all 0.5s var(--home-transition);
-    padding: 12px 0;
-}
-.navbar-home.scrolled {
     background: rgba(12, 12, 29, 0.92) !important;
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     box-shadow: 0 4px 30px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.05);
+    transition: all 0.5s var(--home-transition);
     padding: 6px 0;
 }
 .navbar-home .navbar-link {
