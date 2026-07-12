@@ -313,7 +313,7 @@ const ActivityEngines = {
         }
 
         function roundTrace(target) {
-            const TRACES_NEEDED = 2;
+            const TRACES_NEEDED = 1;
             let tracesDone = 0;
 
             function runOneTrace() {
