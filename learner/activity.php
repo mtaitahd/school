@@ -77,8 +77,6 @@ if ($lesson_id > 0) {
     <link rel="stylesheet" href="../css/activities.css?v=20260712g">
 </head>
 <body class="page-child activity-fullscreen">
-    <?php if (!$learner_logged_in): include '../php/includes/header.php'; endif; ?>
-
     <div class="activity-topbar-simple">
         <a href="<?php echo htmlspecialchars($back_url); ?>" class="topbar-simple-btn" aria-label="Back">
             <i class="fas fa-arrow-left"></i>
