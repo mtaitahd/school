@@ -32,6 +32,10 @@ $category_labels = [
     'Subtraction' => ['en' => 'Subtraction', 'sw' => 'Kutoa'],
     'Matching' => ['en' => 'Matching Games', 'sw' => 'Michezo ya Kulinganisha'],
     'Games' => ['en' => 'Math Games', 'sw' => 'Michezo ya Hisabati'],
+    'Recognising and Counting Numbers 1-9' => ['en' => 'Learn to recognise, count, and write numbers from 1 to 9', 'sw' => 'Jifunze kutambua, kuhesabu, na kuandika namba 1 hadi 9'],
+    'Number Zero' => ['en' => 'Learn to recognise, trace, and find the number 0', 'sw' => 'Jifunze kutambua, kufuata, na kupata namba 0'],
+    'Number Ten' => ['en' => 'Learn to recognise, read, write, and count to 10', 'sw' => 'Jifunze kutambua, kusoma, kuandika, na kuhesabu hadi 10'],
+    'Numbers 11–20' => ['en' => 'Count objects and learn numbers 11 to 20', 'sw' => 'Hesabu vitu na jifunze namba 11 hadi 20'],
 ];
 ?>
 <!DOCTYPE html>
