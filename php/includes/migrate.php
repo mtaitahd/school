@@ -383,6 +383,9 @@ function ensure_schema_v2($database): void {
     if (!in_array('gender', $uFields)) {
         $database->execute("ALTER TABLE users ADD COLUMN gender VARCHAR(10) NULL AFTER age");
     }
+    if (!in_array('parent_id', $uFields)) {
+        $database->execute("ALTER TABLE users ADD COLUMN parent_id INT NULL AFTER last_name");
+    }
 
     $done = true;
 }

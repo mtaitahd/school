@@ -18,25 +18,18 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_require();
 
-    $input = strtolower(trim($_POST['username'] ?? ($_GET['username'] ?? '')));
+    $username = strtolower(trim($_POST['username'] ?? ($_GET['username'] ?? '')));
 
-    if (empty($input)) {
-        $error = 'Please enter your username or claim code.';
-    } elseif (!sec_login_rate_limit($input)) {
+    if (empty($username)) {
+        $error = 'Please enter your username.';
+    } elseif (!sec_login_rate_limit($username)) {
         $error = 'Too many login attempts. Please try again in 15 minutes.';
     } else {
-        // Try claim code first (KH-XXXXXX format), then username
-        if (preg_match('/^KH-[A-Z0-9]{6}$/i', $input)) {
-            $learner = $database->fetchOne(
-                "SELECT * FROM users WHERE UPPER(claim_code) = UPPER(?) AND role = 'learner' AND is_active = 1",
-                [$input]
-            );
-        } else {
-            $learner = $database->fetchOne(
-                "SELECT * FROM users WHERE LOWER(username) = LOWER(?) AND role = 'learner' AND is_active = 1",
-                [$input]
-            );
-        }
+        // Check for learner account (no password required)
+        $learner = $database->fetchOne(
+            "SELECT * FROM users WHERE LOWER(username) = LOWER(?) AND role = 'learner' AND is_active = 1",
+            [$username]
+        );
 
         if ($learner) {
             // Bypass subscription check if payment is disabled
@@ -48,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             if (empty($error)) {
-                sec_clear_login_rate_limit($input);
+                sec_clear_login_rate_limit($username);
                 sec_session_regenerate();
                 $_SESSION['user_id'] = (int) $learner['user_id'];
                 $_SESSION['username'] = $learner['username'];
@@ -63,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
         } else {
-            $error = 'Username or claim code not found. Please ask your parent or teacher for help.';
+            $error = 'Username not found. Please ask your parent or teacher for help.';
         }
     }
 }
@@ -86,7 +79,7 @@ include '../php/includes/auth-split-start.php';
 ?>
             <header class="auth-form-header">
                 <h1 class="auth-form-title">Login</h1>
-                <p class="auth-form-subtitle">Learner account &mdash; enter your username or claim code to start learning</p>
+                <p class="auth-form-subtitle">Learner account &mdash; enter your username to start learning</p>
             </header>
 
             <?php if ($error): ?>
@@ -98,14 +91,14 @@ include '../php/includes/auth-split-start.php';
             <form method="POST" action="" class="auth-form">
                 <?php echo csrf_field(); ?>
                 <div class="form-group-child">
-                    <label class="form-label-child" for="username">Username or Claim Code</label>
+                    <label class="form-label-child" for="username">Username</label>
                     <div class="auth-input-wrap">
                         <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-user"></i></span>
                         <input type="text"
                                class="form-control-child auth-input"
                                id="username"
                                name="username"
-                               placeholder="e.g. SMART/chil/001 or KH-AB12CD"
+                               placeholder="Enter your username"
                                required
                                autocomplete="username"
                                value="<?php echo htmlspecialchars($_POST['username'] ?? ($_GET['username'] ?? '')); ?>">
@@ -120,7 +113,7 @@ include '../php/includes/auth-split-start.php';
             <footer class="auth-form-footer">
                 <p style="font-size: 1rem; color: var(--text-light);">
                     <i class="fas fa-info-circle me-1"></i>
-                    Enter your claim code (KH-XXXXXX) or ask your teacher for your username
+                    Ask your parent or teacher if you don't know your username
                 </p>
                 <a href="../index" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Home</a>
             </footer>

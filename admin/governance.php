@@ -3,6 +3,8 @@ require_once __DIR__ . '/../php/includes/session.php';
 require_once __DIR__ . '/../php/includes/security.php';
 require_once __DIR__ . '/../php/includes/csrf.php';
 require_once __DIR__ . '/../php/db_connection.php';
+require_once __DIR__ . '/../php/includes/migrate.php';
+ensure_schema_v2($database);
 
 sec_require_rate_limit();
 
@@ -231,6 +233,7 @@ $dashboard_page_title = 'Manage Governance & Leadership';
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="" enctype="multipart/form-data">
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="<?php echo $edit_leader ? 'update' : 'create'; ?>">
                 <?php if ($edit_leader): ?>
                     <input type="hidden" name="id" value="<?php echo $edit_leader['id']; ?>">
