@@ -1155,3 +1155,110 @@
 /* High contrast improvements */
 body.high-contrast .number-tile { border-width: 5px; }
 body.high-contrast .activity-prompt { font-size: 1.5rem; font-weight: 800; }
+
+/* ---- Fullscreen Activity Layout ---- */
+body.activity-fullscreen {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background: linear-gradient(180deg, #e8f4fd 0%, #fff9e6 100%);
+}
+
+body.activity-fullscreen .site-header,
+body.activity-fullscreen .navbar {
+    display: none;
+}
+
+body.activity-fullscreen .activity-topbar-simple {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background: #fff;
+    border-bottom: 2px solid rgba(74, 144, 226, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-shrink: 0;
+}
+
+.topbar-simple-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary-blue, #4990e2);
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: background 0.2s, transform 0.2s;
+    flex-shrink: 0;
+}
+
+.topbar-simple-btn:hover,
+.topbar-simple-btn:active {
+    background: #3a7bd5;
+    transform: scale(1.08);
+}
+
+.topbar-simple-progress {
+    margin-left: auto;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-light, #888);
+    padding: 4px 14px;
+    background: rgba(74, 144, 226, 0.1);
+    border-radius: 50px;
+}
+
+/* Activity display fills remaining space */
+body.activity-fullscreen .activity-display {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    padding: 16px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+/* Answer options at bottom */
+body.activity-fullscreen .answer-options {
+    flex-shrink: 0;
+    padding: 12px 16px 16px;
+    width: 100%;
+}
+
+/* Footer bar */
+body.activity-fullscreen .activity-footer-bar {
+    flex-shrink: 0;
+    padding: 12px 16px 24px;
+    border-top: none;
+    margin-top: 0;
+}
+
+/* Mobile fullscreen tweaks */
+@media (max-width: 576px) {
+    body.activity-fullscreen .activity-topbar-simple {
+        padding: 8px 12px;
+    }
+    .topbar-simple-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    body.activity-fullscreen .activity-display {
+        padding: 12px;
+    }
+}

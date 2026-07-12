@@ -74,64 +74,32 @@ if ($lesson_id > 0) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/activities.css">
+    <link rel="stylesheet" href="../css/activities.css?v=20260712f">
 </head>
-<body class="page-child">
+<body class="page-child activity-fullscreen">
     <?php if (!$learner_logged_in): include '../php/includes/header.php'; endif; ?>
 
-    <main class="container-child mt-30 page-enter">
-        <div class="activity-container">
-            <?php include '../php/includes/activity-topbar.php'; ?>
+    <div class="activity-topbar-simple">
+        <a href="<?php echo htmlspecialchars($back_url); ?>" class="topbar-simple-btn" aria-label="Back">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <?php if ($lesson_name && $total_in_lesson > 0): ?>
+        <span class="topbar-simple-progress">
+            <?php echo $activity_position; ?> / <?php echo $total_in_lesson; ?>
+        </span>
+        <?php endif; ?>
+    </div>
 
-            <div class="activity-header">
-                <h1 class="activity-title"><?php echo htmlspecialchars($activity['activity_name']); ?></h1>
-                <p class="activity-instruction"><?php echo htmlspecialchars($activity['activity_description']); ?></p>
-            </div>
+    <div class="activity-display" id="activityDisplay"></div>
 
-            <?php if ($lesson_name && $total_in_lesson > 0): ?>
-            <div class="activity-progress-inline" role="status" aria-label="Activity progress">
-                <div class="activity-progress-label">
-                    <?php echo $current_lang === 'sw' ? 'Somoo' : 'Lesson'; ?>:
-                    <strong><?php echo htmlspecialchars($lesson_name); ?></strong>
-                    &mdash;
-                    <?php echo $activity_position; ?> / <?php echo $total_in_lesson; ?>
-                </div>
-                <div class="activity-progress-track">
-                    <div class="activity-progress-fill" style="width: <?php echo round(($activity_position / $total_in_lesson) * 100); ?>%"></div>
-                </div>
-            </div>
-            <div class="activity-step-dots" aria-hidden="true">
-                <?php for ($i = 1; $i <= $total_in_lesson; $i++): ?>
-                <span class="activity-step-dot <?php echo $i < $activity_position ? 'done' : ($i === $activity_position ? 'active' : ''); ?>"></span>
-                <?php endfor; ?>
-            </div>
-            <?php endif; ?>
+    <div class="answer-options" id="answerOptions"></div>
 
-            <?php if (!$isInteractiveEngine): ?>
-            <div class="progress-bar-child">
-                <div class="progress-fill" style="width: 0%;" id="progressBar">0%</div>
-            </div>
-            <?php endif; ?>
-
-            <div class="activity-display" id="activityDisplay"></div>
-
-            <div class="answer-options" id="answerOptions"></div>
-
-            <div class="text-center mt-30" id="scoreSection" <?php echo $isInteractiveEngine ? 'style="display:none"' : ''; ?>>
-                <h3 style="font-size: 1.5rem; color: var(--primary-blue);">
-                    <?php echo $current_lang === 'sw' ? 'Alama' : 'Score'; ?>:
-                    <span id="scoreDisplay">0</span> / <span id="totalQuestions">5</span>
-                </h3>
-            </div>
-
-            <div class="activity-footer-bar" id="nextActivityBar" style="display: none;">
-                <button type="button" class="btn-child btn-child-green btn-child-large btn-bounce" id="nextActivityBtn">
-                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                    <?php echo htmlspecialchars($t['activity_next']); ?>
-                </button>
-            </div>
-        </div>
-    </main>
+    <div class="activity-footer-bar" id="nextActivityBar" style="display: none;">
+        <button type="button" class="btn-child btn-child-green btn-child-large btn-bounce" id="nextActivityBtn">
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            <?php echo htmlspecialchars($t['activity_next']); ?>
+        </button>
+    </div>
 
 
 
@@ -164,10 +132,10 @@ if ($lesson_id > 0) {
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/activities/core.js?v=20260712e"></script>
-    <script src="../js/activities/engines.js?v=20260712e"></script>
-    <script src="../js/activities/registry.js?v=20260712e"></script>
-    <script src="../js/activity-runner.js?v=20260712e"></script>
+    <script src="../js/activities/core.js?v=20260712f"></script>
+    <script src="../js/activities/engines.js?v=20260712f"></script>
+    <script src="../js/activities/registry.js?v=20260712f"></script>
+    <script src="../js/activity-runner.js?v=20260712f"></script>
 </body>
 </html>
 

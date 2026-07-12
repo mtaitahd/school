@@ -172,7 +172,7 @@ const ActivityEngines = {
     number_identification(config) {
         ActivityCore.hideMultiRoundUI();
         const { min, max } = ActivityCore.getDifficultyRange(config);
-        const nurseryMin = Math.max(1, min);
+        const nurseryMin = Math.max(0, min);
         const nurseryMax = Math.min(Math.max(max, nurseryMin), 20);
         const range = nurseryMax - nurseryMin + 1;
         const poolSize = Math.min(config.poolSize || Math.min(6, range), range);
@@ -183,6 +183,7 @@ const ActivityEngines = {
         let roundsDone = 0;
 
         const SHAPE_MAP = {
+            0: { emoji: '🍊', name: 'orange' },
             1: { emoji: '✏️', name: 'pencil' },
             2: { emoji: '🦆', name: 'duck' },
             3: { emoji: '🦋', name: 'butterfly' },
@@ -582,9 +583,14 @@ const ActivityEngines = {
         let roundsDone = 0;
 
         function round() {
-            const counts = ActivityCore.shuffle(
-                [target, target - 1, target + 1].filter((c) => c > 0 && c <= 10)
-            );
+            var counts;
+            if (target === 0) {
+                counts = ActivityCore.shuffle([0, 1, 2]);
+            } else {
+                counts = ActivityCore.shuffle(
+                    [target, target - 1, target + 1].filter((c) => c >= 0 && c <= 10)
+                );
+            }
             const { display, options } = ActivityCore.clearStage();
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
@@ -608,6 +614,13 @@ const ActivityEngines = {
                     const s = document.createElement('span');
                     s.textContent = emoji;
                     row.appendChild(s);
+                }
+                if (count === 0) {
+                    const empty = document.createElement('span');
+                    empty.textContent = '∅';
+                    empty.style.cssText = 'font-size:2rem;color:#ccc;';
+                    empty.setAttribute('aria-label', 'empty');
+                    row.appendChild(empty);
                 }
                 g.appendChild(row);
                 g.onclick = () => {
