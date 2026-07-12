@@ -27,7 +27,7 @@ $lessonCodes = [
 
 $L = [];
 foreach ($lessonCodes as $code) {
-    $row = $database->fetchOne("SELECT lesson_id, module_id FROM lessons WHERE lesson_code = ?", [$code]);
+    $row = $database->fetchOne("SELECT l.lesson_id, l.topic_id, t.module_id FROM lessons l JOIN topics t ON l.topic_id = t.topic_id WHERE l.lesson_code = ?", [$code]);
     if ($row) {
         $L[$code] = ['lesson_id' => (int)$row['lesson_id'], 'module_id' => (int)$row['module_id']];
         echo "FOUND: $code → lesson_id={$row['lesson_id']}, module_id={$row['module_id']}\n";
