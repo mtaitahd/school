@@ -346,13 +346,29 @@ const ActivityEngines = {
             let painting = false;
             let lastX = 0, lastY = 0;
             let totalPixels = 0;
-            const threshold = 150;
+            let validPixels = 0;
+            const threshold = 400;
+            const validThreshold = 200;
+            const startTime = Date.now();
+            const minTimeMs = 3000;
+            let finished = false;
+
+            /* bounding box of the number (roughly ±120px from center) */
+            const cx = 160, cy = 165, halfW = 130, halfH = 130;
+            function isInNumberArea(x, y) {
+                return x >= cx - halfW && x <= cx + halfW && y >= cy - halfH && y <= cy + halfH;
+            }
 
             ctx.strokeStyle = '#4A90E2';
             ctx.lineWidth = 18;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.globalCompositeOperation = 'source-over';
+
+            const hint = document.createElement('p');
+            hint.style.cssText = 'text-align:center;color:#888;font-size:0.85rem;margin-top:0.3rem;';
+            hint.textContent = 'Drag your finger over the number to trace it!';
+            display.appendChild(hint);
 
             function getPos(e) {
                 const rect = canvas.getBoundingClientRect();
@@ -364,6 +380,7 @@ const ActivityEngines = {
 
             function startPaint(e) {
                 e.preventDefault();
+                if (finished) return;
                 painting = true;
                 const [x, y] = getPos(e);
                 lastX = x;
@@ -371,7 +388,7 @@ const ActivityEngines = {
             }
 
             function paint(e) {
-                if (!painting) return;
+                if (!painting || finished) return;
                 e.preventDefault();
                 const [x, y] = getPos(e);
                 ctx.beginPath();
@@ -382,7 +399,19 @@ const ActivityEngines = {
                 lastX = x;
                 lastY = y;
 
-                if (totalPixels >= threshold) {
+                if (isInNumberArea(x, y)) {
+                    validPixels++;
+                } else {
+                    hint.textContent = 'Try tracing on the dotted line!';
+                    hint.style.color = '#e67e22';
+                    setTimeout(() => {
+                        hint.textContent = 'Drag your finger over the number to trace it!';
+                        hint.style.color = '#888';
+                    }, 1500);
+                }
+
+                if (!finished && validPixels >= validThreshold && totalPixels >= threshold && (Date.now() - startTime) >= minTimeMs) {
+                    finished = true;
                     painting = false;
                     canvas.removeEventListener('pointerdown', startPaint);
                     canvas.removeEventListener('pointermove', paint);
@@ -390,6 +419,8 @@ const ActivityEngines = {
                     canvas.removeEventListener('touchstart', startPaint);
                     canvas.removeEventListener('touchmove', paint);
                     canvas.removeEventListener('touchend', endPaint);
+                    hint.textContent = 'Well done! Great tracing!';
+                    hint.style.color = '#27ae60';
                     ActivityCore.celebrate();
                     ActivityCore.sayNumber(target, () => {
                         ActivityCore.sayEncouragement(finishOrNext);
@@ -405,11 +436,6 @@ const ActivityEngines = {
             canvas.addEventListener('touchstart', startPaint, { passive: false });
             canvas.addEventListener('touchmove', paint, { passive: false });
             canvas.addEventListener('touchend', endPaint);
-
-            const hint = document.createElement('p');
-            hint.style.cssText = 'text-align:center;color:#888;font-size:0.85rem;margin-top:0.3rem;';
-            hint.textContent = 'Drag your finger over the number to trace it!';
-            display.appendChild(hint);
 
             ActivityCore.bindTopbarAudio(() => {
                 ActivityCore.say(prompt);
