@@ -206,7 +206,7 @@ const ActivityEngines = {
         }
 
         function round() {
-            const target = fixedTarget || ActivityCore.randomInt(nurseryMin, nurseryMax);
+            const target = fixedTarget != null ? fixedTarget : ActivityCore.randomInt(nurseryMin, nurseryMax);
 
             if (isTrace) {
                 roundTrace(target);

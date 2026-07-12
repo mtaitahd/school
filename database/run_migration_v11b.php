@@ -96,7 +96,7 @@ $acts[]=[$c,'check',5,'Find Number 10','Tap number 10.',act_json('number_identif
 // 7. Writing Game
 $acts[]=[$c,'game',6,'Writing Game','Trace and write numbers!',act_json('math_game',['difficulty'=>1,'min'=>7,'max'=>10,'game_type'=>'number_hopscotch','skip_finish'=>false],'Write numbers!','Game: write and find.','Write number 10 in the game!',[],10,'Great writer!','easy',3)];
 // 8. Assessment
-$acts[]=[$c,'assessment',7,'Quiz: Writing 10','Show how well you write 10!',act_json('number_identification',['min'=>7,'max'=>10,'poolSize'=>4,'difficulty'=>1],'Write number 10!','Assess writing.','Can you find 10?',[7,8,9,10],10,'You can write 10!','easy',3)];
+$acts[]=[$c,'assessment',7,'Quiz: Writing 10','Show how well you write 10!',act_json('number_identification',['min'=>10,'max'=>10,'poolSize'=>1,'mode'=>'trace','target_number'=>10,'difficulty'=>2],'Write number 10!','Assess writing.','Write number 10 — show what you can do!',[10],10,'You can write 10!','easy',3)];
 // 9. Reward
 $acts[]=[$c,'reward',8,'Great Work!','You completed Writing Number 10!',act_json('math_game',['difficulty'=>1,'step_type'=>'reward','skip_finish'=>true],'You earned a star!','Celebrate.','You can write number 10!',[],[],'Amazing!','easy',1)];
 // 10. Next Steps
