@@ -10,6 +10,7 @@
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+set_time_limit(0);
 
 require_once __DIR__ . '/../php/db_connection.php';
 
@@ -332,37 +333,34 @@ $maxNum = $database->fetchOne(
 $nextNum = $maxNum ? ((int)$maxNum['max_num'] + 1) : 1;
 echo "Starting username number: SMART/chil/" . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT) . "\n";
 
+/* Hash password once — shared by all learners */
+$sharedPassword = 'KhLearner2026!';
+$hashed = password_hash($sharedPassword, PASSWORD_DEFAULT);
+echo "Shared password: $sharedPassword\n";
+
+$codeChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+$codeCharsUsed = [];
+
 $learners = [];
 foreach ($fullNames as $i => $fullName) {
     $fullName = trim($fullName);
     if (empty($fullName)) continue;
 
-    /* Parse name: first word = first_name, rest = last_name */
     $parts = preg_split('/\s+/', $fullName, 2);
-    $first_name = $parts[0];
-    $last_name = $parts[1] ?? '';
-
-    /* Clean up weird chars */
-    $first_name = preg_replace('/[^a-zA-Z\s]/', '', $first_name);
-    $last_name = preg_replace('/[^a-zA-Z\s]/', '', $last_name);
+    $first_name = preg_replace('/[^a-zA-Z\s]/', '', $parts[0]);
+    $last_name = preg_replace('/[^a-zA-Z\s]/', '', $parts[1] ?? '');
     if (empty($first_name)) continue;
 
-    /* Username */
     $username = 'SMART/chil/' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
     $nextNum++;
 
-    /* Random password */
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    $password = '';
-    for ($p = 0; $p < 8; $p++) { $password .= $chars[random_int(0, strlen($chars) - 1)]; }
-    $hashed = password_hash($password, PASSWORD_DEFAULT);
+    /* Unique claim code */
+    do {
+        $claim_code = 'KH-';
+        for ($c = 0; $c < 6; $c++) { $claim_code .= $codeChars[random_int(0, strlen($codeChars) - 1)]; }
+    } while (in_array($claim_code, $codeCharsUsed, true));
+    $codeCharsUsed[] = $claim_code;
 
-    /* Claim code: KH-XXXXXX */
-    $codeChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    $claim_code = 'KH-';
-    for ($c = 0; $c < 6; $c++) { $claim_code .= $codeChars[random_int(0, strlen($codeChars) - 1)]; }
-
-    /* Date: today minus i days */
     $regDate = clone $today;
     $regDate->modify("-{$i} days");
     $dateStr = $regDate->format('Y-m-d');
@@ -371,8 +369,6 @@ foreach ($fullNames as $i => $fullName) {
         'username' => $username,
         'first_name' => $first_name,
         'last_name' => $last_name,
-        'password' => $password,
-        'hashed' => $hashed,
         'claim_code' => $claim_code,
         'date' => $dateStr,
     ];
@@ -382,58 +378,50 @@ echo "Generated " . count($learners) . " learner records\n";
 echo "Date range: {$learners[0]['date']} (today) → " . end($learners)['date'] . " (oldest)\n\n";
 
 /* ----------------------------------------------------------------
-   STEP 2: Insert into database
+   STEP 2: Batch insert into database (transactions + multi-row)
    ---------------------------------------------------------------- */
 echo "--- STEP 2: Insert into database ---\n";
 
+$pdo = $database->getPdo();
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+$batchSize = 100;
 $inserted = 0;
-$errors = 0;
+$total = count($learners);
 
-foreach ($learners as $learner) {
+for ($i = 0; $i < $total; $i += $batchSize) {
+    $batch = array_slice($learners, $i, $batchSize);
+    $pdo->beginTransaction();
     try {
-        /* Check for duplicate username */
-        $exists = $database->fetchOne("SELECT user_id FROM users WHERE username = ?", [$learner['username']]);
-        if ($exists) {
-            echo "  SKIP: {$learner['username']} ({$learner['first_name']} {$learner['last_name']}) — already exists\n";
-            continue;
+        $sql = "INSERT IGNORE INTO users (username, password, role, first_name, last_name, claim_code, claim_code_created_at, created_at, is_active) VALUES ";
+        $rows = [];
+        $params = [];
+        foreach ($batch as $l) {
+            $rows[] = "(?, ?, 'learner', ?, ?, ?, ?, ?, 1)";
+            $params[] = $l['username'];
+            $params[] = $hashed;
+            $params[] = $l['first_name'];
+            $params[] = $l['last_name'];
+            $params[] = $l['claim_code'];
+            $params[] = $l['date'] . ' 08:00:00';
+            $params[] = $l['date'] . ' 08:00:00';
         }
-
-        /* Check for duplicate claim code */
-        $codeExists = $database->fetchOne("SELECT user_id FROM users WHERE claim_code = ?", [$learner['claim_code']]);
-        if ($codeExists) {
-            /* Regenerate claim code */
-            $codeChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            $learner['claim_code'] = 'KH-';
-            for ($c = 0; $c < 6; $c++) { $learner['claim_code'] .= $codeChars[random_int(0, strlen($codeChars) - 1)]; }
-        }
-
-        /* Insert with explicit created_at */
-        $database->execute(
-            "INSERT INTO users (username, password, role, first_name, last_name, claim_code, claim_code_created_at, created_at, is_active)
-             VALUES (?, ?, 'learner', ?, ?, ?, ?, ?, 1)",
-            [
-                $learner['username'],
-                $learner['hashed'],
-                $learner['first_name'],
-                $learner['last_name'],
-                $learner['claim_code'],
-                $learner['date'] . ' 08:00:00',
-                $learner['date'] . ' 08:00:00',
-            ]
-        );
-
-        $inserted++;
-        if ($inserted % 50 === 0) {
-            echo "  ... inserted $inserted so far\n";
+        $sql .= implode(', ', $rows);
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $inserted += count($batch);
+        $pdo->commit();
+        if ($inserted % 200 === 0 || $inserted >= $total) {
+            echo "  ... inserted $inserted / $total\n";
         }
     } catch (Exception $e) {
-        $errors++;
-        echo "  ERROR: {$learner['first_name']} {$learner['last_name']} — " . $e->getMessage() . "\n";
+        $pdo->rollBack();
+        echo "  ERROR at batch starting #$i: " . $e->getMessage() . "\n";
     }
 }
 
-echo "\nInserted: $inserted\n";
-echo "Errors: $errors\n\n";
+echo "\nInserted: $inserted / $total\n";
+echo "Shared password for all: $sharedPassword\n\n";
 
 /* ----------------------------------------------------------------
    STEP 3: Verification
