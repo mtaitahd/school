@@ -343,7 +343,7 @@ const ActivityEngines = {
             ctx.strokeText(String(target), 160, 165);
             ctx.setLineDash([]);
 
-            /* --- build reference pixel map of the number --- */
+            /* --- build reference: stroke outline of the number (the dotted line) --- */
             const refCanvas = document.createElement('canvas');
             refCanvas.width = 320;
             refCanvas.height = 320;
@@ -351,13 +351,14 @@ const ActivityEngines = {
             refCtx.textAlign = 'center';
             refCtx.textBaseline = 'middle';
             refCtx.font = 'bold 240px sans-serif';
-            refCtx.fillStyle = '#000';
-            refCtx.fillText(String(target), 160, 165);
+            refCtx.strokeStyle = '#000';
+            refCtx.lineWidth = 20;
+            refCtx.strokeText(String(target), 160, 165);
             const refData = refCtx.getImageData(0, 0, 320, 320).data;
 
-            function isOnNumber(px, py, radius) {
-                for (let dy = -radius; dy <= radius; dy += 3) {
-                    for (let dx = -radius; dx <= radius; dx += 3) {
+            function isOnNumberStroke(px, py, radius) {
+                for (let dy = -radius; dy <= radius; dy += 2) {
+                    for (let dx = -radius; dx <= radius; dx += 2) {
                         const sx = Math.round(px + dx);
                         const sy = Math.round(py + dy);
                         if (sx >= 0 && sx < 320 && sy >= 0 && sy < 320) {
@@ -437,7 +438,7 @@ const ActivityEngines = {
                 /* sample every 3rd point for validation */
                 if (totalPixels % 3 === 0) {
                     childPoints.push({ x: Math.round(x), y: Math.round(y) });
-                    if (isOnNumber(x, y, 25)) {
+                    if (isOnNumberStroke(x, y, 15)) {
                         onNumberPixels++;
                     }
                 }
@@ -451,9 +452,9 @@ const ActivityEngines = {
                 const accuracy = childPoints.length > 0 ? onNumberPixels / childPoints.length : 0;
                 if (totalPixels >= 5 && totalPixels < 30) {
                     hint.textContent = 'Good! Keep tracing on the line!';
-                } else if (totalPixels >= 30 && accuracy >= 0.4) {
+                } else if (totalPixels >= 30 && accuracy >= 0.5) {
                     hint.textContent = 'Great! You are following the number!';
-                } else if (totalPixels >= 30 && accuracy < 0.4) {
+                } else if (totalPixels >= 30 && accuracy < 0.5) {
                     hint.textContent = 'Try to stay on the dotted line!';
                     hint.style.color = '#e67e22';
                 }
@@ -489,7 +490,7 @@ const ActivityEngines = {
                 doneBtn.style.display = 'none';
                 progressBar.style.width = '100%';
 
-                if (accuracy >= 0.4) {
+                if (accuracy >= 0.5 && childPoints.length >= 15) {
                     /* good trace */
                     canvas.style.borderColor = '#27ae60';
                     canvas.style.borderStyle = 'solid';
