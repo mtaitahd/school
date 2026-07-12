@@ -18,7 +18,9 @@ const ActivityCore = {
         pencil: '✏️', ruler: '📏', eraser: '🧽', desk: '🪑',
         chair: '🪑', table: '🍽️', board: '📋', mushroom: '🍄',
         butterfly: '🦋', rabbit: '🐇', goat: '🐐', chicken: '🐔',
-        mosquito: '🦟', bee: '🐝', fly: '🪰', stick: '🥢'
+        mosquito: '🦟', bee: '🐝', fly: '🪰', stick: '🥢',
+        cow: '🐄', pumpkin: '🎃', bell: '🔔', guitar: '🎸',
+        whistle: '📯', papaya: '🍈', glass: '🥛'
     },
 
     SHAPE_ICONS: {
