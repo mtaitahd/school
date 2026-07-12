@@ -21,7 +21,8 @@ const ActivityCore = {
         mosquito: '🦟', bee: '🐝', fly: '🪰', stick: '🥢',
         cow: '🐄', pumpkin: '🎃', bell: '🔔', guitar: '🎸',
         whistle: '📯', papaya: '🍈', glass: '🥛',
-        eggplant: '🍆', cabbage: '🥬', boat: '⛵', eraser: '🧽'
+        eggplant: '🍆', cabbage: '🥬', boat: '⛵', eraser: '🧽',
+        leaf: '🍃', log: '🪵', coconut: '🥥'
     },
 
     SHAPE_ICONS: {
