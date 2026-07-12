@@ -595,11 +595,12 @@ const ActivityEngines = {
         round();
     },
 
-    /* ----- Number sequencing 1–10 ----- */
+    /* ----- Number sequencing (supports 1–20 via config.min/max) ----- */
     number_sequencing(config) {
         ActivityCore.hideMultiRoundUI();
         const { min, max } = ActivityCore.getDifficultyRange(config);
-        const seqMax = Math.min(max, 10);
+        const seqMin = config.min ?? min ?? 1;
+        const seqMax = Math.min(max, 20);
         const slots = [];
         const pool = [];
 
@@ -608,14 +609,14 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt(config.instruction || ('Put numbers in order from 1 to ' + seqMax), '🔢'));
+            display.appendChild(ActivityCore.renderPrompt(config.instruction || ('Put numbers in order from ' + seqMin + ' to ' + seqMax), '🔢'));
 
             const ws = document.createElement('div');
             ws.className = 'sequence-workspace';
 
             const slotsRow = document.createElement('div');
             slotsRow.className = 'sequence-slots';
-            for (let i = 1; i <= seqMax; i++) {
+            for (let i = seqMin; i <= seqMax; i++) {
                 const slot = document.createElement('div');
                 slot.className = 'sequence-slot';
                 slot.dataset.index = i;
@@ -627,7 +628,7 @@ const ActivityEngines = {
 
             const poolRow = document.createElement('div');
             poolRow.className = 'sequence-pool';
-            const nums = ActivityCore.shuffle([...Array(seqMax)].map((_, i) => i + 1));
+            const nums = ActivityCore.shuffle([...Array(seqMax - seqMin + 1)].map((_, i) => i + seqMin));
             nums.forEach((n) => {
                 const tile = document.createElement('div');
                 tile.className = 'draggable-tile';
@@ -763,7 +764,7 @@ const ActivityEngines = {
                 counts = ActivityCore.shuffle([0, 1, 2]);
             } else {
                 counts = ActivityCore.shuffle(
-                    [target, target - 1, target + 1].filter((c) => c >= 0 && c <= 10)
+                    [target, target - 1, target + 1].filter((c) => c >= 0)
                 );
             }
             const { display, options } = ActivityCore.clearStage();
