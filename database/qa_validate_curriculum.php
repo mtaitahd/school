@@ -243,8 +243,7 @@ $emptyFields = $database->fetchOne(
      JOIN topics t ON l.topic_id = t.topic_id
      WHERE t.topic_code LIKE 'NUM-%'
      AND (a.activity_name IS NULL OR a.activity_name = ''
-          OR a.activity_data IS NULL OR a.activity_data = '')
-)"
+          OR a.activity_data IS NULL OR LENGTH(a.activity_data) < 5)"
 );
 check('No empty activity names or data', $emptyFields['c'] === 0, "$emptyFields[c] activities with empty fields");
 
@@ -255,9 +254,12 @@ $placeholders = $database->fetchAll(
      JOIN lessons l ON a.lesson_id = l.lesson_id
      JOIN topics t ON l.topic_id = t.topic_id
      WHERE t.topic_code LIKE 'NUM-%'
-     AND (a.activity_data LIKE '%TODO%' OR a.activity_data LIKE '%PLACEHOLDER%'
-          OR a.activity_data LIKE '%FIXME%' OR a.activity_name LIKE '%TODO%'
-          OR a.activity_name LIKE '%test%' OR a.activity_data LIKE '%lorem%')"
+     AND (CAST(a.activity_data AS CHAR) LIKE '%TODO%'
+          OR CAST(a.activity_data AS CHAR) LIKE '%PLACEHOLDER%'
+          OR CAST(a.activity_data AS CHAR) LIKE '%FIXME%'
+          OR a.activity_name LIKE '%TODO%'
+          OR a.activity_name LIKE '%test%'
+          OR CAST(a.activity_data AS CHAR) LIKE '%lorem%')"
 );
 check('No placeholder text in activities', count($placeholders) === 0, count($placeholders) . " activities with placeholder text");
 
