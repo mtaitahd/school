@@ -343,17 +343,39 @@ const ActivityEngines = {
             ctx.strokeText(String(target), 160, 165);
             ctx.setLineDash([]);
 
+            /* --- build reference pixel map of the number --- */
+            const refCanvas = document.createElement('canvas');
+            refCanvas.width = 320;
+            refCanvas.height = 320;
+            const refCtx = refCanvas.getContext('2d');
+            refCtx.textAlign = 'center';
+            refCtx.textBaseline = 'middle';
+            refCtx.font = 'bold 240px sans-serif';
+            refCtx.fillStyle = '#000';
+            refCtx.fillText(String(target), 160, 165);
+            const refData = refCtx.getImageData(0, 0, 320, 320).data;
+
+            function isOnNumber(px, py, radius) {
+                for (let dy = -radius; dy <= radius; dy += 3) {
+                    for (let dx = -radius; dx <= radius; dx += 3) {
+                        const sx = Math.round(px + dx);
+                        const sy = Math.round(py + dy);
+                        if (sx >= 0 && sx < 320 && sy >= 0 && sy < 320) {
+                            const i = (sy * 320 + sx) * 4;
+                            if (refData[i + 3] > 128) return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
             let painting = false;
             let lastX = 0, lastY = 0;
             let totalPixels = 0;
+            let onNumberPixels = 0;
             let finished = false;
             let hasDrawn = false;
-
-            /* bounding box of the number */
-            const cx = 160, cy = 165, halfW = 130, halfH = 130;
-            function isInNumberArea(x, y) {
-                return x >= cx - halfW && x <= cx + halfW && y >= cy - halfH && y <= cy + halfH;
-            }
+            const childPoints = [];
 
             ctx.strokeStyle = '#4A90E2';
             ctx.lineWidth = 18;
@@ -375,7 +397,7 @@ const ActivityEngines = {
             progressWrap.appendChild(progressBar);
             display.appendChild(progressWrap);
 
-            /* Done button — always visible */
+            /* Done button */
             const doneBtn = document.createElement('button');
             doneBtn.type = 'button';
             doneBtn.className = 'number-tile';
@@ -412,30 +434,45 @@ const ActivityEngines = {
                 lastX = x;
                 lastY = y;
 
+                /* sample every 3rd point for validation */
+                if (totalPixels % 3 === 0) {
+                    childPoints.push({ x: Math.round(x), y: Math.round(y) });
+                    if (isOnNumber(x, y, 25)) {
+                        onNumberPixels++;
+                    }
+                }
+
                 if (!hasDrawn && totalPixels >= 5) {
                     hasDrawn = true;
-                    hint.textContent = 'Good! Keep drawing!';
-                    hint.style.color = '#27ae60';
                     doneBtn.style.display = 'block';
                 }
 
-                /* update progress */
-                const pct = Math.min(100, Math.round((totalPixels / 120) * 100));
-                progressBar.style.width = pct + '%';
-
-                if (totalPixels >= 50 && totalPixels < 120) {
-                    hint.textContent = 'Great tracing! Keep going!';
-                } else if (totalPixels >= 120) {
-                    hint.textContent = 'Well done! Tap ✅ Done when ready!';
-                    hint.style.color = '#27ae60';
-                    progressBar.style.background = '#27ae60';
+                /* live feedback */
+                const accuracy = childPoints.length > 0 ? onNumberPixels / childPoints.length : 0;
+                if (totalPixels >= 5 && totalPixels < 30) {
+                    hint.textContent = 'Good! Keep tracing on the line!';
+                } else if (totalPixels >= 30 && accuracy >= 0.4) {
+                    hint.textContent = 'Great! You are following the number!';
+                } else if (totalPixels >= 30 && accuracy < 0.4) {
+                    hint.textContent = 'Try to stay on the dotted line!';
+                    hint.style.color = '#e67e22';
                 }
+
+                /* update progress */
+                const pct = Math.min(100, Math.round((totalPixels / 80) * 100));
+                progressBar.style.width = pct + '%';
             }
 
             function endPaint() { painting = false; }
 
             function finishTrace() {
                 if (finished) return;
+                if (totalPixels < 5) {
+                    hint.textContent = 'Draw over the number first!';
+                    hint.style.color = '#e67e22';
+                    return;
+                }
+
                 finished = true;
                 painting = false;
                 canvas.removeEventListener('pointerdown', startPaint);
@@ -445,18 +482,54 @@ const ActivityEngines = {
                 canvas.removeEventListener('touchmove', paint);
                 canvas.removeEventListener('touchend', endPaint);
 
-                canvas.style.borderColor = '#27ae60';
-                canvas.style.borderStyle = 'solid';
-                hint.textContent = 'Well done! Great tracing! 🌟';
-                hint.style.color = '#27ae60';
-                progressBar.style.width = '100%';
-                progressBar.style.background = '#27ae60';
-                doneBtn.style.display = 'none';
+                /* calculate accuracy */
+                const accuracy = childPoints.length > 0 ? onNumberPixels / childPoints.length : 0;
+                const pct = Math.round(accuracy * 100);
 
-                ActivityCore.celebrate();
-                ActivityCore.sayNumber(target, () => {
-                    ActivityCore.sayEncouragement(finishOrNext);
-                });
+                doneBtn.style.display = 'none';
+                progressBar.style.width = '100%';
+
+                if (accuracy >= 0.4) {
+                    /* good trace */
+                    canvas.style.borderColor = '#27ae60';
+                    canvas.style.borderStyle = 'solid';
+                    hint.textContent = 'Great tracing! You followed the number! 🌟';
+                    hint.style.color = '#27ae60';
+                    progressBar.style.background = '#27ae60';
+                    ActivityCore.celebrate();
+                    ActivityCore.sayNumber(target, () => {
+                        ActivityCore.sayEncouragement(finishOrNext);
+                    });
+                } else {
+                    /* poor trace — encourage retry */
+                    canvas.style.borderColor = '#e67e22';
+                    canvas.style.borderStyle = 'solid';
+                    hint.textContent = 'Hmm, try tracing on the dotted line! Tap to try again.';
+                    hint.style.color = '#e67e22';
+                    progressBar.style.background = '#e67e22';
+
+                    /* allow retry after 2s */
+                    setTimeout(() => {
+                        canvas.style.borderColor = 'var(--primary-blue,#4A90E2)';
+                        canvas.style.borderStyle = 'dashed';
+                        hint.textContent = 'Draw over the number with your finger!';
+                        hint.style.color = '#888';
+                        progressBar.style.width = '0%';
+                        progressBar.style.background = 'linear-gradient(90deg,#4A90E2,#27ae60)';
+                        finished = false;
+                        totalPixels = 0;
+                        onNumberPixels = 0;
+                        childPoints.length = 0;
+                        hasDrawn = false;
+                        doneBtn.style.display = 'none';
+                        canvas.addEventListener('pointerdown', startPaint);
+                        canvas.addEventListener('pointermove', paint);
+                        canvas.addEventListener('pointerup', endPaint);
+                        canvas.addEventListener('touchstart', startPaint, { passive: false });
+                        canvas.addEventListener('touchmove', paint, { passive: false });
+                        canvas.addEventListener('touchend', endPaint);
+                    }, 2500);
+                }
             }
 
             doneBtn.onclick = finishTrace;
