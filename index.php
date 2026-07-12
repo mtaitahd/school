@@ -50,6 +50,7 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
             <div class="kyh-ticker-track">
                 <?php foreach ($kyh_ticker_items as $ticker): ?>
                 <span class="kyh-ticker-item">
+                    <i class="fas fa-bullhorn" style="font-size:0.75rem;opacity:0.6;margin-right:4px;"></i>
                     <?php if ($ticker['url']): ?><a href="<?php echo htmlspecialchars($ticker['url']); ?>" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;"><?php endif; ?>
                     <?php echo htmlspecialchars($ticker['message']); ?>
                     <?php if ($ticker['url']): ?></a><?php endif; ?>
@@ -59,6 +60,7 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
                 <?php // duplicate for seamless loop ?>
                 <?php foreach ($kyh_ticker_items as $ticker): ?>
                 <span class="kyh-ticker-item">
+                    <i class="fas fa-bullhorn" style="font-size:0.75rem;opacity:0.6;margin-right:4px;"></i>
                     <?php if ($ticker['url']): ?><a href="<?php echo htmlspecialchars($ticker['url']); ?>" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;"><?php endif; ?>
                     <?php echo htmlspecialchars($ticker['message']); ?>
                     <?php if ($ticker['url']): ?></a><?php endif; ?>
