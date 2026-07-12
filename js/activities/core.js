@@ -20,7 +20,8 @@ const ActivityCore = {
         butterfly: '🦋', rabbit: '🐇', goat: '🐐', chicken: '🐔',
         mosquito: '🦟', bee: '🐝', fly: '🪰', stick: '🥢',
         cow: '🐄', pumpkin: '🎃', bell: '🔔', guitar: '🎸',
-        whistle: '📯', papaya: '🍈', glass: '🥛'
+        whistle: '📯', papaya: '🍈', glass: '🥛',
+        eggplant: '🍆', cabbage: '🥬', boat: '⛵', eraser: '🧽'
     },
 
     SHAPE_ICONS: {
