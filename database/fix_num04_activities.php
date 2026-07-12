@@ -172,6 +172,7 @@ echo "Defined " . count($acts) . " activities.\n\n";
    Do NOT insert lessons or topics — only activities
    ---------------------------------------------------------------- */
 $inserted = 0;
+$updated = 0;
 $errors = 0;
 $skipped = 0;
 
