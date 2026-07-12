@@ -508,12 +508,14 @@ const ActivityEngines = {
                         progressBar.style.background = '#27ae60';
 
                         if (tracesDone >= TRACES_NEEDED) {
-                            /* all traces done — move on */
+                            /* all traces done — move to next activity */
                             hint.textContent = 'Excellent! You traced ' + target + ' perfectly! 🌟';
                             hint.style.color = '#27ae60';
                             ActivityCore.celebrate();
                             ActivityCore.sayNumber(target, () => {
-                                ActivityCore.sayEncouragement(finishOrNext);
+                                ActivityCore.sayEncouragement(function() {
+                                    ActivityCore.finishActivity();
+                                });
                             });
                         } else {
                             /* more traces needed */
