@@ -23,7 +23,7 @@ if ($learner_logged_in) {
     $need_payment = is_payment_enabled() && !$trialInfo['is_active'];
 }
 
-$modules = $database->fetchAll("SELECT * FROM modules WHERE is_active = 1 ORDER BY order_index ASC");
+$modules = $database->fetchAll("SELECT * FROM modules WHERE is_active = 1 AND module_name NOT IN ('Counting','Shapes','Addition','Subtraction','Matching','Games') ORDER BY order_index ASC");
 
 $category_labels = [
     'Counting' => ['en' => 'Counting & Number Recognition', 'sw' => 'Kuhesabu na Kutambua Namba'],
