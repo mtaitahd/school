@@ -115,6 +115,14 @@ const ActivityCore = {
         const p = document.createElement('p');
         p.className = 'activity-prompt';
         p.textContent = emoji ? emoji + ' ' + text : text;
+        /* sync instruction bar with actual engine prompt */
+        const bar = document.getElementById('activityInstructionBar');
+        if (bar) {
+            const txt = bar.querySelector('.instruction-text');
+            if (txt) txt.textContent = text;
+            const ico = bar.querySelector('.instruction-icon');
+            if (ico && emoji) ico.textContent = emoji;
+        }
         return p;
     },
 
