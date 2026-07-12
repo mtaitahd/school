@@ -176,7 +176,7 @@ const ActivityEngines = {
         const nurseryMax = Math.min(Math.max(max, nurseryMin), 20);
         const range = nurseryMax - nurseryMin + 1;
         const poolSize = Math.min(config.poolSize || Math.min(6, range), range);
-        const fixedTarget = (config.target_number != null && config.target_number !== undefined) ? config.target_number : null;
+        const fixedTarget = (config.target_number != null && config.target_number !== undefined) ? config.target_number : (config.answer != null && typeof config.answer === 'number' ? config.answer : null);
         const isShape = !!config.shape_object;
         const isTrace = config.mode === 'trace' || config.interaction === 'coloring';
         const ROUNDS = 3;
