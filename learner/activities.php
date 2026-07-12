@@ -109,11 +109,11 @@ if (!empty($lessons)) {
                             </div>
                             <div class="row-child" style="margin-top: 8px;">
                                 <?php foreach ($lesson_activities as $idx => $activity): ?>
-                                <div class="col-child-3">
-                                    <article class="module-card" tabindex="0" role="button"
+                                <div class="col-child-2">
+                                    <article class="module-card activity-card-full" tabindex="0" role="button"
                                          onclick="selectActivity(<?php echo (int)$activity['activity_id']; ?>)"
                                          onkeydown="if(event.key==='Enter')selectActivity(<?php echo (int)$activity['activity_id']; ?>)">
-                                        <div style="font-size:0.8rem; font-weight:700; color: var(--text-light); margin-bottom:4px;">
+                                        <div style="font-size:0.85rem; font-weight:700; color: var(--text-light); margin-bottom:4px;">
                                             <?php echo $idx + 1; ?> / <?php echo count($lesson_activities); ?>
                                         </div>
                                         <div class="activity-card-icon" style="color: <?php echo htmlspecialchars($module['module_color']); ?>;">
