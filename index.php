@@ -33,11 +33,16 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
     <link rel="icon" type="image/png" href="assets/images/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@400;600;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/home.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="page-child">
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="custom-cursor" id="customCursor"></div>
     <?php include 'php/includes/header.php'; ?>
 
     <div class="kyh-ticker-wrap">
@@ -66,47 +71,73 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
             </div>
         </div>
     </div>
-    <section class="hero-section" aria-labelledby="heroTitle">
+    <section class="hero-section-home" aria-labelledby="heroTitle">
         <div class="hero-background">
             <?php foreach ($kyh_hero_slides as $si => $slide): ?>
             <div class="hero-bg-slide slide-<?php echo $si + 1; ?>" style="background-image: url('<?php echo htmlspecialchars($slide['image']); ?>');"></div>
             <?php endforeach; ?>
         </div>
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
         <div class="hero-overlay">
             <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-lg-8 text-center page-enter">
-                        <h1 id="heroTitle" class="text-white display-3 fw-black mb-3" style="text-shadow:2px 4px 10px rgba(0,0,0,0.85);white-space:nowrap;">
-                            <?php echo htmlspecialchars($t['hero_title']); ?>
-                        </h1>
-                        <p class="text-white fw-semibold lead mb-4" style="text-shadow:0 2px 4px rgba(0,0,0,0.5);max-width:640px;margin-left:auto;margin-right:auto;">
-                            <?php echo htmlspecialchars($t['hero_sub']); ?>
-                        </p>
-                        <div class="row justify-content-center g-4 mb-3">
-                            <div class="col-4 col-md-3">
-                                <div class="home-stat">
-                                    <strong class="text-white display-5 fw-black"><?php echo number_format($total_students); ?>+</strong>
-                                    <span class="d-block fw-bold text-uppercase tracking-wider" style="color:#FFD43B;"><?php echo $current_lang === 'sw' ? 'Wanafunzi' : 'Students'; ?></span>
-                                </div>
+                <div class="row align-items-center">
+                    <div class="col-lg-7">
+                        <div class="hero-content">
+                            <div class="hero-eyebrow">
+                                <i class="fas fa-sparkles"></i>
+                                <?php echo $current_lang === 'sw' ? 'Jifunze Hisabati Kwa Furaha' : 'Learn Mathematics with Joy'; ?>
                             </div>
-                            <div class="col-4 col-md-3">
-                                <div class="home-stat">
-                                    <strong class="text-white display-5 fw-black">100%</strong>
-                                    <span class="d-block fw-bold text-uppercase tracking-wider" style="color:#FFD43B;"><?php echo $current_lang === 'sw' ? 'Bila Malipo' : 'Free Access'; ?></span>
-                                </div>
+                            <h1 id="heroTitle" class="hero-title-home">
+                                <?php echo htmlspecialchars($t['hero_title']); ?>
+                            </h1>
+                            <p class="hero-subtitle-home">
+                                <?php echo htmlspecialchars($t['hero_sub']); ?>
+                            </p>
+                            <div class="hero-cta-group">
+                                <button type="button" onclick="handleStartLearning()" class="hero-btn hero-btn-primary">
+                                    <i class="fas fa-play-circle"></i>
+                                    <?php echo htmlspecialchars($t['btn_start']); ?>
+                                </button>
+                                <a href="#benefits" class="hero-btn hero-btn-ghost">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <?php echo $current_lang === 'sw' ? 'Jifunze Zaidi' : 'Learn More'; ?>
+                                </a>
                             </div>
-                            <div class="col-4 col-md-3">
-                                <div class="home-stat">
-                                    <strong class="text-white display-5 fw-black">SW/EN</strong>
-                                    <span class="d-block fw-bold text-uppercase tracking-wider" style="color:#FFD43B;"><?php echo $current_lang === 'sw' ? 'Lugha Mbili' : 'Bilingual'; ?></span>
+                            <div class="hero-stats">
+                                <div class="hero-stat">
+                                    <div class="hero-stat-number"><span class="counter-value" data-target="<?php echo $total_students; ?>">0</span>+</div>
+                                    <div class="hero-stat-label"><?php echo $current_lang === 'sw' ? 'Wanafunzi' : 'Students'; ?></div>
+                                </div>
+                                <div class="hero-stat">
+                                    <div class="hero-stat-number">480+</div>
+                                    <div class="hero-stat-label"><?php echo $current_lang === 'sw' ? 'Shughuli' : 'Activities'; ?></div>
+                                </div>
+                                <div class="hero-stat">
+                                    <div class="hero-stat-number">SW/<span class="highlight">EN</span></div>
+                                    <div class="hero-stat-label"><?php echo $current_lang === 'sw' ? 'Lugha Mbili' : 'Bilingual'; ?></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="hero-actions" style="margin-top:28px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                            <button type="button" onclick="handleStartLearning()" class="btn-child btn-child-yellow" style="text-decoration:none;min-height:52px;font-size:1.05rem;border-radius:50px;border:none;cursor:pointer;">
-                                <i class="fas fa-play-circle" aria-hidden="true"></i>
-                                <?php echo htmlspecialchars($t['btn_start']); ?>
-                            </button>
+                    </div>
+                    <div class="col-lg-5 d-none d-lg-block">
+                        <div class="hero-visual">
+                            <div class="hero-float-card">
+                                <div class="hero-float-card-icon" style="background:rgba(108,92,231,0.2);color:#a29bfe;"><i class="fas fa-calculator"></i></div>
+                                <div class="hero-float-card-text"><?php echo $current_lang === 'sw' ? 'Hisabati Rahisi' : 'Easy Math'; ?></div>
+                                <div class="hero-float-card-sub"><?php echo $current_lang === 'sw' ? 'Kwa watoto wa awali' : 'For early learners'; ?></div>
+                            </div>
+                            <div class="hero-float-card">
+                                <div class="hero-float-card-icon" style="background:rgba(245,166,35,0.2);color:#ffd93d;"><i class="fas fa-trophy"></i></div>
+                                <div class="hero-float-card-text">100% <?php echo $current_lang === 'sw' ? 'Bure' : 'Free'; ?></div>
+                                <div class="hero-float-card-sub"><?php echo $current_lang === 'sw' ? 'Hakuna ada' : 'No fees'; ?></div>
+                            </div>
+                            <div class="hero-float-card">
+                                <div class="hero-float-card-icon" style="background:rgba(0,206,209,0.2);color:#00ced1;"><i class="fas fa-shield-alt"></i></div>
+                                <div class="hero-float-card-text"><?php echo $current_lang === 'sw' ? 'Salama' : 'Safe'; ?></div>
+                                <div class="hero-float-card-sub"><?php echo $current_lang === 'sw' ? 'Kwa watoto' : 'Child safe'; ?></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -116,129 +147,140 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
         <button type="button" class="slider-arrow slider-arrow-right" onclick="heroSlide(1)" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
     </section>
 
-    <section class="kyh-notevents-section">
+    <section class="notes-events-section">
         <div class="container-child">
-            <div class="kyh-notevents-row">
-                <!-- Notes Board -->
-                <div class="kyh-notevents-left">
-                    <div class="kyh-notes-header">
-                        <h3 class="kyh-section-title"><?php echo $current_lang === 'sw' ? 'Maelezo' : 'Notes Board'; ?></h3>
-                    </div>
-                    <div class="kyh-notes-list">
+            <div class="section-heading-home reveal">
+                <div class="section-badge"><i class="fas fa-newspaper"></i> <?php echo $current_lang === 'sw' ? 'Habari' : 'Latest Updates'; ?></div>
+                <h2 class="section-title-home"><?php echo $current_lang === 'sw' ? 'Maelezo na Matukio' : 'Notes & Events'; ?></h2>
+                <p class="section-subtitle-home"><?php echo $current_lang === 'sw' ? 'Pata habari na matukio mapya kutoka Kona Ya Hisabati' : 'Stay updated with the latest from Kona Ya Hisabati'; ?></p>
+            </div>
+            <div class="row g-4">
+                <!-- Notes Column -->
+                <div class="col-lg-7 reveal-left">
+                    <div class="row g-4">
                         <?php foreach ($kyh_notes as $n): ?>
-                        <div class="kyh-note-item">
-                            <div class="kyh-note-img">
-                                <a href="notes?id=<?php echo (int) $n['id']; ?>">
+                        <div class="col-md-6">
+                            <a href="notes?id=<?php echo (int) $n['id']; ?>" class="note-card-home" style="text-decoration:none;color:inherit;display:block;">
+                                <div class="note-card-img">
                                     <?php if ($n['featured_image']): ?>
                                     <img src="<?php echo htmlspecialchars($n['featured_image']); ?>" alt="<?php echo htmlspecialchars($n['title']); ?>" loading="lazy">
                                     <?php else: ?>
                                     <img src="assets/images/note-placeholder.jpg" alt="" loading="lazy">
                                     <?php endif; ?>
-                                </a>
-                            </div>
-                            <div class="kyh-note-body">
-                                <a href="notes?id=<?php echo (int) $n['id']; ?>" style="text-decoration:none;color:inherit;">
-                                    <h4 class="kyh-note-title"><?php echo htmlspecialchars($n['title']); ?></h4>
-                                </a>
-                                <div class="kyh-note-date">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    <?php echo date('M j, Y', strtotime($n['publish_date'] ?: $n['created_at'])); ?>
                                 </div>
-                                <?php if ($n['short_description']): ?>
-                                <p class="kyh-note-excerpt"><?php echo htmlspecialchars($n['short_description']); ?></p>
-                                <?php endif; ?>
-                                <a href="notes?id=<?php echo (int) $n['id']; ?>" class="kyh-note-link">
-                                    <?php echo $current_lang === 'sw' ? 'Soma Zaidi' : 'Read More'; ?> <i class="fas fa-arrow-right"></i>
-                                </a>
-                            </div>
+                                <div class="note-card-body">
+                                    <div class="note-card-date">
+                                        <i class="fas fa-calendar"></i>
+                                        <?php echo date('M j, Y', strtotime($n['publish_date'] ?: $n['created_at'])); ?>
+                                    </div>
+                                    <h4 class="note-card-title"><?php echo htmlspecialchars($n['title']); ?></h4>
+                                    <?php if ($n['short_description']): ?>
+                                    <p class="note-card-excerpt"><?php echo htmlspecialchars($n['short_description']); ?></p>
+                                    <?php endif; ?>
+                                    <span class="note-card-link">
+                                        <?php echo $current_lang === 'sw' ? 'Soma Zaidi' : 'Read More'; ?> <i class="fas fa-arrow-right"></i>
+                                    </span>
+                                </div>
+                            </a>
                         </div>
                         <?php endforeach; ?>
                     </div>
-                    <a href="notes" class="kyh-board-card-btn">
-                        <?php echo $current_lang === 'sw' ? 'Maelezo Yote' : 'All Notes'; ?> <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <!-- Events Calendar -->
-                <div class="kyh-notevents-right">
-                    <div class="kyh-events-header">
-                        <h3 class="kyh-section-title"><?php echo $current_lang === 'sw' ? 'Matukio' : 'Events Calendar'; ?></h3>
+                    <div class="text-center mt-4">
+                        <a href="notes" class="hero-btn hero-btn-ghost" style="color:var(--home-dark);border-color:rgba(0,0,0,0.1);">
+                            <?php echo $current_lang === 'sw' ? 'Maelezo Yote' : 'All Notes'; ?> <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
-                    <div class="kyh-events-calendar">
-                        <div class="kyh-events-list">
+                </div>
+                <!-- Events Column -->
+                <div class="col-lg-5 reveal-right">
+                    <div class="leader-card-home" style="background:#fff;border:1px solid rgba(0,0,0,0.06);">
+                        <div style="padding:24px 24px 12px;border-bottom:1px solid rgba(0,0,0,0.06);">
+                            <h3 style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:var(--home-dark);margin:0;display:flex;align-items:center;gap:10px;">
+                                <i class="fas fa-calendar-alt" style="color:var(--home-accent);"></i>
+                                <?php echo $current_lang === 'sw' ? 'Matukio Yajayo' : 'Upcoming Events'; ?>
+                            </h3>
+                        </div>
+                        <div style="padding:12px 16px;">
+                            <?php if (empty($kyh_events)): ?>
+                            <p style="text-align:center;padding:40px 20px;color:#999;font-family:var(--font-body);font-size:0.9rem;">
+                                <i class="fas fa-calendar-times" style="font-size:2rem;display:block;margin-bottom:12px;opacity:0.3;"></i>
+                                <?php echo $current_lang === 'sw' ? 'Hakuna matukio yajayo' : 'No upcoming events'; ?>
+                            </p>
+                            <?php else: ?>
                             <?php foreach ($kyh_events as $e): ?>
                             <?php $dt = new DateTime($e['event_date']); ?>
-                            <div class="kyh-event-item">
-                                <div class="kyh-event-date-box">
-                                    <span class="kyh-event-day"><?php echo $dt->format('d'); ?></span>
-                                    <span class="kyh-event-month"><?php echo $dt->format('M'); ?></span>
+                            <div class="event-item-home">
+                                <div class="event-date-box">
+                                    <span class="event-date-day"><?php echo $dt->format('d'); ?></span>
+                                    <span class="event-date-month"><?php echo $dt->format('M'); ?></span>
                                 </div>
-                                <div class="kyh-event-info">
-                                    <h4 class="kyh-event-title"><?php echo htmlspecialchars($e['event_title']); ?></h4>
+                                <div>
+                                    <h4 class="event-info-title"><?php echo htmlspecialchars($e['event_title']); ?></h4>
                                     <?php if ($e['event_time']): ?>
-                                    <div class="kyh-event-time">
-                                        <i class="fas fa-clock"></i> <?php echo htmlspecialchars($e['event_time']); ?>
-                                    </div>
+                                    <div class="event-info-time"><i class="fas fa-clock"></i> <?php echo htmlspecialchars($e['event_time']); ?></div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                             <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                        <div style="padding:12px 24px 20px;text-align:center;">
+                            <a href="events" class="note-card-link" style="font-size:0.85rem;">
+                                <?php echo $current_lang === 'sw' ? 'Matukio Yote' : 'All Events'; ?> <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                     </div>
-                    <a href="events" class="kyh-board-card-btn">
-                        <?php echo $current_lang === 'sw' ? 'Matukio Yote' : 'All Events'; ?> <i class="fas fa-arrow-right"></i>
-                    </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="why-choose-section py-16" style="background:#fff;">
+    <section class="benefits-section-home" id="benefits">
         <div class="container-child">
-            <div class="section-heading-center">
-                <h2 class="why-choose-title"><?php echo $current_lang === 'sw' ? 'Kwa Nini Kona Ya Hisabati?' : 'Why Kona Ya Hisabati?'; ?></h2>
-                <div class="title-underline"></div>
+            <div class="section-heading-home reveal">
+                <div class="section-badge"><i class="fas fa-star"></i> <?php echo $current_lang === 'sw' ? 'Kwa Nini Sisi?' : 'Why Us?'; ?></div>
+                <h2 class="section-title-home"><?php echo $current_lang === 'sw' ? 'Kwa Nini Kona Ya Hisabati?' : 'Why Kona Ya Hisabati?'; ?></h2>
+                <p class="section-subtitle-home"><?php echo $current_lang === 'sw' ? 'Tunatoa uzoefu bora wa kujifunza kwa watoto' : 'We provide the best learning experience for children'; ?></p>
             </div>
-            <div class="benefit-cards-grid">
+            <div class="row g-4 stagger-children">
                 <?php if (empty($benefit_cards)): ?>
-                    <div class="benefit-card-wrap">
-                        <div class="benefit-card">
-                            <div class="benefit-card-icon"><i class="fas fa-shield-alt"></i></div>
-                            <h4 class="benefit-card-title"><?php echo $current_lang === 'sw' ? 'Salama kwa Watoto' : 'Child Safe'; ?></h4>
-                            <p class="benefit-card-desc"><?php echo $current_lang === 'sw' ? 'Hakuna barua pepe kwa wanafunzi.' : 'No email required for learners.'; ?></p>
-                        </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="benefit-card-home">
+                        <div class="benefit-icon-home" style="background:rgba(108,92,231,0.1);color:var(--home-accent);"><i class="fas fa-shield-alt"></i></div>
+                        <h4 class="benefit-title-home"><?php echo $current_lang === 'sw' ? 'Salama kwa Watoto' : 'Child Safe'; ?></h4>
+                        <p class="benefit-desc-home"><?php echo $current_lang === 'sw' ? 'Hakuna barua pepe kwa wanafunzi.' : 'No email required for learners.'; ?></p>
                     </div>
-                    <div class="benefit-card-wrap">
-                        <div class="benefit-card">
-                            <div class="benefit-card-icon"><i class="fas fa-hand-pointer"></i></div>
-                            <h4 class="benefit-card-title"><?php echo $current_lang === 'sw' ? 'Rahisi Kutumia' : 'Easy to Use'; ?></h4>
-                            <p class="benefit-card-desc"><?php echo $current_lang === 'sw' ? 'Kiolesura kinachofaa watoto.' : 'Child-friendly, icon-based interface.'; ?></p>
-                        </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="benefit-card-home">
+                        <div class="benefit-icon-home" style="background:rgba(245,166,35,0.1);color:var(--home-gold);"><i class="fas fa-hand-pointer"></i></div>
+                        <h4 class="benefit-title-home"><?php echo $current_lang === 'sw' ? 'Rahisi Kutumia' : 'Easy to Use'; ?></h4>
+                        <p class="benefit-desc-home"><?php echo $current_lang === 'sw' ? 'Kiolesura kinachofaa watoto.' : 'Child-friendly, icon-based interface.'; ?></p>
                     </div>
-                    <div class="benefit-card-wrap">
-                        <div class="benefit-card">
-                            <div class="benefit-card-icon"><i class="fas fa-mobile-alt"></i></div>
-                            <h4 class="benefit-card-title"><?php echo $current_lang === 'sw' ? 'Kila Kifaa' : 'Any Device'; ?></h4>
-                            <p class="benefit-card-desc"><?php echo $current_lang === 'sw' ? 'Simu, kompyuta kibao, au PC.' : 'Phone, tablet, or computer.'; ?></p>
-                        </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="benefit-card-home">
+                        <div class="benefit-icon-home" style="background:rgba(0,206,209,0.1);color:#00ced1;"><i class="fas fa-mobile-alt"></i></div>
+                        <h4 class="benefit-title-home"><?php echo $current_lang === 'sw' ? 'Kila Kifaa' : 'Any Device'; ?></h4>
+                        <p class="benefit-desc-home"><?php echo $current_lang === 'sw' ? 'Simu, kompyuta kibao, au PC.' : 'Phone, tablet, or computer.'; ?></p>
                     </div>
-                    <div class="benefit-card-wrap">
-                        <div class="benefit-card">
-                            <div class="benefit-card-icon"><i class="fas fa-graduation-cap"></i></div>
-                            <h4 class="benefit-card-title"><?php echo $current_lang === 'sw' ? 'Mtaala wa Tanzania' : 'Tanzania Curriculum'; ?></h4>
-                            <p class="benefit-card-desc"><?php echo $current_lang === 'sw' ? 'Pre-Primary hisabati.' : 'Aligned with Pre-Primary numeracy.'; ?></p>
-                        </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="benefit-card-home">
+                        <div class="benefit-icon-home" style="background:rgba(80,200,120,0.1);color:#50C878;"><i class="fas fa-graduation-cap"></i></div>
+                        <h4 class="benefit-title-home"><?php echo $current_lang === 'sw' ? 'Mtaala wa Tanzania' : 'Tanzania Curriculum'; ?></h4>
+                        <p class="benefit-desc-home"><?php echo $current_lang === 'sw' ? 'Pre-Primary hisabati.' : 'Aligned with Pre-Primary numeracy.'; ?></p>
                     </div>
+                </div>
                 <?php else: ?>
                     <?php foreach ($benefit_cards as $card): ?>
-                    <div class="benefit-card-wrap">
-                        <div class="benefit-card<?php echo $card['bg_image'] ? ' has-bg' : ''; ?>"<?php echo $card['bg_image'] ? ' style="background-image:url(' . htmlspecialchars($card['bg_image']) . ');"' : ''; ?>>
-                            <div class="benefit-card-overlay"></div>
-                            <div class="benefit-card-content">
-                                <div class="benefit-card-icon"><i class="fas <?php echo htmlspecialchars($card['icon']); ?>"></i></div>
-                                <h4 class="benefit-card-title"><?php echo htmlspecialchars($current_lang === 'sw' ? $card['title_sw'] : $card['title_en']); ?></h4>
-                                <p class="benefit-card-desc"><?php echo htmlspecialchars($current_lang === 'sw' ? $card['description_sw'] : $card['description_en']); ?></p>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="benefit-card-home">
+                            <div class="benefit-icon-home" style="background:rgba(108,92,231,0.1);color:var(--home-accent);">
+                                <i class="fas <?php echo htmlspecialchars($card['icon']); ?>"></i>
                             </div>
+                            <h4 class="benefit-title-home"><?php echo htmlspecialchars($current_lang === 'sw' ? $card['title_sw'] : $card['title_en']); ?></h4>
+                            <p class="benefit-desc-home"><?php echo htmlspecialchars($current_lang === 'sw' ? $card['description_sw'] : $card['description_en']); ?></p>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -248,27 +290,12 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
     </section>
 
     <?php $gov_count = !empty($kyh_governance) ? count($kyh_governance) : 0; ?>
-    <?php
-    $color_map = [
-        'blue'   => '#007bff',
-        'green'  => '#28a745',
-        'red'    => '#dc3545',
-        'yellow' => '#ffc107',
-        'purple' => '#6f42c1',
-    ];
-    $tint_map = [
-        'blue'   => 'rgba(0, 123, 255, 0.05)',
-        'green'  => 'rgba(40, 167, 69, 0.05)',
-        'red'    => 'rgba(220, 53, 69, 0.05)',
-        'yellow' => 'rgba(255, 193, 7, 0.08)',
-        'purple' => 'rgba(111, 66, 193, 0.05)',
-    ];
-    ?>
-    <section class="governance-section">
+    <section class="governance-section-home">
         <div class="container-child">
-            <div class="section-heading-center">
-                <h2 class="why-choose-title"><?php echo $current_lang === 'sw' ? 'Usimamizi na Walimu' : 'Management & Teachers'; ?></h2>
-                <div class="title-underline"></div>
+            <div class="section-heading-home reveal">
+                <div class="section-badge"><i class="fas fa-users"></i> <?php echo $current_lang === 'sw' ? 'Timu Yetu' : 'Our Team'; ?></div>
+                <h2 class="section-title-home"><?php echo $current_lang === 'sw' ? 'Usimamizi na Walimu' : 'Management & Teachers'; ?></h2>
+                <p class="section-subtitle-home"><?php echo $current_lang === 'sw' ? 'Wale ambao wanaendesha Kona Ya Hisabati' : 'The people behind Kona Ya Hisabati'; ?></p>
             </div>
             <div class="governance-carousel position-relative">
                 <button type="button" class="governance-arrow governance-arrow-left" onclick="scrollGovernance(-1)" aria-label="Previous">
@@ -279,26 +306,25 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
                 <?php
                     $bc = $g['border_color'] ?? 'blue';
                     $border_hex = $color_map[$bc] ?? '#007bff';
-                    $tint = $tint_map[$bc] ?? 'rgba(0, 123, 255, 0.05)';
                 ?>
                 <div class="col">
-                    <div class="card h-100 text-center leadership-card" style="border-bottom:4px solid <?php echo $border_hex; ?>;">
-                        <div class="image-frame p-3">
+                    <div class="leader-card-home" style="border-bottom:3px solid <?php echo $border_hex; ?>;">
+                        <div class="image-frame" style="overflow:hidden;">
                             <?php if ($g['image_path']): ?>
-                                <img src="<?php echo htmlspecialchars($g['image_path']); ?>" alt="<?php echo htmlspecialchars($g['name']); ?>" loading="lazy">
+                                <img class="leader-avatar" src="<?php echo htmlspecialchars($g['image_path']); ?>" alt="<?php echo htmlspecialchars($g['name']); ?>" loading="lazy">
                             <?php else: ?>
-                                <div class="fallback-icon"><i class="fas fa-user"></i></div>
+                                <div class="fallback-icon" style="width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.2);font-size:2.5rem;">
+                                    <i class="fas fa-user"></i>
+                                </div>
                             <?php endif; ?>
                         </div>
-                        <div class="card-body p-0">
-                            <h5 class="fw-bold text-dark mt-3 px-2 mb-1"><?php echo htmlspecialchars($g['name']); ?></h5>
-                            <div class="role-box p-2 mt-auto" style="background-color:<?php echo $tint; ?>;">
-                                <p class="role-text"><?php echo htmlspecialchars($g['title']); ?></p>
-                            </div>
+                        <div class="leader-info">
+                            <h5 class="leader-name"><?php echo htmlspecialchars($g['name']); ?></h5>
+                            <p class="leader-role"><?php echo htmlspecialchars($g['title']); ?></p>
                             <?php if ($g['profile_link']): ?>
-                                <a href="<?php echo htmlspecialchars($g['profile_link']); ?>" class="d-block text-muted text-decoration-none small pb-3" target="_blank" rel="noopener">view profile</a>
-                            <?php else: ?>
-                                <span class="d-block text-muted small pb-3" style="cursor:default;">view profile</span>
+                                <a href="<?php echo htmlspecialchars($g['profile_link']); ?>" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;color:var(--home-gold-light);text-decoration:none;margin-top:8px;transition:color 0.3s;">
+                                    <i class="fas fa-external-link-alt"></i> Profile
+                                </a>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -311,7 +337,7 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
             </div>
             <?php if ($gov_count > 5): ?>
             <div class="text-center mt-4">
-                <button type="button" class="kyh-board-card-btn" data-bs-toggle="modal" data-bs-target="#governanceAllModal">
+                <button type="button" class="hero-btn hero-btn-ghost" style="color:#fff;border-color:rgba(255,255,255,0.15);" data-bs-toggle="modal" data-bs-target="#governanceAllModal">
                     <?php echo $current_lang === 'sw' ? 'Wote' : 'View All'; ?> (<?php echo $gov_count; ?>) <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
@@ -362,14 +388,119 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
         </div>
     </div>
 
+    <!-- CTA Section -->
+    <section class="cta-section-home reveal-scale">
+        <div class="container-child" style="position:relative;z-index:2;">
+            <h2 class="cta-title-home"><?php echo $current_lang === 'sw' ? 'Anza Kujifunza Leo' : 'Start Learning Today'; ?></h2>
+            <p class="cta-subtitle-home"><?php echo $current_lang === 'sw' ? 'Jiunge na wanafunzi elfu kwenye Kona Ya Hisabati' : 'Join thousands of learners on Kona Ya Hisabati'; ?></p>
+            <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+                <button type="button" onclick="handleStartLearning()" class="hero-btn hero-btn-primary">
+                    <i class="fas fa-play-circle"></i>
+                    <?php echo htmlspecialchars($t['btn_start']); ?>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <button type="button" class="scroll-top-btn" id="scrollTopBtn" aria-label="Scroll to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
     <?php include 'php/includes/footer.php'; ?>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
     <script>
-    // Dynamic hero slider -- handles any number of slides with arrow navigation
+    /* ── Scroll Progress Bar ──────────────────────── */
+    (function(){
+        var bar = document.getElementById('scrollProgress');
+        if (!bar) return;
+        window.addEventListener('scroll', function(){
+            var h = document.documentElement.scrollHeight - window.innerHeight;
+            bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+        }, {passive:true});
+    })();
+
+    /* ── Custom Cursor ────────────────────────────── */
+    (function(){
+        var c = document.getElementById('customCursor');
+        if (!c || 'ontouchstart' in window) return;
+        document.addEventListener('mousemove', function(e){
+            c.style.left = e.clientX + 'px';
+            c.style.top = e.clientY + 'px';
+        });
+        document.querySelectorAll('a, button, .note-card-home, .benefit-card-home, .leader-card-home, .hero-btn, .event-item-home').forEach(function(el){
+            el.addEventListener('mouseenter', function(){ c.classList.add('hover'); });
+            el.addEventListener('mouseleave', function(){ c.classList.remove('hover'); });
+        });
+    })();
+
+    /* ── Scroll Reveal (Intersection Observer) ────── */
+    (function(){
+        var targets = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger-children');
+        if (!targets.length) return;
+        var io = new IntersectionObserver(function(entries){
+            entries.forEach(function(entry){
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    io.unobserve(entry.target);
+                }
+            });
+        }, {threshold: 0.15, rootMargin: '0px 0px -40px 0px'});
+        targets.forEach(function(t){ io.observe(t); });
+    })();
+
+    /* ── Counter Animation ────────────────────────── */
+    (function(){
+        var counters = document.querySelectorAll('.counter-value[data-target]');
+        if (!counters.length) return;
+        var io = new IntersectionObserver(function(entries){
+            entries.forEach(function(entry){
+                if (!entry.isIntersecting) return;
+                var el = entry.target;
+                var target = parseInt(el.getAttribute('data-target'), 10);
+                var duration = 2000;
+                var start = performance.now();
+                function tick(now){
+                    var elapsed = now - start;
+                    var progress = Math.min(elapsed / duration, 1);
+                    var eased = 1 - Math.pow(1 - progress, 3);
+                    el.textContent = Math.floor(eased * target).toLocaleString();
+                    if (progress < 1) requestAnimationFrame(tick);
+                }
+                requestAnimationFrame(tick);
+                io.unobserve(el);
+            });
+        }, {threshold: 0.5});
+        counters.forEach(function(c){ io.observe(c); });
+    })();
+
+    /* ── Scroll-to-top Button ─────────────────────── */
+    (function(){
+        var btn = document.getElementById('scrollTopBtn');
+        if (!btn) return;
+        window.addEventListener('scroll', function(){
+            btn.classList.toggle('visible', window.scrollY > 400);
+        }, {passive:true});
+        btn.addEventListener('click', function(){
+            window.scrollTo({top:0, behavior:'smooth'});
+        });
+    })();
+
+    /* ── Navbar scroll effect ─────────────────────── */
+    (function(){
+        var nav = document.querySelector('.navbar-modern');
+        if (!nav) return;
+        nav.classList.add('navbar-home');
+        window.addEventListener('scroll', function(){
+            nav.classList.toggle('scrolled', window.scrollY > 60);
+        }, {passive:true});
+    })();
+
+    /* ── Hero slider ──────────────────────────────── */
     (function() {
         var slides = document.querySelectorAll('.hero-bg-slide');
         if (slides.length > 1) {
-            // Disable CSS animations for dynamic slides
             var style = document.createElement('style');
             var css = '';
             for (var i = 1; i <= slides.length; i++) {
@@ -377,16 +508,12 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
             }
             style.textContent = css;
             document.head.appendChild(style);
-
-            // Show first, hide rest
             for (var i = 1; i < slides.length; i++) {
                 slides[i].style.opacity = '0';
             }
             slides[0].style.opacity = '1';
-
             var current = 0;
             var interval;
-
             function goToSlide(index) {
                 if (index < 0) index = slides.length - 1;
                 if (index >= slides.length) index = 0;
@@ -394,27 +521,17 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
                 current = index;
                 slides[current].style.opacity = '1';
             }
-
             function startInterval() {
                 if (interval) clearInterval(interval);
-                interval = setInterval(function() {
-                    goToSlide(current + 1);
-                }, 5000);
+                interval = setInterval(function() { goToSlide(current + 1); }, 5000);
             }
-
             window.heroSlide = function(dir) {
                 goToSlide(current + dir);
                 startInterval();
             };
-
             startInterval();
         }
     })();
-    </script>
-    <audio id="audioPlayer" preload="auto"></audio>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/main.js"></script>
-    <script>
     function kyhOpenModal(id) {
         var el = document.getElementById('kyhModal' + id);
         if (el) el.classList.add('active');
