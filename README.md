@@ -1,563 +1,297 @@
-KONA YA HISABATI
-FULL SYSTEM FLOWCHART -TEXT-BASED DIAGRAM
-1. MASTER SYSTEM FLOW
- ┌─────────────────────┐
-│ HOME PAGE │
-└─────────┬───────────┘
- │
- ┌────────────────────────────┼────────────────────────────┐
- │ │ │
-┌───▼───┐ ┌─────▼─────┐ ┌──────▼──────┐
-│ START │ │ TEACHER │ │ PARENT │
-│LEARNING│ │ DASHBOARD │ │ GUIDE │
-└───┬───┘ └─────┬─────┘ └──────┬──────┘
- │ │ │
- ▼ ▼ ▼
-┌────────────┐ ┌────────────┐ ┌─────────────┐
-│ LEARNING │ │ TEACHER │ │ PARENT │
-│ CATEGORIES │ │ TOOLS │ │ RESOURCES │
-└────┬───────┘ └────┬───────┘ └──────┬──────┘
- │ │ │
- ▼ ▼ ▼
-(Flows Continue...) (Flows Continue...) (Flows Continue...)
-2. CHILD USER FLOW DIAGRAM
- ┌─────────────────────────┐
-│ HOME PAGE │
-└─────────────┬───────────┘
- │
- ┌─────▼─────┐
-│ START │
-│ LEARNING │
-└─────┬─────┘
- │
- ┌──────▼──────┐
-│ LEARNING │
-│ CATEGORIES │
-└──────┬──────┘
- ┌──────────────────┼───────────────────┐
- │ │ │
- ▼ ▼ ▼
- ┌────────────┐ ┌────────────┐ ┌────────────┐
- │ COUNTING & │ │ SHAPES & │ │ ADDITION & │
- │ NUMBERS │ │ PATTERNS │ │ SUBTRACTION│
- └─────┬──────┘ └──────┬─────┘ └──────┬─────┘
- │ │ │
- ▼ ▼ ▼
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│ Interactive │ │ Interactive │ │ Interactive │
-│ Activities │ │ Activities │ │ Activities │
-└──────┬──────────┘ └──────┬──────────┘ └──────┬──────────┘
- │ │ │
- ▼ ▼ ▼
-┌──────────────┐ ┌──────────────┐ ┌───────────────┐
-│ Feedback & │ │ Feedback & │ │ Feedback & │
-│ Rewards │ │ Rewards │ │ Rewards │
-└──────┬───────┘ └──────┬───────┘ └──────┬────────┘
- │ │ │
- ▼ ▼ ▼
-┌──────────────┐ ┌──────────────┐ ┌───────────────┐
-│ Next Activity│ │ Next Activity│ │ Next Activity │
-└──────────────┘ └──────────────┘ └───────────────┘
-3. TEACHER FLOW DIAGRAM
- ┌──────────────────────────┐
-│ HOME PAGE │
-└──────────────┬───────────┘
- │
- ┌──────▼──────┐
-│ TEACHER │
- │ LOGIN │
- └──────┬──────┘
- │ (Auth success)
- ┌──────▼────────┐
-│ TEACHER │
-│ DASHBOARD │
-└──────┬────────┘
- ┌───────────────────────────┼──────────────────────────┐
- │ │ │
- ▼ ▼ ▼
-┌───────────────┐ ┌─────────────────┐ ┌──────────────────┐
-│ Curriculum & │ │ Track Learner │ │ Downloadable │
-│ Lesson Plans │ │ Progress │ Worksheets/Tools │
-└───────┬──────┘ └──────────┬──────┘ └──────────┬────────┘
- │ │ │
- ▼ ▼ ▼
-┌───────────────┐ ┌─────────────────┐ ┌────────────────────┐
-│ Select Lesson │ │ Class/Student │ │ PDF/Flashcards
-│
-│ or Activity │ │ Progress View │ │ Lesson Guides
-│
-└───────────────┘ └─────────────────┘ └────────────────────┘
- Final Action → Log Out / Continue Teaching
-4. PARENT/CAREGIVER FLOW
-DIAGRAM
- ┌─────────────────────────┐
-│ HOME PAGE │
-└─────────────┬───────────┘
- │
- ┌───────▼────────┐
-│ PARENT GUIDE │
-└───────┬────────┘
- │
- ┌────────────────────────┼────────────────────────┐
- │ │ │
- ▼ ▼ ▼
-┌────────────────┐ ┌─────────────────┐ ┌──────────────────┐
-│ Home Numeracy │ │ Video Tutorials │ │ Daily Practice │
-│ Guides │ │ │ │ Activities
-└──────┬─────────┘ └────────┬────────┘ └────────┬─────────┘
- │ │ │
- ▼ ▼ ▼
-┌────────────────┐ ┌─────────────────┐ ┌──────────────────┐
-│ Step-by-step │ │ Watch & Learn │ │ Activities that │
-│ Support Tips │ │ │ │ need no devices │
-└────────────────┘ └─────────────────┘ └──────────────────┘
- Final Action → Support child → Return anytime
-5. DETAILED SYSTEM FLOW – ALL
-MODULES CONNECTED
-HOME PAGE
- │
- ├──► START LEARNING (Child Path)
- │ │
- │ └──► Learning Categories
- │ │
- │ ├──► Counting
- │ ├──► Shapes
- │ ├──► Addition/Subtraction
- │ ├──► Math Games
- │ ├──► Quizzes
- │ └──► Songs & Videos
- │
- ├──► TEACHER LOGIN → Dashboard
- │ │
- │ ├──► Lesson Plans
- │ ├──► Learner Progress
- │ ├──► Activity Library
- │ └──► Downloads
- │
- └──► PARENT GUIDE
- │
- ├──► Home Numeracy Tips
- ├──► Videos
- └──► Practice Activities
+# Kona Ya Hisabati — Comprehensive Project Report
 
+> **Final Status:** Design & Architecture Complete — Awaiting Implementation Phase
+> **Date:** July 2026
 
+---
 
+## 1. Executive Summary
 
- KONA YA HISABATI – WEB DEVELOPMENT GUIDELINE & FLOW-CHART
-A. DEVELOPMENT GUIDELINE
-1.0 Background Summary for Developers
-Kona Ya Hisabati is a digital version of the classroom Mathematics Learning Corner. It aims to address
-the lack of well-equipped math corners in many schools by providing online, child-friendly,
-interactive numeracy activities accessible anytime, at school or home.
-Target Users:
- Pre-Primary pupils
- Standard One and two pupils
- Teachers
- Parents/Caregivers
-Platform Goals:
- Improve numeracy skills through interactive practice.
- Provide continuous access to curriculum-aligned math resources.
- Strengthen school–home collaboration.
- Boost children’s interest, engagement, and self-confidence in mathematics.
-2.0 Functional Requirements
-2.1 User Categories
-1. Learner (Pupil)
- Access games and activities.
- Receive feedback (audio + visual).
- Navigate using icons (minimal text).
-2. Teacher
- Select activities for class.
- Monitor learner progress.
- Download simple worksheets.
-3. Parent
- Monitor child’s performance.
- Support home practice.
-4. Admin
- Upload content.
- Manage accounts/permissions.
- Review analytics.
-3.0 Platform Structure & Modules
-A. Home Page
- Child-friendly interface
- Colorful icons
- Audio-assisted navigation eg Tap here for Counting
-B. Main Learning Modules
-1. Number Concepts
-Counting, number recognition, sequencing, tracing, missing numbers.
-2. Shapes & Patterns & Spatial Awareness
-Identify, sort, complete patterns, left/right, above/below.
-3. Basic Operations (Addition/Subtraction)
-Drag & drop, number lines, visual operations, word problems.
-4. Sorting, Matching, Classifying
-Sort by color/size, categorize objects, match numbers.
-5. Measurement Basics
-Big/small, tall/short, heavy/light, ordering sizes.
-6. Time & Daily Routine
-Day/night, morning/evening, sequencing activities.
-7. Money Concepts
-Identify coins/notes, match values, simple buying/selling.
-8. Math Games (Play Zone)
-Puzzles, matching games, memory cards, number hunts.
-9. Math Songs & Rhymes
-Counting songs, animations, shape songs.
-10. Quizzes & Assessment
-Auto-graded quizzes, badges, progress reports.
-4.0 Technical Requirements
-4.1 Front-End
- Framework: React.js / Vue.js (recommended)
- Responsive design for tablets and phones
- High-contrast colors and large buttons for children
-4.2 Back-End
- Admin dashboard for content uploading
-4.3 Accessibility
- Audio instructions for non-readers
- Minimal text
- Visual cues (arrows, icons)
- Offline mode (optional)
-4.4 Security
- Child-safe authentication (no email needed for pupils)
- Teacher/parent accounts secured by password
- No personal data collection from children
-5.0 Content Development Guidelines
-1. Curriculum Alignment
- Align with pre-primary and Grade 1 numeracy standards in Tanzania.
-2. Activity Design
- Simple instructions with voice support.
- Use bright colors, familiar objects (animals, fruits, everyday items).
- Immediate positive feedback (sounds, stars, animations).
-3. Game Mechanics
- Drag-and-drop
- Matching
- Tap-to-select
- Audio prompts
-4. Assessment
- Short quizzes after each topic
- Automatic scoring
- Generate simple reports for parents/teachers
-6.0 Development Phases
-Phase 1: Planning & Analysis
- Review curriculum
- Define modules
- Draft UI/UX wireframes
-Phase 2: Content & Activity Design
- Prepare all visuals (icons, shapes, objects)
- Script audio instructions
- Prepare animations
-Phase 3: System Development
- Build front-end interface
- Set up back-end, API, database
- Integrate content
-Phase 4: Testing
- Child usability testing
- Teacher feedback
- Bug fixing
-Phase 5: Deployment
- Launch web platform
- Set up analytics
-Phase 6: Continuous Improvement
- Add new games
- Update songs & quizzes
- Teacher feedback integration
-7.0 Flow Chart Diagram
- ┌──────────────────────┐
- │ START │
- └─────────┬────────────┘
- ▼
- ┌────────────────────────────┐
- │ User Accesses Platform │
- └─────────┬──────────────────┘
- ▼
- ┌──────────────────┼───────────────────┐
- ▼ ▼ ▼
-┌──────────────┐ ┌────────────────┐ ┌────────────────┐
- │ Learner │ │ Teacher │ │ Parent │
-└─────┬────────┘ └──────┬─────────┘ └──────┬─────────┘
- ▼ ▼ ▼
-┌───────────────┐ ┌────────────────┐ ┌──────────────────┐
-│Select Activity │ │Choose Class/ │ │ View Child │
-│(Games/Numbers/ │ │Assign Activity │ │ Progress │
-│Shapes, etc.) │ └──────┬─────────┘ └──────────────────┘
-└─────┬─────────┘ │
- │ │
- ▼ ▼
-┌───────────────┐ ┌────────────────┐
-│Play Activity/ │ │ Monitor Progress│
-│Receive Feedback│ │ View Reports │
-└─────┬─────────┘ └──────┬──────────┘
- │ │
- ▼ ▼
-┌───────────────┐ ┌────────────────┐
-│Take Quiz/ │ │ Adjust Teaching│
-│Assessment │ │ based on data │
-└─────┬─────────┘ └──────┬──────────┘
- │ │
- └──────────┬────────┘
- ▼
- ┌──────────────────────┐
- │ Save Progress │
- └─────────┬────────────┘
- ▼
- ┌──────────────────────┐
- │ END │
- └──────────────────────┘
-8.0 Deliverables for Developers
- Functional platform with full modules listed.
- UX optimized for children (3–7 years).
- Audio-assisted instructions.
- Teacher & parent dashboards.
- Secure, scalable architecture.
- Admin for adding new content.
+Kona Ya Hisabati (Math Corner) is a digital mathematics learning platform for Tanzanian Pre-Primary and Standard 1-2 learners. The project has completed a full architectural redesign with two approved governing documents: the **Education Blueprint** (curriculum "what") and the **Master Content Architecture** (content "how"). No implementation code has been written for these new designs — the existing codebase (PHP/MySQL/jQuery/Bootstrap 5) is the pre-architecture legacy system.
 
+---
 
-Kona Ya Hisabati
-Complete UI/UX Design and Development Guideline
-1. UI/UX Concept Overview
-1.1 Purpose of the Platform
-Kona Ya Hisabati is a web-based interactive mathematics learning platform designed to
-digitize the traditional Mathematics Learning Corner used in Tanzanian early grade
-classrooms. The platform aims to:
- Improve numeracy learning for Pre-Primary and Standard One to Two learners.
- Provide a child-friendly environment for interactive math practice.
- Equip teachers with structured digital activities and progress tracking tools.
- Support parents in guiding home-based practice numeracy learning.
- Ensure inclusive, accessible learning following UDL principles.
-1.2 Target Users
-1. Children (Pre-Primary & Standard One-Two)
-o Limited reading ability
-o Require visual, intuitive, highly interactive interfaces
-o Prefer audio guidance and large buttons
-2. Teachers
-o Require structured lesson-aligned content
-o Need classroom resources, analytics, and printable materials
-o Require tools aligned with Tanzania’s curriculum
-3. Parents / Caregivers
-o Require simple navigation and explanations
-o Need practical home numeracy activities
-o Require video guides and low literacy support
-1.3 Key Learning Principles
- Early Childhood Education: More visuals, less text; color-rich, playful interactions.
- Universal Design for Learning (UDL): Multiple means of engagement,
-representation, and expression.
- Accessibility: High contrast colors, simple navigation, audio instruction controls,
-alternative text, offline support.
+## 2. Project Structure
 
-## Project Structure
-
+```
 school/
+├── index.php                     # Home page
+├── login.php                     # Teacher/Parent login
+├── register.php                  # Registration
+├── logout.php                    # Logout handler
+├── about.php                     # About page
+├── contact.php                   # Contact page
+├── terms.php                     # Terms of use
+├── parent-guide.php              # Parent resources
+├── teacher-guide.php             # Teacher resources
+│
 ├── css/
-│   └── style.css              # Global styles and child-friendly design
+│   └── style.css                 # 7,464 lines — Design system with child-friendly variables
+│
 ├── js/
-│   └── main.js               # JavaScript functionality and audio prompts
+│   ├── main.js                   # Global JS, audio, interactions
+│   └── activities/
+│       ├── engines.js            # 12 activity engines (mango_counting, number_id, etc.)
+│       ├── registry.js           # Maps 27 engine keys to engines
+│       ├── core.js               # Shared utilities (TTS, celebration, emojis)
+│       └── activity-runner.js    # Engine bootstrap + legacy quiz fallback
+│
 ├── php/
-│   └── db_connection.php     # Database connection using PDO
-├── assets/
-│   ├── audio/                # Audio files (optional)
-│   └── images/               # Images and icons
-├── admin/
-│   └── dashboard.php         # Admin dashboard for content management
-├── teacher/
-│   └── dashboard.php         # Teacher dashboard with lesson plans and progress
-├── parent/
-│   ├── dashboard.php         # Parent dashboard for tracking children
-│   ├── add-child.php         # Add child account
-│   ├── guide.php             # Parent guide with tips and activities
-│   └── child-progress.php    # Detailed child progress view
+│   ├── db_connection.php         # PDO connection (env vars + fallback)
+│   ├── init_db.php               # DB setup script
+│   └── includes/
+│       ├── session.php           # Secure session management
+│       ├── csrf.php              # CSRF protection
+│       ├── validator.php         # Input validation
+│       ├── security.php          # Headers, rate limiting, error handling
+│       ├── auth.php              # Authentication core
+│       ├── lang.php              # Bilingual EN/SW UI strings
+│       └── helpers.php           # Utility functions
+│
 ├── learner/
-│   ├── login.php             # Child-safe learner login
-│   ├── activities.php        # Activities list for a module
-│   └── activity.php          # Interactive activity template
-├── index.php                 # Home page with learning categories
-├── login.php                 # Login page for teachers/parents
-├── register.php              # Registration page
-├── logout.php                # Logout handler
-├── about.php                 # About page
-├── contact.php               # Contact page
-├── terms.php                 # Terms of use page
-├── database.sql              # Database schema and sample data
-└── README.md                 # This file
+│   ├── login.php                 # No-password learner login (username only)
+│   ├── dashboard.php             # Learner dashboard
+│   ├── activities.php            # Module -> activity listing
+│   ├── activity.php              # Activity page — engine resolver
+│   ├── profile.php               # Learner profile
+│   └── finish.php                # Activity completion/reward
+│
+├── teacher/                      # 16 files — dashboard, learners, progress, reports, etc.
+│   ├── dashboard.php
+│   ├── learners.php
+│   ├── progress.php
+│   └── ...
+│
+├── parent/                       # 11 files — dashboard, claiming, progress, guide, etc.
+│   ├── dashboard.php
+│   ├── claim-child.php
+│   ├── add-child.php
+│   ├── guide.php
+│   └── ...
+│
+├── admin/                        # 22 files — users, content, analytics, migrations, etc.
+│   ├── dashboard.php
+│   ├── users.php
+│   ├── activities.php
+│   ├── modules.php
+│   └── ...
+│
+├── assets/
+│   ├── images/
+│   ├── uploads/                  # Has .htaccess blocking PHP execution
+│   └── audio/
+│
+├── database/
+│   ├── schema.sql                # Core schema
+│   └── migrations_v3.sql         # Migration scripts (10 total)
+│
+├── database.sql                  # Full schema + seed data (13 modules, 30+ activities, 5 badges)
+│
+├── includes/                     # Legacy includes (being phased out)
+│   ├── header.php
+│   ├── footer.php
+│   └── ...
+│
+├── .env                          # DB credentials, SMS API token
+├── .htaccess                     # Security rules, 40+ blocked file patterns
+│
+├── README.md                     # This file
+├── child-parent-flow.md          # Registration & claiming documentation
+├── SETUP_INSTRUCTIONS.md         # Setup guide
+├── QUICK_START.md                # 5-minute quick start
+├── TODO.md                       # SMS debug tasks
+└── SECURITY.md                   # Full security implementation documentation
+```
 
-2.2 Sitemap (Hierarchical)
-Home Page
- Start Learning
- Teacher Login
- Parent Guide
- About Kona Ya Hisabati
- Language Selector
-Children Learning Section
- Counting & Number Recognition
-o Count Objects
-o Match Numbers
-o Number Ordering
- Shapes & Patterns
-o Identify Shapes
-o Create Patterns
-o Shape Sorting
- Addition & Subtraction
-o Single-digit addition
-o Single-digit subtraction
-o Story problems
- Math Games
-o Memory game
-o Matching game
-o Drag-and-drop games
-o Math Tag of war (mfano) https://www.instagram.com/reels/DUsl_8VATIr/
- Quizzes
-o Short assessments
-o Certificate printing
- Math Songs & Videos
-o Counting songs
-o Shape songs
-o Animated story videos
-Teacher Section/ Dashboard
- Lesson Plans
- Activity Library
- Learner Progress
- Printable Worksheets
- Classroom Tips
-Parent Section
- How to Support Learning at Home
- Simple daily math tasks
- Video guides
- Progress view (optional)
-2.3 User Flows
-Child User Flow
-Home → Start Learning → Choose Category → Interactive Activity → Reward/Progress →
-Continue or Exit
-Teacher User Flow
-Home → Teacher Login → Dashboard → Select Tools → Download/Track → Logout
-Parent User Flow
-Home → Parent Guide → View Tips → Watch Video → Access Home Activities
-3. Detailed UI Descriptions for Each Page
-3.1 Home Page
-Purpose
-Welcome page for all users; easy entry to learning activities.
-Layout
- Top header: Logo, language toggle, teacher login
- Center: Main illustration (children learning)
- Large “Start Learning” button
- Secondary buttons: Teacher Area, Parent Guide
- Footer: About, Contact, Terms
-Components
- Large rounded buttons
- High-resolution illustrations
- Top navigation bar
-Sample Labels
- “Start Learning ”
- “Teacher Dashboard”
- “Parent Guide”
-Interaction
- Hover: Light shadow expansion
- Click: Soft bounce animation
- Audio option: “Touch here to start learning!”
-3.2 Learning Categories Page
-Purpose
-Provide children with icon based choices of math activities.
-Layout
- Grid of colorful icons (6 main categories)
- Each icon shows an illustration (shapes, numbers, games)
-Components
- Icon card (child friendly)
- Category title
- Simple audio prompts
-Sample Labels
- “Counting,” “Shapes,” “Games,” “Quizzes”
-Interactions
- Hover: Glow effect
- Click: Page transition with animation
-3.3 Activity Page Template (All Learning Activities)
-Purpose
-Interactive page where children solve math tasks.
-Layout
- Top bar: Home, Back, Audio
- Middle: Interactive component (drag-and-drop, buttons, animations)
- Bottom: Next Activity button
-Components
- Large interactive element
- Object illustrations (fruit, toys, animals)
- Reward animations (stars)
-Sample Text
- “Count the apples”
- “Touch the correct number”
-Interaction Behavior
- Click feedback: Color change
- Drag feedback: Snap-to-place
- Correct answer: Star animation and voice “Good job!”
-4. Learning Activity UI Templates
-4.1 Counting & Number Recognition
- Drag objects to match numbers
- Select correct number from 1–10
- Moving number line
-4.2 Shapes & Patterns
- Identify shapes by tapping
- Complete patterns using drag-and-drop
- Shape matching memory game
-4.3 Addition & Subtraction
- Visual math (apples added/removed)
- Simple equations (3 + 2 = ?)
-4.4 Math Games
- Maze game (collect numbers)
- Shape-hunt adventure
-4.5 Quizzes
- Timed tasks
- Star-rating scorecards
-4.6 Math Songs & Videos
- Video player with large controls
- Playlist of math songs
-5. Teacher Dashboard UI Requirements
-5.1 Content Access
- Clear folder-like structure
- Curriculum-aligned activities
-5.2 Progress Tracking
- Charts (bar/line)
- Class-level summaries
- Downloadable reports
-5.3 Materials
- PDF worksheets
- Flashcards
- Lesson guides
-5.4 Classroom Tools
- Tips for differentiation
- UDL strategies
- Remedial plans
-6. Parent/Caregiver Support UI
-Key Elements
- Step-by-step guides
- Simple video tutorials
- Printable home activities
- Low-literacy-friendly icons
- Large fonts
-7. Style Guide / Design System
-7.1 Color Palette
- Primary Blue:
- Primary Yellow:
- Secondary Green:
- Orange (high interest)
- Background Light:
-7.2 Typography
- Headings: Poppins
- Body text: Nunito
-7.3 Buttons
- Rounded corners
- Height: 70–90px for children
- Bold labels
-7.4 Icons
- Flat, colorful, child friendly
- Use culturally appropriate visuals
-7.5 Spacing
- 16px baseline grid
- Clear padding around elements
-8. Accessibility & Inclusivity Requirements
- High contrast colors
- Alt-text for images
- Audio instruction button on all activities
- Touch-friendly 1.5cm minimum tap-target
- Simple language (Kiswahili & English)
- Dyslexia-friendly mode (optional)
-9. Flow Diagrams (Text-Based)
-10.1 Child Flow
-Home → Start → Select Category → Activity → Reward → Next Activity → Exit
-10.2 Teacher Flow
-Home → Login → Dashboard → Select Tool → Track/Download → Logout
-10.3 Parent Flow
-Home → Parent Guide → Watch Video → Try Home Activity → Repeat#   s c h o o l  
- 
+---
+
+## 3. Database Schema
+
+**Database:** `kona_hisabati` — ~32 tables
+
+### Core Tables
+
+| Table | Purpose |
+|-------|---------|
+| `users` | All users (admin, teacher, parent, learner) — role-based |
+| `modules` | Learning modules (maps to STRAND in curriculum) with colors/icons |
+| `activities` | Learning activities with JSON `activity_data` field |
+| `progress` | Learner activity completion tracking |
+| `badges` | Badge definitions |
+| `user_badges` | Learner badge awards |
+| `classes` | Classroom groups |
+| `class_enrollments` | Learner-to-class mapping |
+| `parent_student_links` | Parent-to-child linking (supports multiple parents) |
+| `student_access_codes` | 8-char access codes for parent claiming |
+| `sms_logs` | SMS delivery tracking |
+| `notifications` | In-app notifications |
+| `content_reports` | Content moderation/flagging |
+| + assignment, fee, grade, attendance, and analytics tables |
+
+### Key Relationships
+```
+users (role=learner) ──> progress ──> activities ──> modules
+users (role=teacher) ──> classes ──> class_enrollments ──> users (learner)
+users (role=parent) ──> parent_student_links ──> users (learner)
+```
+
+### Current Seed Data
+- 13 modules (Counting, Shapes, Addition, Subtraction, Matching, Games, +7 more)
+- 30+ activities across all modules
+- 5 badge types
+
+---
+
+## 4. Existing Activity Engine System
+
+Located in `js/activities/`:
+
+### 12 Engines (`engines.js`)
+1. **mango_counting** — Count mangoes on tree, select correct number
+2. **number_identification** — Identify displayed number from choices
+3. **number_sequencing** — Order numbers in sequence
+4. **missing_numbers** — Fill in missing numbers in sequence
+5. **match_quantity** — Match number to quantity of objects
+6. **identify_shapes** — Identify geometric shapes
+7. **complete_pattern** — Complete visual patterns (ABB, ABC)
+8. **drag_addition** — Visual drag-to-add (objects + objects)
+9. **visual_subtraction** — Visual take-away subtraction
+10. **object_recognition** — Recognize and count objects (fruits, animals)
+11. **math_game** — Multiple mini-game formats (memory, matching)
+12. **counting** — Basic counting with various objects
+
+### Engine Architecture
+- **Registry** (`registry.js`): Maps 27 activity keys to engine names — e.g., `"count-apples"` → `"mango_counting"`
+- **Core** (`core.js`): Shared utilities — `playAudio()` (Web Speech API), `showCelebration()`, `getEmoji()`, `getScoreMessage()`
+- **Runner** (`activity-runner.js`): Bootstrap script that reads `activity_data` JSON from PHP, resolves engine via registry, initializes engine
+
+### Learner Flow
+`categories.php` → `activities.php` (select module) → `activity.php` (engine/quiz) → `finish.php` (stars + next)
+
+---
+
+## 5. Approved Architecture Documents
+
+### 5.1 Education Blueprint
+The "what" — full curriculum architecture:
+
+| Component | Description |
+|-----------|-------------|
+| 5 Learning Stages | Pre-Numeracy (1), Foundation (2), Core (3), Advanced (4), Mastery (5) |
+| Tier 1 (Foundation) | 8 topics: Number sense 1-5, 6-10, Counting, Number Recognition, Shape Intro, Shape Properties, Sorting, Matching |
+| Tier 2 (Core) | 6 topics: Addition Intro, Subtraction Intro, Patterns, Ordering, Measurement, Position |
+| Tier 3+ | Advanced operations, Time, Money, Data, Problem Solving |
+| Per-topic progression | 10-13 step sequences (Concrete→Representational→Abstract) |
+| Tanzania Curriculum Map | Full mapping of all 5 Pre-Primary Learning Areas |
+| Expansion Plan | Insertion points for Letters, Colors, Animals, Fruits, Body Parts, Science, Social Skills |
+
+### 5.2 Master Content Architecture (MCA)
+The "how" — constitutional rules for all current and future content:
+
+| Section | Content |
+|---------|---------|
+| **Content Hierarchy** | 8 levels: Domain → Strand → Topic → Lesson → Activity → Challenge → Assessment → Reward |
+| **Lesson Blueprint** | 10-step template: Intro → WUP → I Do → We Do → You Do → Check → Game → Assess → Reward → Review |
+| **12 Activity Blueprints** | INTRO, TAP, MULTI-TAP, DRAG, TRACE, WRITE, MATCH, ORDER, SORT, COMPLETE, GAME, QUIZ — each with full spec |
+| **6-Level Difficulty** | Explore → Identify → Match → Order → Apply → Create (cognitive demand ladder) |
+| **12 Reusable Engines** | Cross-mapped to activity blueprints with required params per engine type |
+| **Asset Blueprint** | All asset types per activity category (images, audio, text, hints) |
+| **Assessment Blueprint** | 4 tiers: Quick Check → Lesson Check → Topic Test → Strand Exam with mastery criteria |
+| **Reward Blueprint** | 3-tier: Stars (per activity) → Badges (per milestone) → Certificates (per Strand) |
+| **Revision Blueprint** | Automatic triggers (score < 80%), spaced repetition schedule (1d, 3d, 7d, 14d, 30d) |
+| **10 Expansion Rules** | Guardrails for adding any new curriculum (Letters, Time, Money, Science, etc.) |
+
+---
+
+## 6. Current System Features
+
+### Security (fully implemented)
+- PDO prepared statements (no SQL injection)
+- CSRF tokens on all POST requests
+- Rate-limited login (5 attempts/15 min per IP+username)
+- Secure sessions (httponly, SameSite=Lax, 30min timeout, regeneration)
+- Security headers (CSP, X-Frame-Options, HSTS, etc.)
+- File upload validation (MIME check, extension allowlist, random filenames)
+- .htaccess blocks 40+ sensitive file patterns
+- Admin lockout capability
+
+### Audio System
+- Web Speech API for text-to-speech
+- Bilingual (English + Swahili) with `lang.php`
+- "Repeat" button on all activities
+- Celebration sounds on correct answers
+
+### User Flows
+- **Learner:** Username-only login → category picker → activity → stars/celebration
+- **Teacher:** Login → dashboard → learner progress → reports/worksheets
+- **Parent:** Register → claim child via SMS code → view progress
+- **Admin:** Login → manage users/content/analytics
+
+### SMS System
+- Provider: Webline Africa API
+- Sender ID: TAARIFA
+- Triggers: child creation, parent claiming, performance alerts, fee payments, assignments
+- Full logging with status tracking (pending/sent/delivered/failed)
+
+---
+
+## 7. What Has Been Achieved
+
+| Area | Status |
+|------|--------|
+| Legacy codebase analysis | ✅ Complete — all 52 directories, 124 PHP, 23 JS, 17 CSS files reviewed |
+| Schema analysis | ✅ Complete — ~32 tables, relationships, seed data documented |
+| Engine analysis | ✅ Complete — 12 engines, 27-key registry, runner architecture mapped |
+| Education Blueprint | ✅ Approved — full curriculum for Tier 1-3, Tanzania mapping, expansion plan |
+| Master Content Architecture | ✅ Approved — 10-section constitutional document governing ALL content |
+| SMS fixing (TODO.md) | 🔲 Not yet started — 7 steps pending |
+| Code implementation | 🔲 Not yet started — all new architecture is design-only |
+
+---
+
+## 8. Next Steps (Awaiting Direction)
+
+The architecture is complete. The user has been asked: **"Where should Phase 1 implementation begin?"**
+
+Options:
+1. **Foundation Numbers** — Build first 4 topics using MCA specs
+2. **Engine Refactor** — Rewrite 12 engines to MCA standards
+3. **Lesson System** — Build 10-step lesson template + 8-level hierarchy
+4. **Assessment System** — Implement 4-tier assessment with revision triggers
+5. **Reward System** — Build star/badge/certificate hierarchy
+
+SMS fixing tasks (from TODO.md) are also pending and can be worked on independently.
+
+---
+
+## 9. Key Files Reference
+
+| File | What It Does |
+|------|-------------|
+| `js/activities/engines.js` | 12 activity engines — core game logic |
+| `js/activities/registry.js` | Maps 27 keys → engine names |
+| `js/activities/core.js` | Shared utilities, TTS, celebration |
+| `js/activities/activity-runner.js` | Engine bootstrap + fallback |
+| `learner/activity.php` | Activity page — resolves engine from `activity_data` |
+| `php/includes/lang.php` | Bilingual EN/SW strings |
+| `css/style.css` | Full design system (child-friendly variables) |
+| `php/db_connection.php` | PDO database connection |
+| `database.sql` | Full schema with seed data |
+| `child-parent-flow.md` | Registration & claiming flow |
+| `SECURITY.md` | Full security documentation |
+
+---
+
+## 10. Technical Stack
+
+| Component | Technology |
+|-----------|-----------|
+| Frontend | HTML5, CSS3, JavaScript (vanilla + jQuery 3.x) |
+| Framework | Bootstrap 5 |
+| Backend | PHP 7.4+ (procedural + some OOP) |
+| Database | MySQL/MariaDB via PDO |
+| Audio | Web Speech API (TTS) |
+| Charts | Chart.js |
+| SMS | Webline Africa REST API |
+| Auth | bcrypt + session-based |
+| Security | CSP, CSRF, rate limiting, input validation |
