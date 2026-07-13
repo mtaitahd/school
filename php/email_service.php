@@ -28,11 +28,11 @@ class EmailService {
             }
         }
 
-        $this->host       = $env['SMTP_HOST'] ?? 'mail.smartmathcorner.co.tz';
+        $this->host       = $env['SMTP_HOST'] ?? 'smartmathconner.co.tz';
         $this->port       = (int) ($env['SMTP_PORT'] ?? 465);
-        $this->username   = $env['SMTP_USERNAME'] ?? 'info@smartmathcorner.co.tz';
+        $this->username   = $env['SMTP_USERNAME'] ?? 'info@smartmathconner.co.tz';
         $this->password   = $env['SMTP_PASSWORD'] ?? 'kona2026$';
-        $this->fromEmail  = $env['SMTP_FROM_EMAIL'] ?? 'info@smartmathcorner.co.tz';
+        $this->fromEmail  = $env['SMTP_FROM_EMAIL'] ?? 'info@smartmathconner.co.tz';
         $this->fromName   = $env['SMTP_FROM_NAME'] ?? 'Kona Ya Hisabati';
         $this->encryption = $env['SMTP_ENCRYPTION'] ?? 'ssl';
     }
