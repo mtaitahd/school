@@ -255,12 +255,17 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
                 <?php else: ?>
                     <?php foreach ($benefit_cards as $card): ?>
                     <div class="col-md-6 col-lg-3">
-                        <div class="benefit-card-home">
-                            <div class="benefit-icon-home" style="background:rgba(108,92,231,0.1);color:var(--home-accent);">
-                                <i class="fas <?php echo htmlspecialchars($card['icon']); ?>"></i>
+                        <div class="benefit-card-home<?php echo !empty($card['bg_image']) ? ' has-bg' : ''; ?>"<?php echo !empty($card['bg_image']) ? ' style="background-image:url(\'' . htmlspecialchars($card['bg_image']) . '\');background-size:cover;background-position:center;"' : ''; ?>>
+                            <?php if (!empty($card['bg_image'])): ?>
+                            <div class="benefit-card-overlay"></div>
+                            <?php endif; ?>
+                            <div class="benefit-card-home-content">
+                                <div class="benefit-icon-home" style="background:rgba(108,92,231,0.1);color:var(--home-accent);">
+                                    <i class="fas <?php echo htmlspecialchars($card['icon']); ?>"></i>
+                                </div>
+                                <h4 class="benefit-title-home"><?php echo htmlspecialchars($current_lang === 'sw' ? $card['title_sw'] : $card['title_en']); ?></h4>
+                                <p class="benefit-desc-home"><?php echo htmlspecialchars($current_lang === 'sw' ? $card['description_sw'] : $card['description_en']); ?></p>
                             </div>
-                            <h4 class="benefit-title-home"><?php echo htmlspecialchars($current_lang === 'sw' ? $card['title_sw'] : $card['title_en']); ?></h4>
-                            <p class="benefit-desc-home"><?php echo htmlspecialchars($current_lang === 'sw' ? $card['description_sw'] : $card['description_en']); ?></p>
                         </div>
                     </div>
                     <?php endforeach; ?>

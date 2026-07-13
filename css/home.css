@@ -658,6 +658,39 @@
     position: relative;
     overflow: hidden;
 }
+.benefit-card-home.has-bg {
+    padding: 0;
+    min-height: 260px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+.benefit-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%);
+    z-index: 1;
+}
+.benefit-card-home-content {
+    position: relative;
+    z-index: 2;
+    padding: 24px 20px;
+    text-align: center;
+    width: 100%;
+}
+.benefit-card-home.has-bg .benefit-title-home {
+    color: #fff;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+}
+.benefit-card-home.has-bg .benefit-desc-home {
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+.benefit-card-home.has-bg .benefit-icon-home {
+    background: rgba(255,255,255,0.15) !important;
+    color: #fff !important;
+    margin: 0 auto 12px;
+}
 .benefit-card-home::before {
     content: '';
     position: absolute;
@@ -677,6 +710,9 @@
     transform: translateY(-8px);
     box-shadow: 0 20px 50px rgba(108, 92, 231, 0.1);
     border-color: transparent;
+}
+.benefit-card-home.has-bg:hover .benefit-card-overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.15) 100%);
 }
 .benefit-icon-home {
     width: 68px;
