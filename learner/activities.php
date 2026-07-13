@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../php/db_connection.php';
 require_once __DIR__ . '/../php/includes/lang.php';
 require_once __DIR__ . '/../php/includes/learner-session.php';
+require_once __DIR__ . '/../php/includes/migrate.php';
 
 // Fix mistaken double /learner/learner/ URLs (404 Not Found)
 if (!empty($_SERVER['REQUEST_URI']) && preg_match('#/learner/learner/#', $_SERVER['REQUEST_URI'])) {
@@ -21,6 +22,8 @@ if ($module_id === 0) {
     header('Location: categories?lang=' . $current_lang);
     exit;
 }
+
+ensure_schema_v4_number_groups($database);
 
 $module = $database->fetchOne("SELECT * FROM modules WHERE module_id = ? AND is_active = 1", [$module_id]);
 if (!$module) {
@@ -91,9 +94,29 @@ if (!empty($lessons)) {
         <div class="row-child">
             <?php if (!empty($activities_by_lesson)): ?>
                 <?php foreach ($activities_by_lesson as $entry): ?>
-                    <?php $lesson = $entry['lesson']; $lesson_activities = $entry['activities']; ?>
+                    <?php $lesson = $entry['lesson']; $lesson_activities = $entry['activities'];
+                    $is_number_lesson = preg_match('/NUM-N(\d)/', $lesson['lesson_code'] ?? '', $nm);
+                    $number_val = $is_number_lesson ? (int)$nm[1] : 0;
+                    ?>
                     <div class="col-child-1">
                         <div class="lesson-section" style="margin-bottom: 32px;">
+                            <?php if ($is_number_lesson): ?>
+                            <div class="lesson-header" style="display:flex; align-items:center; gap:16px; padding:16px 20px; margin-bottom:16px; background:linear-gradient(135deg, <?php echo htmlspecialchars($module['module_color']); ?>15, <?php echo htmlspecialchars($module['module_color']); ?>08); border-radius:16px; border:2px solid <?php echo htmlspecialchars($module['module_color']); ?>30;">
+                                <div style="width:64px; height:64px; border-radius:50%; background:<?php echo htmlspecialchars($module['module_color']); ?>; color:#fff; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:900; flex-shrink:0;">
+                                    <?php echo $number_val; ?>
+                                </div>
+                                <div style="flex:1;">
+                                    <h3 style="font-size:1.3rem; font-weight:700; color:var(--text-dark); margin-bottom:4px;">
+                                        <?php echo htmlspecialchars($lesson['lesson_name']); ?>
+                                    </h3>
+                                    <p style="font-size:0.85rem; color:var(--text-light); margin-bottom:0;">
+                                        <i class="fas fa-list" aria-hidden="true"></i> <?php echo count($lesson_activities); ?> activities
+                                        &middot;
+                                        <i class="fas fa-clock" aria-hidden="true"></i> <?php echo (int)$lesson['estimated_minutes']; ?> min
+                                    </p>
+                                </div>
+                            </div>
+                            <?php else: ?>
                             <div class="lesson-header" style="border-left: 5px solid <?php echo htmlspecialchars($module['module_color']); ?>; padding: 12px 16px; margin-bottom: 16px; background: rgba(255,255,255,0.7); border-radius: 0 12px 12px 0;">
                                 <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-dark); margin-bottom: 6px;">
                                     <?php echo htmlspecialchars($lesson['lesson_name']); ?>
@@ -107,6 +130,7 @@ if (!empty($lessons)) {
                                     <i class="fas fa-list" aria-hidden="true"></i> <?php echo count($lesson_activities); ?> activities
                                 </p>
                             </div>
+                            <?php endif; ?>
                             <div class="row-child" style="margin-top: 8px;">
                                 <?php foreach ($lesson_activities as $idx => $activity): ?>
                                 <div class="col-child-2">

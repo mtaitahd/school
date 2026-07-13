@@ -4,6 +4,8 @@ require_once __DIR__ . '/../php/includes/lang.php';
 require_once __DIR__ . '/../php/includes/learner-session.php';
 require_once __DIR__ . '/../php/includes/SubscriptionMiddleware.php';
 require_once __DIR__ . '/../php/includes/settings.php';
+require_once __DIR__ . '/../php/includes/migrate.php';
+ensure_schema_v4_number_groups($database);
 
 if (!empty($_SERVER['REQUEST_URI']) && preg_match('#/learner/learner/#', $_SERVER['REQUEST_URI'])) {
     $fixed = preg_replace('#/learner/learner/#', '/learner/', $_SERVER['REQUEST_URI']);

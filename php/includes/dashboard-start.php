@@ -27,6 +27,7 @@ if (auth_role() !== $dashboard_role) {
 
 if (isset($database)) {
     ensure_schema_v2($database);
+    ensure_schema_v4_number_groups($database);
 }
 
 $layout = 'dashboard';
