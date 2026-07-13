@@ -495,45 +495,100 @@ function ensure_schema_v3($database): void {
 }
 
 /**
- * Creates per-number lessons (Number 1-9) with child-friendly activities.
- * Replaces old grouped lessons (Numbers 1,2,3 / Numbers 4,5 etc).
- * Each number gets 9 activities: colour, count, shape, match, trace, find, game, quiz, reward + next.
+ * Creates two modules from the old "Recognising and Counting Numbers 1-9":
+ *   1. "Recognising Numbers 1-9" — colour, shape, trace, find, quiz, reward, next
+ *   2. "Counting Numbers 1-9" — count, match, game
+ * Each number (1-9) gets activities split between the two modules.
  */
 function ensure_schema_v4_number_groups($database): void {
     static $done = false;
     if ($done) return;
 
-    $module = $database->fetchOne(
-        "SELECT module_id FROM modules WHERE module_name LIKE '%Recognising%Counting%Numbers%9%' AND is_active = 1"
+    // Find original module
+    $origModule = $database->fetchOne(
+        "SELECT module_id, module_name FROM modules WHERE module_name LIKE '%Recognising%Counting%Numbers%9%' AND is_active = 1"
     );
-    if (!$module) { $done = true; return; }
-    $moduleId = (int)$module['module_id'];
+    if (!$origModule) { $done = true; return; }
+    $origModuleId = (int)$origModule['module_id'];
 
-    $topic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? LIMIT 1", [$moduleId]);
-    if (!$topic) {
+    // --- Module 1: Recognising Numbers 1-9 (keep original module) ---
+    $recogniseId = $origModuleId;
+    $database->execute(
+        "UPDATE modules SET module_name = 'Recognising Numbers 1-9', module_description = 'Learn to recognise, trace, and find numbers 1 to 9', audio_prompt = 'Touch here for Recognising Numbers!' WHERE module_id = ?",
+        [$origModuleId]
+    );
+
+    // --- Module 2: Counting Numbers 1-9 (create new module) ---
+    $countingModule = $database->fetchOne("SELECT module_id FROM modules WHERE module_name = 'Counting Numbers 1-9'");
+    if (!$countingModule) {
+        $maxOrder = (int)($database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM modules")['mx'] ?? 0);
+        $database->execute(
+            "INSERT INTO modules (module_name, module_description, module_icon, module_color, audio_prompt, order_index, is_active)
+             VALUES ('Counting Numbers 1-9', 'Count objects, match groups, and play counting games with numbers 1 to 9', 'fa-calculator', '#10B981', 'Touch here for Counting Numbers!', ?, 1)",
+            [$maxOrder + 1]
+        );
+        $countingModule = $database->fetchOne("SELECT module_id FROM modules WHERE module_name = 'Counting Numbers 1-9'");
+    }
+    $countingId = (int)$countingModule['module_id'];
+
+    // Create topic for counting module
+    $countTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? LIMIT 1", [$countingId]);
+    if (!$countTopic) {
         $strand = $database->fetchOne("SELECT strand_id FROM strands WHERE strand_code = 'NUM' LIMIT 1");
         if (!$strand) { $strand = $database->fetchOne("SELECT strand_id FROM strands LIMIT 1"); }
         if ($strand) {
             $database->execute(
                 "INSERT IGNORE INTO topics (strand_id, module_id, topic_name, topic_code, age_range, description, order_index, is_active)
-                 VALUES (?, ?, 'Recognising and Counting Numbers 1-9', 'NUM-01', '3-5', 'Learn to recognise, count, and write numbers from 1 to 9', 1, 1)",
-                [$strand['strand_id'], $moduleId]
+                 VALUES (?, ?, 'Counting Numbers 1-9', 'NUM-C1', '3-5', 'Count objects and match numbers 1 to 9', 1, 1)",
+                [$strand['strand_id'], $countingId]
             );
-            $topic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? LIMIT 1", [$moduleId]);
         }
     }
-    if (!$topic) { $done = true; return; }
-    $topicId = (int)$topic['topic_id'];
+    $countTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? LIMIT 1", [$countingId]);
+    $countTopicId = $countTopic ? (int)$countTopic['topic_id'] : 0;
 
-    // Check if NUM-N1 already has activities — if yes, migration is complete
-    $n1 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-N1'");
-    if ($n1) {
-        $actCount = $database->fetchOne("SELECT COUNT(*) as cnt FROM activities WHERE lesson_id = ? AND is_active = 1", [$n1['lesson_id']]);
-        if ((int)($actCount['cnt'] ?? 0) >= 5) { $done = true; return; }
+    // --- Create per-number lessons for Counting module ---
+    for ($num = 1; $num <= 9; $num++) {
+        $lessonCode = 'COUNT-N' . $num;
+        $database->execute(
+            "INSERT IGNORE INTO lessons (topic_id, lesson_code, lesson_name, learning_objective, success_criteria, estimated_minutes, order_index, is_active)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 1)",
+            [$countTopicId, $lessonCode, 'Number ' . $num,
+             'Count ' . $num . ' objects and match to number ' . $num,
+             'Can count ' . $num . ' objects and match them to the number.',
+             ($num >= 7) ? 20 : 15, $num]
+        );
     }
 
-    $wordMap = ['','one','two','three','four','five','six','seven','eight','nine'];
+    // --- Old lessons deactivation ---
+    $recogTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? LIMIT 1", [$recogniseId]);
+    if ($recogTopic) {
+        $database->execute(
+            "UPDATE lessons SET is_active = 0 WHERE topic_id = ? AND lesson_code NOT LIKE 'NUM-N%'",
+            [(int)$recogTopic['topic_id']]
+        );
+    }
+    if ($countTopicId) {
+        $database->execute(
+            "UPDATE lessons SET is_active = 0 WHERE topic_id = ? AND lesson_code NOT LIKE 'COUNT-N%'",
+            [$countTopicId]
+        );
+    }
+
+    // --- Check if counting activities already exist ---
+    $countN1 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'COUNT-N1'");
+    if ($countN1) {
+        $cnt = $database->fetchOne("SELECT COUNT(*) as c FROM activities WHERE lesson_id = ? AND is_active = 1", [$countN1['lesson_id']]);
+        if ((int)($cnt['c'] ?? 0) >= 3) { $done = true; return; }
+    }
+
+    // --- Shared data ---
     $objects = [1=>'pencil',2=>'table',3=>'desk',4=>'chair',5=>'butterfly',6=>'rabbit',7=>'book',8=>'eraser',9=>'chicken'];
+
+    // =============================================
+    // RECOGNISING activities (for each number)
+    // =============================================
+    $wordMap = ['','one','two','three','four','five','six','seven','eight','nine'];
     $shapes = [
         1=>'straight like a pencil', 2=>'like a swan swimming', 3=>'like two bumps on a hill',
         4=>'like a chair with legs', 5=>'like a hat and a belly', 6=>'like a spiral',
@@ -541,29 +596,9 @@ function ensure_schema_v4_number_groups($database): void {
     ];
 
     for ($num = 1; $num <= 9; $num++) {
-        $lessonCode = 'NUM-N' . $num;
-        $estMin = ($num >= 7) ? 20 : 15;
-        $database->execute(
-            "INSERT IGNORE INTO lessons (topic_id, lesson_code, lesson_name, learning_objective, success_criteria, estimated_minutes, order_index, is_active)
-             VALUES (?, ?, ?, ?, ?, ?, ?, 1)",
-            [$topicId, $lessonCode, 'Number ' . $num,
-             'Learn to recognise, count, trace, and match number ' . $num,
-             'Can identify number ' . $num . ', count ' . $num . ' objects, and trace the digit.',
-             $estMin, $num]
-        );
-    }
-
-    // Deactivate ALL old lessons under this topic (not NUM-N*)
-    $database->execute(
-        "UPDATE lessons SET is_active = 0 WHERE topic_id = ? AND lesson_code NOT LIKE 'NUM-N%'",
-        [$topicId]
-    );
-
-    for ($num = 1; $num <= 9; $num++) {
         $lesson = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = ?", ['NUM-N' . $num]);
         if (!$lesson) continue;
         $lessonId = (int)$lesson['lesson_id'];
-        $obj = $objects[$num];
         $shapeDesc = $shapes[$num];
         $nextNum = ($num < 9) ? $num + 1 : null;
         $numWord = $wordMap[$num];
@@ -574,48 +609,36 @@ function ensure_schema_v4_number_groups($database): void {
              "Let us learn about number $num! Colour the big number $num.",
              '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$maxCount.',"object":"star","mode":"intro","step_type":"intro","skip_finish":true}',
              "Let us learn about number $num!"],
-            ['warmup', 1, 'counting', "Count $num " . ucfirst($obj) . ($num > 1 ? 's' : ''),
-             "Count the $obj" . ($num > 1 ? 's' : '') . " on the screen. Tap each one!",
-             '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$num.',"object":"'.$obj.'","mode":"count","step_type":"warmup"}',
-             "Count the $obj" . ($num > 1 ? 's' : '') . " with me!"],
-            ['shape', 2, 'tracing', "Shape of Number $num",
+            ['shape', 1, 'tracing', "Shape of Number $num",
              "Look at the shape of number $num. It looks $shapeDesc.",
              '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$num.',"object":"star","mode":"intro","step_type":"shape","skip_finish":true}',
              "Number $num looks $shapeDesc."],
-            ['match', 3, 'matching', "Match " . ucfirst($numWord) . ' Object' . ($num > 1 ? 's' : ''),
-             "Match the number $num to the group with $num $obj" . ($num > 1 ? 's' : '') . ".",
-             '{"engine":"match_quantity","difficulty":1,"min":1,"max":'.$maxCount.',"step_type":"match"}',
-             "Find the group with $num $obj" . ($num > 1 ? 's' : '') . "!"],
-            ['tracing', 4, 'tracing', "Trace Number $num",
+            ['tracing', 2, 'tracing', "Trace Number $num",
              "Use your finger to trace the number $num. Follow the dotted lines.",
              '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$num.',"object":"star","mode":"trace","step_type":"tracing","skip_finish":true}',
              "Trace number $num with your finger!"],
-            ['find', 5, 'identification', "Find Number $num",
+            ['find', 3, 'identification', "Find Number $num",
              "Find and tap the number $num among all the numbers!",
              '{"engine":"number_identification","difficulty":1,"min":1,"max":'.$maxCount.',"step_type":"find"}',
              "Can you find number $num?"],
-            ['game', 6, 'game', "Number Game: Find $num",
-             "Play a fun game! Find number $num as fast as you can!",
-             '{"engine":"number_identification","difficulty":1,"min":1,"max":'.$maxCount.',"mode":"hunt","step_type":"game"}',
-             "Let us play a game! Find number $num!"],
-            ['assessment', 7, 'quiz', "Quiz: Number $num",
+            ['assessment', 4, 'quiz', "Quiz: Number $num",
              "Show what you know about number $num!",
              '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$maxCount.',"mode":"quiz","step_type":"assessment"}',
              "Let us see what you learned about number $num!"],
-            ['reward', 8, 'game', 'Great Work!',
-             "Amazing work! You learned number $num!",
+            ['reward', 5, 'game', 'Great Work!',
+             "Amazing work! You recognised number $num!",
              '{"engine":"math_game","difficulty":1,"step_type":"reward","skip_finish":true}',
              "Amazing work! You earned your stars!"],
         ];
 
         if ($nextNum) {
-            $acts[] = ['next_steps', 9, 'counting', "Next: Number $nextNum",
+            $acts[] = ['next_steps', 6, 'counting', "Next: Number $nextNum",
                 "Great job! Ready for number $nextNum?",
                 '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$maxCount.',"mode":"intro","step_type":"next_steps","skip_finish":true}',
                 "Great job! You are ready for number $nextNum!"];
         } else {
-            $acts[] = ['next_steps', 9, 'counting', 'What is Next?',
-                "Congratulations! You completed numbers 1 to 9!",
+            $acts[] = ['next_steps', 6, 'counting', 'What is Next?',
+                "Congratulations! You recognised numbers 1 to 9!",
                 '{"engine":"mango_counting","difficulty":1,"min":1,"max":9,"mode":"intro","step_type":"next_steps","skip_finish":true}',
                 "Congratulations! You completed all numbers from 1 to 9!"];
         }
@@ -626,11 +649,71 @@ function ensure_schema_v4_number_groups($database): void {
                 [$lessonId, $stepType]
             );
             if ($exists) continue;
-
             $database->execute(
                 "INSERT IGNORE INTO activities (module_id, lesson_id, step_type, step_order, order_index, activity_name, activity_description, activity_type, difficulty_level, activity_data, audio_instruction, is_active)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'easy', ?, ?, 1)",
-                [$moduleId, $lessonId, $stepType, $stepOrder, $stepOrder, $name, $desc, $actType, $data, $audio]
+                [$recogniseId, $lessonId, $stepType, $stepOrder, $stepOrder, $name, $desc, $actType, $data, $audio]
+            );
+        }
+    }
+
+    // =============================================
+    // COUNTING activities (for each number)
+    // =============================================
+    for ($num = 1; $num <= 9; $num++) {
+        $lesson = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = ?", ['COUNT-N' . $num]);
+        if (!$lesson) continue;
+        $lessonId = (int)$lesson['lesson_id'];
+        $obj = $objects[$num];
+        $numWord = $wordMap[$num];
+        $maxCount = ($num === 9) ? 9 : $num + 2;
+
+        $acts = [
+            ['warmup', 0, 'counting', "Count $num " . ucfirst($obj) . ($num > 1 ? 's' : ''),
+             "Count the $obj" . ($num > 1 ? 's' : '') . " on the screen. Tap each one!",
+             '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$num.',"object":"'.$obj.'","mode":"count","step_type":"warmup"}',
+             "Count the $obj" . ($num > 1 ? 's' : '') . " with me!"],
+            ['match', 1, 'matching', "Match " . ucfirst($numWord) . ' Object' . ($num > 1 ? 's' : ''),
+             "Match the number $num to the group with $num $obj" . ($num > 1 ? 's' : '') . ".",
+             '{"engine":"match_quantity","difficulty":1,"min":1,"max":'.$maxCount.',"step_type":"match"}',
+             "Find the group with $num $obj" . ($num > 1 ? 's' : '') . "!"],
+            ['game', 2, 'game', "Number Game: Find $num",
+             "Play a fun game! Find number $num as fast as you can!",
+             '{"engine":"number_identification","difficulty":1,"min":1,"max":'.$maxCount.',"mode":"hunt","step_type":"game"}',
+             "Let us play a game! Find number $num!"],
+            ['assessment', 3, 'quiz', "Counting Quiz: Number $num",
+             "Show how well you can count to $num!",
+             '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$maxCount.',"mode":"quiz","step_type":"assessment"}',
+             "Let us see how well you can count!"],
+            ['reward', 4, 'game', 'Great Counting!',
+             "Amazing! You can count to $num!",
+             '{"engine":"math_game","difficulty":1,"step_type":"reward","skip_finish":true}',
+             "Amazing counting! You earned your stars!"],
+        ];
+
+        $nextNum = ($num < 9) ? $num + 1 : null;
+        if ($nextNum) {
+            $acts[] = ['next_steps', 5, 'counting', "Next: Count to $nextNum",
+                "Great counting! Ready to count to $nextNum?",
+                '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$maxCount.',"mode":"intro","step_type":"next_steps","skip_finish":true}',
+                "Great counting! Ready for the next number!"];
+        } else {
+            $acts[] = ['next_steps', 5, 'counting', 'Congratulations!',
+                "You can count all the way from 1 to 9!",
+                '{"engine":"mango_counting","difficulty":1,"min":1,"max":9,"mode":"intro","step_type":"next_steps","skip_finish":true}',
+                "Congratulations! You can count from 1 to 9!"];
+        }
+
+        foreach ($acts as [$stepType, $stepOrder, $actType, $name, $desc, $data, $audio]) {
+            $exists = $database->fetchOne(
+                "SELECT activity_id FROM activities WHERE lesson_id = ? AND step_type = ? LIMIT 1",
+                [$lessonId, $stepType]
+            );
+            if ($exists) continue;
+            $database->execute(
+                "INSERT IGNORE INTO activities (module_id, lesson_id, step_type, step_order, order_index, activity_name, activity_description, activity_type, difficulty_level, activity_data, audio_instruction, is_active)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'easy', ?, ?, 1)",
+                [$countingId, $lessonId, $stepType, $stepOrder, $stepOrder, $name, $desc, $actType, $data, $audio]
             );
         }
     }
