@@ -57,11 +57,20 @@ $lesson_name = '';
 $lesson_id = (int)($activity['lesson_id'] ?? 0);
 $activity_position = 0;
 $total_in_lesson = 0;
+$next_activity_id = 0;
 if ($lesson_id > 0) {
     $lesson_row = $database->fetchOne("SELECT lesson_name FROM lessons WHERE lesson_id = ?", [$lesson_id]);
     $lesson_name = $lesson_row['lesson_name'] ?? '';
     $total_in_lesson = (int)$database->fetchOne("SELECT COUNT(*) as cnt FROM activities WHERE lesson_id = ? AND is_active = 1", [$lesson_id])['cnt'];
     $activity_position = (int)$database->fetchOne("SELECT COUNT(*) as cnt FROM activities WHERE lesson_id = ? AND is_active = 1 AND order_index <= ?", [$lesson_id, $activity['order_index'] ?? 0])['cnt'];
+    // Find next activity in this lesson
+    $nextRow = $database->fetchOne(
+        "SELECT activity_id FROM activities WHERE lesson_id = ? AND is_active = 1 AND order_index > ? ORDER BY order_index ASC LIMIT 1",
+        [$lesson_id, $activity['order_index'] ?? 0]
+    );
+    if ($nextRow) {
+        $next_activity_id = (int)$nextRow['activity_id'];
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -130,10 +139,14 @@ if ($lesson_id > 0) {
             totalQuestions: 5,
             lessonName: <?php echo json_encode($lesson_name); ?>,
             activityPosition: <?php echo $activity_position; ?>,
-            totalInLesson: <?php echo $total_in_lesson; ?>
+            totalInLesson: <?php echo $total_in_lesson; ?>,
+            nextActivityId: <?php echo $next_activity_id; ?>,
+            nextActivityUrl: <?php echo $next_activity_id
+                ? json_encode('activity?activity_id=' . $next_activity_id . '&lang=' . $current_lang)
+                : json_encode('activities?module_id=' . (int)$activity['module_id'] . '&lang=' . $current_lang); ?>
         };
         function goBack() {
-            window.location.href = 'activities?module_id=' + ACTIVITY_CONFIG.moduleId + '&lang=' + ACTIVITY_CONFIG.lang;
+            window.location.href = ACTIVITY_CONFIG.nextActivityUrl || 'activities?module_id=' + ACTIVITY_CONFIG.moduleId + '&lang=' + ACTIVITY_CONFIG.lang;
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

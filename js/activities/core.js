@@ -214,7 +214,13 @@ const ActivityCore = {
             bar.style.display = 'flex';
             const btn = document.getElementById('nextActivityBtn');
             if (btn) {
-                btn.innerHTML = '<i class="fas fa-star me-2"></i>Great!';
+                const cfg = window.ACTIVITY_CONFIG || {};
+                const hasNext = cfg.nextActivityId > 0;
+                if (hasNext) {
+                    btn.innerHTML = '<i class="fas fa-arrow-right me-2"></i>Next';
+                } else {
+                    btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Done';
+                }
                 btn.onclick = function () {
                     if (typeof goBack === 'function') goBack();
                 };

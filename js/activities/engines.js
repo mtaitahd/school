@@ -1196,6 +1196,36 @@ const ActivityEngines = {
     /* ----- Math Game with Level 1 (1-9) and Level 2 (10-20) ----- */
     math_game(config) {
         ActivityCore.hideMultiRoundUI();
+
+        if (config.skip_finish) {
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+            display.innerHTML = '<div class="finish-screen text-center">' +
+                '<div class="finish-trophy">🏆</div>' +
+                '<div class="finish-stars">⭐⭐⭐</div>' +
+                '<h2 class="finish-title">Great Work!</h2>' +
+                '<p class="finish-subtitle">You are doing amazing!</p></div>';
+            ActivityCore.celebrate();
+            ActivityCore.say('Great work! You are doing amazing!');
+            const bar = document.getElementById('nextActivityBar');
+            if (bar) {
+                bar.style.display = 'flex';
+                const btn = document.getElementById('nextActivityBtn');
+                if (btn) {
+                    const actCfg = window.ACTIVITY_CONFIG || {};
+                    const hasNext = actCfg.nextActivityId > 0;
+                    btn.innerHTML = hasNext
+                        ? '<i class="fas fa-arrow-right me-2"></i>Next'
+                        : '<i class="fas fa-check-circle me-2"></i>Done';
+                    btn.onclick = function () {
+                        if (typeof goBack === 'function') goBack();
+                    };
+                }
+            }
+            return;
+        }
+
         const ROUNDS_PER_LEVEL = 5;
         const LEVELS = [
             { name: 'Level 1', min: 1, max: 9, emoji: '🌟' },
