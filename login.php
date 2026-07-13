@@ -146,6 +146,10 @@ include 'php/includes/auth-split-start.php';
                     </div>
                 </div>
 
+                <div style="text-align:right;margin-bottom:15px;">
+                    <a href="forgot-password.php" style="color:var(--primary-color,#4f46e5);font-size:0.875rem;text-decoration:none;">Forgot password?</a>
+                </div>
+
                 <button type="submit" class="btn-child btn-child-primary auth-submit-btn">
                     <span class="auth-btn-text"><i class="fas fa-sign-in-alt me-2"></i>Login</span>
                 </button>
