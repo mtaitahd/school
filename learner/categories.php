@@ -7,6 +7,13 @@ require_once __DIR__ . '/../php/includes/settings.php';
 require_once __DIR__ . '/../php/includes/migrate.php';
 ensure_schema_v4_number_groups($database);
 
+// Set display order every page load (lightweight UPDATEs)
+$database->execute("UPDATE modules SET order_index = 1 WHERE module_name = 'Counting Numbers 1-9'");
+$database->execute("UPDATE modules SET order_index = 2 WHERE module_name LIKE '%Recognising%Numbers%1-9%' AND module_name NOT LIKE '%Counting%'");
+$database->execute("UPDATE modules SET order_index = 3 WHERE module_name LIKE '%Zero%'");
+$database->execute("UPDATE modules SET order_index = 4 WHERE module_name LIKE '%Ten%' AND module_name NOT LIKE '%11%'");
+$database->execute("UPDATE modules SET order_index = 5 WHERE module_name LIKE '%11%20%'");
+
 if (!empty($_SERVER['REQUEST_URI']) && preg_match('#/learner/learner/#', $_SERVER['REQUEST_URI'])) {
     $fixed = preg_replace('#/learner/learner/#', '/learner/', $_SERVER['REQUEST_URI']);
     header('Location: ' . $fixed, true, 301);
