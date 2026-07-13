@@ -525,8 +525,12 @@ function ensure_schema_v4_number_groups($database): void {
     if (!$topic) { $done = true; return; }
     $topicId = (int)$topic['topic_id'];
 
-    $check = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-N1'");
-    if ($check) { $done = true; return; }
+    // Check if NUM-N1 already has activities — if yes, migration is complete
+    $n1 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-N1'");
+    if ($n1) {
+        $actCount = $database->fetchOne("SELECT COUNT(*) as cnt FROM activities WHERE lesson_id = ? AND is_active = 1", [$n1['lesson_id']]);
+        if ((int)($actCount['cnt'] ?? 0) >= 5) { $done = true; return; }
+    }
 
     $wordMap = ['','one','two','three','four','five','six','seven','eight','nine'];
     $objects = [1=>'pencil',2=>'table',3=>'desk',4=>'chair',5=>'butterfly',6=>'rabbit',7=>'book',8=>'eraser',9=>'chicken'];
@@ -549,8 +553,10 @@ function ensure_schema_v4_number_groups($database): void {
         );
     }
 
+    // Deactivate ALL old lessons under this topic (not NUM-N*)
     $database->execute(
-        "UPDATE lessons SET is_active = 0 WHERE lesson_code IN ('NUM-01-L01','NUM-01-L02','NUM-01-L03','NUM-01-L04')"
+        "UPDATE lessons SET is_active = 0 WHERE topic_id = ? AND lesson_code NOT LIKE 'NUM-N%'",
+        [$topicId]
     );
 
     for ($num = 1; $num <= 9; $num++) {

@@ -21,8 +21,8 @@ INSERT IGNORE INTO lessons (topic_id, lesson_code, lesson_name, learning_objecti
 (@topic_id, 'NUM-N8', 'Number 8', 'Learn to recognise, count, trace, and match number 8', 'Can identify number 8, count 8 objects, and trace the digit.', 20, 8, 1),
 (@topic_id, 'NUM-N9', 'Number 9', 'Learn to recognise, count, trace, and match number 9', 'Can identify number 9, count 9 objects, and trace the digit.', 20, 9, 1);
 
--- Deactivate old grouped lessons
-UPDATE lessons SET is_active = 0 WHERE lesson_code IN ('NUM-01-L01','NUM-01-L02','NUM-01-L03','NUM-01-L04');
+-- Deactivate ALL old lessons (keep only NUM-N*)
+UPDATE lessons SET is_active = 0 WHERE topic_id = @topic_id AND lesson_code NOT LIKE 'NUM-N%';
 
 -- NOTE: Activities should be seeded via the PHP migration (ensure_schema_v4_number_groups)
 -- which runs automatically on page load. For manual seeding, see the PHP function in migrate.php.
