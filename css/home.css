@@ -709,7 +709,7 @@
 /* ── Governance Section ────────────────────────────── */
 .governance-section-home {
     padding: 100px 0;
-    background: var(--home-dark);
+    background: #fff;
     position: relative;
     overflow: hidden;
 }
@@ -721,34 +721,33 @@
     width: 500px;
     height: 500px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(108, 92, 231, 0.15), transparent 70%);
+    background: radial-gradient(circle, rgba(108, 92, 231, 0.08), transparent 70%);
     pointer-events: none;
 }
 .governance-section-home .section-title-home {
-    color: #fff;
+    color: var(--home-dark);
 }
 .governance-section-home .section-subtitle-home {
-    color: rgba(255,255,255,0.5);
+    color: #666;
 }
 .governance-section-home .section-badge {
-    background: rgba(255,255,255,0.06);
-    border-color: rgba(255,255,255,0.1);
-    color: var(--home-gold-light);
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(108, 92, 231, 0.05));
+    border-color: rgba(108, 92, 231, 0.15);
+    color: var(--home-accent);
 }
 
 .leader-card-home {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.06);
     border-radius: var(--home-radius);
     overflow: hidden;
     transition: all 0.4s var(--home-transition);
-    backdrop-filter: blur(10px);
 }
 .leader-card-home:hover {
     transform: translateY(-8px);
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.15);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    background: #fff;
+    border-color: rgba(108, 92, 231, 0.2);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.08);
 }
 .leader-avatar {
     width: 100%;
@@ -767,14 +766,14 @@
     font-family: var(--font-display);
     font-size: 0.95rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--home-dark);
     margin-bottom: 4px;
 }
 .leader-card-home .leader-role {
     font-family: var(--font-body);
     font-size: 0.75rem;
     font-weight: 500;
-    color: rgba(255,255,255,0.45);
+    color: #999;
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
