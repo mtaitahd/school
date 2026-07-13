@@ -2,8 +2,7 @@
 -- Run on live server if ensure_schema_v4 doesn't auto-run.
 
 SET @module_id = (SELECT module_id FROM modules WHERE module_name LIKE '%Recognising%Counting%Numbers%9%' AND is_active = 1 LIMIT 1);
-SET @strand_id = (SELECT strand_id FROM strands WHERE strand_code = 'NUM' LIMIT 1);
-IF @strand_id IS NULL THEN SET @strand_id = (SELECT strand_id FROM strands LIMIT 1); END IF;
+SET @strand_id = COALESCE((SELECT strand_id FROM strands WHERE strand_code = 'NUM' LIMIT 1), (SELECT strand_id FROM strands LIMIT 1));
 
 INSERT IGNORE INTO topics (strand_id, module_id, topic_name, topic_code, age_range, description, order_index, is_active)
 VALUES (@strand_id, @module_id, 'Recognising and Counting Numbers 1-9', 'NUM-01', '3-5', 'Learn to recognise, count, and write numbers from 1 to 9', 1, 1);
