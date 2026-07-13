@@ -59,13 +59,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $userName = trim($user['first_name'] . ' ' . $user['last_name']);
 
             if ($mailer->sendPasswordResetCode($user['email'], $userName, $code)) {
-                $success = 'A reset code has been sent to your email address. Please check your inbox.';
+                $success = 'A reset code has been sent to ' . htmlspecialchars($user['email']) . '. Please check your inbox.';
             } else {
                 $error = 'Failed to send email. Please try again later or contact support.';
             }
         } else {
             // Always show success even if email not found (security)
-            $success = 'If an account with that email exists, a reset code has been sent.';
+            $success = 'If an account with that email exists, a reset code has been sent to ' . htmlspecialchars($email) . '.';
         }
     }
 }
