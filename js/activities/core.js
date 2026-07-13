@@ -15,7 +15,7 @@ const ActivityCore = {
         queen: '👑', robot: '🤖', sun: '☀️', truck: '🛻',
         umbrella: '☂️', van: '🚐', watermelon: '🍉', xylophone: '🔔',
         yarn: '🧶', zebra: '🦓',
-        pencil: '✏️', ruler: '📏', eraser: '🧽', desk: '🪑',
+        pencil: '✏️', ruler: '📏', eraser: '🧽', desk: '📦',
         chair: '🪑', table: '🍽️', board: '📋', mushroom: '🍄',
         butterfly: '🦋', rabbit: '🐇', goat: '🐐', chicken: '🐔',
         mosquito: '🦟', bee: '🐝', fly: '🪰', stick: '🥢',

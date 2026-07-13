@@ -593,9 +593,10 @@ function ensure_schema_v4_number_groups($database): void {
                 );
                 if ($matchAct) {
                     $data = json_decode($matchAct['activity_data'], true) ?: [];
-                    if (!isset($data['target']) || $data['target'] != $n) {
-                        $data['target'] = $n;
-                        $data['object'] = $obj;
+                    $needsUpdate = false;
+                    if (!isset($data['target']) || $data['target'] != $n) { $data['target'] = $n; $needsUpdate = true; }
+                    if (!isset($data['object']) || $data['object'] !== $obj) { $data['object'] = $obj; $needsUpdate = true; }
+                    if ($needsUpdate) {
                         $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
                             [json_encode($data), $matchAct['activity_id']]);
                     }
