@@ -78,6 +78,7 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
             <?php foreach ($kyh_hero_slides as $si => $slide): ?>
             <div class="hero-bg-slide slide-<?php echo $si + 1; ?>" style="background-image: url('<?php echo htmlspecialchars($slide['image']); ?>');"></div>
             <?php endforeach; ?>
+            <div class="hero-dark-overlay"></div>
         </div>
         <div class="hero-orb hero-orb-1"></div>
         <div class="hero-orb hero-orb-2"></div>
