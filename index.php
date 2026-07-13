@@ -123,25 +123,6 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-5 d-none d-lg-block">
-                        <div class="hero-visual">
-                            <div class="hero-float-card">
-                                <div class="hero-float-card-icon" style="background:rgba(108,92,231,0.2);color:#a29bfe;"><i class="fas fa-calculator"></i></div>
-                                <div class="hero-float-card-text"><?php echo $current_lang === 'sw' ? 'Hisabati Rahisi' : 'Easy Math'; ?></div>
-                                <div class="hero-float-card-sub"><?php echo $current_lang === 'sw' ? 'Kwa watoto wa awali' : 'For early learners'; ?></div>
-                            </div>
-                            <div class="hero-float-card">
-                                <div class="hero-float-card-icon" style="background:rgba(245,166,35,0.2);color:#ffd93d;"><i class="fas fa-trophy"></i></div>
-                                <div class="hero-float-card-text">100% <?php echo $current_lang === 'sw' ? 'Bure' : 'Free'; ?></div>
-                                <div class="hero-float-card-sub"><?php echo $current_lang === 'sw' ? 'Hakuna ada' : 'No fees'; ?></div>
-                            </div>
-                            <div class="hero-float-card">
-                                <div class="hero-float-card-icon" style="background:rgba(0,206,209,0.2);color:#00ced1;"><i class="fas fa-shield-alt"></i></div>
-                                <div class="hero-float-card-text"><?php echo $current_lang === 'sw' ? 'Salama' : 'Safe'; ?></div>
-                                <div class="hero-float-card-sub"><?php echo $current_lang === 'sw' ? 'Kwa watoto' : 'Child safe'; ?></div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -389,20 +370,6 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
             </div>
         </div>
     </div>
-
-    <!-- CTA Section -->
-    <section class="cta-section-home reveal-scale">
-        <div class="container-child" style="position:relative;z-index:2;">
-            <h2 class="cta-title-home"><?php echo $current_lang === 'sw' ? 'Anza Kujifunza Leo' : 'Start Learning Today'; ?></h2>
-            <p class="cta-subtitle-home"><?php echo $current_lang === 'sw' ? 'Jiunge na wanafunzi elfu kwenye Kona Ya Hisabati' : 'Join thousands of learners on Kona Ya Hisabati'; ?></p>
-            <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-                <button type="button" onclick="handleStartLearning()" class="hero-btn hero-btn-primary">
-                    <i class="fas fa-play-circle"></i>
-                    <?php echo htmlspecialchars($t['btn_start']); ?>
-                </button>
-            </div>
-        </div>
-    </section>
 
     <button type="button" class="scroll-top-btn" id="scrollTopBtn" aria-label="Scroll to top">
         <i class="fas fa-chevron-up"></i>
