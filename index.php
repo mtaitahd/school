@@ -88,10 +88,6 @@ $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_activ
                 <div class="row align-items-center justify-content-center">
                     <div class="col-lg-8 text-center">
                         <div class="hero-content">
-                            <div class="hero-eyebrow">
-                                <i class="fas fa-sparkles"></i>
-                                <?php echo $current_lang === 'sw' ? 'Jifunze Hisabati Kwa Furaha' : 'Learn Mathematics with Joy'; ?>
-                            </div>
                             <h1 id="heroTitle" class="hero-title-home">
                                 <?php echo htmlspecialchars($t['hero_title']); ?>
                             </h1>
