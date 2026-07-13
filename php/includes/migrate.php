@@ -579,7 +579,63 @@ function ensure_schema_v4_number_groups($database): void {
     $countN1 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'COUNT-N1'");
     if ($countN1) {
         $cnt = $database->fetchOne("SELECT COUNT(*) as c FROM activities WHERE lesson_id = ? AND is_active = 1", [$countN1['lesson_id']]);
-        if ((int)($cnt['c'] ?? 0) >= 3) { $done = true; return; }
+        if ((int)($cnt['c'] ?? 0) >= 3) {
+            // Fix existing activities: add target/target_number to match/find/game activities
+            $objects = [1=>'pencil',2=>'table',3=>'desk',4=>'chair',5=>'butterfly',6=>'rabbit',7=>'book',8=>'eraser',9=>'chicken'];
+            for ($n = 1; $n <= 9; $n++) {
+                $obj = $objects[$n];
+                // Fix match_quantity activities: add target and object
+                $matchAct = $database->fetchOne(
+                    "SELECT a.activity_id, a.activity_data FROM activities a
+                     JOIN lessons l ON a.lesson_id = l.lesson_id
+                     WHERE l.lesson_code = ? AND a.step_type = 'match' LIMIT 1",
+                    ['COUNT-N' . $n]
+                );
+                if ($matchAct) {
+                    $data = json_decode($matchAct['activity_data'], true) ?: [];
+                    if (!isset($data['target']) || $data['target'] != $n) {
+                        $data['target'] = $n;
+                        $data['object'] = $obj;
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($data), $matchAct['activity_id']]);
+                    }
+                }
+                // Fix number_identification activities (find/game): add target_number
+                foreach (['find', 'game'] as $step) {
+                    $idAct = $database->fetchOne(
+                        "SELECT a.activity_id, a.activity_data FROM activities a
+                         JOIN lessons l ON a.lesson_id = l.lesson_id
+                         WHERE l.lesson_code = ? AND a.step_type = ? LIMIT 1",
+                        ['COUNT-N' . $n, $step]
+                    );
+                    if ($idAct) {
+                        $data = json_decode($idAct['activity_data'], true) ?: [];
+                        if (!isset($data['target_number']) || $data['target_number'] != $n) {
+                            $data['target_number'] = $n;
+                            $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                                [json_encode($data), $idAct['activity_id']]);
+                        }
+                    }
+                }
+                // Fix warmup (count) activities: add count field
+                $warmAct = $database->fetchOne(
+                    "SELECT a.activity_id, a.activity_data FROM activities a
+                     JOIN lessons l ON a.lesson_id = l.lesson_id
+                     WHERE l.lesson_code = ? AND a.step_type = 'warmup' LIMIT 1",
+                    ['COUNT-N' . $n]
+                );
+                if ($warmAct) {
+                    $data = json_decode($warmAct['activity_data'], true) ?: [];
+                    if (!isset($data['count']) || $data['count'] != $n) {
+                        $data['count'] = $n;
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($data), $warmAct['activity_id']]);
+                    }
+                }
+            }
+            $done = true;
+            return;
+        }
     }
 
     // --- Shared data ---
@@ -619,7 +675,7 @@ function ensure_schema_v4_number_groups($database): void {
              "Trace number $num with your finger!"],
             ['find', 3, 'identification', "Find Number $num",
              "Find and tap the number $num among all the numbers!",
-             '{"engine":"number_identification","difficulty":1,"min":1,"max":'.$maxCount.',"step_type":"find"}',
+             '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"min":1,"max":'.$maxCount.',"step_type":"find"}',
              "Can you find number $num?"],
             ['assessment', 4, 'quiz', "Quiz: Number $num",
              "Show what you know about number $num!",
@@ -671,15 +727,15 @@ function ensure_schema_v4_number_groups($database): void {
         $acts = [
             ['warmup', 0, 'counting', "Count $num " . ucfirst($obj) . ($num > 1 ? 's' : ''),
              "Count the $obj" . ($num > 1 ? 's' : '') . " on the screen. Tap each one!",
-             '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$num.',"object":"'.$obj.'","mode":"count","step_type":"warmup"}',
+             '{"engine":"mango_counting","difficulty":1,"count":'.$num.',"min":1,"max":'.$num.',"object":"'.$obj.'","mode":"count","step_type":"warmup"}',
              "Count the $obj" . ($num > 1 ? 's' : '') . " with me!"],
             ['match', 1, 'matching', "Match " . ucfirst($numWord) . ' Object' . ($num > 1 ? 's' : ''),
              "Match the number $num to the group with $num $obj" . ($num > 1 ? 's' : '') . ".",
-             '{"engine":"match_quantity","difficulty":1,"min":1,"max":'.$maxCount.',"step_type":"match"}',
+             '{"engine":"match_quantity","difficulty":1,"target":'.$num.',"object":"'.$obj.'","step_type":"match"}',
              "Find the group with $num $obj" . ($num > 1 ? 's' : '') . "!"],
             ['game', 2, 'game', "Number Game: Find $num",
              "Play a fun game! Find number $num as fast as you can!",
-             '{"engine":"number_identification","difficulty":1,"min":1,"max":'.$maxCount.',"mode":"hunt","step_type":"game"}',
+             '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"min":1,"max":'.$maxCount.',"mode":"hunt","step_type":"game"}',
              "Let us play a game! Find number $num!"],
             ['assessment', 3, 'quiz', "Counting Quiz: Number $num",
              "Show how well you can count to $num!",
