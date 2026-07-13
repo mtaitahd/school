@@ -28,7 +28,7 @@ class EmailService {
             }
         }
 
-        $this->host       = $env['SMTP_HOST'] ?? 'smartmathconner.co.tz';
+        $this->host       = $env['SMTP_HOST'] ?? 'mail.smartmathconner.co.tz';
         $this->port       = (int) ($env['SMTP_PORT'] ?? 465);
         $this->username   = $env['SMTP_USERNAME'] ?? 'info@smartmathconner.co.tz';
         $this->password   = $env['SMTP_PASSWORD'] ?? 'kona2026$';
