@@ -521,15 +521,20 @@ function ensure_schema_v4_number_groups($database): void {
     // --- Module 2: Counting Numbers 1-9 (create new module) ---
     $countingModule = $database->fetchOne("SELECT module_id FROM modules WHERE module_name = 'Counting Numbers 1-9'");
     if (!$countingModule) {
-        $maxOrder = (int)($database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM modules")['mx'] ?? 0);
         $database->execute(
             "INSERT INTO modules (module_name, module_description, module_icon, module_color, audio_prompt, order_index, is_active)
-             VALUES ('Counting Numbers 1-9', 'Count objects, match groups, and play counting games with numbers 1 to 9', 'fa-calculator', '#10B981', 'Touch here for Counting Numbers!', ?, 1)",
-            [$maxOrder + 1]
+             VALUES ('Counting Numbers 1-9', 'Count objects, match groups, and play counting games with numbers 1 to 9', 'fa-calculator', '#10B981', 'Touch here for Counting Numbers!', 1, 1)"
         );
         $countingModule = $database->fetchOne("SELECT module_id FROM modules WHERE module_name = 'Counting Numbers 1-9'");
     }
     $countingId = (int)$countingModule['module_id'];
+
+    // Set display order: Counting=1, Recognising=2, Zero=3, Ten=4, 11-20=5
+    $database->execute("UPDATE modules SET order_index = 1 WHERE module_name = 'Counting Numbers 1-9'");
+    $database->execute("UPDATE modules SET order_index = 2 WHERE module_name LIKE '%Recognising%Numbers%1-9%' AND module_name NOT LIKE '%Counting%'");
+    $database->execute("UPDATE modules SET order_index = 3 WHERE module_name LIKE '%Zero%'");
+    $database->execute("UPDATE modules SET order_index = 4 WHERE module_name LIKE '%Ten%' AND module_name NOT LIKE '%11%'");
+    $database->execute("UPDATE modules SET order_index = 5 WHERE module_name LIKE '%11%20%'");
 
     // Create topic for counting module
     $countTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? LIMIT 1", [$countingId]);
