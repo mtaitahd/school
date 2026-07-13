@@ -102,10 +102,10 @@ class EmailService {
     }
 
     /**
-     * Send a password reset email
+     * Send a password reset code email
      */
-    public function sendPasswordReset(string $toEmail, string $userName, string $resetUrl): bool {
-        $subject = "Reset Your Password - Kona Ya Hisabati";
+    public function sendPasswordResetCode(string $toEmail, string $userName, string $code): bool {
+        $subject = "Your Reset Code - Kona Ya Hisabati";
 
         $html = '
         <!DOCTYPE html>
@@ -115,15 +115,15 @@ class EmailService {
             <div style="max-width:500px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
                 <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:30px;text-align:center;">
                     <h1 style="color:#fff;margin:0;font-size:22px;">Kona Ya Hisabati</h1>
-                    <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;">Password Reset Request</p>
+                    <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;">Password Reset Code</p>
                 </div>
-                <div style="padding:30px;">
+                <div style="padding:30px;text-align:center;">
                     <p style="color:#333;font-size:15px;line-height:1.6;">Hello <strong>' . htmlspecialchars($userName) . '</strong>,</p>
-                    <p style="color:#555;font-size:14px;line-height:1.6;">We received a request to reset your password. Click the button below to create a new password:</p>
-                    <div style="text-align:center;margin:28px 0;">
-                        <a href="' . htmlspecialchars($resetUrl) . '" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;font-weight:600;">Reset Password</a>
+                    <p style="color:#555;font-size:14px;line-height:1.6;">Use the code below to reset your password:</p>
+                    <div style="margin:28px 0;">
+                        <span style="display:inline-block;background:#f4f4ff;border:2px dashed #4f46e5;border-radius:10px;padding:16px 40px;font-size:28px;font-weight:800;letter-spacing:6px;color:#4f46e5;font-family:\'Courier New\',monospace;">' . htmlspecialchars($code) . '</span>
                     </div>
-                    <p style="color:#888;font-size:13px;line-height:1.5;">This link will expire in <strong>1 hour</strong>. If you did not request a password reset, please ignore this email.</p>
+                    <p style="color:#888;font-size:13px;line-height:1.5;">This code will expire in <strong>1 hour</strong>. If you did not request a password reset, please ignore this email.</p>
                     <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
                     <p style="color:#aaa;font-size:12px;text-align:center;">Kona Ya Hisabati &mdash; Jifunze, Furahia, Fanikiwa</p>
                 </div>

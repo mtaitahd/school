@@ -36,8 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
 
         if ($user) {
-            // Generate a secure token
-            $token = bin2hex(random_bytes(32));
+            // Generate an 8-char code: uppercase + lowercase + digits
+            $code = strtoupper(substr(str_replace(['0','O','l','1','I'], '', substr(bin2hex(random_bytes(8)), 0, 8)), 0, 4))
+                  . substr(str_replace(['0','O','l','1','I'], '', substr(bin2hex(random_bytes(8)), 0, 8)), 0, 4);
             $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour
 
             // Delete any existing tokens for this user
@@ -46,32 +47,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 [$user['user_id']]
             );
 
-            // Insert new token
+            // Insert new code
             $database->execute(
                 "INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)",
-                [$user['user_id'], $token, $expires]
+                [$user['user_id'], $code, $expires]
             );
 
-            // Build reset URL
-            $resetUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
-                . '://' . $_SERVER['HTTP_HOST']
-                . dirname($_SERVER['REQUEST_URI'])
-                . '/reset-password.php?token=' . $token;
-
-            // Send email
+            // Send email with code
             require_once __DIR__ . '/php/email_service.php';
             $mailer = new EmailService();
             $userName = trim($user['first_name'] . ' ' . $user['last_name']);
 
-            if ($mailer->sendPasswordReset($user['email'], $userName, $resetUrl)) {
-                $success = 'A password reset link has been sent to your email address. Please check your inbox.';
+            if ($mailer->sendPasswordResetCode($user['email'], $userName, $code)) {
+                $success = 'A reset code has been sent to your email address. Please check your inbox.';
             } else {
                 $error = 'Failed to send email. Please try again later or contact support.';
-                // Log the error but still show success to user (don't reveal if email exists)
             }
         } else {
             // Always show success even if email not found (security)
-            $success = 'If an account with that email exists, a password reset link has been sent.';
+            $success = 'If an account with that email exists, a reset code has been sent.';
         }
     }
 }
@@ -94,7 +88,7 @@ include 'php/includes/auth-split-start.php';
 ?>
             <header class="auth-form-header">
                 <h1 class="auth-form-title">Forgot Password?</h1>
-                <p class="auth-form-subtitle">Enter your email address and we'll send you a link to reset your password.</p>
+                <p class="auth-form-subtitle">Enter your email address and we'll send you a code to reset your password.</p>
             </header>
 
             <?php if ($success): ?>
@@ -131,7 +125,7 @@ include 'php/includes/auth-split-start.php';
                     </div>
 
                     <button type="submit" class="btn-child btn-child-primary auth-submit-btn">
-                        <span class="auth-btn-text"><i class="fas fa-paper-plane me-2"></i>Send Reset Link</span>
+                        <span class="auth-btn-text"><i class="fas fa-paper-plane me-2"></i>Send Reset Code</span>
                     </button>
                 </form>
 
