@@ -163,9 +163,9 @@
 }
 .hero-section-home::after {
     background: linear-gradient(135deg,
-        rgba(0, 0, 0, 0.72) 0%,
-        rgba(0, 0, 0, 0.58) 50%,
-        rgba(0, 0, 0, 0.38) 100%) !important;
+        rgba(0, 0, 0, 0.82) 0%,
+        rgba(0, 0, 0, 0.68) 50%,
+        rgba(0, 0, 0, 0.50) 100%) !important;
 }
 
 /* Hero content */
