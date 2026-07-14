@@ -541,7 +541,7 @@ function ensure_schema_v4_number_groups($database): void {
             }
         }
         // Fix NUM-N activities that use mango_counting with mode=intro/trace (wrong engine)
-        $shapeObjects = [1=>'pencil',2=>'duck',3=>'butterfly',4:'chair',5=>'hat',6=>'snail',7=>'cane',8=>'snail',9=>'balloon'];
+        $shapeObjects = [1=>'pencil',2=>'duck',3=>'butterfly',4=>'chair',5=>'hat',6=>'snail',7=>'cane',8=>'snail',9=>'balloon'];
         for ($pn = 1; $pn <= 9; $pn++) {
             $pCode = 'NUM-N' . $pn;
             $pLesson = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = ?", [$pCode]);
