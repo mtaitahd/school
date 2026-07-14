@@ -95,10 +95,11 @@ include 'php/includes/auth-split-start.php';
                 <div class="alert-child alert-child-success text-center">
                     <i class="fas fa-check-circle me-2"></i><?php echo htmlspecialchars($success); ?>
                 </div>
-                <div class="auth-form-footer">
-                    <a href="login" class="btn-child btn-child-primary auth-submit-btn">
-                        <span class="auth-btn-text"><i class="fas fa-sign-in-alt me-2"></i>Back to Login</span>
+                <div class="auth-form-footer" style="display:flex;flex-direction:column;gap:10px;">
+                    <a href="reset-password.php" class="btn-child btn-child-primary auth-submit-btn">
+                        <span class="auth-btn-text"><i class="fas fa-key me-2"></i>Enter Reset Code</span>
                     </a>
+                    <a href="login" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Login</a>
                 </div>
             <?php else: ?>
                 <?php if ($error): ?>

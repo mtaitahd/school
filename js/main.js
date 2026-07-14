@@ -13,12 +13,25 @@ function playAudio(text) {
         utterance.rate = 0.85;
         utterance.pitch = 1.15;
         utterance.volume = 1;
+        const lang = getPageLang();
+        if (lang === 'sw') {
+            utterance.lang = 'sw-KE';
+        } else {
+            utterance.lang = 'en-US';
+        }
         const voices = window.speechSynthesis.getVoices();
-        const preferred = voices.find(v =>
-            v.name.includes('Female') ||
-            v.name.includes('Samantha') ||
-            v.name.includes('Google US English')
-        );
+        let preferred;
+        if (lang === 'sw') {
+            preferred = voices.find(v => v.lang && v.lang.startsWith('sw'));
+        }
+        if (!preferred) {
+            preferred = voices.find(v =>
+                v.name.includes('Female') ||
+                v.name.includes('Samantha') ||
+                v.name.includes('Google US English') ||
+                v.name.includes('Google')
+            );
+        }
         if (preferred) utterance.voice = preferred;
         window.speechSynthesis.speak(utterance);
     }

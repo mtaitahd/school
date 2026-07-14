@@ -294,8 +294,22 @@ const ActivityEngines = {
         }
 
         function roundShape(target) {
-            const correctShape = SHAPE_MAP[target] || ALL_SHAPE_EMOJIS[0];
-            const distractors = ALL_SHAPE_EMOJIS.filter((s) => s.name !== correctShape.name);
+            var correctShape;
+            if (config.shape_object) {
+                var byName = ALL_SHAPE_EMOJIS.find(function (s) { return s.name === config.shape_object; });
+                if (byName) {
+                    correctShape = byName;
+                } else {
+                    var sEmoji = ActivityCore.OBJECT_EMOJIS[config.shape_object] || '❓';
+                    correctShape = { emoji: sEmoji, name: config.shape_object };
+                }
+            } else {
+                correctShape = SHAPE_MAP[target] || ALL_SHAPE_EMOJIS[0];
+            }
+            var distractors = ALL_SHAPE_EMOJIS.filter(function (s) { return s.name !== correctShape.name; });
+            if (distractors.length < 2) {
+                distractors = ActivityCore.getDistractorObjects(correctShape.name, 3);
+            }
             const pick = ActivityCore.shuffle(distractors).slice(0, 2);
             const options_list = ActivityCore.shuffle([correctShape, ...pick]);
 
@@ -800,7 +814,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt(config.instruction || ('Find the group with ' + target + ' ' + obj + 's'), emoji));
+            display.appendChild(ActivityCore.renderPrompt(config.instruction || ('Find the group with ' + target + ' ' + obj + (target === 1 ? '' : 's')), emoji));
             const badge = document.createElement('div');
             badge.className = 'target-number-badge';
             badge.textContent = target;

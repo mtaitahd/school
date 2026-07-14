@@ -540,6 +540,71 @@ function ensure_schema_v4_number_groups($database): void {
                     [$expAudio, $ac['activity_id']]);
             }
         }
+        // Fix NUM-N activities that use mango_counting with mode=intro/trace (wrong engine)
+        $shapeObjects = [1=>'pencil',2=>'duck',3=>'butterfly',4:'chair',5=>'hat',6=>'snail',7=>'cane',8=>'snail',9=>'balloon'];
+        for ($pn = 1; $pn <= 9; $pn++) {
+            $pCode = 'NUM-N' . $pn;
+            $pLesson = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = ?", [$pCode]);
+            if (!$pLesson) continue;
+            $pActs = $database->fetchAll(
+                "SELECT activity_id, activity_data, audio_instruction FROM activities WHERE lesson_id = ? AND is_active = 1",
+                [(int)$pLesson['lesson_id']]
+            );
+            foreach ($pActs as $pa) {
+                $pd = json_decode($pa['activity_data'], true) ?: [];
+                if (($pd['engine'] ?? '') !== 'mango_counting') continue;
+                $mode = $pd['mode'] ?? '';
+                $step = $pd['step_type'] ?? '';
+                $pNeed = false;
+                if ($mode === 'intro' && $step === 'intro') {
+                    $pd['engine'] = 'number_identification';
+                    $pd['target_number'] = $pn;
+                    $pd['poolSize'] = 3;
+                    $pd['interaction'] = 'coloring';
+                    unset($pd['min'], $pd['max'], $pd['object']);
+                    $pNeed = true;
+                    $expectedAudio = "Let us learn about number $pn!";
+                    if ($pa['audio_instruction'] !== $expectedAudio) {
+                        $database->execute("UPDATE activities SET activity_data = ?, audio_instruction = ? WHERE activity_id = ?",
+                            [json_encode($pd), $expectedAudio, $pa['activity_id']]);
+                    } else {
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($pd), $pa['activity_id']]);
+                    }
+                } elseif ($mode === 'intro' && $step === 'shape') {
+                    $shapeObj = $shapeObjects[$pn] ?? 'pencil';
+                    $pd['engine'] = 'number_identification';
+                    $pd['target_number'] = $pn;
+                    $pd['poolSize'] = 3;
+                    $pd['shape_object'] = $shapeObj;
+                    unset($pd['min'], $pd['max'], $pd['object']);
+                    $pNeed = true;
+                    $shapeDesc = ['','pencil','duck','butterfly','chair','hat','spiral','cane','snail','balloon'][$pn];
+                    $expectedAudio = "Number $pn looks like a $shapeDesc.";
+                    if ($pa['audio_instruction'] !== $expectedAudio) {
+                        $database->execute("UPDATE activities SET activity_data = ?, audio_instruction = ? WHERE activity_id = ?",
+                            [json_encode($pd), $expectedAudio, $pa['activity_id']]);
+                    } else {
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($pd), $pa['activity_id']]);
+                    }
+                } elseif ($step === 'tracing') {
+                    $pd['engine'] = 'number_identification';
+                    $pd['target_number'] = $pn;
+                    $pd['mode'] = 'trace';
+                    unset($pd['min'], $pd['max'], $pd['object']);
+                    $pNeed = true;
+                    $expectedAudio = "Trace number $pn with your finger!";
+                    if ($pa['audio_instruction'] !== $expectedAudio) {
+                        $database->execute("UPDATE activities SET activity_data = ?, audio_instruction = ? WHERE activity_id = ?",
+                            [json_encode($pd), $expectedAudio, $pa['activity_id']]);
+                    } else {
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($pd), $pa['activity_id']]);
+                    }
+                }
+            }
+        }
         $universalPatched = true;
     }
 
@@ -786,18 +851,19 @@ function ensure_schema_v4_number_groups($database): void {
         $numWord = $wordMap[$num];
         $maxCount = ($num === 9) ? 9 : $num + 2;
 
+        $shapeObjs = ['','pencil','duck','butterfly','chair','hat','snail','cane','snail','balloon'];
         $acts = [
             ['intro', 0, 'colouring', "Colour Number $num",
              "Let us learn about number $num! Colour the big number $num.",
-             '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$maxCount.',"object":"star","mode":"intro","step_type":"intro","skip_finish":true}',
+             '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"poolSize":3,"interaction":"coloring","step_type":"intro","skip_finish":true}',
              "Let us learn about number $num!"],
             ['shape', 1, 'tracing', "Shape of Number $num",
              "Look at the shape of number $num. It looks $shapeDesc.",
-             '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$num.',"object":"star","mode":"intro","step_type":"shape","skip_finish":true}',
-             "Number $num looks $shapeDesc."],
+             '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"poolSize":3,"shape_object":"'.$shapeObjs[$num].'","step_type":"shape","skip_finish":true}',
+             "Number $num looks like a " . $shapeObjs[$num] . "."],
             ['tracing', 2, 'tracing', "Trace Number $num",
              "Use your finger to trace the number $num. Follow the dotted lines.",
-             '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$num.',"object":"star","mode":"trace","step_type":"tracing","skip_finish":true}',
+             '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"min":1,"max":3,"mode":"trace","step_type":"tracing","skip_finish":true}',
              "Trace number $num with your finger!"],
             ['find', 3, 'identification', "Find Number $num",
              "Find and tap the number $num among all the numbers!",
