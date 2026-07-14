@@ -74,6 +74,15 @@ const ActivityCore = {
         return arr[Math.floor(Math.random() * arr.length)];
     },
 
+    getDistractorObjects(targetObj, count) {
+        const allObjects = Object.keys(this.OBJECT_EMOJIS);
+        const others = allObjects.filter(function (o) { return o !== targetObj; });
+        const picked = this.shuffle(others).slice(0, count);
+        return picked.map(function (o) {
+            return { obj: o, emoji: ActivityCore.OBJECT_EMOJIS[o] };
+        });
+    },
+
     buildMCOptions(correct, poolMin, poolMax, count = 3) {
         const opts = [correct];
         let tries = 0;

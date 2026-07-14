@@ -623,19 +623,67 @@ function ensure_schema_v4_number_groups($database): void {
                         }
                     }
                 }
-                // Fix warmup (count) activities: add count field
+                // Fix warmup (count) activities: add count field, mixed_objects, and fix audio_instruction
                 $warmAct = $database->fetchOne(
-                    "SELECT a.activity_id, a.activity_data FROM activities a
+                    "SELECT a.activity_id, a.activity_data, a.audio_instruction FROM activities a
                      JOIN lessons l ON a.lesson_id = l.lesson_id
                      WHERE l.lesson_code = ? AND a.step_type = 'warmup' LIMIT 1",
                     ['COUNT-N' . $n]
                 );
                 if ($warmAct) {
                     $data = json_decode($warmAct['activity_data'], true) ?: [];
+                    $needsUpdate = false;
                     if (!isset($data['count']) || $data['count'] != $n) {
                         $data['count'] = $n;
+                        $needsUpdate = true;
+                    }
+                    if (!isset($data['min']) || $data['min'] != $n) {
+                        $data['min'] = $n;
+                        $needsUpdate = true;
+                    }
+                    if (!isset($data['max']) || $data['max'] != $n) {
+                        $data['max'] = $n;
+                        $needsUpdate = true;
+                    }
+                    if (!isset($data['mixed_objects']) || $data['mixed_objects'] !== true) {
+                        $data['mixed_objects'] = true;
+                        $needsUpdate = true;
+                    }
+                    if ($needsUpdate) {
                         $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
                             [json_encode($data), $warmAct['activity_id']]);
+                    }
+                    $expectedAudio = "Count the $obj" . ($n > 1 ? 's' : '') . " with me!";
+                    if (isset($warmAct['audio_instruction']) && $warmAct['audio_instruction'] !== $expectedAudio) {
+                        $database->execute("UPDATE activities SET audio_instruction = ? WHERE activity_id = ?",
+                            [$expectedAudio, $warmAct['activity_id']]);
+                    }
+                }
+                // Fix NUM-N (Recognising) module mango_counting activities: ensure count/min/max consistent
+                $recogCode = 'NUM-N' . $n;
+                $recogLesson = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = ?", [$recogCode]);
+                if ($recogLesson) {
+                    $recogActs = $database->fetchAll(
+                        "SELECT activity_id, activity_data FROM activities WHERE lesson_id = ? AND is_active = 1",
+                        [(int)$recogLesson['lesson_id']]
+                    );
+                    foreach ($recogActs as $recogAct) {
+                        $rdata = json_decode($recogAct['activity_data'], true) ?: [];
+                        if (($rdata['engine'] ?? '') !== 'mango_counting') continue;
+                        $rneedsUpdate = false;
+                        if (!isset($rdata['count']) || $rdata['count'] != $n) {
+                            $rdata['count'] = $n; $rneedsUpdate = true;
+                        }
+                        if (!isset($rdata['min']) || $rdata['min'] != $n) {
+                            $rdata['min'] = $n; $rneedsUpdate = true;
+                        }
+                        if (!isset($rdata['max']) || $rdata['max'] != $n) {
+                            $rdata['max'] = $n; $rneedsUpdate = true;
+                        }
+                        if ($rneedsUpdate) {
+                            $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                                [json_encode($rdata), $recogAct['activity_id']]);
+                        }
                     }
                 }
             }
@@ -733,7 +781,7 @@ function ensure_schema_v4_number_groups($database): void {
         $acts = [
             ['warmup', 0, 'counting', "Count $num " . ucfirst($obj) . ($num > 1 ? 's' : ''),
              "Count the $obj" . ($num > 1 ? 's' : '') . " on the screen. Tap each one!",
-             '{"engine":"mango_counting","difficulty":1,"count":'.$num.',"min":1,"max":'.$num.',"object":"'.$obj.'","mode":"count","step_type":"warmup"}',
+             '{"engine":"mango_counting","difficulty":1,"count":'.$num.',"min":'.$num.',"max":'.$num.',"object":"'.$obj.'","mode":"count","step_type":"warmup","mixed_objects":true}',
              "Count the $obj" . ($num > 1 ? 's' : '') . " with me!"],
             ['match', 1, 'matching', "Match " . ucfirst($numWord) . ' Object' . ($num > 1 ? 's' : ''),
              "Match the number $num to the group with $num $obj" . ($num > 1 ? 's' : '') . ".",

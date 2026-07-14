@@ -16,8 +16,11 @@ const ActivityEngines = {
         const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🥭';
         const { min, max } = ActivityCore.getDifficultyRange(config);
         const total = config.count || ActivityCore.randomInt(min, max);
+        const useMixed = config.mixed_objects === true || config.mixed_objects === 'true';
         const objectName = obj.charAt(0).toUpperCase() + obj.slice(1);
-        const prompt = config.instruction || ('Tap each ' + obj + ' as you count!');
+        const prompt = useMixed
+            ? ('Count only the ' + obj + 's! Tap each ' + obj + '!')
+            : (config.instruction || ('Tap each ' + obj + ' as you count!'));
         let tapped = 0;
 
         function reset() {
@@ -35,31 +38,57 @@ const ActivityEngines = {
             grid.className = 'object-count-grid';
             grid.setAttribute('role', 'group');
 
-            for (let i = 0; i < total; i++) {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'object-count-item';
-                btn.setAttribute('aria-label', obj + ' ' + (i + 1));
-                btn.innerHTML = '<span class="count-label"></span><span class="count-emoji">' + emoji + '</span>';
-                const label = btn.querySelector('.count-label');
-                btn.onclick = () => {
-                    if (btn.classList.contains('tapped')) return;
-                    tapped++;
-                    btn.classList.add('tapped');
-                    label.textContent = tapped;
-                    ActivityCore.sayNumber(tapped);
-                    if (tapped >= total) {
-                        setTimeout(showAnswerPhase, 800);
-                    }
-                };
-                grid.appendChild(btn);
+            /* Build items array — targets + optional distractors */
+            var items = [];
+            for (var t = 0; t < total; t++) {
+                items.push({ emoji: emoji, obj: obj, isTarget: true });
+            }
+            if (useMixed) {
+                var distractorCount = Math.min(5, Math.max(2, Math.ceil(total * 0.5)));
+                var distractors = ActivityCore.getDistractorObjects(obj, distractorCount);
+                for (var d = 0; d < distractors.length; d++) {
+                    items.push({ emoji: distractors[d].emoji, obj: distractors[d].obj, isTarget: false });
+                }
+                items = ActivityCore.shuffle(items);
+            }
+
+            for (var i = 0; i < items.length; i++) {
+                (function (idx) {
+                    var item = items[idx];
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'object-count-item';
+                    btn.setAttribute('aria-label', item.obj + ' ' + (idx + 1));
+                    btn.innerHTML = '<span class="count-label"></span><span class="count-emoji">' + item.emoji + '</span>';
+                    var label = btn.querySelector('.count-label');
+                    btn.onclick = function () {
+                        if (btn.classList.contains('tapped')) return;
+                        if (!item.isTarget) {
+                            btn.classList.add('wrong-tap');
+                            ActivityCore.say("That is not a " + obj + "! Count only " + obj + "s.");
+                            setTimeout(function () { btn.classList.remove('wrong-tap'); }, 600);
+                            return;
+                        }
+                        tapped++;
+                        btn.classList.add('tapped');
+                        label.textContent = tapped;
+                        ActivityCore.sayNumber(tapped);
+                        if (tapped >= total) {
+                            setTimeout(showAnswerPhase, 800);
+                        }
+                    };
+                    grid.appendChild(btn);
+                })(i);
             }
             display.appendChild(grid);
 
-            ActivityCore.bindTopbarAudio(() => {
-                ActivityCore.say("Let's count the " + obj + "s. Tap each one as I say the number.");
+            var audioMsg = useMixed
+                ? "Count only the " + obj + "s. Tap each one as I say the number."
+                : "Let's count the " + obj + "s. Tap each one as I say the number.";
+            ActivityCore.bindTopbarAudio(function () {
+                ActivityCore.say(audioMsg);
             });
-            ActivityCore.say("Let's count the " + obj + "s. Tap each one as I say the number.");
+            ActivityCore.say(audioMsg);
         }
 
         function showAnswerPhase() {

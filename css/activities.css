@@ -590,6 +590,20 @@
     animation: badgePop 0.4s ease;
 }
 
+.object-count-item.wrong-tap {
+    animation: shakeWrong 0.5s ease;
+    border-color: #e74c3c !important;
+    box-shadow: 0 0 18px rgba(231, 76, 60, 0.5) !important;
+}
+
+@keyframes shakeWrong {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+}
+
 /* ---- Number Tiles Large (nursery) — enhanced Phase 4 ---- */
 .number-tiles.number-tiles-large {
     gap: 20px;
