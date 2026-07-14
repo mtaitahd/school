@@ -96,7 +96,7 @@ include 'php/includes/auth-split-start.php';
                     <i class="fas fa-check-circle me-2"></i><?php echo htmlspecialchars($success); ?>
                 </div>
                 <div class="auth-form-footer" style="display:flex;flex-direction:column;gap:10px;">
-                    <a href="reset-password.php" class="btn-child btn-child-primary auth-submit-btn">
+                    <a href="reset-password.php" class="btn-child auth-submit-btn" style="background:#fff;color:#1a5276;border:2px solid #1a5276;">
                         <span class="auth-btn-text"><i class="fas fa-key me-2"></i>Enter Reset Code</span>
                     </a>
                     <a href="login" class="auth-link-muted"><i class="fas fa-arrow-left"></i> Back to Login</a>
