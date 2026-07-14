@@ -25,11 +25,18 @@ function playAudio(text) {
             preferred = voices.find(v => v.lang && v.lang.startsWith('sw'));
         }
         if (!preferred) {
+            preferred = voices.find(v => v.lang && v.lang.startsWith('en-US'));
+        }
+        if (!preferred) {
+            preferred = voices.find(v => v.lang && v.lang.startsWith('en'));
+        }
+        if (!preferred) {
             preferred = voices.find(v =>
-                v.name.includes('Female') ||
                 v.name.includes('Samantha') ||
                 v.name.includes('Google US English') ||
-                v.name.includes('Google')
+                v.name.includes('Google') ||
+                v.name.includes('Female') ||
+                v.name.includes('Microsoft')
             );
         }
         if (preferred) utterance.voice = preferred;
