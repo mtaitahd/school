@@ -64,8 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Failed to send email. Please try again later or contact support.';
             }
         } else {
-            // Always show success even if email not found (security)
-            $success = 'If an account with that email exists, a reset code has been sent to ' . htmlspecialchars($email) . '.';
+            $error = 'This email is not registered. Please check your email or create an account.';
         }
     }
 }
