@@ -687,6 +687,39 @@ function ensure_schema_v4_number_groups($database): void {
                     }
                 }
             }
+            // Universal patch: ALL mango_counting activities with mode='count' get mixed_objects
+            $allCounting = $database->fetchAll(
+                "SELECT activity_id, activity_data, audio_instruction FROM activities WHERE activity_type = 'counting' AND is_active = 1"
+            );
+            foreach ($allCounting as $ac) {
+                $adata = json_decode($ac['activity_data'], true) ?: [];
+                if (($adata['engine'] ?? '') !== 'mango_counting') continue;
+                if (($adata['mode'] ?? '') !== 'count') continue;
+                $aObj = $adata['object'] ?? 'mango';
+                $aNeed = false;
+                if (!isset($adata['mixed_objects']) || $adata['mixed_objects'] !== true) {
+                    $adata['mixed_objects'] = true;
+                    $aNeed = true;
+                }
+                if (!isset($adata['count']) && isset($adata['min']) && isset($adata['max']) && $adata['min'] == $adata['max']) {
+                    $adata['count'] = (int)$adata['min'];
+                    $aNeed = true;
+                }
+                if ($adata['min'] != $adata['max'] && isset($adata['count'])) {
+                    $adata['min'] = (int)$adata['count'];
+                    $adata['max'] = (int)$adata['count'];
+                    $aNeed = true;
+                }
+                if ($aNeed) {
+                    $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                        [json_encode($adata), $ac['activity_id']]);
+                }
+                $expAudio = "Count the $aObj" . (($adata['count'] ?? 0) > 1 ? 's' : '') . " with me!";
+                if (isset($ac['audio_instruction']) && $ac['audio_instruction'] !== $expAudio) {
+                    $database->execute("UPDATE activities SET audio_instruction = ? WHERE activity_id = ?",
+                        [$expAudio, $ac['activity_id']]);
+                }
+            }
             $done = true;
             return;
         }
