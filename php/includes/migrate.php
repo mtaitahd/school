@@ -605,6 +605,28 @@ function ensure_schema_v4_number_groups($database): void {
                 }
             }
         }
+        // Fix ALL number_identification activities missing target_number
+        $allNI = $database->fetchAll(
+            "SELECT activity_id, activity_data, lesson_id FROM activities WHERE is_active = 1"
+        );
+        $niLessonCache = [];
+        foreach ($allNI as $ni) {
+            $nd = json_decode($ni['activity_data'], true) ?: [];
+            if (($nd['engine'] ?? '') !== 'number_identification') continue;
+            if (isset($nd['target_number']) && $nd['target_number'] > 0) continue;
+            $step = $nd['step_type'] ?? '';
+            if (!in_array($step, ['check', 'find', 'game'])) continue;
+            if (!isset($niLessonCache[$ni['lesson_id']])) {
+                $nl = $database->fetchOne("SELECT lesson_code FROM lessons WHERE lesson_id = ?", [(int)$ni['lesson_id']]);
+                $niLessonCache[$ni['lesson_id']] = $nl ? $nl['lesson_code'] : '';
+            }
+            $code = $niLessonCache[$ni['lesson_id']];
+            $numFromCode = (int)preg_replace('/[^0-9]/', '', str_replace(['NUM-N', 'COUNT-N'], '', $code));
+            if ($numFromCode < 1 || $numFromCode > 9) continue;
+            $nd['target_number'] = $numFromCode;
+            $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                [json_encode($nd), $ni['activity_id']]);
+        }
         // Fix ALL match_quantity activities: ensure audio_instruction matches object+target
         $allMatch = $database->fetchAll(
             "SELECT activity_id, activity_data, audio_instruction FROM activities WHERE is_active = 1"
