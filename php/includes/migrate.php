@@ -605,6 +605,28 @@ function ensure_schema_v4_number_groups($database): void {
                 }
             }
         }
+        // Fix ALL match_quantity activities: ensure audio_instruction matches object+target
+        $allMatch = $database->fetchAll(
+            "SELECT activity_id, activity_data, audio_instruction FROM activities WHERE is_active = 1"
+        );
+        foreach ($allMatch as $ma) {
+            $md = json_decode($ma['activity_data'], true) ?: [];
+            if (($md['engine'] ?? '') !== 'match_quantity') continue;
+            $mObj = $md['object'] ?? 'apple';
+            $mTarget = $md['target'] ?? 1;
+            $mPlural = ($mTarget === 1) ? '' : 's';
+            $expected = "Find the group with $mTarget $mObj$mPlural!";
+            if (isset($ma['audio_instruction']) && $ma['audio_instruction'] !== $expected) {
+                $database->execute("UPDATE activities SET audio_instruction = ? WHERE activity_id = ?",
+                    [$expected, $ma['activity_id']]);
+            }
+            // Also fix instruction in JSON
+            if (isset($md['instruction']) && $md['instruction'] !== $expected) {
+                $md['instruction'] = $expected;
+                $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                    [json_encode($md), $ma['activity_id']]);
+            }
+        }
         $universalPatched = true;
     }
 
