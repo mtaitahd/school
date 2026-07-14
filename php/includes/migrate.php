@@ -504,6 +504,45 @@ function ensure_schema_v4_number_groups($database): void {
     static $done = false;
     if ($done) return;
 
+    // --- UNIVERSAL PATCH: runs once, fixes ALL counting activities regardless of module ---
+    static $universalPatched = false;
+    if (!$universalPatched) {
+        $allCounting = $database->fetchAll(
+            "SELECT activity_id, activity_data, audio_instruction FROM activities WHERE activity_type = 'counting' AND is_active = 1"
+        );
+        foreach ($allCounting as $ac) {
+            $adata = json_decode($ac['activity_data'], true) ?: [];
+            if (($adata['engine'] ?? '') !== 'mango_counting') continue;
+            if (($adata['mode'] ?? '') !== 'count') continue;
+            $aObj = $adata['object'] ?? 'mango';
+            $aNeed = false;
+            if (!isset($adata['mixed_objects']) || $adata['mixed_objects'] !== true) {
+                $adata['mixed_objects'] = true;
+                $aNeed = true;
+            }
+            if (isset($adata['min']) && isset($adata['max']) && $adata['min'] == $adata['max'] && !isset($adata['count'])) {
+                $adata['count'] = (int)$adata['min'];
+                $aNeed = true;
+            }
+            if (isset($adata['count']) && (isset($adata['min']) && $adata['min'] != $adata['count'])) {
+                $adata['min'] = (int)$adata['count'];
+                $adata['max'] = (int)$adata['count'];
+                $aNeed = true;
+            }
+            if ($aNeed) {
+                $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                    [json_encode($adata), $ac['activity_id']]);
+            }
+            $n = $adata['count'] ?? $adata['min'] ?? 1;
+            $expAudio = "Count the $aObj" . ($n > 1 ? 's' : '') . " with me!";
+            if (isset($ac['audio_instruction']) && $ac['audio_instruction'] !== $expAudio) {
+                $database->execute("UPDATE activities SET audio_instruction = ? WHERE activity_id = ?",
+                    [$expAudio, $ac['activity_id']]);
+            }
+        }
+        $universalPatched = true;
+    }
+
     // Find original module
     $origModule = $database->fetchOne(
         "SELECT module_id, module_name FROM modules WHERE module_name LIKE '%Recognising%Counting%Numbers%9%' AND is_active = 1"
