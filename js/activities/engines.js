@@ -19,7 +19,7 @@ const ActivityEngines = {
         const useMixed = config.mixed_objects === true || config.mixed_objects === 'true';
         const objectName = obj.charAt(0).toUpperCase() + obj.slice(1);
         const prompt = useMixed
-            ? ('Count only the ' + obj + 's! Tap each ' + obj + '!')
+            ? ('Count only the ' + ActivityCore.pluralize(obj, 2) + '! Tap each ' + obj + '!')
             : (config.instruction || ('Tap each ' + obj + ' as you count!'));
         let tapped = 0;
 
@@ -65,7 +65,7 @@ const ActivityEngines = {
                         if (btn.classList.contains('tapped')) return;
                         if (!item.isTarget) {
                             btn.classList.add('wrong-tap');
-                            ActivityCore.say("That is not a " + obj + "! Count only " + obj + "s.");
+                            ActivityCore.say("That is not a " + obj + "! Count only " + ActivityCore.pluralize(obj, 2) + ".");
                             setTimeout(function () { btn.classList.remove('wrong-tap'); }, 600);
                             return;
                         }
@@ -83,8 +83,8 @@ const ActivityEngines = {
             display.appendChild(grid);
 
             var audioMsg = useMixed
-                ? "Count only the " + obj + "s. Tap each one as I say the number."
-                : "Let's count the " + obj + "s. Tap each one as I say the number.";
+                ? "Count only the " + ActivityCore.pluralize(obj, 2) + ". Tap each one as I say the number."
+                : "Let's count the " + ActivityCore.pluralize(obj, 2) + ". Tap each one as I say the number.";
             ActivityCore.bindTopbarAudio(function () {
                 ActivityCore.say(audioMsg);
             });
@@ -95,7 +95,7 @@ const ActivityEngines = {
             const options = ActivityCore.getOptions();
             options.innerHTML = '';
             ActivityCore.getDisplay().querySelector('.activity-prompt').textContent =
-                'How many ' + obj + 's did you count?';
+                'How many ' + ActivityCore.pluralize(obj, total) + ' did you count?';
             const choices = ActivityCore.buildMCOptions(total, Math.max(1, total - 2), total + 2);
             ActivityCore.renderMC(choices, (selected, btn) => {
                 if (selected === total) {
@@ -134,7 +134,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt('Count the ' + obj + 's!', emoji));
+            display.appendChild(ActivityCore.renderPrompt('Count the ' + ActivityCore.pluralize(obj, count) + '!', emoji));
             const grid = document.createElement('div');
             grid.className = 'object-count-grid';
             let tapped = 0;
@@ -161,7 +161,7 @@ const ActivityEngines = {
                 grid.appendChild(btn);
             }
             display.appendChild(grid);
-            ActivityCore.say('Row ' + count + ': Count the ' + obj + 's!');
+            ActivityCore.say('Row ' + count + ': Count the ' + ActivityCore.pluralize(obj, count) + '!');
         }
 
         function showFinalAnswer() {
@@ -875,9 +875,9 @@ const ActivityEngines = {
             display.appendChild(groups);
 
             ActivityCore.bindTopbarAudio(() => {
-                ActivityCore.say('Can you find the group that has ' + target + ' ' + obj + 's?');
+                ActivityCore.say('Can you find the group that has ' + target + ' ' + ActivityCore.pluralize(obj, target) + '?');
             });
-            ActivityCore.say('Can you find the group that has ' + target + ' ' + obj + 's?');
+            ActivityCore.say('Can you find the group that has ' + target + ' ' + ActivityCore.pluralize(obj, target) + '?');
         }
         round();
     },
@@ -1046,7 +1046,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Move all ' + obj + 's into the basket', emoji));
+        display.appendChild(ActivityCore.renderPrompt('Move all ' + ActivityCore.pluralize(obj, total) + ' into the basket', emoji));
         const eq = document.createElement('div');
         eq.className = 'addition-eq';
         eq.textContent = a + ' + ' + b + ' = ?';
@@ -1094,7 +1094,7 @@ const ActivityEngines = {
         display.appendChild(layout);
 
         function showAnswer() {
-            display.querySelector('.activity-prompt').textContent = 'How many ' + obj + 's are in the basket?';
+            display.querySelector('.activity-prompt').textContent = 'How many ' + ActivityCore.pluralize(obj, total) + ' are in the basket?';
             const choices = ActivityCore.buildMCOptions(total, 1, total + 3);
             ActivityCore.renderMC(choices, (sel, btn) => {
                 if (sel === total) {
@@ -1103,13 +1103,13 @@ const ActivityEngines = {
                     ActivityCore.sayNumber(total, () => ActivityCore.sayEncouragement());
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Count again. How many ' + obj + 's?');
+                    ActivityCore.say('Count again. How many ' + ActivityCore.pluralize(obj, total) + '?');
                 }
             });
-            ActivityCore.say('How many ' + obj + 's are in the basket?');
+            ActivityCore.say('How many ' + ActivityCore.pluralize(obj, total) + ' are in the basket?');
         }
 
-        ActivityCore.say('Let us add the ' + obj + 's. Move them into the basket!');
+        ActivityCore.say('Let us add the ' + ActivityCore.pluralize(obj, total) + '. Move them into the basket!');
     },
 
     /* ----- Visual subtraction (objects disappear, count remaining) ----- */
@@ -1127,7 +1127,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Tap ' + remove + ' ' + obj + 's to take away', emoji));
+        display.appendChild(ActivityCore.renderPrompt('Tap ' + remove + ' ' + ActivityCore.pluralize(obj, remove) + ' to take away', emoji));
         const eq = document.createElement('div');
         eq.className = 'addition-eq';
         eq.textContent = start + ' - ' + remove + ' = ?';
@@ -1158,7 +1158,7 @@ const ActivityEngines = {
         function showAnswer() {
             const remaining = start - remove;
             display.querySelector('.activity-prompt').textContent =
-                'How many ' + obj + 's are left?';
+                'How many ' + ActivityCore.pluralize(obj, remaining) + ' are left?';
             const choices = ActivityCore.buildMCOptions(answer, 0, start);
             ActivityCore.renderMC(choices, (sel, btn) => {
                 if (sel === answer) {
@@ -1173,13 +1173,13 @@ const ActivityEngines = {
                     ActivityCore.say('Count what is left. Try again.');
                 }
             });
-            ActivityCore.say('How many ' + obj + 's are left?');
+            ActivityCore.say('How many ' + ActivityCore.pluralize(obj, remaining) + ' are left?');
         }
 
         ActivityCore.bindTopbarAudio(() => {
-            ActivityCore.say('We have ' + start + ' ' + obj + 's. Tap ' + remove + ' to take them away.');
+            ActivityCore.say('We have ' + start + ' ' + ActivityCore.pluralize(obj, start) + '. Tap ' + remove + ' to take them away.');
         });
-        ActivityCore.say('We have ' + start + ' ' + obj + 's. Tap ' + remove + ' to take them away.');
+        ActivityCore.say('We have ' + start + ' ' + ActivityCore.pluralize(obj, start) + '. Tap ' + remove + ' to take them away.');
     },
 
     /* ----- Object recognition (identify object by name/emoji) ----- */
@@ -1339,7 +1339,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            showRoundHeader(display, 'Count the ' + obj + 's!');
+            showRoundHeader(display, 'Count the ' + ActivityCore.pluralize(obj, total) + '!');
 
             const grid = document.createElement('div');
             grid.className = 'object-count-grid';
@@ -1363,7 +1363,7 @@ const ActivityEngines = {
             }
             display.appendChild(grid);
 
-            ActivityCore.say('Count the ' + obj + 's. Tap each one.');
+            ActivityCore.say('Count the ' + ActivityCore.pluralize(obj, total) + '. Tap each one.');
         }
 
         function startAdditionRound(level) {
@@ -1379,7 +1379,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            showRoundHeader(display, 'Add the ' + obj + 's!');
+            showRoundHeader(display, 'Add the ' + ActivityCore.pluralize(obj, total) + '!');
             const eq = document.createElement('div');
             eq.className = 'addition-eq';
             eq.textContent = a + ' + ' + b + ' = ?';
@@ -1428,7 +1428,7 @@ const ActivityEngines = {
             layout.appendChild(basket);
             display.appendChild(layout);
 
-            ActivityCore.say('Add the ' + obj + 's. Move them into the basket.');
+            ActivityCore.say('Add the ' + ActivityCore.pluralize(obj, total) + '. Move them into the basket.');
         }
 
         function startSubtractionRound(level) {
@@ -1443,7 +1443,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            showRoundHeader(display, 'Take away ' + obj + 's!');
+            showRoundHeader(display, 'Take away ' + ActivityCore.pluralize(obj, start) + '!');
             const eq = document.createElement('div');
             eq.className = 'addition-eq';
             eq.textContent = start + ' - ' + remove + ' = ?';
@@ -1470,7 +1470,7 @@ const ActivityEngines = {
             }
             display.appendChild(grid);
 
-            ActivityCore.say('Take away ' + remove + ' ' + obj + 's. Tap them.');
+            ActivityCore.say('Take away ' + remove + ' ' + ActivityCore.pluralize(obj, remove) + '. Tap them.');
         }
 
         function showRoundHeader(display, text) {

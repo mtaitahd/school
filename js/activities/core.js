@@ -74,6 +74,10 @@ const ActivityCore = {
         return arr[Math.floor(Math.random() * arr.length)];
     },
 
+    pluralize(word, count) {
+        return count === 1 ? word : word + 's';
+    },
+
     getDistractorObjects(targetObj, count) {
         const allObjects = Object.keys(this.OBJECT_EMOJIS);
         const others = allObjects.filter(function (o) { return o !== targetObj; });
