@@ -51,10 +51,10 @@ if ($existingName) {
 
 // Auto-generate username in SMART/chil/NNN format
 $maxNum = $database->fetchOne(
-    "SELECT COALESCE(MAX(CAST(SUBSTRING(username, 12) AS UNSIGNED)), 0) + 1
+    "SELECT COALESCE(MAX(CAST(SUBSTRING(username, 12) AS UNSIGNED)), 0) + 1 as next_num
      FROM users WHERE role = 'learner' AND username LIKE 'SMART/chil/%'"
 );
-$username = 'SMART/chil/' . str_pad((string) $maxNum, 3, '0', STR_PAD_LEFT);
+$username = 'SMART/chil/' . str_pad((string) ($maxNum['next_num'] ?? 1), 3, '0', STR_PAD_LEFT);
 // Ensure uniqueness (race condition guard)
 $suffix = 0;
 $base = $username;
