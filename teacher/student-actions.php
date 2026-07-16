@@ -39,6 +39,16 @@ if ($fullname === '') {
     exit;
 }
 
+// Check for duplicate name (same first_name + last_name already exists as learner)
+$existingName = $database->fetchOne(
+    "SELECT user_id, username FROM users WHERE role = 'learner' AND LOWER(TRIM(first_name)) = LOWER(?) AND LOWER(TRIM(last_name)) = LOWER(?)",
+    [$first_name, $last_name]
+);
+if ($existingName) {
+    header('Location: ' . $redirect . '?error=duplicate_name&existing=' . urlencode($existingName['username']));
+    exit;
+}
+
 // Auto-generate username in SMART/chil/NNN format
 $maxNum = $database->fetchOne(
     "SELECT COALESCE(MAX(CAST(SUBSTRING(username, 12) AS UNSIGNED)), 0) + 1

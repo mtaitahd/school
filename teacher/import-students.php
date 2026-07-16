@@ -64,6 +64,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 continue;
             }
 
+            // Check for duplicate name
+            $existingName = $database->fetchOne(
+                "SELECT user_id, username FROM users WHERE role = 'learner' AND LOWER(TRIM(first_name)) = LOWER(?) AND LOWER(TRIM(last_name)) = LOWER(?)",
+                [$first_name, $last_name]
+            );
+            if ($existingName) {
+                $error_count++;
+                $results[] = "Row " . ($index + 1) . ": '$first_name $last_name' already exists (username: " . $existingName['username'] . ")";
+                continue;
+            }
+
             // Auto-generate username in SMART/chil/NNN format if not provided
             if (empty($username)) {
                 $maxNum = $database->fetchOne(
