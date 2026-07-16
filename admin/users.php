@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../php/includes/security.php';
+require_once __DIR__ . '/../php/includes/csrf.php';
 if (session_status() === PHP_SESSION_NONE) {
     sec_session_start();
 }
@@ -30,6 +31,7 @@ $lang_page = 'users.php';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
+    <?php echo csrf_meta(); ?>
 </head>
 <body class="dashboard-body"><?php include '../php/includes/dashboard-start.php'; ?>
 
@@ -225,6 +227,8 @@ $lang_page = 'users.php';
     <script>
         function postUser(action, data) {
             data.append('action', action);
+            var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            data.append('_csrf_token', token);
             return fetch('user-actions', { method: 'POST', body: data }).then(r => r.json());
         }
         document.getElementById('addUserForm').addEventListener('submit', function(e) {

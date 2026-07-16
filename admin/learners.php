@@ -135,6 +135,8 @@ $lang_page = 'learners.php';
 
         function postUser(action, data) {
             data.append('action', action);
+            var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            data.append('_csrf_token', token);
             return fetch('user-actions', { method: 'POST', body: data }).then(r => r.json());
         }
         function editUser(user) {
