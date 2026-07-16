@@ -19,7 +19,7 @@ set_time_limit(0);
 
 require_once __DIR__ . '/../php/db_connection.php';
 
-$execute = in_array('--execute', $argv);
+$execute = isset($argv) && is_array($argv) && in_array('--execute', $argv);
 
 echo "<pre>\n";
 echo "=== DEDUP LEARNERS ===\n";
