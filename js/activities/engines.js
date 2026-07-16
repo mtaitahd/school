@@ -95,7 +95,7 @@ const ActivityEngines = {
             const options = ActivityCore.getOptions();
             options.innerHTML = '';
             ActivityCore.getDisplay().querySelector('.activity-prompt').textContent =
-                'How many ' + ActivityCore.pluralize(obj, total) + ' did you count?';
+                'How many ' + ActivityCore.pluralize(obj, 2) + ' did you count?';
             const choices = ActivityCore.buildMCOptions(total, Math.max(1, total - 2), total + 2);
             ActivityCore.renderMC(choices, (selected, btn) => {
                 if (selected === total) {
@@ -814,7 +814,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt(config.instruction || ('Find the group with ' + target + ' ' + obj + (target === 1 ? '' : 's')), emoji));
+            display.appendChild(ActivityCore.renderPrompt('Find the group with ' + target + ' ' + ActivityCore.pluralize(obj, target), emoji));
             const badge = document.createElement('div');
             badge.className = 'target-number-badge';
             badge.textContent = target;
@@ -1094,7 +1094,7 @@ const ActivityEngines = {
         display.appendChild(layout);
 
         function showAnswer() {
-            display.querySelector('.activity-prompt').textContent = 'How many ' + ActivityCore.pluralize(obj, total) + ' are in the basket?';
+            display.querySelector('.activity-prompt').textContent = 'How many ' + ActivityCore.pluralize(obj, 2) + ' are in the basket?';
             const choices = ActivityCore.buildMCOptions(total, 1, total + 3);
             ActivityCore.renderMC(choices, (sel, btn) => {
                 if (sel === total) {
@@ -1103,10 +1103,10 @@ const ActivityEngines = {
                     ActivityCore.sayNumber(total, () => ActivityCore.sayEncouragement());
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Count again. How many ' + ActivityCore.pluralize(obj, total) + '?');
+                    ActivityCore.say('Count again. How many ' + ActivityCore.pluralize(obj, 2) + '?');
                 }
             });
-            ActivityCore.say('How many ' + ActivityCore.pluralize(obj, total) + ' are in the basket?');
+            ActivityCore.say('How many ' + ActivityCore.pluralize(obj, 2) + ' are in the basket?');
         }
 
         ActivityCore.say('Let us add the ' + ActivityCore.pluralize(obj, total) + '. Move them into the basket!');
@@ -1158,7 +1158,7 @@ const ActivityEngines = {
         function showAnswer() {
             const remaining = start - remove;
             display.querySelector('.activity-prompt').textContent =
-                'How many ' + ActivityCore.pluralize(obj, remaining) + ' are left?';
+                'How many ' + ActivityCore.pluralize(obj, 2) + ' are left?';
             const choices = ActivityCore.buildMCOptions(answer, 0, start);
             ActivityCore.renderMC(choices, (sel, btn) => {
                 if (sel === answer) {
@@ -1173,7 +1173,7 @@ const ActivityEngines = {
                     ActivityCore.say('Count what is left. Try again.');
                 }
             });
-            ActivityCore.say('How many ' + ActivityCore.pluralize(obj, remaining) + ' are left?');
+            ActivityCore.say('How many ' + ActivityCore.pluralize(obj, 2) + ' are left?');
         }
 
         ActivityCore.bindTopbarAudio(() => {

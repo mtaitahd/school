@@ -638,13 +638,27 @@ function ensure_schema_v4_number_groups($database): void {
             $mTarget = $md['target'] ?? 1;
             $mPlural = ($mTarget === 1) ? '' : 's';
             $expected = "Find the group with $mTarget $mObj$mPlural!";
+            // Ensure target and object are always set in config
+            $needsUpdate = false;
+            if (!isset($md['target']) || $md['target'] != $mTarget) {
+                $md['target'] = (int)$mTarget;
+                $needsUpdate = true;
+            }
+            if (!isset($md['object']) || $md['object'] !== $mObj) {
+                $md['object'] = $mObj;
+                $needsUpdate = true;
+            }
             if (isset($ma['audio_instruction']) && $ma['audio_instruction'] !== $expected) {
                 $database->execute("UPDATE activities SET audio_instruction = ? WHERE activity_id = ?",
                     [$expected, $ma['activity_id']]);
+                $needsUpdate = true;
             }
             // Also fix instruction in JSON
             if (isset($md['instruction']) && $md['instruction'] !== $expected) {
                 $md['instruction'] = $expected;
+                $needsUpdate = true;
+            }
+            if ($needsUpdate) {
                 $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
                     [json_encode($md), $ma['activity_id']]);
             }
