@@ -47,13 +47,16 @@ $lang_page = 'learners.php';
 
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
             <h1 class="h3 mb-0 text-gray-800" style="font-family:'Poppins',sans-serif;font-weight:700;">Manage Learners</h1>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
                 <a href="export-learners?mode=all" class="btn btn-success" style="border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;">
                     <i class="fas fa-file-excel me-1"></i> Export All
                 </a>
                 <a href="export-learners?mode=paid" class="btn btn-info text-white" style="border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;">
                     <i class="fas fa-file-excel me-1"></i> Export Paid
                 </a>
+                <button type="button" class="btn btn-danger" id="bulkDeleteBtn" onclick="bulkDeleteSelected()" style="border:none;border-radius:50px;padding:8px 22px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.85rem;display:none;">
+                    <i class="fas fa-trash me-1"></i> Delete Selected (<span id="selectedCount">0</span>)
+                </button>
             </div>
         </div>
 
@@ -66,6 +69,7 @@ $lang_page = 'learners.php';
                     <table class="table table-bordered" width="100%" cellspacing="0">
                         <thead>
                             <tr>
+                                <th style="width:40px;"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" style="cursor:pointer;width:18px;height:18px;"></th>
                                 <th>Name</th>
                                 <th>Username</th>
                                 <th>Claim Code</th>
@@ -77,6 +81,7 @@ $lang_page = 'learners.php';
                         <tbody>
                             <?php foreach ($learners as $learner): ?>
                             <tr>
+                                <td><input type="checkbox" class="user-cb" value="<?php echo (int)$learner['user_id']; ?>" onchange="updateSelectedCount()" style="cursor:pointer;width:18px;height:18px;"></td>
                                 <td style="font-weight:600;text-transform:lowercase"><?php echo htmlspecialchars($learner['first_name'] . ' ' . $learner['last_name']); ?></td>
                                 <td><?php echo htmlspecialchars($learner['username']); ?></td>
                                 <td>
@@ -160,6 +165,33 @@ $lang_page = 'learners.php';
             confirmAction('Confirm', 'Toggle learner active status?').then(function(c) { if (!c) return;
                 const fd = new FormData(); fd.append('user_id', userId);
                 postUser('toggle', fd).then(res => { if (res.ok) location.reload(); else showToast(res.message); });
+            });
+        }
+        function toggleSelectAll(el) {
+            document.querySelectorAll('.user-cb').forEach(function(cb) { cb.checked = el.checked; });
+            updateSelectedCount();
+        }
+        function updateSelectedCount() {
+            var cbs = document.querySelectorAll('.user-cb:checked');
+            var n = cbs.length;
+            document.getElementById('selectedCount').textContent = n;
+            document.getElementById('bulkDeleteBtn').style.display = n > 0 ? 'inline-flex' : 'none';
+            var allCbs = document.querySelectorAll('.user-cb');
+            document.getElementById('selectAll').checked = allCbs.length > 0 && n === allCbs.length;
+        }
+        function bulkDeleteSelected() {
+            var cbs = document.querySelectorAll('.user-cb:checked');
+            if (cbs.length === 0) return;
+            var ids = [];
+            cbs.forEach(function(cb) { ids.push(cb.value); });
+            confirmAction('Delete Learners', 'Delete ' + ids.length + ' selected learner(s)? This cannot be undone.', 'Delete').then(function(c) {
+                if (!c) return;
+                var fd = new FormData();
+                fd.append('action', 'bulk_delete');
+                ids.forEach(function(id) { fd.append('user_ids[]', id); });
+                postUser('bulk_delete', fd).then(function(res) {
+                    if (res.ok) location.reload(); else showToast(res.message);
+                });
             });
         }
     </script>

@@ -95,6 +95,34 @@ switch ($action) {
         $database->execute('DELETE FROM users WHERE user_id = ?', [$user_id]);
         json_ok('User deleted successfully.');
 
+    case 'bulk_delete':
+        $user_ids = $_POST['user_ids'] ?? [];
+        if (!is_array($user_ids) || empty($user_ids)) {
+            json_err('No users selected.');
+        }
+        $ids = array_map('intval', array_filter($user_ids));
+        $ids = array_filter($ids, fn($id) => $id > 0 && $id !== $admin_id);
+        if (empty($ids)) {
+            json_err('No valid users to delete.');
+        }
+        $pdo = $database->getPdo();
+        $deleted = 0;
+        try {
+            $pdo->beginTransaction();
+            $chunks = array_chunk($ids, 200);
+            foreach ($chunks as $chunk) {
+                $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+                $stmt = $pdo->prepare("DELETE FROM users WHERE user_id IN ($placeholders)");
+                $stmt->execute($chunk);
+                $deleted += $stmt->rowCount();
+            }
+            $pdo->commit();
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            json_err('Delete failed: ' . $e->getMessage());
+        }
+        json_ok("Deleted {$deleted} user(s).");
+
     case 'toggle':
         $user_id = (int) ($_POST['user_id'] ?? 0);
         if ($user_id < 1 || $user_id === $admin_id) {

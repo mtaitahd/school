@@ -15,25 +15,80 @@ set_time_limit(0);
 
 require_once __DIR__ . '/../php/db_connection.php';
 
-$action   = $_GET['action']   ?? $_POST['action']   ?? 'list';
+$action   = $_POST['action']   ?? $_GET['action']   ?? 'list';
 $selected = $_POST['delete_ids'] ?? [];
 $message  = '';
 $msgType  = 'info';
 
+/* ---- Handle auto-delete all ---- */
+if ($action === 'delete_all') {
+    $toRemove = $database->fetchAll("
+        SELECT user_id FROM users u1
+        WHERE role = 'learner'
+          AND user_id != (
+              SELECT MIN(u2.user_id) FROM users u2
+              WHERE u2.role = 'learner'
+                AND LOWER(TRIM(u2.first_name)) = LOWER(TRIM(u1.first_name))
+                AND LOWER(TRIM(u2.last_name))  = LOWER(TRIM(u1.last_name))
+          )
+          AND EXISTS (
+              SELECT 1 FROM users u3
+              WHERE u3.role = 'learner'
+                AND LOWER(TRIM(u3.first_name)) = LOWER(TRIM(u1.first_name))
+                AND LOWER(TRIM(u3.last_name))  = LOWER(TRIM(u1.last_name))
+                AND u3.user_id < u1.user_id
+          )
+    ");
+    $ids = array_column($toRemove, 'user_id');
+    if (!empty($ids)) {
+        $pdo  = $database->getPdo();
+        $deleted = 0;
+        $errors  = [];
+        try {
+            $pdo->beginTransaction();
+            $chunks = array_chunk($ids, 200);
+            foreach ($chunks as $chunk) {
+                $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+                $stmt = $pdo->prepare("DELETE FROM users WHERE user_id IN ($placeholders)");
+                $stmt->execute($chunk);
+                $deleted += $stmt->rowCount();
+            }
+            $pdo->commit();
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            $errors[] = $e->getMessage();
+        }
+        $msgType = $deleted > 0 ? 'success' : 'error';
+        $message = "Deleted {$deleted} duplicate(s)" . ($errors ? ". Error: " . htmlspecialchars(implode('; ', $errors)) : "");
+    } else {
+        $msgType = 'info';
+        $message = "No duplicates found to delete.";
+    }
+}
+
 /* ---- Handle delete ---- */
 if ($action === 'delete' && !empty($selected)) {
+    $pdo  = $database->getPdo();
+    $ids  = array_map('intval', $selected);
+    $ids  = array_filter($ids);
     $deleted = 0;
-    $errors  = 0;
-    foreach ($selected as $uid) {
-        try {
-            $database->execute("DELETE FROM users WHERE user_id = ?", [(int)$uid]);
-            $deleted++;
-        } catch (\Exception $e) {
-            $errors++;
+    $errors  = [];
+    try {
+        $pdo->beginTransaction();
+        $chunks = array_chunk($ids, 200);
+        foreach ($chunks as $chunk) {
+            $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+            $stmt = $pdo->prepare("DELETE FROM users WHERE user_id IN ($placeholders)");
+            $stmt->execute($chunk);
+            $deleted += $stmt->rowCount();
         }
+        $pdo->commit();
+    } catch (\Exception $e) {
+        $pdo->rollBack();
+        $errors[] = $e->getMessage();
     }
     $msgType = $deleted > 0 ? 'success' : 'error';
-    $message = "Deleted {$deleted} duplicate(s)" . ($errors ? ", {$errors} error(s)" : "");
+    $message = "Deleted {$deleted} duplicate(s)" . ($errors ? ". Error: " . htmlspecialchars(implode('; ', $errors)) : "");
 }
 
 /* ---- Fetch duplicate groups ---- */
@@ -151,6 +206,7 @@ select{padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:.9em}
             <button type="button" class="btn btn-outline" onclick="toggleAll()">Select / Deselect All</button>
             <button type="button" class="btn btn-outline" onclick="selectAllRemove()">Select All Duplicates</button>
             <button type="submit" class="btn btn-danger" onclick="return confirm('Delete <?= $totalRecords ?> duplicate records? This cannot be undone.')">Delete Selected (<?= $totalRecords ?>)</button>
+            <a href="?action=delete_all" class="btn btn-danger" onclick="return confirm('Delete ALL <?= $totalRecords ?> duplicates automatically? This cannot be undone.')" style="background:#c0392b">Delete All Duplicates</a>
             <a href="?action=list" class="btn btn-outline">Refresh</a>
         </div>
 
