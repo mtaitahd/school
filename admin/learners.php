@@ -187,7 +187,6 @@ $lang_page = 'learners.php';
             confirmAction('Delete Learners', 'Delete ' + ids.length + ' selected learner(s)? This cannot be undone.', 'Delete').then(function(c) {
                 if (!c) return;
                 var fd = new FormData();
-                fd.append('action', 'bulk_delete');
                 ids.forEach(function(id) { fd.append('user_ids[]', id); });
                 postUser('bulk_delete', fd).then(function(res) {
                     if (res.ok) location.reload(); else showToast(res.message);
