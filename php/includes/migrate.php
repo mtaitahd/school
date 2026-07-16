@@ -507,32 +507,67 @@ function ensure_schema_v4_number_groups($database): void {
     // --- UNIVERSAL PATCH: runs once, fixes ALL counting activities regardless of module ---
     static $universalPatched = false;
     if (!$universalPatched) {
+        $objectsMap = [1=>'pencil',2=>'table',3=>'desk',4=>'chair',5=>'butterfly',6=>'rabbit',7=>'book',8=>'eraser',9=>'chicken'];
         $allCounting = $database->fetchAll(
-            "SELECT activity_id, activity_data, audio_instruction FROM activities WHERE activity_type = 'counting' AND is_active = 1"
+            "SELECT a.activity_id, a.activity_data, a.audio_instruction, a.lesson_id,
+                    l.lesson_code FROM activities a
+             LEFT JOIN lessons l ON a.lesson_id = l.lesson_id
+             WHERE a.activity_type = 'counting' AND a.is_active = 1"
         );
         foreach ($allCounting as $ac) {
             $adata = json_decode($ac['activity_data'], true) ?: [];
             if (($adata['engine'] ?? '') !== 'mango_counting') continue;
             if (($adata['mode'] ?? '') !== 'count') continue;
-            $aObj = $adata['object'] ?? 'mango';
             $aNeed = false;
+
+            // Try to extract expected number from lesson code
+            $lessonCode = $ac['lesson_code'] ?? '';
+            $expectedNum = 0;
+            $expectedObj = '';
+            if (preg_match('/(?:COUNT|NUM)-N(\d)/', $lessonCode, $lm)) {
+                $expectedNum = (int)$lm[1];
+                $expectedObj = $objectsMap[$expectedNum] ?? '';
+            }
+
+            // Fix mixed_objects
             if (!isset($adata['mixed_objects']) || $adata['mixed_objects'] !== true) {
                 $adata['mixed_objects'] = true;
                 $aNeed = true;
             }
-            if (isset($adata['min']) && isset($adata['max']) && $adata['min'] == $adata['max'] && !isset($adata['count'])) {
+
+            // Fix count: derive from min==max if missing, or from lesson code
+            if ($expectedNum > 0 && (!isset($adata['count']) || $adata['count'] != $expectedNum)) {
+                $adata['count'] = $expectedNum;
+                $adata['min'] = $expectedNum;
+                $adata['max'] = $expectedNum;
+                $aNeed = true;
+            } elseif (isset($adata['min']) && isset($adata['max']) && $adata['min'] == $adata['max'] && !isset($adata['count'])) {
                 $adata['count'] = (int)$adata['min'];
                 $aNeed = true;
             }
+
+            // Fix min/max to match count
             if (isset($adata['count']) && (isset($adata['min']) && $adata['min'] != $adata['count'])) {
                 $adata['min'] = (int)$adata['count'];
                 $adata['max'] = (int)$adata['count'];
                 $aNeed = true;
             }
+            if (isset($adata['count']) && (isset($adata['max']) && $adata['max'] != $adata['count'])) {
+                $adata['max'] = (int)$adata['count'];
+                $aNeed = true;
+            }
+
+            // Fix object: use expected object from lesson code if available
+            if ($expectedObj && (!isset($adata['object']) || $adata['object'] !== $expectedObj)) {
+                $adata['object'] = $expectedObj;
+                $aNeed = true;
+            }
+
             if ($aNeed) {
                 $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
                     [json_encode($adata), $ac['activity_id']]);
             }
+            $aObj = $adata['object'] ?? 'mango';
             $n = $adata['count'] ?? $adata['min'] ?? 1;
             $expAudio = "Count the $aObj" . ($n > 1 ? 's' : '') . " with me!";
             if (isset($ac['audio_instruction']) && $ac['audio_instruction'] !== $expAudio) {
@@ -727,6 +762,58 @@ function ensure_schema_v4_number_groups($database): void {
         );
     }
 
+    // --- Ensure topic exists for Recognising module ---
+    $recogTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? LIMIT 1", [$recogniseId]);
+    if (!$recogTopic) {
+        $strand = $database->fetchOne("SELECT strand_id FROM strands WHERE strand_code = 'NUM' LIMIT 1");
+        if (!$strand) { $strand = $database->fetchOne("SELECT strand_id FROM strands LIMIT 1"); }
+        if ($strand) {
+            $database->execute(
+                "INSERT IGNORE INTO topics (strand_id, module_id, topic_name, topic_code, age_range, description, order_index, is_active)
+                 VALUES (?, ?, 'Recognising Numbers 1-9', 'NUM-R1', '3-5', 'Recognise, trace, and find numbers 1 to 9', 1, 1)",
+                [$strand['strand_id'], $recogniseId]
+            );
+            $recogTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? LIMIT 1", [$recogniseId]);
+        }
+    }
+    $recogTopicId = $recogTopic ? (int)$recogTopic['topic_id'] : 0;
+
+    // --- Create per-number lessons for Recognising module ---
+    $recogNames = ['','Recognising Number 1','Recognising Number 2','Recognising Number 3','Recognising Number 4','Recognising Number 5','Recognising Number 6','Recognising Number 7','Recognising Number 8','Recognising Number 9'];
+    for ($num = 1; $num <= 9; $num++) {
+        $lessonCode = 'NUM-N' . $num;
+        $database->execute(
+            "INSERT IGNORE INTO lessons (topic_id, lesson_code, lesson_name, learning_objective, success_criteria, estimated_minutes, order_index, is_active)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 1)",
+            [$recogTopicId, $lessonCode, $recogNames[$num],
+             'Recognise number ' . $num . ' and its shape, count objects to ' . $num,
+             'Can identify number ' . $num . ', trace it, and match it to ' . $num . ' objects.',
+             ($num >= 7) ? 20 : 15, $num]
+        );
+    }
+
+    // --- Deactivate orphaned old lessons and their activities ---
+    if ($recogTopicId) {
+        $oldLessons = $database->fetchAll(
+            "SELECT lesson_id FROM lessons WHERE topic_id = ? AND lesson_code NOT LIKE 'NUM-N%' AND is_active = 1",
+            [$recogTopicId]
+        );
+        foreach ($oldLessons as $ol) {
+            $database->execute("UPDATE lessons SET is_active = 0 WHERE lesson_id = ?", [(int)$ol['lesson_id']]);
+            $database->execute("UPDATE activities SET is_active = 0 WHERE lesson_id = ?", [(int)$ol['lesson_id']]);
+        }
+    }
+    if ($countTopicId) {
+        $oldCountLessons = $database->fetchAll(
+            "SELECT lesson_id FROM lessons WHERE topic_id = ? AND lesson_code NOT LIKE 'COUNT-N%' AND is_active = 1",
+            [$countTopicId]
+        );
+        foreach ($oldCountLessons as $ocl) {
+            $database->execute("UPDATE lessons SET is_active = 0 WHERE lesson_id = ?", [(int)$ocl['lesson_id']]);
+            $database->execute("UPDATE activities SET is_active = 0 WHERE lesson_id = ?", [(int)$ocl['lesson_id']]);
+        }
+    }
+
     // --- Old lessons deactivation ---
     $recogTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? LIMIT 1", [$recogniseId]);
     if ($recogTopic) {
@@ -753,7 +840,7 @@ function ensure_schema_v4_number_groups($database): void {
                 $obj = $objects[$n];
                 // Fix match_quantity activities: add target and object
                 $matchAct = $database->fetchOne(
-                    "SELECT a.activity_id, a.activity_data FROM activities a
+                    "SELECT a.activity_id, a.activity_data, a.audio_instruction FROM activities a
                      JOIN lessons l ON a.lesson_id = l.lesson_id
                      WHERE l.lesson_code = ? AND a.step_type = 'match' LIMIT 1",
                     ['COUNT-N' . $n]
@@ -766,6 +853,12 @@ function ensure_schema_v4_number_groups($database): void {
                     if ($needsUpdate) {
                         $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
                             [json_encode($data), $matchAct['activity_id']]);
+                    }
+                    $mPlural = ($n === 1) ? '' : 's';
+                    $expectedAudio = "Find the group with $n $obj$mPlural!";
+                    if (isset($matchAct['audio_instruction']) && $matchAct['audio_instruction'] !== $expectedAudio) {
+                        $database->execute("UPDATE activities SET audio_instruction = ? WHERE activity_id = ?",
+                            [$expectedAudio, $matchAct['activity_id']]);
                     }
                 }
                 // Fix number_identification activities (find/game): add target_number
@@ -809,6 +902,10 @@ function ensure_schema_v4_number_groups($database): void {
                     }
                     if (!isset($data['mixed_objects']) || $data['mixed_objects'] !== true) {
                         $data['mixed_objects'] = true;
+                        $needsUpdate = true;
+                    }
+                    if (!isset($data['object']) || $data['object'] !== $obj) {
+                        $data['object'] = $obj;
                         $needsUpdate = true;
                     }
                     if ($needsUpdate) {

@@ -14,12 +14,16 @@ const ActivityEngines = {
 
         const obj = config.object || 'mango';
         const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🥭';
-        const { min, max } = ActivityCore.getDifficultyRange(config);
-        const total = config.count || ActivityCore.randomInt(min, max);
+        const { min: diffMin, max: diffMax } = ActivityCore.getDifficultyRange(config);
+        const total = config.count || ActivityCore.randomInt(diffMin, diffMax);
+        if (config.count && (diffMin !== config.count || diffMax !== config.count)) {
+            config.min = config.count;
+            config.max = config.count;
+        }
         const useMixed = config.mixed_objects === true || config.mixed_objects === 'true';
         const objectName = obj.charAt(0).toUpperCase() + obj.slice(1);
         const prompt = useMixed
-            ? ('Count only the ' + ActivityCore.pluralize(obj, 2) + '! Tap each ' + obj + '!')
+            ? ('Count only the ' + ActivityCore.pluralize(obj, total) + '! Tap each ' + obj + '!')
             : (config.instruction || ('Tap each ' + obj + ' as you count!'));
         let tapped = 0;
 
@@ -83,8 +87,8 @@ const ActivityEngines = {
             display.appendChild(grid);
 
             var audioMsg = useMixed
-                ? "Count only the " + ActivityCore.pluralize(obj, 2) + ". Tap each one as I say the number."
-                : "Let's count the " + ActivityCore.pluralize(obj, 2) + ". Tap each one as I say the number.";
+                ? "Count only the " + ActivityCore.pluralize(obj, total) + ". Tap each one as I say the number."
+                : "Let's count the " + ActivityCore.pluralize(obj, total) + ". Tap each one as I say the number.";
             ActivityCore.bindTopbarAudio(function () {
                 ActivityCore.say(audioMsg);
             });
