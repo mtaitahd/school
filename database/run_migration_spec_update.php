@@ -340,16 +340,34 @@ $lessons[] = [
     ]
 ];
 
+// --- Clean old NUM-02 (Number 0) and NUM-03 (Number 10) lessons ---
+echo "Cleaning old Number 0 (NUM-02) lessons...\n";
+$old0 = $database->fetchAll("SELECT lesson_id FROM lessons WHERE lesson_code LIKE 'NUM-02-%'");
+foreach ($old0 as $row) {
+    $database->execute("DELETE FROM activities WHERE lesson_id = ?", [(int)$row['lesson_id']]);
+    $database->execute("DELETE FROM lessons WHERE lesson_id = ?", [(int)$row['lesson_id']]);
+    echo "  Deleted lesson ID {$row['lesson_id']}\n";
+}
+echo "Cleaning old Number 10 (NUM-03) lessons...\n";
+$old10 = $database->fetchAll("SELECT lesson_id FROM lessons WHERE lesson_code LIKE 'NUM-03-%'");
+foreach ($old10 as $row) {
+    $database->execute("DELETE FROM activities WHERE lesson_id = ?", [(int)$row['lesson_id']]);
+    $database->execute("DELETE FROM lessons WHERE lesson_id = ?", [(int)$row['lesson_id']]);
+    echo "  Deleted lesson ID {$row['lesson_id']}\n";
+}
+
 // --- Check for existing spec lessons to avoid duplicates ---
 $existingSpec = $database->fetchOne(
     "SELECT COUNT(*) as cnt FROM lessons WHERE lesson_code LIKE 'NUM-SPEC-%'"
 );
 if ($existingSpec['cnt'] > 0) {
-    echo "Spec lessons already exist (" . $existingSpec['cnt'] . " found).\n";
-    echo "To re-run, delete existing NUM-SPEC-* lessons and their activities first.\n\n";
-    echo "Run: DELETE FROM activities WHERE lesson_id IN (SELECT lesson_id FROM lessons WHERE lesson_code LIKE 'NUM-SPEC-%');\n";
-    echo "Run: DELETE FROM lessons WHERE lesson_code LIKE 'NUM-SPEC-%';\n";
-    exit(0);
+    echo "Cleaning old spec lessons...\n";
+    $oldspec = $database->fetchAll("SELECT lesson_id FROM lessons WHERE lesson_code LIKE 'NUM-SPEC-%'");
+    foreach ($oldspec as $row) {
+        $database->execute("DELETE FROM activities WHERE lesson_id = ?", [(int)$row['lesson_id']]);
+        $database->execute("DELETE FROM lessons WHERE lesson_id = ?", [(int)$row['lesson_id']]);
+    }
+    echo "  Deleted " . count($oldspec) . " old spec lessons.\n";
 }
 
 // --- Insert lessons and activities ---

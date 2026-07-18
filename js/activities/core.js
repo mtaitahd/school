@@ -222,12 +222,13 @@ const ActivityCore = {
             '<p class="finish-subtitle">You did a great job!</p></div>';
         options.innerHTML = '';
 
+        const cfg = window.ACTIVITY_CONFIG || {};
+
         const bar = document.getElementById('nextActivityBar');
         if (bar) {
             bar.style.display = 'flex';
             const btn = document.getElementById('nextActivityBtn');
             if (btn) {
-                const cfg = window.ACTIVITY_CONFIG || {};
                 const hasNext = cfg.nextActivityId > 0;
                 if (hasNext) {
                     btn.innerHTML = '<i class="fas fa-arrow-right me-2"></i>Next';
@@ -239,10 +240,18 @@ const ActivityCore = {
                 };
             }
         }
+
         this.celebrate();
         this.say(finishMsg);
 
-        const cfg = window.ACTIVITY_CONFIG || {};
+        /* Auto-advance to next activity after audio plays */
+        const hasNext = cfg.nextActivityId > 0;
+        if (hasNext) {
+            setTimeout(function () {
+                if (typeof goBack === 'function') goBack();
+            }, 3000);
+        }
+
         if (cfg.activityId && cfg.saveProgressUrl) {
             fetch(cfg.saveProgressUrl, {
                 method: 'POST',
