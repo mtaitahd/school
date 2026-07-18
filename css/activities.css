@@ -1101,6 +1101,294 @@
     75% { transform: translateX(-4px); }
 }
 
+/* ---- Spec: Plate Activity (Section 3, Act 1) ---- */
+.plate-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    max-width: 700px;
+    width: 100%;
+}
+.plate-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+    min-height: 160px;
+    border: 5px solid #ddd;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    -webkit-tap-highlight-color: transparent;
+    padding: 20px;
+}
+.plate-btn:hover {
+    transform: scale(1.08);
+    border-color: var(--primary-blue);
+}
+.plate-btn:active {
+    transform: scale(0.95);
+}
+.plate-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    font-size: 2.5rem;
+}
+.plate-empty {
+    font-size: 3rem;
+    color: #ccc;
+}
+.plate-correct {
+    border-color: var(--primary-green) !important;
+    background: #e8fff0 !important;
+    animation: correctPulse 0.5s ease;
+}
+.plate-wrong {
+    border-color: var(--primary-red) !important;
+    animation: shake 0.4s ease;
+}
+
+/* ---- Spec: Zero Drag Activity (Section 3, Act 2) ---- */
+.zero-drag-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 700px;
+}
+.zero-drop-zone, .zero-source-zone {
+    border: 4px dashed var(--primary-blue);
+    border-radius: var(--border-radius-lg);
+    padding: 16px;
+    background: rgba(255, 249, 230, 0.5);
+    min-height: 100px;
+}
+.zero-drop-zone {
+    border-color: var(--primary-yellow);
+    background: #fffde7;
+    border-style: solid;
+    border-width: 5px;
+}
+.zero-zone-label {
+    font-size: 3rem;
+    font-weight: 900;
+    text-align: center;
+    color: var(--primary-blue);
+}
+.zero-zone-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+.zero-zone-items, .zero-source-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+.zero-drag-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 18px;
+    border: 4px solid #ddd;
+    border-radius: var(--border-radius-md);
+    background: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: var(--shadow-soft);
+    -webkit-tap-highlight-color: transparent;
+    min-width: 120px;
+}
+.zero-drag-item:hover {
+    border-color: var(--primary-blue);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+}
+.zero-drag-item .zero-item-emoji {
+    font-size: 2.5rem;
+}
+.zero-drag-item .zero-item-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+}
+.zero-drag-item .zero-item-payload {
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+.zero-drag-item.done {
+    border-color: var(--primary-green);
+    background: #e8fff0;
+}
+.zero-drag-item.shake-wrong, .balloon-btn.shake-wrong {
+    animation: shake 0.4s ease;
+    border-color: var(--primary-red) !important;
+}
+
+/* ---- Spec: Ten Drag Activity (Section 4, Act 2) ---- */
+.ten-drag-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 500px;
+    align-items: center;
+}
+.ten-drop-zone {
+    width: 200px;
+    min-height: 160px;
+    border: 5px solid #FFD600;
+    border-radius: var(--border-radius-lg);
+    background: #fff9c4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(255, 214, 0, 0.4);
+}
+.ten-zone-label {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--primary-blue);
+}
+.ten-source-zone {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.ten-drag-item {
+    min-width: 100px;
+    min-height: 100px;
+    font-size: 3rem;
+    font-weight: 800;
+    border: 5px solid var(--primary-blue);
+    border-radius: 20px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: var(--shadow-soft);
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Poppins', sans-serif;
+}
+.ten-drag-item:hover {
+    transform: scale(1.08);
+    border-color: var(--primary-orange);
+}
+.ten-drag-item.done {
+    background: var(--primary-green);
+    color: white;
+    border-color: var(--primary-green);
+}
+.ten-drag-item.incorrect {
+    background: var(--primary-red);
+    color: white;
+    border-color: var(--primary-red);
+    animation: shake 0.4s ease;
+}
+.ten-placed {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--primary-blue);
+}
+
+/* ---- Spec: Ten Match Number (Section 4, Act 3) ---- */
+.ten-match-number {
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--primary-blue);
+    text-align: center;
+    padding: 12px 24px;
+    background: #e8f4ff;
+    border-radius: 20px;
+    border: 4px solid var(--primary-blue);
+    margin-bottom: 12px;
+}
+
+/* ---- Spec: Balloon Pop (Section 4, Act 4) ---- */
+.balloon-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    max-width: 600px;
+    width: 100%;
+}
+.balloon-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    min-width: 100px;
+    position: relative;
+}
+.balloon-btn:hover {
+    transform: scale(1.12);
+}
+.balloon-btn:active {
+    transform: scale(0.93);
+}
+.balloon-btn .balloon-string {
+    font-size: 1.5rem;
+    color: #888;
+    line-height: 0.6;
+    order: 2;
+}
+.balloon-btn .balloon-body {
+    font-size: 4.5rem;
+    line-height: 1;
+    order: 1;
+    animation: balloonFloat 2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+.balloon-btn .balloon-label {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    order: 3;
+    z-index: 1;
+    text-shadow: 0 0 6px rgba(255,255,255,0.9);
+}
+.balloon-btn.popped .balloon-body {
+    animation: none;
+    font-size: 5rem;
+}
+.balloon-btn.popped .balloon-label {
+    display: none;
+}
+
+@keyframes balloonFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* ---- Answer buttons grid (for number buttons) ---- */
+.answer-options .number-tile {
+    min-width: 90px;
+    min-height: 90px;
+    font-size: 2.8rem;
+}
+
 @media (max-width: 576px) {
     .activity-prompt { font-size: 1.2rem; }
     .activity-stage { min-height: 260px; padding: 12px; gap: 16px; }

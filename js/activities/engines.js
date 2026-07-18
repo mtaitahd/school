@@ -1547,6 +1547,480 @@ const ActivityEngines = {
         showLevelSelect();
     },
 
+    /* ----- Section 1 & 2: Count objects and select number button ----- */
+    spec_count_objects(config) {
+        ActivityCore.hideMultiRoundUI();
+        const obj = config.object || 'orange';
+        const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🍊';
+        const count = config.count || 1;
+        const successAudio = config.success_audio || (count + ' ' + obj + '. Number ' + count + '. Well done!');
+        const tapAudio = config.tap_audio || ('Tap ' + count + ' ' + ActivityCore.pluralize(obj, count) + '.');
+        const numbers = config.numbers || [];
+        const correctNumber = config.correct_number || count;
+        let tapped = 0;
+
+        function start() {
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+
+            display.appendChild(ActivityCore.renderPrompt(tapAudio, emoji));
+
+            const grid = document.createElement('div');
+            grid.className = 'object-count-grid';
+            for (let i = 0; i < count; i++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'object-count-item';
+                btn.innerHTML = '<span class="count-label"></span><span class="count-emoji">' + emoji + '</span>';
+                const label = btn.querySelector('.count-label');
+                btn.onclick = function () {
+                    if (btn.classList.contains('tapped')) return;
+                    tapped++;
+                    btn.classList.add('tapped');
+                    label.textContent = tapped;
+                    ActivityCore.sayNumber(tapped);
+                    if (tapped >= count) {
+                        setTimeout(showNumberButtons, 800);
+                    }
+                };
+                grid.appendChild(btn);
+            }
+            display.appendChild(grid);
+
+            ActivityCore.bindTopbarAudio(function () {
+                ActivityCore.say(tapAudio);
+            });
+            ActivityCore.say(tapAudio);
+        }
+
+        function showNumberButtons() {
+            const options = ActivityCore.getOptions();
+            options.innerHTML = '';
+
+            const promptEl = ActivityCore.getDisplay().querySelector('.activity-prompt');
+            if (promptEl) promptEl.textContent = 'Now tap the number ' + correctNumber + '!';
+
+            const shuffled = ActivityCore.shuffle([...numbers]);
+            shuffled.forEach(function (n) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'number-tile';
+                btn.textContent = n;
+                btn.onclick = function () {
+                    if (n === correctNumber) {
+                        btn.classList.add('correct');
+                        ActivityCore.celebrate();
+                        ActivityCore.say(successAudio, function () {
+                            setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
+                        });
+                    } else {
+                        btn.classList.add('incorrect');
+                        ActivityCore.say('Try again.');
+                        setTimeout(function () { btn.classList.remove('incorrect'); }, 600);
+                    }
+                };
+                options.appendChild(btn);
+            });
+
+            ActivityCore.say('Tap the number ' + correctNumber + '.');
+        }
+
+        start();
+    },
+
+    /* ----- Section 3, Activity 1: Tap the empty plate ----- */
+    spec_zero_plate(config) {
+        ActivityCore.hideMultiRoundUI();
+        const { display, options } = ActivityCore.clearStage();
+        display.className = 'activity-display activity-stage';
+        options.innerHTML = '';
+
+        display.appendChild(ActivityCore.renderPrompt('Tap the plate with no oranges.', '🍊'));
+
+        const plates = document.createElement('div');
+        plates.className = 'plate-container';
+
+        const plateData = [
+            { label: '2 oranges', items: 2 },
+            { label: '1 orange', items: 1 },
+            { label: 'Empty', items: 0 }
+        ];
+        const shuffledPlates = ActivityCore.shuffle(plateData);
+
+        shuffledPlates.forEach(function (data) {
+            const plate = document.createElement('button');
+            plate.type = 'button';
+            plate.className = 'plate-btn';
+            const content = document.createElement('div');
+            content.className = 'plate-content';
+            for (let i = 0; i < data.items; i++) {
+                const span = document.createElement('span');
+                span.textContent = '🍊';
+                span.className = 'plate-item';
+                content.appendChild(span);
+            }
+            if (data.items === 0) {
+                const empty = document.createElement('span');
+                empty.textContent = '∅';
+                empty.className = 'plate-empty';
+                content.appendChild(empty);
+            }
+            plate.appendChild(content);
+            plate.onclick = function () {
+                if (data.items === 0) {
+                    plate.classList.add('plate-correct');
+                    ActivityCore.celebrate();
+                    const numDisplay = document.createElement('div');
+                    numDisplay.className = 'activity-display-number';
+                    numDisplay.textContent = '0';
+                    numDisplay.style.marginTop = '16px';
+                    display.appendChild(numDisplay);
+                    ActivityCore.say('There are no oranges. No oranges means zero.', function () {
+                        setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
+                    });
+                } else {
+                    plate.classList.add('plate-wrong');
+                    ActivityCore.say('Try again.');
+                    setTimeout(function () { plate.classList.remove('plate-wrong'); }, 600);
+                }
+            };
+            plates.appendChild(plate);
+        });
+        display.appendChild(plates);
+
+        ActivityCore.bindTopbarAudio(function () {
+            ActivityCore.say('Tap the plate with no oranges.');
+        });
+        ActivityCore.say('Tap the plate with no oranges.');
+    },
+
+    /* ----- Section 3, Activity 2: Drag pictures with no objects to Zero box ----- */
+    spec_zero_drag(config) {
+        ActivityCore.hideMultiRoundUI();
+        const { display, options } = ActivityCore.clearStage();
+        display.className = 'activity-display activity-stage';
+        options.innerHTML = '';
+
+        display.appendChild(ActivityCore.renderPrompt('Drag the pictures with no objects to the box labeled Zero.', '0️⃣'));
+
+        const workspace = document.createElement('div');
+        workspace.className = 'zero-drag-workspace';
+
+        const zeroBox = document.createElement('div');
+        zeroBox.className = 'zero-drop-zone';
+        zeroBox.innerHTML = '<div class="zero-zone-label">0</div><div class="zero-zone-title">Zero</div><div class="zero-zone-items"></div>';
+
+        const objectsBox = document.createElement('div');
+        objectsBox.className = 'zero-source-zone';
+        objectsBox.innerHTML = '<div class="zero-zone-label">📦</div><div class="zero-zone-title">Objects</div>';
+        const objectsItemsDiv = document.createElement('div');
+        objectsItemsDiv.className = 'zero-source-items';
+
+        const items = [
+            { emoji: '🍽️', label: 'Empty plate', isZero: true },
+            { emoji: '🥭', label: 'Basket with 3 oranges', isZero: false, payload: '🍊🍊🍊' },
+            { emoji: '🥛', label: 'Empty cup', isZero: true },
+            { emoji: '🌳', label: 'Tree with 2 birds', isZero: false, payload: '🐦🐦' }
+        ];
+
+        const shuffledItems = ActivityCore.shuffle(items);
+        let correctDrops = 0;
+        const totalCorrect = shuffledItems.filter(function (i) { return i.isZero; }).length;
+
+        shuffledItems.forEach(function (item) {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'zero-drag-item';
+            card.innerHTML = '<span class="zero-item-emoji">' + item.emoji + '</span><span class="zero-item-label">' + item.label + '</span>';
+            if (item.payload) {
+                const p = document.createElement('div');
+                p.className = 'zero-item-payload';
+                p.textContent = item.payload;
+                card.appendChild(p);
+            }
+            card.dataset.isZero = item.isZero ? 'true' : 'false';
+            card.onclick = function () {
+                if (card.classList.contains('done')) return;
+                if (item.isZero) {
+                    card.classList.add('done');
+                    const itemsContainer = zeroBox.querySelector('.zero-zone-items');
+                    const clone = card.cloneNode(true);
+                    clone.onclick = null;
+                    clone.classList.remove('done');
+                    itemsContainer.appendChild(clone);
+                    card.style.display = 'none';
+                    correctDrops++;
+                    ActivityCore.say('Correct!');
+                    if (correctDrops >= totalCorrect) {
+                        ActivityCore.celebrate();
+                        ActivityCore.say('Well done!', function () {
+                            setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
+                        });
+                    }
+                } else {
+                    card.classList.add('shake-wrong');
+                    ActivityCore.say('This has objects. Find the empty ones.');
+                    setTimeout(function () { card.classList.remove('shake-wrong'); }, 600);
+                }
+            };
+            objectsItemsDiv.appendChild(card);
+        });
+
+        objectsBox.appendChild(objectsItemsDiv);
+        workspace.appendChild(zeroBox);
+        workspace.appendChild(objectsBox);
+        display.appendChild(workspace);
+
+        ActivityCore.bindTopbarAudio(function () {
+            ActivityCore.say('Drag the empty things to the Zero box.');
+        });
+        ActivityCore.say('Drag the empty things to the Zero box.');
+    },
+
+    /* ----- Section 3, Activity 3: Tap number zero ----- */
+    spec_zero_tap(config) {
+        ActivityCore.hideMultiRoundUI();
+        const { display, options } = ActivityCore.clearStage();
+        display.className = 'activity-display activity-stage';
+        options.innerHTML = '';
+
+        display.appendChild(ActivityCore.renderPrompt('Tap number zero.', '0️⃣'));
+
+        const numbers = ActivityCore.shuffle([0, 2, 5, 7]);
+        const tiles = document.createElement('div');
+        tiles.className = 'number-tiles number-tiles-large';
+
+        numbers.forEach(function (n) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'number-tile';
+            btn.textContent = n;
+            btn.onclick = function () {
+                if (n === 0) {
+                    btn.classList.add('correct');
+                    ActivityCore.celebrate();
+                    ActivityCore.say('Well done!', function () {
+                        setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
+                    });
+                } else {
+                    btn.classList.add('incorrect');
+                    ActivityCore.say('Try again.');
+                    setTimeout(function () { btn.classList.remove('incorrect'); }, 600);
+                }
+            };
+            tiles.appendChild(btn);
+        });
+        display.appendChild(tiles);
+
+        ActivityCore.bindTopbarAudio(function () {
+            ActivityCore.say('Tap number zero.');
+        });
+        ActivityCore.say('Tap number zero.');
+    },
+
+    /* ----- Section 4, Activity 1: Tap number ten ----- */
+    spec_ten_tap(config) {
+        ActivityCore.hideMultiRoundUI();
+        const { display, options } = ActivityCore.clearStage();
+        display.className = 'activity-display activity-stage';
+        options.innerHTML = '';
+
+        display.appendChild(ActivityCore.renderPrompt('Tap number ten.', '🔢'));
+
+        const numbers = ActivityCore.shuffle([7, 10, 4, 9]);
+        const tiles = document.createElement('div');
+        tiles.className = 'number-tiles number-tiles-large';
+
+        numbers.forEach(function (n) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'number-tile';
+            btn.textContent = n;
+            btn.onclick = function () {
+                if (n === 10) {
+                    btn.classList.add('correct');
+                    ActivityCore.celebrate();
+                    ActivityCore.say('Well done!', function () {
+                        setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
+                    });
+                } else {
+                    btn.classList.add('incorrect');
+                    ActivityCore.say('Try again.');
+                    setTimeout(function () { btn.classList.remove('incorrect'); }, 600);
+                }
+            };
+            tiles.appendChild(btn);
+        });
+        display.appendChild(tiles);
+
+        ActivityCore.bindTopbarAudio(function () {
+            ActivityCore.say('Tap number ten.');
+        });
+        ActivityCore.say('Tap number ten.');
+    },
+
+    /* ----- Section 4, Activity 2: Drag number ten into yellow box ----- */
+    spec_ten_drag(config) {
+        ActivityCore.hideMultiRoundUI();
+        const { display, options } = ActivityCore.clearStage();
+        display.className = 'activity-display activity-stage';
+        options.innerHTML = '';
+
+        display.appendChild(ActivityCore.renderPrompt('Drag number ten into the yellow box.', '🔢'));
+
+        const workspace = document.createElement('div');
+        workspace.className = 'ten-drag-workspace';
+
+        const targetBox = document.createElement('div');
+        targetBox.className = 'ten-drop-zone';
+        targetBox.innerHTML = '<div class="ten-zone-label">10</div>';
+
+        const sourceDiv = document.createElement('div');
+        sourceDiv.className = 'ten-source-zone';
+
+        const numbers = ActivityCore.shuffle([6, 10, 8]);
+        numbers.forEach(function (n) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ten-drag-item';
+            btn.textContent = n;
+            btn.onclick = function () {
+                if (btn.classList.contains('done')) return;
+                if (n === 10) {
+                    btn.classList.add('done');
+                    btn.textContent = '';
+                    const clone = document.createElement('span');
+                    clone.className = 'ten-placed';
+                    clone.textContent = '10';
+                    targetBox.appendChild(clone);
+                    btn.style.display = 'none';
+                    ActivityCore.celebrate();
+                    ActivityCore.say('Well done! Excellent! That is number ten.', function () {
+                        setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
+                    });
+                } else {
+                    btn.classList.add('incorrect');
+                    ActivityCore.say('Try again.');
+                    setTimeout(function () { btn.classList.remove('incorrect'); }, 600);
+                }
+            };
+            sourceDiv.appendChild(btn);
+        });
+
+        workspace.appendChild(targetBox);
+        workspace.appendChild(sourceDiv);
+        display.appendChild(workspace);
+
+        ActivityCore.bindTopbarAudio(function () {
+            ActivityCore.say('Drag number ten into the yellow box.');
+        });
+        ActivityCore.say('Drag number ten into the yellow box.');
+    },
+
+    /* ----- Section 4, Activity 3: Match number ten with group of 10 apples ----- */
+    spec_ten_match(config) {
+        ActivityCore.hideMultiRoundUI();
+        const { display, options } = ActivityCore.clearStage();
+        display.className = 'activity-display activity-stage';
+        options.innerHTML = '';
+
+        display.appendChild(ActivityCore.renderPrompt('Match number ten with the group that has ten apples.', '🍎'));
+
+        const numCard = document.createElement('div');
+        numCard.className = 'ten-match-number';
+        numCard.textContent = '10';
+        display.appendChild(numCard);
+
+        const groups = document.createElement('div');
+        groups.className = 'quantity-groups';
+
+        const groupData = [
+            { label: 'Group A', count: 8 },
+            { label: 'Group B', count: 10 },
+            { label: 'Group C', count: 6 }
+        ];
+        const shuffled = ActivityCore.shuffle(groupData);
+
+        shuffled.forEach(function (g) {
+            const groupEl = document.createElement('button');
+            groupEl.type = 'button';
+            groupEl.className = 'quantity-group';
+            const row = document.createElement('div');
+            row.className = 'objects-row';
+            for (let i = 0; i < g.count; i++) {
+                const s = document.createElement('span');
+                s.textContent = '🍎';
+                row.appendChild(s);
+            }
+            groupEl.appendChild(row);
+            groupEl.onclick = function () {
+                if (g.count === 10) {
+                    groupEl.classList.add('selected-correct');
+                    ActivityCore.celebrate();
+                    ActivityCore.say('Excellent! That is number ten.', function () {
+                        setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
+                    });
+                } else {
+                    groupEl.classList.add('selected-wrong');
+                    ActivityCore.say('Try again. Count the apples.');
+                    setTimeout(function () { groupEl.classList.remove('selected-wrong'); }, 600);
+                }
+            };
+            groups.appendChild(groupEl);
+        });
+        display.appendChild(groups);
+
+        ActivityCore.bindTopbarAudio(function () {
+            ActivityCore.say('Match number ten with the group that has ten apples.');
+        });
+        ActivityCore.say('Match number ten with the group that has ten apples.');
+    },
+
+    /* ----- Section 4, Activity 4: Pop the balloon with number ten ----- */
+    spec_ten_balloon(config) {
+        ActivityCore.hideMultiRoundUI();
+        const { display, options } = ActivityCore.clearStage();
+        display.className = 'activity-display activity-stage';
+        options.innerHTML = '';
+
+        display.appendChild(ActivityCore.renderPrompt('Pop the balloon with number ten!', '🎈'));
+
+        const balloonGrid = document.createElement('div');
+        balloonGrid.className = 'balloon-grid';
+
+        const balloonLabels = ActivityCore.shuffle([5, 10, 7, 9]);
+
+        balloonLabels.forEach(function (n) {
+            const balloon = document.createElement('button');
+            balloon.type = 'button';
+            balloon.className = 'balloon-btn';
+            balloon.innerHTML = '<span class="balloon-string">|</span><span class="balloon-body">🎈</span><span class="balloon-label">' + n + '</span>';
+            balloon.onclick = function () {
+                if (balloon.classList.contains('popped')) return;
+                if (n === 10) {
+                    balloon.classList.add('popped');
+                    balloon.querySelector('.balloon-body').textContent = '💥';
+                    ActivityCore.celebrate();
+                    ActivityCore.say('Excellent! That is number ten.', function () {
+                        setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
+                    });
+                } else {
+                    balloon.classList.add('shake-wrong');
+                    ActivityCore.say('Try again. Find the balloon with ten.');
+                    setTimeout(function () { balloon.classList.remove('shake-wrong'); }, 600);
+                }
+            };
+            balloonGrid.appendChild(balloon);
+        });
+        display.appendChild(balloonGrid);
+
+        ActivityCore.bindTopbarAudio(function () {
+            ActivityCore.say('Pop the balloon with number ten!');
+        });
+        ActivityCore.say('Pop the balloon with number ten!');
+    },
+
     /* ----- Legacy simple counting ----- */
     counting(config) {
         if (config.object === 'mango' || config.engine === 'mango_counting') {

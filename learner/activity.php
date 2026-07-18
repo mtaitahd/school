@@ -49,7 +49,9 @@ $isInteractiveEngine = in_array($engine, [
     'mango_counting', 'pattern_counting', 'number_identification', 'number_sequencing', 'number_tracing',
     'missing_numbers', 'match_quantity', 'dot_to_dot', 'identify_shapes',
     'shape_sorting', 'complete_pattern', 'drag_addition', 'visual_subtraction', 'number_line',
-    'object_recognition', 'objects', 'sorting', 'math_game'
+    'object_recognition', 'objects', 'sorting', 'math_game',
+    'spec_count_objects', 'spec_zero_plate', 'spec_zero_drag', 'spec_zero_tap',
+    'spec_ten_tap', 'spec_ten_drag', 'spec_ten_match', 'spec_ten_balloon'
 ], true);
 
 /* Phase 6: Lesson progress info */

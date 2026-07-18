@@ -26,6 +26,14 @@ const ActivityRegistry = {
     game: (c) => ActivityEngines.math_game(c),
     math_game: (c) => ActivityEngines.math_game(c),
     objects: (c) => ActivityEngines.object_recognition(c),
+    spec_count_objects: (c) => ActivityEngines.spec_count_objects(c),
+    spec_zero_plate: (c) => ActivityEngines.spec_zero_plate(c),
+    spec_zero_drag: (c) => ActivityEngines.spec_zero_drag(c),
+    spec_zero_tap: (c) => ActivityEngines.spec_zero_tap(c),
+    spec_ten_tap: (c) => ActivityEngines.spec_ten_tap(c),
+    spec_ten_drag: (c) => ActivityEngines.spec_ten_drag(c),
+    spec_ten_match: (c) => ActivityEngines.spec_ten_match(c),
+    spec_ten_balloon: (c) => ActivityEngines.spec_ten_balloon(c),
 };
 
 function resolveEngine(config, activityType) {
