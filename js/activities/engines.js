@@ -1918,7 +1918,7 @@ const ActivityEngines = {
         ActivityCore.say('Drag number ten into the yellow box.');
     },
 
-    /* ----- Section 4, Activity 3: Match number ten with group of 10 apples ----- */
+    /* ----- Section 4, Activity 3: Drag numeral 10 to the group of 10 apples ----- */
     spec_ten_match(config) {
         ActivityCore.hideMultiRoundUI();
         const { display, options } = ActivityCore.clearStage();
@@ -1927,25 +1927,30 @@ const ActivityEngines = {
 
         display.appendChild(ActivityCore.renderPrompt('Match number ten with the group that has ten apples.', '🍎'));
 
-        const numCard = document.createElement('div');
-        numCard.className = 'ten-match-number';
-        numCard.textContent = '10';
-        display.appendChild(numCard);
+        const workspace = document.createElement('div');
+        workspace.className = 'ten-match-workspace';
+
+        const draggable10 = document.createElement('button');
+        draggable10.type = 'button';
+        draggable10.className = 'ten-drag-number';
+        draggable10.textContent = '10';
+        workspace.appendChild(draggable10);
 
         const groups = document.createElement('div');
         groups.className = 'quantity-groups';
 
         const groupData = [
-            { label: 'Group A', count: 8 },
-            { label: 'Group B', count: 10 },
-            { label: 'Group C', count: 6 }
+            { count: 8 },
+            { count: 10 },
+            { count: 6 }
         ];
         const shuffled = ActivityCore.shuffle(groupData);
+        let matched = false;
 
         shuffled.forEach(function (g) {
             const groupEl = document.createElement('button');
             groupEl.type = 'button';
-            groupEl.className = 'quantity-group';
+            groupEl.className = 'quantity-group ten-drop-group';
             const row = document.createElement('div');
             row.className = 'objects-row';
             for (let i = 0; i < g.count; i++) {
@@ -1955,26 +1960,47 @@ const ActivityEngines = {
             }
             groupEl.appendChild(row);
             groupEl.onclick = function () {
-                if (g.count === 10) {
-                    groupEl.classList.add('selected-correct');
-                    ActivityCore.celebrate();
-                    ActivityCore.say('Excellent! That is number ten.', function () {
-                        setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
-                    });
+                if (matched) return;
+                if (draggable10.classList.contains('selected-drag')) {
+                    if (g.count === 10) {
+                        matched = true;
+                        groupEl.classList.add('selected-correct');
+                        draggable10.classList.add('placed');
+                        var clone = document.createElement('span');
+                        clone.className = 'ten-placed-badge';
+                        clone.textContent = '10';
+                        groupEl.appendChild(clone);
+                        ActivityCore.celebrate();
+                        ActivityCore.say('Excellent! That is number ten.', function () {
+                            setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
+                        });
+                    } else {
+                        groupEl.classList.add('selected-wrong');
+                        draggable10.classList.remove('selected-drag');
+                        ActivityCore.say('Try again. Count the apples.');
+                        setTimeout(function () { groupEl.classList.remove('selected-wrong'); }, 600);
+                    }
                 } else {
-                    groupEl.classList.add('selected-wrong');
-                    ActivityCore.say('Try again. Count the apples.');
-                    setTimeout(function () { groupEl.classList.remove('selected-wrong'); }, 600);
+                    ActivityCore.say('First tap the number 10, then tap the group with ten apples.');
                 }
             };
             groups.appendChild(groupEl);
         });
-        display.appendChild(groups);
+
+        draggable10.onclick = function () {
+            if (matched) return;
+            document.querySelectorAll('.ten-drag-number').forEach(function (el) { el.classList.remove('selected-drag'); });
+            draggable10.classList.add('selected-drag');
+            ActivityCore.say('Now tap the group with ten apples.');
+        };
+
+        workspace.appendChild(groups);
+        display.appendChild(workspace);
 
         ActivityCore.bindTopbarAudio(function () {
-            ActivityCore.say('Match number ten with the group that has ten apples.');
+            ActivityCore.say('Match number ten with the group that has ten apples. First tap 10, then tap the group with ten apples.');
         });
-        ActivityCore.say('Match number ten with the group that has ten apples.');
+        ActivityCore.say('Match number ten with the group that has ten apples. First tap 10, then tap the group with ten apples.');
     },
 
     /* ----- Section 4, Activity 4: Pop the balloon with number ten ----- */

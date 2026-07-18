@@ -2,30 +2,17 @@
 /**
  * Spec Update: Insert Smart Math Corner Spec-based Activities
  *
- * This migration adds the exact spec-defined activities as new lessons
- * within the existing module 14 (Recognising and Counting Numbers 1-9).
- *
- * Sections:
- *   Section 1 - Count Objects and Read Numbers 1-5 (5 lessons, 1 per number)
- *   Section 2 - Count Objects and Read Numbers 6-9 (4 lessons, 1 per number)
- *   Section 3 - Recognising Number 0 (3 activities)
- *   Section 4 - Recognising Number 10 (4 activities)
+ * Adds 4 lessons to module 14 (Recognising and Counting Numbers 1-9):
+ *   1. Count Objects and Read Numbers 1-5 (5 activities)
+ *   2. Count Objects and Read Numbers 6-9 (4 activities)
+ *   3. Recognising Number 0 (3 activities)
+ *   4. Recognising Number 10 (4 activities)
  *
  * Usage: php database/run_migration_spec_update.php
- *        or include from web admin run-migration page
  *
- * Each act_data is a JSON object with engine name plus extra config.
- * Engines are defined in js/activities/engines.js
- *
- * Spec Activity Names:
- * - spec_count_objects
- * - spec_zero_plate
- * - spec_zero_drag
- * - spec_zero_tap
- * - spec_ten_tap
- * - spec_ten_drag
- * - spec_ten_match
- * - spec_ten_balloon
+ * Engines (defined in js/activities/engines.js):
+ *   spec_count_objects, spec_zero_plate, spec_zero_drag, spec_zero_tap,
+ *   spec_ten_tap, spec_ten_drag, spec_ten_match, spec_ten_balloon
  */
 
 require_once __DIR__ . '/../php/db_connection.php';
@@ -34,7 +21,6 @@ $module_id = 14;
 
 echo "=== Smart Math Corner Spec Update ===\n\n";
 
-// --- Helper: create activity data JSON ---
 function spec_act_data($engine, $extra = []) {
     return json_encode(array_merge([
         'engine' => $engine,
@@ -51,15 +37,16 @@ if (!$mod) {
 }
 echo "Using module: $module_id\n\n";
 
-// --- Lessons to create ---
+// --- Lessons exactly matching the spec structure ---
 $lessons = [];
 
-// SECTION 1: Count Objects and Read Numbers 1-5
+// LESSON 1: COUNT OBJECTS AND READ NUMBERS 1-5
 $lessons[] = [
     'lesson_code' => 'NUM-SPEC-L01',
-    'lesson_name' => 'Count One Object',
-    'description' => 'Count one orange and recognize number 1.',
+    'lesson_name' => 'Count Objects and Read Numbers 1-5',
+    'description' => 'Count objects and identify numbers 1 to 5.',
     'activities' => [
+        // Activity 1.1: Count one orange
         [
             'name' => 'Count One Orange',
             'desc' => 'Tap one orange then select number 1.',
@@ -77,15 +64,8 @@ $lessons[] = [
             'step_type' => 'warmup',
             'step_order' => 0,
             'difficulty' => 1
-        ]
-    ]
-];
-
-$lessons[] = [
-    'lesson_code' => 'NUM-SPEC-L02',
-    'lesson_name' => 'Count Two Objects',
-    'description' => 'Count two mangoes and recognize number 2.',
-    'activities' => [
+        ],
+        // Activity 1.2: Count two mangoes
         [
             'name' => 'Count Two Mangoes',
             'desc' => 'Tap two mangoes then select number 2.',
@@ -101,17 +81,10 @@ $lessons[] = [
                 'difficulty' => 1
             ]),
             'step_type' => 'warmup',
-            'step_order' => 0,
+            'step_order' => 1,
             'difficulty' => 1
-        ]
-    ]
-];
-
-$lessons[] = [
-    'lesson_code' => 'NUM-SPEC-L03',
-    'lesson_name' => 'Count Three Objects',
-    'description' => 'Count three pencils and recognize number 3.',
-    'activities' => [
+        ],
+        // Activity 1.3: Count three pencils
         [
             'name' => 'Count Three Pencils',
             'desc' => 'Tap three pencils then select number 3.',
@@ -127,17 +100,10 @@ $lessons[] = [
                 'difficulty' => 1
             ]),
             'step_type' => 'warmup',
-            'step_order' => 0,
+            'step_order' => 2,
             'difficulty' => 1
-        ]
-    ]
-];
-
-$lessons[] = [
-    'lesson_code' => 'NUM-SPEC-L04',
-    'lesson_name' => 'Count Four Objects',
-    'description' => 'Count four apples and recognize number 4.',
-    'activities' => [
+        ],
+        // Activity 1.4: Count four apples
         [
             'name' => 'Count Four Apples',
             'desc' => 'Tap four apples then select number 4.',
@@ -153,17 +119,10 @@ $lessons[] = [
                 'difficulty' => 1
             ]),
             'step_type' => 'warmup',
-            'step_order' => 0,
+            'step_order' => 3,
             'difficulty' => 1
-        ]
-    ]
-];
-
-$lessons[] = [
-    'lesson_code' => 'NUM-SPEC-L05',
-    'lesson_name' => 'Count Five Objects',
-    'description' => 'Count five cups and recognize number 5.',
-    'activities' => [
+        ],
+        // Activity 1.5: Count five cups
         [
             'name' => 'Count Five Cups',
             'desc' => 'Tap five cups then select number 5.',
@@ -179,18 +138,19 @@ $lessons[] = [
                 'difficulty' => 1
             ]),
             'step_type' => 'warmup',
-            'step_order' => 0,
+            'step_order' => 4,
             'difficulty' => 1
-        ]
+        ],
     ]
 ];
 
-// SECTION 2: Count Objects and Read Numbers 6-9
+// LESSON 2: COUNT OBJECTS AND READ NUMBERS 6-9
 $lessons[] = [
-    'lesson_code' => 'NUM-SPEC-L06',
-    'lesson_name' => 'Count Six Objects',
-    'description' => 'Count six chairs and recognize number 6.',
+    'lesson_code' => 'NUM-SPEC-L02',
+    'lesson_name' => 'Count Objects and Read Numbers 6-9',
+    'description' => 'Count objects and identify numbers 6 to 9.',
     'activities' => [
+        // Activity 2.1: Count six chairs
         [
             'name' => 'Count Six Chairs',
             'desc' => 'Tap six chairs then select number 6.',
@@ -208,15 +168,8 @@ $lessons[] = [
             'step_type' => 'warmup',
             'step_order' => 0,
             'difficulty' => 2
-        ]
-    ]
-];
-
-$lessons[] = [
-    'lesson_code' => 'NUM-SPEC-L07',
-    'lesson_name' => 'Count Seven Objects',
-    'description' => 'Count seven plates and recognize number 7.',
-    'activities' => [
+        ],
+        // Activity 2.2: Count seven plates
         [
             'name' => 'Count Seven Plates',
             'desc' => 'Tap seven plates then select number 7.',
@@ -232,17 +185,10 @@ $lessons[] = [
                 'difficulty' => 2
             ]),
             'step_type' => 'warmup',
-            'step_order' => 0,
+            'step_order' => 1,
             'difficulty' => 2
-        ]
-    ]
-];
-
-$lessons[] = [
-    'lesson_code' => 'NUM-SPEC-L08',
-    'lesson_name' => 'Count Eight Objects',
-    'description' => 'Count eight sticks and recognize number 8.',
-    'activities' => [
+        ],
+        // Activity 2.3: Count eight sticks
         [
             'name' => 'Count Eight Sticks',
             'desc' => 'Tap eight sticks then select number 8.',
@@ -258,17 +204,10 @@ $lessons[] = [
                 'difficulty' => 2
             ]),
             'step_type' => 'warmup',
-            'step_order' => 0,
+            'step_order' => 2,
             'difficulty' => 2
-        ]
-    ]
-];
-
-$lessons[] = [
-    'lesson_code' => 'NUM-SPEC-L09',
-    'lesson_name' => 'Count Nine Objects',
-    'description' => 'Count nine trees and recognize number 9.',
-    'activities' => [
+        ],
+        // Activity 2.4: Count nine trees
         [
             'name' => 'Count Nine Trees',
             'desc' => 'Tap nine trees then select number 9.',
@@ -284,21 +223,22 @@ $lessons[] = [
                 'difficulty' => 2
             ]),
             'step_type' => 'warmup',
-            'step_order' => 0,
+            'step_order' => 3,
             'difficulty' => 2
-        ]
+        ],
     ]
 ];
 
-// SECTION 3: Recognizing Number 0
+// LESSON 3: RECOGNISING NUMBER 0
 $lessons[] = [
-    'lesson_code' => 'NUM-SPEC-L10',
+    'lesson_code' => 'NUM-SPEC-L03',
     'lesson_name' => 'Recognising Number 0',
-    'description' => 'Understand that zero means no objects.',
+    'description' => 'Understand that zero means no objects. Tap the empty plate, drag empty pictures to Zero, and tap number 0.',
     'activities' => [
+        // Activity 3.1: Tap the empty plate
         [
             'name' => 'Tap the Empty Plate',
-            'desc' => 'Tap the plate with no oranges to learn zero.',
+            'desc' => 'Three plates appear: 2 oranges, 1 orange, empty. Tap the empty plate.',
             'audio' => 'Tap the plate with no oranges.',
             'activity_type' => 'spec_zero_plate',
             'data' => spec_act_data('spec_zero_plate', [
@@ -309,9 +249,10 @@ $lessons[] = [
             'step_order' => 0,
             'difficulty' => 1
         ],
+        // Activity 3.2: Drag empty pictures to Zero
         [
             'name' => 'Drag Empty to Zero',
-            'desc' => 'Drag the empty pictures to the Zero box.',
+            'desc' => 'Drag pictures with no objects into the Zero box.',
             'audio' => 'Drag the pictures with no objects to the box labeled Zero.',
             'activity_type' => 'spec_zero_drag',
             'data' => spec_act_data('spec_zero_drag', [
@@ -321,9 +262,10 @@ $lessons[] = [
             'step_order' => 1,
             'difficulty' => 1
         ],
+        // Activity 3.3: Tap number zero
         [
             'name' => 'Tap Number Zero',
-            'desc' => 'Find and tap the number 0.',
+            'desc' => 'Find and tap the number 0 from 0, 2, 5, 7.',
             'audio' => 'Tap number zero.',
             'activity_type' => 'spec_zero_tap',
             'data' => spec_act_data('spec_zero_tap', [
@@ -332,19 +274,20 @@ $lessons[] = [
             'step_type' => 'check',
             'step_order' => 2,
             'difficulty' => 1
-        ]
+        ],
     ]
 ];
 
-// SECTION 4: Recognizing Number 10
+// LESSON 4: RECOGNISING NUMBER 10
 $lessons[] = [
-    'lesson_code' => 'NUM-SPEC-L11',
+    'lesson_code' => 'NUM-SPEC-L04',
     'lesson_name' => 'Recognising Number 10',
     'description' => 'Identify, drag, match, and pop number 10.',
     'activities' => [
+        // Activity 4.1: Tap number ten
         [
             'name' => 'Tap Number Ten',
-            'desc' => 'Find and tap the number 10.',
+            'desc' => 'Find and tap the number 10 from 7, 10, 4, 9.',
             'audio' => 'Tap number ten.',
             'activity_type' => 'spec_ten_tap',
             'data' => spec_act_data('spec_ten_tap', [
@@ -354,9 +297,10 @@ $lessons[] = [
             'step_order' => 0,
             'difficulty' => 1
         ],
+        // Activity 4.2: Drag number ten into yellow box
         [
             'name' => 'Drag Ten into Box',
-            'desc' => 'Drag number ten into the yellow box.',
+            'desc' => 'A yellow box labeled 10 and numbers 6, 10, 8. Drag 10 into the yellow box.',
             'audio' => 'Drag number ten into the yellow box.',
             'activity_type' => 'spec_ten_drag',
             'data' => spec_act_data('spec_ten_drag', [
@@ -366,9 +310,10 @@ $lessons[] = [
             'step_order' => 1,
             'difficulty' => 1
         ],
+        // Activity 4.3: Match ten with group of ten apples (drag)
         [
             'name' => 'Match Ten with Apples',
-            'desc' => 'Match number ten with the group that has ten apples.',
+            'desc' => 'Three groups: 8 apples, 10 apples, 6 apples. Drag number 10 to the group with 10 apples.',
             'audio' => 'Match number ten with the group that has ten apples.',
             'activity_type' => 'spec_ten_match',
             'data' => spec_act_data('spec_ten_match', [
@@ -379,9 +324,10 @@ $lessons[] = [
             'step_order' => 2,
             'difficulty' => 1
         ],
+        // Activity 4.4: Pop balloon with ten
         [
             'name' => 'Pop Balloon Ten',
-            'desc' => 'Pop the balloon with number ten.',
+            'desc' => 'Balloons labeled 5, 10, 7, 9. Pop the balloon with 10.',
             'audio' => 'Pop the balloon with number ten.',
             'activity_type' => 'spec_ten_balloon',
             'data' => spec_act_data('spec_ten_balloon', [
@@ -390,7 +336,7 @@ $lessons[] = [
             'step_type' => 'game',
             'step_order' => 3,
             'difficulty' => 1
-        ]
+        ],
     ]
 ];
 
@@ -401,11 +347,8 @@ $existingSpec = $database->fetchOne(
 if ($existingSpec['cnt'] > 0) {
     echo "Spec lessons already exist (" . $existingSpec['cnt'] . " found).\n";
     echo "To re-run, delete existing NUM-SPEC-* lessons and their activities first.\n\n";
-
-    // Still register the engines if not already registered
-    echo "Verifying engine registration...\n";
-    echo "All spec engines are registered in ActivityRegistry.\n";
-    echo "Done.\n";
+    echo "Run: DELETE FROM activities WHERE lesson_id IN (SELECT lesson_id FROM lessons WHERE lesson_code LIKE 'NUM-SPEC-%');\n";
+    echo "Run: DELETE FROM lessons WHERE lesson_code LIKE 'NUM-SPEC-%';\n";
     exit(0);
 }
 
@@ -421,12 +364,7 @@ if ($topicRow) {
     $topicId = (int)$topicRow['topic_id'];
 }
 
-foreach ($lessons as $lessonIdx => $lesson) {
-    // Create lesson
-    $lessonCode = $lesson['lesson_code'];
-    $lessonName = $lesson['lesson_name'];
-    $lessonDesc = $lesson['description'];
-
+foreach ($lessons as $lesson) {
     $lastLesson = $database->fetchOne(
         "SELECT MAX(order_index) as max_idx FROM lessons WHERE module_id = ?",
         [$module_id]
@@ -436,29 +374,18 @@ foreach ($lessons as $lessonIdx => $lesson) {
     $dbResult = $database->execute(
         "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
          VALUES (?, ?, ?, ?, ?, ?, 1)",
-        [$module_id, $topicId, $lessonCode, $lessonName, $lessonDesc, $lessonOrder]
+        [$module_id, $topicId, $lesson['lesson_code'], $lesson['lesson_name'], $lesson['description'], $lessonOrder]
     );
 
     if (!$dbResult) {
-        echo "ERROR: Failed to create lesson '$lessonName'.\n";
+        echo "ERROR: Failed to create lesson '{$lesson['lesson_name']}'.\n";
         continue;
     }
 
     $lessonId = $database->lastInsertId();
-    echo "  Lesson: $lessonName (ID: $lessonId)\n";
+    echo "  Lesson: {$lesson['lesson_name']} (ID: $lessonId)\n";
 
-    // Insert activities
-    foreach ($lesson['activities'] as $actIdx => $act) {
-        $actData = $act['data'];
-        $actType = $act['activity_type'];
-        $actName = $act['name'];
-        $actDesc = $act['desc'];
-        $audioInstr = $act['audio'];
-        $stepType = $act['step_type'];
-        $stepOrder = $act['step_order'];
-        $difficulty = $act['difficulty'];
-
-        // Find the max order_index for this lesson
+    foreach ($lesson['activities'] as $act) {
         $lastAct = $database->fetchOne(
             "SELECT MAX(order_index) as max_idx FROM activities WHERE lesson_id = ?",
             [$lessonId]
@@ -468,18 +395,23 @@ foreach ($lessons as $lessonIdx => $lesson) {
         $dbResult2 = $database->execute(
             "INSERT INTO activities (module_id, lesson_id, step_type, step_order, order_index, activity_name, activity_description, activity_type, difficulty_level, activity_data, audio_instruction, is_active)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)",
-            [$module_id, $lessonId, $stepType, $stepOrder, $orderIdx, $actName, $actDesc, $actType, $difficulty, $actData, $audioInstr]
+            [$module_id, $lessonId, $act['step_type'], $act['step_order'], $orderIdx, $act['name'], $act['desc'], $act['activity_type'], $act['difficulty'], $act['data'], $act['audio']]
         );
 
         if ($dbResult2) {
             $actId = $database->lastInsertId();
-            echo "    + Activity: $actName (ID: $actId)\n";
+            echo "    + {$act['name']} (ID: $actId)\n";
         } else {
-            echo "    ! ERROR: Failed to insert activity '$actName'.\n";
+            echo "    ! ERROR: Failed to insert activity '{$act['name']}'.\n";
         }
     }
 }
 
 echo "\n=== Spec Update Complete! ===\n";
-echo count($lessons) . " lessons created with activities for Sections 1-4.\n";
-echo "Visit the learner page to see the new activities.\n";
+echo "4 lessons created:\n";
+echo "  1. Count Objects and Read Numbers 1-5 (5 activities)\n";
+echo "  2. Count Objects and Read Numbers 6-9 (4 activities)\n";
+echo "  3. Recognising Number 0 (3 activities)\n";
+echo "  4. Recognising Number 10 (4 activities)\n";
+echo "Run the migration from your live server:\n";
+echo "  php database/run_migration_spec_update.php\n";
