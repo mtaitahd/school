@@ -529,9 +529,9 @@ function ensure_schema_v4_number_groups($database): void {
                 $expectedObj = $objectsMap[$expectedNum] ?? '';
             }
 
-            // Fix mixed_objects
-            if (!isset($adata['mixed_objects']) || $adata['mixed_objects'] !== true) {
-                $adata['mixed_objects'] = true;
+            // Fix mixed_objects — show only the target object, no distractors
+            if (!isset($adata['mixed_objects']) || $adata['mixed_objects'] !== false) {
+                $adata['mixed_objects'] = false;
                 $aNeed = true;
             }
 
@@ -1100,8 +1100,8 @@ function ensure_schema_v4_number_groups($database): void {
                         $data['max'] = $n;
                         $needsUpdate = true;
                     }
-                    if (!isset($data['mixed_objects']) || $data['mixed_objects'] !== true) {
-                        $data['mixed_objects'] = true;
+                    if (!isset($data['mixed_objects']) || $data['mixed_objects'] !== false) {
+                        $data['mixed_objects'] = false;
                         $needsUpdate = true;
                     }
                     if (!isset($data['object']) || $data['object'] !== $obj) {
@@ -1146,7 +1146,7 @@ function ensure_schema_v4_number_groups($database): void {
                     }
                 }
             }
-            // Universal patch: ALL mango_counting activities with mode='count' get mixed_objects
+            // Universal patch: ALL mango_counting activities with mode='count' — show only target object
             $allCounting = $database->fetchAll(
                 "SELECT activity_id, activity_data, audio_instruction FROM activities WHERE activity_type = 'counting' AND is_active = 1"
             );
@@ -1156,8 +1156,8 @@ function ensure_schema_v4_number_groups($database): void {
                 if (($adata['mode'] ?? '') !== 'count') continue;
                 $aObj = $adata['object'] ?? 'mango';
                 $aNeed = false;
-                if (!isset($adata['mixed_objects']) || $adata['mixed_objects'] !== true) {
-                    $adata['mixed_objects'] = true;
+                if (!isset($adata['mixed_objects']) || $adata['mixed_objects'] !== false) {
+                    $adata['mixed_objects'] = false;
                     $aNeed = true;
                 }
                 if (!isset($adata['count']) && isset($adata['min']) && isset($adata['max']) && $adata['min'] == $adata['max']) {
@@ -1274,7 +1274,7 @@ function ensure_schema_v4_number_groups($database): void {
         $acts = [
             ['warmup', 0, 'counting', "Count $num " . ucfirst($obj) . ($num > 1 ? 's' : ''),
              "Count the $obj" . ($num > 1 ? 's' : '') . " on the screen. Tap each one!",
-             '{"engine":"mango_counting","difficulty":1,"count":'.$num.',"min":'.$num.',"max":'.$num.',"object":"'.$obj.'","mode":"count","step_type":"warmup","mixed_objects":true}',
+             '{"engine":"mango_counting","difficulty":1,"count":'.$num.',"min":'.$num.',"max":'.$num.',"object":"'.$obj.'","mode":"count","step_type":"warmup","mixed_objects":false}',
              "Count the $obj" . ($num > 1 ? 's' : '') . " with me!"],
             ['match', 1, 'matching', "Match " . ucfirst($numWord) . ' Object' . ($num > 1 ? 's' : ''),
              "Match the number $num to the group with $num $obj" . ($num > 1 ? 's' : '') . ".",
