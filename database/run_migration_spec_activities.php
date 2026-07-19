@@ -70,11 +70,15 @@ echo "\nModule IDs: 1-9=$mod14Id, Zero=$modZeroId, Ten=$modTenId\n\n";
 function ensureTopic($database, $moduleId, $topicName, $topicCode) {
     $t = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = ? LIMIT 1", [$moduleId, $topicCode]);
     if ($t) return (int)$t['topic_id'];
-    $maxOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM topics WHERE module_id = ?", [$moduleId])['mx'];
-    $database->execute(
-        "INSERT INTO topics (module_id, topic_name, topic_code, order_index, is_active) VALUES (?, ?, ?, ?, 1)",
-        [$moduleId, $topicName, $topicCode, $maxOrder + 1]
-    );
+    try {
+        $maxOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM topics WHERE module_id = ?", [$moduleId])['mx'];
+        $database->execute(
+            "INSERT IGNORE INTO topics (module_id, topic_name, topic_code, order_index, is_active) VALUES (?, ?, ?, ?, 1)",
+            [$moduleId, $topicName, $topicCode, $maxOrder + 1]
+        );
+    } catch (Exception $e) {
+        echo "  WARN: topic insert: " . $e->getMessage() . "\n";
+    }
     $t = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = ? LIMIT 1", [$moduleId, $topicCode]);
     return $t ? (int)$t['topic_id'] : 0;
 }
@@ -83,12 +87,16 @@ function ensureTopic($database, $moduleId, $topicName, $topicCode) {
 function ensureLesson($database, $moduleId, $topicId, $code, $name, $desc) {
     $l = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = ?", [$code]);
     if ($l) return (int)$l['lesson_id'];
-    $maxOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$topicId])['mx'];
-    $database->execute(
-        "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
-         VALUES (?, ?, ?, ?, ?, ?, 1)",
-        [$moduleId, $topicId, $code, $name, $desc, $maxOrder + 1]
-    );
+    try {
+        $maxOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$topicId])['mx'];
+        $database->execute(
+            "INSERT IGNORE INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
+             VALUES (?, ?, ?, ?, ?, ?, 1)",
+            [$moduleId, $topicId, $code, $name, $desc, $maxOrder + 1]
+        );
+    } catch (Exception $e) {
+        echo "  WARN: lesson insert: " . $e->getMessage() . "\n";
+    }
     $l = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = ?", [$code]);
     return $l ? (int)$l['lesson_id'] : 0;
 }
@@ -100,12 +108,16 @@ function insertActivity($database, $moduleId, $lessonId, $stepType, $idx, $name,
         echo "  - exists: $name\n";
         return;
     }
-    $database->execute(
-        "INSERT INTO activities (module_id, lesson_id, step_type, step_order, order_index, activity_name, activity_description, activity_type, difficulty_level, activity_data, audio_instruction, is_active)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, 1)",
-        [$moduleId, $lessonId, $stepType, $idx, $idx, $name, $desc, $engine, $data, $audio]
-    );
-    echo "  + created: $name\n";
+    try {
+        $database->execute(
+            "INSERT INTO activities (module_id, lesson_id, step_type, step_order, order_index, activity_name, activity_description, activity_type, difficulty_level, activity_data, audio_instruction, is_active)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, 1)",
+            [$moduleId, $lessonId, $stepType, $idx, $idx, $name, $desc, $engine, $data, $audio]
+        );
+        echo "  + created: $name\n";
+    } catch (Exception $e) {
+        echo "  ERROR: $name: " . $e->getMessage() . "\n";
+    }
 }
 
 // =============================================
