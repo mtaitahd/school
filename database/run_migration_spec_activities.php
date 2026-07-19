@@ -66,6 +66,13 @@ $modTenId = $modTen ? (int)$modTen['module_id'] : 0;
 
 echo "\nModule IDs: 1-9=$mod14Id, Zero=$modZeroId, Ten=$modTenId\n\n";
 
+// --- Cleanup orphaned activities from previous failed run ---
+echo "Cleaning orphaned activities (lesson_id=0)...\n";
+$database->execute(
+    "DELETE FROM activities WHERE (lesson_id = 0 OR lesson_id IS NULL) AND activity_type IN ('spec_count_objects','spec_zero_plate','spec_zero_drag','spec_zero_tap','spec_ten_tap','spec_ten_drag','spec_ten_match','spec_ten_balloon')"
+);
+echo "  Done.\n\n";
+
 // --- Helper: ensure topic ---
 function ensureTopic($database, $moduleId, $topicName, $topicCode) {
     $t = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = ? LIMIT 1", [$moduleId, $topicCode]);
@@ -90,9 +97,9 @@ function ensureLesson($database, $moduleId, $topicId, $code, $name, $desc) {
     try {
         $maxOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$topicId])['mx'];
         $database->execute(
-            "INSERT IGNORE INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
-             VALUES (?, ?, ?, ?, ?, ?, 1)",
-            [$moduleId, $topicId, $code, $name, $desc, $maxOrder + 1]
+            "INSERT IGNORE INTO lessons (topic_id, lesson_code, lesson_name, learning_objective, success_criteria, estimated_minutes, order_index, is_active)
+             VALUES (?, ?, ?, ?, ?, 20, ?, 1)",
+            [$topicId, $code, $name, $desc, $desc, $maxOrder + 1]
         );
     } catch (Exception $e) {
         echo "  WARN: lesson insert: " . $e->getMessage() . "\n";

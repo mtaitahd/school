@@ -738,9 +738,9 @@ function ensure_schema_v4_number_groups($database): void {
         if (!$specL01) {
             $specLessonOrder = ($database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$countingSpecTopicId])['mx'] ?? 0) + 1;
             $database->execute(
-                "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
-                 VALUES (?, ?, 'NUM-SPEC-L01', 'Count Objects and Read Numbers 1-5', 'Count objects and identify numbers 1 to 5.', ?, 1)",
-                [$origModuleId, $countingSpecTopicId, $specLessonOrder]
+                "INSERT IGNORE INTO lessons (topic_id, lesson_code, lesson_name, learning_objective, success_criteria, estimated_minutes, order_index, is_active)
+                 VALUES (?, 'NUM-SPEC-L01', 'Count Objects and Read Numbers 1-5', 'Count objects and identify numbers 1 to 5.', 'Can count objects and match numbers 1 to 5.', 20, ?, 1)",
+                [$countingSpecTopicId, $specLessonOrder]
             );
             $specL01 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L01'");
         }
@@ -774,9 +774,9 @@ function ensure_schema_v4_number_groups($database): void {
         if (!$specL02) {
             $specLessonOrder = ($database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$countingSpecTopicId])['mx'] ?? 0) + 1;
             $database->execute(
-                "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
-                 VALUES (?, ?, 'NUM-SPEC-L02', 'Count Objects and Read Numbers 6-9', 'Count objects and identify numbers 6 to 9.', ?, 1)",
-                [$origModuleId, $countingSpecTopicId, $specLessonOrder]
+                "INSERT IGNORE INTO lessons (topic_id, lesson_code, lesson_name, learning_objective, success_criteria, estimated_minutes, order_index, is_active)
+                 VALUES (?, 'NUM-SPEC-L02', 'Count Objects and Read Numbers 6-9', 'Count objects and identify numbers 6 to 9.', 'Can count objects and match numbers 6 to 9.', 20, ?, 1)",
+                [$countingSpecTopicId, $specLessonOrder]
             );
             $specL02 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L02'");
         }
@@ -825,9 +825,9 @@ function ensure_schema_v4_number_groups($database): void {
             if (!$specL03) {
                 $lessonOrder = ($database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$zeroTopicId])['mx'] ?? 0) + 1;
                 $database->execute(
-                    "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
-                     VALUES (?, ?, 'NUM-SPEC-L03', 'Recognising Number 0', 'Understand that zero means no objects.', ?, 1)",
-                    [$zeroModuleId, $zeroTopicId, $lessonOrder]
+                    "INSERT IGNORE INTO lessons (topic_id, lesson_code, lesson_name, learning_objective, success_criteria, estimated_minutes, order_index, is_active)
+                     VALUES (?, 'NUM-SPEC-L03', 'Recognising Number 0', 'Understand that zero means no objects.', 'Can identify that zero means nothing.', 20, ?, 1)",
+                    [$zeroTopicId, $lessonOrder]
                 );
                 $specL03 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L03'");
             }
@@ -872,9 +872,9 @@ function ensure_schema_v4_number_groups($database): void {
             if (!$specL04) {
                 $lessonOrder = ($database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$tenTopicId])['mx'] ?? 0) + 1;
                 $database->execute(
-                    "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
-                     VALUES (?, ?, 'NUM-SPEC-L04', 'Recognising Number 10', 'Identify, drag, match, and pop number 10.', ?, 1)",
-                    [$tenModuleId, $tenTopicId, $lessonOrder]
+                    "INSERT IGNORE INTO lessons (topic_id, lesson_code, lesson_name, learning_objective, success_criteria, estimated_minutes, order_index, is_active)
+                     VALUES (?, 'NUM-SPEC-L04', 'Recognising Number 10', 'Identify, drag, match, and pop number 10.', 'Can identify number 10 in different ways.', 20, ?, 1)",
+                    [$tenTopicId, $lessonOrder]
                 );
                 $specL04 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L04'");
             }
