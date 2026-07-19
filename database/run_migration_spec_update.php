@@ -2,11 +2,14 @@
 /**
  * Spec Update: Insert Smart Math Corner Spec-based Activities
  *
- * Adds 4 lessons to module 14 (Recognising and Counting Numbers 1-9):
- *   1. Count Objects and Read Numbers 1-5 (5 activities)
- *   2. Count Objects and Read Numbers 6-9 (4 activities)
- *   3. Recognising Number 0 (3 activities)
- *   4. Recognising Number 10 (4 activities)
+ * Adds 4 lessons across 3 modules:
+ *   Module 14 (Recognising and Counting Numbers 1-9):
+ *     1. Count Objects and Read Numbers 1-5 (5 activities)
+ *     2. Count Objects and Read Numbers 6-9 (4 activities)
+ *   "Number Zero" module:
+ *     3. Recognising Number 0 (3 activities)
+ *   "Number Ten" module:
+ *     4. Recognising Number 10 (4 activities)
  *
  * Usage: php database/run_migration_spec_update.php
  *
@@ -16,8 +19,6 @@
  */
 
 require_once __DIR__ . '/../php/db_connection.php';
-
-$module_id = 14;
 
 echo "=== Smart Math Corner Spec Update ===\n\n";
 
@@ -29,13 +30,37 @@ function spec_act_data($engine, $extra = []) {
     ], $extra), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
 }
 
-// --- Ensure the module exists ---
-$mod = $database->fetchOne("SELECT module_id FROM modules WHERE module_id = ?", [$module_id]);
-if (!$mod) {
-    echo "ERROR: Module $module_id not found. Run earlier migrations first.\n";
-    exit(1);
+/**
+ * Get or create the topic for a given module.
+ * Reuses the first active topic in the module, or creates a default one.
+ */
+function ensure_topic($database, $module_id, $topic_name = null, $topic_code = null) {
+    $topic = $database->fetchOne(
+        "SELECT topic_id FROM topics WHERE module_id = ? AND is_active = 1 LIMIT 1",
+        [$module_id]
+    );
+    if ($topic) {
+        return (int)$topic['topic_id'];
+    }
+    // Create a default topic
+    $name = $topic_name ?? 'Number Activities';
+    $code = $topic_code ?? 'NUM-SPEC-TOPIC';
+    $maxOrder = (int)$database->fetchOne(
+        "SELECT COALESCE(MAX(order_index), 0) as mx FROM topics WHERE module_id = ?",
+        [$module_id]
+    )['mx'];
+    $database->execute(
+        "INSERT INTO topics (module_id, topic_name, topic_code, order_index, is_active)
+         VALUES (?, ?, ?, ?, 1)",
+        [$module_id, $name, $code, $maxOrder + 1]
+    );
+    return (int)$database->lastInsertId();
 }
-echo "Using module: $module_id\n\n";
+
+function get_module_id($database, $name) {
+    $row = $database->fetchOne("SELECT module_id FROM modules WHERE module_name = ?", [$name]);
+    return $row ? (int)$row['module_id'] : null;
+}
 
 // --- Lessons exactly matching the spec structure ---
 $lessons = [];
@@ -342,18 +367,33 @@ $lessons[] = [
 
 // --- Clean old NUM-02 (Number 0) and NUM-03 (Number 10) lessons ---
 echo "Cleaning old Number 0 (NUM-02) lessons...\n";
-$old0 = $database->fetchAll("SELECT lesson_id FROM lessons WHERE lesson_code LIKE 'NUM-02-%'");
+$old0 = $database->fetchAll("SELECT lesson_id, topic_id FROM lessons WHERE lesson_code LIKE 'NUM-02-%'");
+$topicIds0 = [];
 foreach ($old0 as $row) {
     $database->execute("DELETE FROM activities WHERE lesson_id = ?", [(int)$row['lesson_id']]);
     $database->execute("DELETE FROM lessons WHERE lesson_id = ?", [(int)$row['lesson_id']]);
+    if ($row['topic_id']) $topicIds0[] = (int)$row['topic_id'];
     echo "  Deleted lesson ID {$row['lesson_id']}\n";
 }
 echo "Cleaning old Number 10 (NUM-03) lessons...\n";
-$old10 = $database->fetchAll("SELECT lesson_id FROM lessons WHERE lesson_code LIKE 'NUM-03-%'");
+$old10 = $database->fetchAll("SELECT lesson_id, topic_id FROM lessons WHERE lesson_code LIKE 'NUM-03-%'");
+$topicIds10 = [];
 foreach ($old10 as $row) {
     $database->execute("DELETE FROM activities WHERE lesson_id = ?", [(int)$row['lesson_id']]);
     $database->execute("DELETE FROM lessons WHERE lesson_id = ?", [(int)$row['lesson_id']]);
+    if ($row['topic_id']) $topicIds10[] = (int)$row['topic_id'];
     echo "  Deleted lesson ID {$row['lesson_id']}\n";
+}
+
+// --- Clean old NUM-02 topics that have no remaining lessons ---
+$removedTopics = [];
+foreach (array_unique(array_merge($topicIds0, $topicIds10)) as $tid) {
+    $cnt = (int)$database->fetchOne("SELECT COUNT(*) as cnt FROM lessons WHERE topic_id = ?", [$tid])['cnt'];
+    if ($cnt === 0) {
+        $database->execute("DELETE FROM topics WHERE topic_id = ?", [$tid]);
+        echo "  Deleted empty topic ID $tid\n";
+        $removedTopics[] = $tid;
+    }
 }
 
 // --- Check for existing spec lessons to avoid duplicates ---
@@ -370,29 +410,59 @@ if ($existingSpec['cnt'] > 0) {
     echo "  Deleted " . count($oldspec) . " old spec lessons.\n";
 }
 
+// --- Determine target module IDs ---
+$module14 = 14;
+$module0 = get_module_id($database, 'Number Zero');
+$module10 = get_module_id($database, 'Number Ten');
+
+echo "\nModule mapping:\n";
+echo "  Module 14 (1-9): ID=$module14\n";
+echo "  Number Zero module: ID=" . ($module0 ?? 'NOT FOUND') . "\n";
+echo "  Number Ten module: ID=" . ($module10 ?? 'NOT FOUND') . "\n\n";
+
+if (!$module0 || !$module10) {
+    echo "ERROR: Could not find Number Zero or Number Ten module.\n";
+    echo "Run php database/run_migration_v13_modules.php first.\n";
+    exit(1);
+}
+
+// --- Ensure topics exist for each module ---
+$topic14 = ensure_topic($database, $module14, 'Counting Numbers 1-9', 'NUM-SPEC-TOPIC-14');
+$topic0 = ensure_topic($database, $module0, 'Understanding Zero', 'NUM-SPEC-TOPIC-0');
+$topic10 = ensure_topic($database, $module10, 'Understanding Ten', 'NUM-SPEC-TOPIC-10');
+
+echo "Using topic IDs: module14=$topic14, zero=$topic0, ten=$topic10\n\n";
+
+// --- Map each lesson to (module_id, topic_id) ---
+$lessonModules = [
+    'NUM-SPEC-L01' => ['module_id' => $module14, 'topic_id' => $topic14],
+    'NUM-SPEC-L02' => ['module_id' => $module14, 'topic_id' => $topic14],
+    'NUM-SPEC-L03' => ['module_id' => $module0, 'topic_id' => $topic0],
+    'NUM-SPEC-L04' => ['module_id' => $module10, 'topic_id' => $topic10],
+];
+
 // --- Insert lessons and activities ---
 echo "Inserting " . count($lessons) . " spec lessons...\n\n";
 
-$topicId = null;
-$topicRow = $database->fetchOne(
-    "SELECT topic_id FROM topics WHERE module_id = ? ORDER BY order_index DESC LIMIT 1",
-    [$module_id]
-);
-if ($topicRow) {
-    $topicId = (int)$topicRow['topic_id'];
-}
-
 foreach ($lessons as $lesson) {
+    $lc = $lesson['lesson_code'];
+    if (!isset($lessonModules[$lc])) {
+        echo "ERROR: No module mapping for $lc. Skipping.\n";
+        continue;
+    }
+    $modId = $lessonModules[$lc]['module_id'];
+    $topId = $lessonModules[$lc]['topic_id'];
+
     $lastLesson = $database->fetchOne(
-        "SELECT MAX(order_index) as max_idx FROM lessons WHERE module_id = ?",
-        [$module_id]
+        "SELECT MAX(order_index) as max_idx FROM lessons WHERE topic_id = ?",
+        [$topId]
     );
     $lessonOrder = ($lastLesson['max_idx'] ?? 0) + 1;
 
     $dbResult = $database->execute(
         "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
          VALUES (?, ?, ?, ?, ?, ?, 1)",
-        [$module_id, $topicId, $lesson['lesson_code'], $lesson['lesson_name'], $lesson['description'], $lessonOrder]
+        [$modId, $topId, $lesson['lesson_code'], $lesson['lesson_name'], $lesson['description'], $lessonOrder]
     );
 
     if (!$dbResult) {
@@ -401,7 +471,7 @@ foreach ($lessons as $lesson) {
     }
 
     $lessonId = $database->lastInsertId();
-    echo "  Lesson: {$lesson['lesson_name']} (ID: $lessonId)\n";
+    echo "  Lesson: {$lesson['lesson_name']} (module=$modId, ID: $lessonId)\n";
 
     foreach ($lesson['activities'] as $act) {
         $lastAct = $database->fetchOne(
@@ -413,7 +483,7 @@ foreach ($lessons as $lesson) {
         $dbResult2 = $database->execute(
             "INSERT INTO activities (module_id, lesson_id, step_type, step_order, order_index, activity_name, activity_description, activity_type, difficulty_level, activity_data, audio_instruction, is_active)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)",
-            [$module_id, $lessonId, $act['step_type'], $act['step_order'], $orderIdx, $act['name'], $act['desc'], $act['activity_type'], $act['difficulty'], $act['data'], $act['audio']]
+            [$modId, $lessonId, $act['step_type'], $act['step_order'], $orderIdx, $act['name'], $act['desc'], $act['activity_type'], $act['difficulty'], $act['data'], $act['audio']]
         );
 
         if ($dbResult2) {
@@ -426,10 +496,13 @@ foreach ($lessons as $lesson) {
 }
 
 echo "\n=== Spec Update Complete! ===\n";
-echo "4 lessons created:\n";
-echo "  1. Count Objects and Read Numbers 1-5 (5 activities)\n";
-echo "  2. Count Objects and Read Numbers 6-9 (4 activities)\n";
-echo "  3. Recognising Number 0 (3 activities)\n";
-echo "  4. Recognising Number 10 (4 activities)\n";
+echo "4 lessons created across 3 modules:\n";
+echo "  Module 14 (Recognising and Counting Numbers 1-9):\n";
+echo "    1. Count Objects and Read Numbers 1-5 (5 activities)\n";
+echo "    2. Count Objects and Read Numbers 6-9 (4 activities)\n";
+echo "  Number Zero module:\n";
+echo "    3. Recognising Number 0 (3 activities)\n";
+echo "  Number Ten module:\n";
+echo "    4. Recognising Number 10 (4 activities)\n";
 echo "Run the migration from your live server:\n";
 echo "  php database/run_migration_spec_update.php\n";
