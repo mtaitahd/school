@@ -66,11 +66,11 @@ $modTenId = $modTen ? (int)$modTen['module_id'] : 0;
 
 echo "\nModule IDs: 1-9=$mod14Id, Zero=$modZeroId, Ten=$modTenId\n\n";
 
-// --- Cleanup orphaned activities from previous failed run ---
-echo "Cleaning orphaned activities (lesson_id=0)...\n";
-$database->execute(
-    "DELETE FROM activities WHERE (lesson_id = 0 OR lesson_id IS NULL) AND activity_type IN ('spec_count_objects','spec_zero_plate','spec_zero_drag','spec_zero_tap','spec_ten_tap','spec_ten_drag','spec_ten_match','spec_ten_balloon')"
-);
+// --- Cleanup: fully reset spec activities and lessons ---
+echo "Cleaning old spec data...\n";
+$database->execute("DELETE FROM activities WHERE activity_type IN ('spec_count_objects','spec_zero_plate','spec_zero_drag','spec_zero_tap','spec_ten_tap','spec_ten_drag','spec_ten_match','spec_ten_balloon')");
+$database->execute("DELETE FROM lessons WHERE lesson_code LIKE 'NUM-SPEC-%'");
+$database->execute("DELETE FROM topics WHERE topic_code LIKE 'NUM-SPEC-%'");
 echo "  Done.\n\n";
 
 // --- Helper: ensure topic ---
