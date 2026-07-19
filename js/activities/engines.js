@@ -15,12 +15,13 @@ const ActivityEngines = {
         const obj = config.object || 'mango';
         const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🥭';
         const { min: diffMin, max: diffMax } = ActivityCore.getDifficultyRange(config);
-        const total = config.count || ActivityCore.randomInt(diffMin, diffMax);
+        const useMixed = config.mixed_objects === true || config.mixed_objects === 'true';
+        const rawCount = config.count || ActivityCore.randomInt(diffMin, diffMax);
+        const total = useMixed ? rawCount : Math.max(3, rawCount);
         if (config.count && (diffMin !== config.count || diffMax !== config.count)) {
             config.min = config.count;
             config.max = config.count;
         }
-        const useMixed = config.mixed_objects === true || config.mixed_objects === 'true';
         const objectName = obj.charAt(0).toUpperCase() + obj.slice(1);
         const prompt = useMixed
             ? ('Count only the ' + ActivityCore.pluralize(obj, total) + '! Tap each ' + obj + '!')
@@ -42,19 +43,12 @@ const ActivityEngines = {
             grid.className = 'object-count-grid';
             grid.setAttribute('role', 'group');
 
-            /* Build items array — targets + optional distractors */
+            /* Build items array — targets only (same object type) */
             var items = [];
             for (var t = 0; t < total; t++) {
                 items.push({ emoji: emoji, obj: obj, isTarget: true });
             }
-            if (useMixed) {
-                var distractorCount = Math.min(5, Math.max(2, Math.ceil(total * 0.5)));
-                var distractors = ActivityCore.getDistractorObjects(obj, distractorCount);
-                for (var d = 0; d < distractors.length; d++) {
-                    items.push({ emoji: distractors[d].emoji, obj: distractors[d].obj, isTarget: false });
-                }
-                items = ActivityCore.shuffle(items);
-            }
+            items = ActivityCore.shuffle(items);
 
             for (var i = 0; i < items.length; i++) {
                 (function (idx) {
