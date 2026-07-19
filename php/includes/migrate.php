@@ -724,10 +724,13 @@ function ensure_schema_v4_number_groups($database): void {
     $countingSpecTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-14' LIMIT 1", [$origModuleId]);
     if (!$countingSpecTopic) {
         $maxTopicOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM topics WHERE module_id = ?", [$origModuleId])['mx'];
+        $strand = $database->fetchOne("SELECT strand_id FROM strands WHERE strand_code = 'NUM' LIMIT 1");
+        if (!$strand) $strand = $database->fetchOne("SELECT strand_id FROM strands LIMIT 1");
+        $strandId = $strand ? (int)$strand['strand_id'] : 1;
         $database->execute(
-            "INSERT IGNORE INTO topics (module_id, topic_name, topic_code, order_index, is_active)
-             VALUES (?, 'Counting Objects 1-9', 'NUM-SPEC-TOPIC-14', ?, 1)",
-            [$origModuleId, $maxTopicOrder + 1]
+            "INSERT IGNORE INTO topics (strand_id, module_id, topic_name, topic_code, order_index, is_active)
+             VALUES (?, ?, 'Counting Objects 1-9', 'NUM-SPEC-TOPIC-14', ?, 1)",
+            [$strandId, $origModuleId, $maxTopicOrder + 1]
         );
         $countingSpecTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-14' LIMIT 1", [$origModuleId]);
     }
@@ -811,10 +814,13 @@ function ensure_schema_v4_number_groups($database): void {
         $zeroTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-0' LIMIT 1", [$zeroModuleId]);
         if (!$zeroTopic) {
             $maxTopicOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM topics WHERE module_id = ?", [$zeroModuleId])['mx'];
+            $strand = $database->fetchOne("SELECT strand_id FROM strands WHERE strand_code = 'NUM' LIMIT 1");
+            if (!$strand) $strand = $database->fetchOne("SELECT strand_id FROM strands LIMIT 1");
+            $strandId = $strand ? (int)$strand['strand_id'] : 1;
             $database->execute(
-                "INSERT IGNORE INTO topics (module_id, topic_name, topic_code, order_index, is_active)
-                 VALUES (?, 'Understanding Zero', 'NUM-SPEC-TOPIC-0', ?, 1)",
-                [$zeroModuleId, $maxTopicOrder + 1]
+                "INSERT IGNORE INTO topics (strand_id, module_id, topic_name, topic_code, order_index, is_active)
+                 VALUES (?, ?, 'Understanding Zero', 'NUM-SPEC-TOPIC-0', ?, 1)",
+                [$strandId, $zeroModuleId, $maxTopicOrder + 1]
             );
             $zeroTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-0' LIMIT 1", [$zeroModuleId]);
         }
@@ -858,10 +864,13 @@ function ensure_schema_v4_number_groups($database): void {
         $tenTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-10' LIMIT 1", [$tenModuleId]);
         if (!$tenTopic) {
             $maxTopicOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM topics WHERE module_id = ?", [$tenModuleId])['mx'];
+            $strand = $database->fetchOne("SELECT strand_id FROM strands WHERE strand_code = 'NUM' LIMIT 1");
+            if (!$strand) $strand = $database->fetchOne("SELECT strand_id FROM strands LIMIT 1");
+            $strandId = $strand ? (int)$strand['strand_id'] : 1;
             $database->execute(
-                "INSERT IGNORE INTO topics (module_id, topic_name, topic_code, order_index, is_active)
-                 VALUES (?, 'Understanding Ten', 'NUM-SPEC-TOPIC-10', ?, 1)",
-                [$tenModuleId, $maxTopicOrder + 1]
+                "INSERT IGNORE INTO topics (strand_id, module_id, topic_name, topic_code, order_index, is_active)
+                 VALUES (?, ?, 'Understanding Ten', 'NUM-SPEC-TOPIC-10', ?, 1)",
+                [$strandId, $tenModuleId, $maxTopicOrder + 1]
             );
             $tenTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-10' LIMIT 1", [$tenModuleId]);
         }

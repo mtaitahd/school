@@ -17,10 +17,20 @@ function sd($engine, $extra = []) {
 function getOrCreateTopic($db, $moduleId, $name, $code) {
     $t = $db->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = ? LIMIT 1", [$moduleId, $code]);
     if ($t) { echo "  topic: id={$t['topic_id']} (exists)\n"; return (int)$t['topic_id']; }
+    // Find a valid strand_id
+    $strand = $db->fetchOne("SELECT strand_id FROM strands WHERE strand_code = 'NUM' LIMIT 1");
+    if (!$strand) $strand = $db->fetchOne("SELECT strand_id FROM strands LIMIT 1");
+    if (!$strand) { echo "  ERROR: no strands table rows!\n"; return 0; }
+    $strandId = (int)$strand['strand_id'];
     $mx = (int)$db->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM topics WHERE module_id = ?", [$moduleId])['mx'];
-    $db->execute("INSERT INTO topics (module_id, topic_name, topic_code, order_index, is_active) VALUES (?, ?, ?, ?, 1)", [$moduleId, $name, $code, $mx + 1]);
+    try {
+        $db->execute("INSERT INTO topics (strand_id, module_id, topic_name, topic_code, order_index, is_active) VALUES (?, ?, ?, ?, ?, 1)", [$strandId, $moduleId, $name, $code, $mx + 1]);
+    } catch (Exception $e) {
+        echo "  ERROR creating topic: " . $e->getMessage() . "\n";
+        return 0;
+    }
     $t = $db->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = ? LIMIT 1", [$moduleId, $code]);
-    if (!$t) { echo "  ERROR: topic create failed!\n"; return 0; }
+    if (!$t) { echo "  ERROR: topic not found after insert!\n"; return 0; }
     echo "  topic: id={$t['topic_id']} (created)\n";
     return (int)$t['topic_id'];
 }
