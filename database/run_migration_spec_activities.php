@@ -244,16 +244,15 @@ if ($modTenId) {
 // --- Verify ---
 echo "\n=== Verification ===\n";
 $lessons = $database->fetchAll("
-    SELECT l.lesson_code, l.lesson_name, m.module_name, COUNT(a.activity_id) as act_count
+    SELECT l.lesson_code, l.lesson_name, COUNT(a.activity_id) as act_count
     FROM lessons l
-    JOIN modules m ON l.module_id = m.module_id
     LEFT JOIN activities a ON a.lesson_id = l.lesson_id AND a.is_active = 1
     WHERE l.lesson_code LIKE 'NUM-SPEC-%'
     GROUP BY l.lesson_id
     ORDER BY l.lesson_code
 ");
 foreach ($lessons as $l) {
-    echo "  {$l['lesson_code']}: {$l['lesson_name']} ({$l['module_name']}) — {$l['act_count']} activities\n";
+    echo "  {$l['lesson_code']}: {$l['lesson_name']} — {$l['act_count']} activities\n";
 }
 
 echo "\nDone! Refresh your browser.\n";
