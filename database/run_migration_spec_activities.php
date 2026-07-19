@@ -68,10 +68,24 @@ echo "\nModule IDs: 1-9=$mod14Id, Zero=$modZeroId, Ten=$modTenId\n\n";
 
 // --- Cleanup: fully reset spec activities and lessons ---
 echo "Cleaning old spec data...\n";
-$database->execute("DELETE FROM activities WHERE activity_type IN ('spec_count_objects','spec_zero_plate','spec_zero_drag','spec_zero_tap','spec_ten_tap','spec_ten_drag','spec_ten_match','spec_ten_balloon')");
+
+// Show what exists before cleanup
+$oldActs = $database->fetchAll("SELECT activity_id, activity_name, activity_type, lesson_id FROM activities WHERE activity_name IN ('Count One Orange','Tap the Empty Plate','Tap Number Ten','Pop Balloon Ten')");
+echo "  Found " . count($oldActs) . " old activities:\n";
+foreach ($oldActs as $oa) {
+    echo "    id={$oa['activity_id']} type={$oa['activity_type']} lesson_id={$oa['lesson_id']} name={$oa['activity_name']}\n";
+}
+
+// Delete by name (guaranteed match)
+foreach (['Count One Orange','Count Two Mangoes','Count Three Pencils','Count Four Apples','Count Five Cups',
+          'Count Six Chairs','Count Seven Plates','Count Eight Sticks','Count Nine Trees',
+          'Tap the Empty Plate','Drag Empty to Zero','Tap Number Zero',
+          'Tap Number Ten','Drag Ten into Box','Match Ten with Apples','Pop Balloon Ten'] as $name) {
+    $database->execute("DELETE FROM activities WHERE activity_name = ?", [$name]);
+}
 $database->execute("DELETE FROM lessons WHERE lesson_code LIKE 'NUM-SPEC-%'");
 $database->execute("DELETE FROM topics WHERE topic_code LIKE 'NUM-SPEC-%'");
-echo "  Done.\n\n";
+echo "  Cleanup done.\n\n";
 
 // --- Helper: ensure topic ---
 function ensureTopic($database, $moduleId, $topicName, $topicCode) {
