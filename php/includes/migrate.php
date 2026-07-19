@@ -1121,5 +1121,197 @@ function ensure_schema_v4_number_groups($database): void {
         }
     }
 
+    // =============================================
+    // SPEC ACTIVITIES: Counting Objects 1-5, 6-9 (under original module)
+    // =============================================
+    $specSpecData = function ($engine, $extra = []) {
+        return json_encode(array_merge([
+            'engine' => $engine,
+            'difficulty' => 1,
+            'visual' => ['theme'=>'numbers','background'=>'light','show_progress'=>true,'large_numbers'=>true,'large_objects'=>true,'animation'=>'fade']
+        ], $extra), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    };
+
+    $countingSpecTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-14' LIMIT 1", [$origModuleId]);
+    if (!$countingSpecTopic) {
+        $maxTopicOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM topics WHERE module_id = ?", [$origModuleId])['mx'];
+        $database->execute(
+            "INSERT IGNORE INTO topics (module_id, topic_name, topic_code, order_index, is_active)
+             VALUES (?, 'Counting Objects 1-9', 'NUM-SPEC-TOPIC-14', ?, 1)",
+            [$origModuleId, $maxTopicOrder + 1]
+        );
+        $countingSpecTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-14' LIMIT 1", [$origModuleId]);
+    }
+    $countingSpecTopicId = $countingSpecTopic ? (int)$countingSpecTopic['topic_id'] : 0;
+
+    if ($countingSpecTopicId) {
+        $specL01 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L01'");
+        if (!$specL01) {
+            $specLessonOrder = ($database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$countingSpecTopicId])['mx'] ?? 0) + 1;
+            $database->execute(
+                "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
+                 VALUES (?, ?, 'NUM-SPEC-L01', 'Count Objects and Read Numbers 1-5', 'Count objects and identify numbers 1 to 5.', ?, 1)",
+                [$origModuleId, $countingSpecTopicId, $specLessonOrder]
+            );
+            $specL01 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L01'");
+        }
+        if ($specL01) {
+            $specL01Id = (int)$specL01['lesson_id'];
+            $specActs1to5 = [
+                ['Count One Orange', 'Tap one orange then select number 1.', 'Tap one orange.', 'spec_count_objects',
+                 ['object'=>'orange','count'=>1,'correct_number'=>1,'numbers'=>[1,2,3],'tap_audio'=>'Tap one orange.','success_audio'=>'One orange. Number one. Well done!']],
+                ['Count Two Mangoes', 'Tap two mangoes then select number 2.', 'Tap two mangoes.', 'spec_count_objects',
+                 ['object'=>'mango','count'=>2,'correct_number'=>2,'numbers'=>[1,2,3],'tap_audio'=>'Tap two mangoes.','success_audio'=>'Two mangoes. Number two. Well done!']],
+                ['Count Three Pencils', 'Tap three pencils then select number 3.', 'Tap three pencils.', 'spec_count_objects',
+                 ['object'=>'pencil','count'=>3,'correct_number'=>3,'numbers'=>[1,2,3,4],'tap_audio'=>'Tap three pencils.','success_audio'=>'Three pencils. Number three. Well done!']],
+                ['Count Four Apples', 'Tap four apples then select number 4.', 'Tap four apples.', 'spec_count_objects',
+                 ['object'=>'apple','count'=>4,'correct_number'=>4,'numbers'=>[2,1,3,4,5],'tap_audio'=>'Tap four apples.','success_audio'=>'Four apples. Number four. Well done!']],
+                ['Count Five Cups', 'Tap five cups then select number 5.', 'Tap five cups.', 'spec_count_objects',
+                 ['object'=>'cup','count'=>5,'correct_number'=>5,'numbers'=>[1,2,3,4,5],'tap_audio'=>'Tap five cups.','success_audio'=>'Five cups. Number five. Well done!']],
+            ];
+            foreach ($specActs1to5 as $idx => $act) {
+                $exists = $database->fetchOne("SELECT activity_id FROM activities WHERE lesson_id = ? AND activity_name = ? LIMIT 1", [$specL01Id, $act[0]]);
+                if ($exists) continue;
+                $database->execute(
+                    "INSERT INTO activities (module_id, lesson_id, step_type, step_order, order_index, activity_name, activity_description, activity_type, difficulty_level, activity_data, audio_instruction, is_active)
+                     VALUES (?, ?, 'warmup', ?, ?, ?, ?, 'counting', 1, ?, ?, 1)",
+                    [$origModuleId, $specL01Id, $idx, $idx, $act[0], $act[1], $specSpecData($act[3], $act[4]), $act[2]]
+                );
+            }
+        }
+
+        $specL02 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L02'");
+        if (!$specL02) {
+            $specLessonOrder = ($database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$countingSpecTopicId])['mx'] ?? 0) + 1;
+            $database->execute(
+                "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
+                 VALUES (?, ?, 'NUM-SPEC-L02', 'Count Objects and Read Numbers 6-9', 'Count objects and identify numbers 6 to 9.', ?, 1)",
+                [$origModuleId, $countingSpecTopicId, $specLessonOrder]
+            );
+            $specL02 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L02'");
+        }
+        if ($specL02) {
+            $specL02Id = (int)$specL02['lesson_id'];
+            $specActs6to9 = [
+                ['Count Six Chairs', 'Tap six chairs then select number 6.', 'Tap six chairs.', 'spec_count_objects',
+                 ['object'=>'chair','count'=>6,'correct_number'=>6,'numbers'=>[1,2,3,4,5,6],'tap_audio'=>'Tap six chairs.','success_audio'=>'Six chairs. Number six. Well done!']],
+                ['Count Seven Plates', 'Tap seven plates then select number 7.', 'Tap seven plates.', 'spec_count_objects',
+                 ['object'=>'plate','count'=>7,'correct_number'=>7,'numbers'=>[2,4,5,7,1],'tap_audio'=>'Tap seven plates.','success_audio'=>'Seven plates. Number seven. Well done!']],
+                ['Count Eight Sticks', 'Tap eight sticks then select number 8.', 'Tap eight sticks.', 'spec_count_objects',
+                 ['object'=>'stick','count'=>8,'correct_number'=>8,'numbers'=>[4,7,1,3,2,8],'tap_audio'=>'Tap eight sticks.','success_audio'=>'Eight sticks. Number eight. Well done!']],
+                ['Count Nine Trees', 'Tap nine trees then select number 9.', 'Tap nine trees.', 'spec_count_objects',
+                 ['object'=>'tree','count'=>9,'correct_number'=>9,'numbers'=>[1,2,3,4,5,6,8,9],'tap_audio'=>'Tap nine trees.','success_audio'=>'Nine trees. Number nine. Well done!']],
+            ];
+            foreach ($specActs6to9 as $idx => $act) {
+                $exists = $database->fetchOne("SELECT activity_id FROM activities WHERE lesson_id = ? AND activity_name = ? LIMIT 1", [$specL02Id, $act[0]]);
+                if ($exists) continue;
+                $database->execute(
+                    "INSERT INTO activities (module_id, lesson_id, step_type, step_order, order_index, activity_name, activity_description, activity_type, difficulty_level, activity_data, audio_instruction, is_active)
+                     VALUES (?, ?, 'warmup', ?, ?, ?, ?, 'counting', 2, ?, ?, 1)",
+                    [$origModuleId, $specL02Id, $idx, $idx, $act[0], $act[1], $specSpecData($act[3], $act[4]), $act[2]]
+                );
+            }
+        }
+    }
+
+    // =============================================
+    // SPEC ACTIVITIES: Recognising Number 0
+    // =============================================
+    $zeroModule = $database->fetchOne("SELECT module_id FROM modules WHERE module_name = 'Number Zero' AND is_active = 1");
+    if ($zeroModule) {
+        $zeroModuleId = (int)$zeroModule['module_id'];
+        $zeroTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-0' LIMIT 1", [$zeroModuleId]);
+        if (!$zeroTopic) {
+            $maxTopicOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM topics WHERE module_id = ?", [$zeroModuleId])['mx'];
+            $database->execute(
+                "INSERT IGNORE INTO topics (module_id, topic_name, topic_code, order_index, is_active)
+                 VALUES (?, 'Understanding Zero', 'NUM-SPEC-TOPIC-0', ?, 1)",
+                [$zeroModuleId, $maxTopicOrder + 1]
+            );
+            $zeroTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-0' LIMIT 1", [$zeroModuleId]);
+        }
+        $zeroTopicId = $zeroTopic ? (int)$zeroTopic['topic_id'] : 0;
+
+        if ($zeroTopicId) {
+            $specL03 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L03'");
+            if (!$specL03) {
+                $lessonOrder = ($database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$zeroTopicId])['mx'] ?? 0) + 1;
+                $database->execute(
+                    "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
+                     VALUES (?, ?, 'NUM-SPEC-L03', 'Recognising Number 0', 'Understand that zero means no objects.', ?, 1)",
+                    [$zeroModuleId, $zeroTopicId, $lessonOrder]
+                );
+                $specL03 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L03'");
+            }
+            if ($specL03) {
+                $specL03Id = (int)$specL03['lesson_id'];
+                $zeroActs = [
+                    ['Tap the Empty Plate', 'Three plates appear: 2 oranges, 1 orange, empty. Tap the empty plate.', 'Tap the plate with no oranges.', 'spec_zero_plate', 'warmup'],
+                    ['Drag Empty to Zero', 'Drag pictures with no objects into the Zero box.', 'Drag the pictures with no objects to the box labeled Zero.', 'spec_zero_drag', 'we_do'],
+                    ['Tap Number Zero', 'Find and tap the number 0 from 0, 2, 5, 7.', 'Tap number zero.', 'spec_zero_tap', 'check'],
+                ];
+                foreach ($zeroActs as $idx => $act) {
+                    $exists = $database->fetchOne("SELECT activity_id FROM activities WHERE lesson_id = ? AND activity_name = ? LIMIT 1", [$specL03Id, $act[0]]);
+                    if ($exists) continue;
+                    $database->execute(
+                        "INSERT INTO activities (module_id, lesson_id, step_type, step_order, order_index, activity_name, activity_description, activity_type, difficulty_level, activity_data, audio_instruction, is_active)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, 1)",
+                        [$zeroModuleId, $specL03Id, $act[4], $idx, $idx, $act[0], $act[1], $act[3], $specSpecData($act[3]), $act[2]]
+                    );
+                }
+            }
+        }
+    }
+
+    // =============================================
+    // SPEC ACTIVITIES: Recognising Number 10
+    // =============================================
+    $tenModule = $database->fetchOne("SELECT module_id FROM modules WHERE module_name = 'Number Ten' AND is_active = 1");
+    if ($tenModule) {
+        $tenModuleId = (int)$tenModule['module_id'];
+        $tenTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-10' LIMIT 1", [$tenModuleId]);
+        if (!$tenTopic) {
+            $maxTopicOrder = (int)$database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM topics WHERE module_id = ?", [$tenModuleId])['mx'];
+            $database->execute(
+                "INSERT IGNORE INTO topics (module_id, topic_name, topic_code, order_index, is_active)
+                 VALUES (?, 'Understanding Ten', 'NUM-SPEC-TOPIC-10', ?, 1)",
+                [$tenModuleId, $maxTopicOrder + 1]
+            );
+            $tenTopic = $database->fetchOne("SELECT topic_id FROM topics WHERE module_id = ? AND topic_code = 'NUM-SPEC-TOPIC-10' LIMIT 1", [$tenModuleId]);
+        }
+        $tenTopicId = $tenTopic ? (int)$tenTopic['topic_id'] : 0;
+
+        if ($tenTopicId) {
+            $specL04 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L04'");
+            if (!$specL04) {
+                $lessonOrder = ($database->fetchOne("SELECT COALESCE(MAX(order_index),0) as mx FROM lessons WHERE topic_id = ?", [$tenTopicId])['mx'] ?? 0) + 1;
+                $database->execute(
+                    "INSERT INTO lessons (module_id, topic_id, lesson_code, lesson_name, description, order_index, is_active)
+                     VALUES (?, ?, 'NUM-SPEC-L04', 'Recognising Number 10', 'Identify, drag, match, and pop number 10.', ?, 1)",
+                    [$tenModuleId, $tenTopicId, $lessonOrder]
+                );
+                $specL04 = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = 'NUM-SPEC-L04'");
+            }
+            if ($specL04) {
+                $specL04Id = (int)$specL04['lesson_id'];
+                $tenActs = [
+                    ['Tap Number Ten', 'Find and tap the number 10 from 7, 10, 4, 9.', 'Tap number ten.', 'spec_ten_tap', 'warmup', []],
+                    ['Drag Ten into Box', 'A yellow box labeled 10 and numbers 6, 10, 8. Drag 10 into the yellow box.', 'Drag number ten into the yellow box.', 'spec_ten_drag', 'we_do', []],
+                    ['Match Ten with Apples', 'Three groups: 8 apples, 10 apples, 6 apples. Drag number 10 to the group with 10 apples.', 'Match number ten with the group that has ten apples.', 'spec_ten_match', 'you_do', ['object'=>'apple']],
+                    ['Pop Balloon Ten', 'Balloons labeled 5, 10, 7, 9. Pop the balloon with 10.', 'Pop the balloon with number ten.', 'spec_ten_balloon', 'game', []],
+                ];
+                foreach ($tenActs as $idx => $act) {
+                    $exists = $database->fetchOne("SELECT activity_id FROM activities WHERE lesson_id = ? AND activity_name = ? LIMIT 1", [$specL04Id, $act[0]]);
+                    if ($exists) continue;
+                    $database->execute(
+                        "INSERT INTO activities (module_id, lesson_id, step_type, step_order, order_index, activity_name, activity_description, activity_type, difficulty_level, activity_data, audio_instruction, is_active)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, 1)",
+                        [$tenModuleId, $specL04Id, $act[4], $idx, $idx, $act[0], $act[1], $act[3], $specSpecData($act[3], $act[5]), $act[2]]
+                    );
+                }
+            }
+        }
+    }
+
     $done = true;
 }
