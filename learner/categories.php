@@ -32,7 +32,7 @@ if ($learner_logged_in) {
     $need_payment = is_payment_enabled() && !$trialInfo['is_active'];
 }
 
-$modules = $database->fetchAll("SELECT * FROM modules WHERE is_active = 1 AND module_name NOT IN ('Counting','Shapes','Addition','Subtraction','Matching','Games') ORDER BY order_index ASC");
+$modules = $database->fetchAll("SELECT * FROM modules WHERE is_active = 1 AND module_name NOT IN ('Counting','Shapes','Addition','Subtraction','Matching','Games') AND module_id NOT IN (15, 16) ORDER BY order_index ASC");
 
 $category_labels = [
     'Counting' => ['en' => 'Counting & Number Recognition', 'sw' => 'Kuhesabu na Kutambua Namba'],
@@ -44,6 +44,8 @@ $category_labels = [
     'Recognising Numbers 1-9' => ['en' => 'Recognise, trace, and find numbers 1 to 9', 'sw' => 'Tambua, fuata, na upate namba 1 hadi 9'],
     'Counting Numbers 1-9' => ['en' => 'Count objects, match groups, and play counting games', 'sw' => 'Hesabu vitu, linganisha makundi, naucheza michezo ya kuhesabu'],
     'Recognising and Counting Numbers 1-9' => ['en' => 'Learn to recognise, count, and write numbers from 1 to 9', 'sw' => 'Jifunze kutambua, kuhesabu, na kuandika namba 1 hadi 9'],
+    'Numbers 1-5' => ['en' => 'Count, match, and play with numbers 1 to 5', 'sw' => 'Hesabu, linganisha, naucheza na namba 1 hadi 5'],
+    'Numbers 6-9' => ['en' => 'Count, match, and play with numbers 6 to 9', 'sw' => 'Hesabu, linganisha, naucheza na namba 6 hadi 9'],
     'Number Zero' => ['en' => 'Learn to recognise, trace, and find the number 0', 'sw' => 'Jifunze kutambua, kufuata, na kupata namba 0'],
     'Number Ten' => ['en' => 'Learn to recognise, read, write, and count to 10', 'sw' => 'Jifunze kutambua, kusoma, kuandika, na kuhesabu hadi 10'],
     'Numbers 11–20' => ['en' => 'Count objects and learn numbers 11 to 20', 'sw' => 'Hesabu vitu na jifunze namba 11 hadi 20'],

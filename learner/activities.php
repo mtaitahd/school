@@ -31,7 +31,8 @@ if (!$module) {
     exit;
 }
 
-// Fetch lessons for this module if using the new hierarchy
+// Check if this module is a sub-category container (has child modules but no own lessons)
+$sub_modules = [];
 $lessons = $database->fetchAll(
     "SELECT l.* FROM lessons l
      JOIN topics t ON l.topic_id = t.topic_id
@@ -39,6 +40,40 @@ $lessons = $database->fetchAll(
      ORDER BY l.order_index ASC",
     [$module_id]
 );
+
+if (empty($lessons)) {
+    // No lessons — check if this module has child modules (sub-categories)
+    // A module is a sub-category container if its topics have child modules
+    // or if it has topics with no lessons but other modules share similar topics
+    $has_own_activities = $database->fetchOne(
+        "SELECT COUNT(*) as cnt FROM activities WHERE module_id = ? AND is_active = 1",
+        [$module_id]
+    );
+    if ((int)($has_own_activities['cnt'] ?? 0) === 0) {
+        // No activities either — this is likely a container module
+        // Find child modules: modules that have topics linked to this module's strand
+        $parentTopics = $database->fetchAll(
+            "SELECT t.strand_id FROM topics t WHERE t.module_id = ?",
+            [$module_id]
+        );
+        if (!empty($parentTopics)) {
+            $strandId = (int)$parentTopics[0]['strand_id'];
+            $sub_modules = $database->fetchAll(
+                "SELECT DISTINCT m.module_id, m.module_name, m.module_description, m.module_icon, m.module_color, m.audio_prompt,
+                        COUNT(DISTINCT l.lesson_id) as lesson_count,
+                        COUNT(DISTINCT a.activity_id) as activity_count
+                 FROM modules m
+                 JOIN topics t ON t.module_id = m.module_id
+                 LEFT JOIN lessons l ON l.topic_id = t.topic_id AND l.is_active = 1
+                 LEFT JOIN activities a ON a.lesson_id = l.lesson_id AND a.is_active = 1
+                 WHERE t.strand_id = ? AND m.module_id != ? AND m.is_active = 1
+                 GROUP BY m.module_id
+                 ORDER BY m.order_index ASC",
+                [$strandId, $module_id]
+            );
+        }
+    }
+}
 
 $activities_by_lesson = [];
 $activities_flat = [];
@@ -55,7 +90,7 @@ if (!empty($lessons)) {
             'activities' => $lesson_activities,
         ];
     }
-} else {
+} elseif (empty($sub_modules)) {
     // Legacy: fetch activities directly under module
     $activities_flat = $database->fetchAll(
         "SELECT * FROM activities WHERE module_id = ? AND is_active = 1 ORDER BY order_index ASC",
@@ -92,7 +127,30 @@ if (!empty($lessons)) {
         </div>
 
         <div class="row-child">
-            <?php if (!empty($activities_by_lesson)): ?>
+            <?php if (!empty($sub_modules)): ?>
+                <?php foreach ($sub_modules as $sub): ?>
+                <div class="col-child-2">
+                    <article class="module-card" tabindex="0" role="button"
+                         onclick="selectSubModule(<?php echo (int)$sub['module_id']; ?>)"
+                         onkeydown="if(event.key==='Enter')selectSubModule(<?php echo (int)$sub['module_id']; ?>)"
+                         style="border-color: <?php echo htmlspecialchars($sub['module_color']); ?>;">
+                        <div class="module-card-icon-wrap" style="border: 4px solid <?php echo htmlspecialchars($sub['module_color']); ?>;">
+                            <i class="fas <?php echo htmlspecialchars($sub['module_icon']); ?> module-card-icon" style="color: <?php echo htmlspecialchars($sub['module_color']); ?>;" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="module-card-title"><?php echo htmlspecialchars($sub['module_name']); ?></h3>
+                        <p class="module-card-subtitle"><?php echo htmlspecialchars($sub['module_description']); ?></p>
+                        <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 8px;">
+                            <i class="fas fa-book" aria-hidden="true"></i> <?php echo (int)$sub['lesson_count']; ?> lessons
+                            &middot;
+                            <i class="fas fa-play-circle" aria-hidden="true"></i> <?php echo (int)$sub['activity_count']; ?> activities
+                        </p>
+                        <button type="button" class="audio-btn" onclick="event.stopPropagation(); playAudio('<?php echo htmlspecialchars($sub['audio_prompt'], ENT_QUOTES); ?>')" aria-label="Listen">
+                            <i class="fas fa-volume-up" aria-hidden="true"></i>
+                        </button>
+                    </article>
+                </div>
+                <?php endforeach; ?>
+            <?php elseif (!empty($activities_by_lesson)): ?>
                 <?php foreach ($activities_by_lesson as $entry): ?>
                     <?php $lesson = $entry['lesson']; $lesson_activities = $entry['activities'];
                     $is_number_lesson = preg_match('/NUM-N(\d)/', $lesson['lesson_code'] ?? '', $nm);
@@ -184,6 +242,11 @@ if (!empty($lessons)) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <?php include '../php/includes/paths-script.php'; ?>
     <script src="../js/main.js"></script>
+    <script>
+    function selectSubModule(moduleId) {
+        window.location.href = 'activities.php?module_id=' + moduleId + '&lang=<?php echo urlencode($current_lang); ?>';
+    }
+    </script>
 </body>
 </html>
 
