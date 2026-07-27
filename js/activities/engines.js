@@ -221,6 +221,17 @@ const ActivityEngines = {
             8: { emoji: '🐌', name: 'snail' },
             9: { emoji: '👁️', name: 'eye' }
         };
+        const EXTRA_SHAPE_OBJECTS = {
+            1: [{ emoji: '🥢', name: 'stick' }, { emoji: '🚪', name: 'door' }],
+            2: [{ emoji: '🦢', name: 'swan' }, { emoji: '🌙', name: 'moon' }],
+            3: [{ emoji: '🏔️', name: 'mountain' }, { emoji: '🐿️', name: 'squirrel' }],
+            4: [{ emoji: '⛵', name: 'sailboat' }, { emoji: '🪁', name: 'kite' }],
+            5: [{ emoji: '🪝', name: 'hook' }, { emoji: '🥜', name: 'nut' }],
+            6: [{ emoji: '🐌', name: 'snail' }, { emoji: '🌀', name: 'spiral' }],
+            7: [{ emoji: '🪝', name: 'hook' }, { emoji: '🏝️', name: 'island' }],
+            8: [{ emoji: '🍬', name: 'candy' }, { emoji: '🎃', name: 'pumpkin' }],
+            9: [{ emoji: '🎈', name: 'balloon' }, { emoji: '🪢', name: 'knot' }]
+        };
         const ALL_SHAPE_EMOJIS = Object.values(SHAPE_MAP);
 
         function finishOrNext() {
@@ -243,22 +254,38 @@ const ActivityEngines = {
                 roundShape(target);
                 return;
             }
+            if (config.mode === 'fall') {
+                roundFall(target);
+                return;
+            }
 
             /* default: number tiles */
+            const useMultiTarget = config.multiple_targets === true || config.multiple_targets === 'true';
+            const multiCount = useMultiTarget ? (config.target_count || 2) : 1;
             const pool = new Set([target]);
+            const extraTargets = [];
+            if (useMultiTarget && multiCount > 1) {
+                for (let mt = 1; mt < multiCount; mt++) {
+                    extraTargets.push(target);
+                }
+            }
             while (pool.size < poolSize) {
                 pool.add(ActivityCore.randomInt(nurseryMin, nurseryMax));
             }
-            const numbers = ActivityCore.shuffle([...pool]);
+            const numbers = ActivityCore.shuffle([...pool, ...extraTargets]);
             const { display, options } = ActivityCore.clearStage();
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            const prompt = config.instruction || ('Find number ' + target);
+            const prompt = useMultiTarget
+                ? (config.instruction || ('Find ALL the number ' + target + 's! Tap each one.'))
+                : (config.instruction || ('Find number ' + target));
             display.appendChild(ActivityCore.renderPrompt(prompt, '🔢'));
             const tiles = document.createElement('div');
             tiles.className = 'number-tiles number-tiles-large';
 
+            const multiTargetTotal = useMultiTarget ? multiCount : 1;
+            let multiTapped = 0;
             numbers.forEach((n) => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
@@ -267,16 +294,29 @@ const ActivityEngines = {
                 btn.onclick = () => {
                     if (n === target) {
                         btn.classList.add('correct');
-                        ActivityCore.celebrate();
-                        ActivityCore.sayNumber(target, () => {
-                            ActivityCore.sayEncouragement(finishOrNext);
-                        });
+                        if (useMultiTarget) {
+                            multiTapped++;
+                            btn.style.opacity = '0.5';
+                            btn.style.pointerEvents = 'none';
+                            ActivityCore.sayNumber(multiTapped);
+                            if (multiTapped >= multiTargetTotal) {
+                                ActivityCore.celebrate();
+                                ActivityCore.sayNumber(target, () => {
+                                    ActivityCore.sayEncouragement(finishOrNext);
+                                });
+                            }
+                        } else {
+                            ActivityCore.celebrate();
+                            ActivityCore.sayNumber(target, () => {
+                                ActivityCore.sayEncouragement(finishOrNext);
+                            });
+                        }
                     } else {
                         btn.classList.add('incorrect');
                         ActivityCore.say('Oops! That is not ' + target + '. Try again.');
                         setTimeout(() => {
-                            const t = [...tiles.children].find((c) => +c.textContent === target);
-                            if (t) t.classList.add('hint-flash');
+                            const matchingBtns = [...tiles.children].filter((c) => +c.textContent === target && !c.classList.contains('correct'));
+                            if (matchingBtns.length > 0) matchingBtns[0].classList.add('hint-flash');
                         }, 400);
                         setTimeout(() => btn.classList.remove('incorrect'), 600);
                     }
@@ -305,6 +345,11 @@ const ActivityEngines = {
                 correctShape = SHAPE_MAP[target] || ALL_SHAPE_EMOJIS[0];
             }
             var distractors = ALL_SHAPE_EMOJIS.filter(function (s) { return s.name !== correctShape.name; });
+            // Add extra shape objects for variety
+            var extraForNum = EXTRA_SHAPE_OBJECTS[target] || [];
+            extraForNum.forEach(function (e) {
+                if (e.name !== correctShape.name) distractors.push(e);
+            });
             if (distractors.length < 2) {
                 distractors = ActivityCore.getDistractorObjects(correctShape.name, 3);
             }
@@ -633,6 +678,130 @@ const ActivityEngines = {
             runOneTrace();
         }
 
+        function roundFall(target) {
+            const { display, options } = ActivityCore.clearStage();
+            display.className = 'activity-display activity-stage';
+            options.innerHTML = '';
+            display.style.position = 'relative';
+            display.style.overflow = 'hidden';
+            display.style.minHeight = '400px';
+
+            const fallDuration = 4000;
+            const spawnInterval = 600;
+            let score = 0;
+            let missed = 0;
+            let gameActive = true;
+            const totalTargets = config.target_count || 5;
+            const distractorPool = [];
+            for (let d = nurseryMin; d <= nurseryMax; d++) {
+                if (d !== target) distractorPool.push(d);
+            }
+
+            const scoreEl = document.createElement('div');
+            scoreEl.style.cssText = 'text-align:center;font-size:1.1rem;font-weight:700;color:var(--primary-blue,#4A90E2);padding:6px 0;';
+            scoreEl.textContent = 'Tap the ' + target + 's!  Score: 0/' + totalTargets;
+            display.appendChild(scoreEl);
+
+            const arena = document.createElement('div');
+            arena.style.cssText = 'position:relative;width:100%;height:340px;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#e8f4fd 0%,#fff 100%);';
+            display.appendChild(arena);
+
+            function spawnNumber() {
+                if (!gameActive) return;
+                const isTarget = Math.random() < 0.45;
+                const num = isTarget ? target : distractorPool[Math.floor(Math.random() * distractorPool.length)];
+                const el = document.createElement('button');
+                el.type = 'button';
+                el.textContent = num;
+                el.style.cssText = 'position:absolute;top:-60px;width:52px;height:52px;border-radius:50%;border:3px solid ' +
+                    (isTarget ? '#27ae60' : '#e74c3c') + ';background:' + (isTarget ? '#e8f8f0' : '#fde8e8') +
+                    ';font-size:1.5rem;font-weight:800;cursor:pointer;z-index:10;transition:opacity 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.12);';
+                const xPos = Math.random() * (arena.offsetWidth - 60) + 4;
+                el.style.left = xPos + 'px';
+                el.dataset.num = num;
+                el.dataset.isTarget = isTarget ? '1' : '0';
+
+                el.onclick = function () {
+                    if (!gameActive || el.dataset.clicked) return;
+                    el.dataset.clicked = '1';
+                    if (isTarget) {
+                        score++;
+                        el.style.background = '#27ae60';
+                        el.style.color = '#fff';
+                        el.style.transform = 'scale(1.3)';
+                        el.style.opacity = '0';
+                        ActivityCore.sayNumber(score);
+                        scoreEl.textContent = 'Tap the ' + target + 's!  Score: ' + score + '/' + totalTargets;
+                        setTimeout(function () { el.remove(); }, 200);
+                        if (score >= totalTargets) {
+                            gameActive = false;
+                            clearInterval(spawnTimer);
+                            ActivityCore.celebrate();
+                            ActivityCore.sayNumber(target, function () {
+                                ActivityCore.sayEncouragement(finishOrNext);
+                            });
+                        }
+                    } else {
+                        el.style.background = '#e74c3c';
+                        el.style.color = '#fff';
+                        el.style.transform = 'scale(0.8)';
+                        el.style.opacity = '0';
+                        ActivityCore.say('Oops! That is not ' + target + '.');
+                        setTimeout(function () { el.remove(); }, 200);
+                    }
+                };
+
+                arena.appendChild(el);
+
+                let pos = -60;
+                const speed = 0.8 + Math.random() * 0.6;
+                function fallStep() {
+                    if (!gameActive && pos < 340) { el.remove(); return; }
+                    pos += speed;
+                    el.style.top = pos + 'px';
+                    if (pos < 380) {
+                        requestAnimationFrame(fallStep);
+                    } else {
+                        if (!el.dataset.clicked && isTarget) {
+                            missed++;
+                        }
+                        el.remove();
+                    }
+                }
+                requestAnimationFrame(fallStep);
+            }
+
+            const spawnTimer = setInterval(spawnNumber, spawnInterval);
+            setTimeout(function () {
+                gameActive = false;
+                clearInterval(spawnTimer);
+                if (score < totalTargets) {
+                    scoreEl.textContent = 'You found ' + score + ' out of ' + totalTargets + ' ' + target + 's!';
+                    ActivityCore.say('You found ' + score + ' ' + ActivityCore.pluralize(target, score) + '! Let us try again.', function () {
+                        score = 0;
+                        missed = 0;
+                        gameActive = true;
+                        scoreEl.textContent = 'Tap the ' + target + 's!  Score: 0/' + totalTargets;
+                        // restart
+                        var restartTimer = setInterval(spawnNumber, spawnInterval);
+                        setTimeout(function () {
+                            gameActive = false;
+                            clearInterval(restartTimer);
+                            ActivityCore.celebrate();
+                            ActivityCore.sayNumber(target, function () {
+                                ActivityCore.sayEncouragement(finishOrNext);
+                            });
+                        }, 8000);
+                    });
+                }
+            }, fallDuration);
+
+            ActivityCore.bindTopbarAudio(function () {
+                ActivityCore.say('Tap only the number ' + target + ' as they fall down!');
+            });
+            ActivityCore.say('Tap only the number ' + target + ' as they fall!');
+        }
+
         round();
     },
 
@@ -796,8 +965,10 @@ const ActivityEngines = {
         const emoji = ActivityCore.OBJECT_EMOJIS[obj] || '🍎';
         const { min, max } = ActivityCore.getDifficultyRange(config);
         const target = (config.target != null && config.target !== undefined) ? config.target : ActivityCore.randomInt(Math.max(0, min), Math.min(max, 10));
+        const useMixed = config.mixed_fruits === true || config.mixed_fruits === 'true';
         const ROUNDS = 3;
         let roundsDone = 0;
+        const MIXED_POOL = ['apple', 'orange', 'mango', 'grapes', 'watermelon', 'candy', 'cookie', 'star'];
 
         function round() {
             var counts;
@@ -827,9 +998,14 @@ const ActivityEngines = {
                 g.className = 'quantity-group';
                 const row = document.createElement('div');
                 row.className = 'objects-row';
+                // Use mixed fruits for distractor groups, target object for correct group
+                const groupObj = (useMixed && count !== target)
+                    ? ActivityCore.pickRandom(MIXED_POOL.filter(o => o !== obj))
+                    : obj;
+                const groupEmoji = ActivityCore.OBJECT_EMOJIS[groupObj] || emoji;
                 for (let i = 0; i < count; i++) {
                     const s = document.createElement('span');
-                    s.textContent = emoji;
+                    s.textContent = groupEmoji;
                     row.appendChild(s);
                 }
                 if (count === 0) {
@@ -854,7 +1030,10 @@ const ActivityEngines = {
                         });
                     } else {
                         g.classList.add('selected-wrong');
-                        ActivityCore.say('Almost! Let us count together.');
+                        var wrongEmojiCount = g.querySelectorAll('.objects-row span[aria-label!="empty"]').length;
+                        var wrongIsEmpty = g.querySelector('.objects-row span[aria-label="empty"]');
+                        var wrongTotal = wrongIsEmpty ? 0 : wrongEmojiCount;
+                        ActivityCore.say('That group has ' + wrongTotal + ' ' + ActivityCore.pluralize(obj, wrongTotal) + '. Find the group with ' + target + ' ' + ActivityCore.pluralize(obj, target) + '!');
                         setTimeout(() => {
                             g.classList.remove('selected-wrong');
                             [...groups.children].forEach((el) => {
@@ -865,7 +1044,7 @@ const ActivityEngines = {
                                     el.classList.add('selected-correct');
                                 }
                             });
-                        }, 1200);
+                        }, 1800);
                     }
                 };
                 groups.appendChild(g);

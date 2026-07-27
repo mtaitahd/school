@@ -1544,12 +1544,21 @@ body.activity-fullscreen .activity-topbar-simple {
     font-size: 1.2rem;
     transition: background 0.2s, transform 0.2s;
     flex-shrink: 0;
+    margin-right: 8px;
 }
 
 .topbar-simple-btn:hover,
 .topbar-simple-btn:active {
     background: #3a7bd5;
     transform: scale(1.08);
+}
+
+.topbar-home-btn {
+    background: var(--primary-green, #27ae60);
+}
+.topbar-home-btn:hover,
+.topbar-home-btn:active {
+    background: #1e8449;
 }
 
 .topbar-simple-progress {

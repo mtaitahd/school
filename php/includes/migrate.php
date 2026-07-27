@@ -507,7 +507,14 @@ function ensure_schema_v4_number_groups($database): void {
     // --- UNIVERSAL PATCH: runs once, fixes ALL counting activities regardless of module ---
     static $universalPatched = false;
     if (!$universalPatched) {
-        $objectsMap = [1=>'pencil',2=>'table',3=>'desk',4=>'chair',5=>'butterfly',6=>'rabbit',7=>'book',8=>'eraser',9=>'chicken'];
+        // Fix lesson ordering: ensure NUM-N3,4,5,6 have correct order_index
+        for ($fixNum = 1; $fixNum <= 9; $fixNum++) {
+            $fixCode = 'NUM-N' . $fixNum;
+            $database->execute("UPDATE lessons SET order_index = ? WHERE lesson_code = ? AND is_active = 1", [$fixNum, $fixCode]);
+            $fixCode2 = 'COUNT-N' . $fixNum;
+            $database->execute("UPDATE lessons SET order_index = ? WHERE lesson_code = ? AND is_active = 1", [$fixNum, $fixCode2]);
+        }
+        $objectsMap = [1=>'pencil',2=>'table',3=>'book',4=>'chair',5=>'butterfly',6=>'rabbit',7=>'fish',8=>'eraser',9=>'chicken'];
         $allCounting = $database->fetchAll(
             "SELECT a.activity_id, a.activity_data, a.audio_instruction, a.lesson_id,
                     l.lesson_code FROM activities a
@@ -615,7 +622,7 @@ function ensure_schema_v4_number_groups($database): void {
                     unset($pd['min'], $pd['max'], $pd['object']);
                     $pNeed = true;
                     $shapeDesc = ['','pencil','duck','butterfly','chair','hat','spiral','cane','snail','balloon'][$pn];
-                    $expectedAudio = "Number $pn looks like a $shapeDesc.";
+                    $expectedAudio = "Which object looks like number $pn?";
                     if ($pa['audio_instruction'] !== $expectedAudio) {
                         $database->execute("UPDATE activities SET activity_data = ?, audio_instruction = ? WHERE activity_id = ?",
                             [json_encode($pd), $expectedAudio, $pa['activity_id']]);
@@ -698,6 +705,160 @@ function ensure_schema_v4_number_groups($database): void {
                     [json_encode($md), $ma['activity_id']]);
             }
         }
+        // === COMPREHENSIVE PER-NUMBER FIX ===
+        // Ensures every COUNT-N{x} and NUM-N{x} activity has correct counts/targets
+        $fixObjects = [1=>'pencil',2=>'table',3=>'book',4=>'chair',5=>'butterfly',6=>'rabbit',7=>'fish',8=>'eraser',9=>'chicken'];
+        $fixWordMap = ['','one','two','three','four','five','six','seven','eight','nine'];
+        for ($fixN = 1; $fixN <= 9; $fixN++) {
+            $fixObj = $fixObjects[$fixN];
+            $fixWord = $fixWordMap[$fixN];
+
+            // --- COUNTING module (COUNT-N{x}) ---
+            $fixCountLesson = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = ?", ['COUNT-N' . $fixN]);
+            if ($fixCountLesson) {
+                $fixLessonId = (int)$fixCountLesson['lesson_id'];
+                // Fix warmup: count must match the number
+                $fixWarmup = $database->fetchOne(
+                    "SELECT activity_id, activity_data FROM activities WHERE lesson_id = ? AND step_type = 'warmup' LIMIT 1",
+                    [$fixLessonId]
+                );
+                if ($fixWarmup) {
+                    $fd = json_decode($fixWarmup['activity_data'], true) ?: [];
+                    $changed = false;
+                    if (($fd['engine'] ?? '') === 'mango_counting') {
+                        if (($fd['count'] ?? 0) != $fixN) { $fd['count'] = $fixN; $changed = true; }
+                        if (($fd['min'] ?? 0) != $fixN) { $fd['min'] = $fixN; $changed = true; }
+                        if (($fd['max'] ?? 0) != $fixN) { $fd['max'] = $fixN; $changed = true; }
+                        if (($fd['object'] ?? '') !== $fixObj) { $fd['object'] = $fixObj; $changed = true; }
+                        if (($fd['mixed_objects'] ?? true) !== false) { $fd['mixed_objects'] = false; $changed = true; }
+                    }
+                    if ($changed) {
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($fd), $fixWarmup['activity_id']]);
+                    }
+                    $expAudio = "Count the $fixObj" . ($fixN > 1 ? 's' : '') . " with me!";
+                    $database->execute("UPDATE activities SET audio_instruction = ? WHERE activity_id = ? AND audio_instruction != ?",
+                        [$expAudio, $fixWarmup['activity_id'], $expAudio]);
+                }
+                // Fix match: target must equal the number
+                $fixMatch = $database->fetchOne(
+                    "SELECT activity_id, activity_data FROM activities WHERE lesson_id = ? AND step_type = 'match' LIMIT 1",
+                    [$fixLessonId]
+                );
+                if ($fixMatch) {
+                    $fd = json_decode($fixMatch['activity_data'], true) ?: [];
+                    $changed = false;
+                    if (($fd['engine'] ?? '') === 'match_quantity') {
+                        if (($fd['target'] ?? 0) != $fixN) { $fd['target'] = $fixN; $changed = true; }
+                        if (($fd['object'] ?? '') !== $fixObj) { $fd['object'] = $fixObj; $changed = true; }
+                    }
+                    if ($changed) {
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($fd), $fixMatch['activity_id']]);
+                    }
+                    $mPlural = ($fixN === 1) ? '' : 's';
+                    $expAudio = "Find the group with $fixN $fixObj$mPlural!";
+                    $database->execute("UPDATE activities SET audio_instruction = ? WHERE activity_id = ? AND audio_instruction != ?",
+                        [$expAudio, $fixMatch['activity_id'], $expAudio]);
+                }
+                // Fix game: target_number must equal the number
+                $fixGame = $database->fetchOne(
+                    "SELECT activity_id, activity_data FROM activities WHERE lesson_id = ? AND step_type = 'game' LIMIT 1",
+                    [$fixLessonId]
+                );
+                if ($fixGame) {
+                    $fd = json_decode($fixGame['activity_data'], true) ?: [];
+                    $changed = false;
+                    if (($fd['engine'] ?? '') === 'number_identification') {
+                        if (($fd['target_number'] ?? 0) != $fixN) { $fd['target_number'] = $fixN; $changed = true; }
+                    }
+                    if ($changed) {
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($fd), $fixGame['activity_id']]);
+                    }
+                }
+            }
+
+            // --- RECOGNISING module (NUM-N{x}) ---
+            $fixRecogLesson = $database->fetchOne("SELECT lesson_id FROM lessons WHERE lesson_code = ?", ['NUM-N' . $fixN]);
+            if ($fixRecogLesson) {
+                $fixLessonId = (int)$fixRecogLesson['lesson_id'];
+                // Fix find: target_number must equal the number
+                $fixFind = $database->fetchOne(
+                    "SELECT activity_id, activity_data FROM activities WHERE lesson_id = ? AND step_type = 'find' LIMIT 1",
+                    [$fixLessonId]
+                );
+                if ($fixFind) {
+                    $fd = json_decode($fixFind['activity_data'], true) ?: [];
+                    $changed = false;
+                    if (($fd['engine'] ?? '') === 'number_identification') {
+                        if (($fd['target_number'] ?? 0) != $fixN) { $fd['target_number'] = $fixN; $changed = true; }
+                        // Reduce poolSize to avoid too many numbers
+                        if (($fd['poolSize'] ?? 6) > 5) { $fd['poolSize'] = 5; $changed = true; }
+                        // Set max range appropriately
+                        $fixMax = ($fixN === 9) ? 9 : min($fixN + 2, 9);
+                        if (($fd['max'] ?? 0) > $fixMax || ($fd['max'] ?? 0) < $fixN) { $fd['max'] = $fixMax; $changed = true; }
+                        if (($fd['min'] ?? 0) < 1) { $fd['min'] = 1; $changed = true; }
+                    }
+                    if ($changed) {
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($fd), $fixFind['activity_id']]);
+                    }
+                }
+                // Fix intro (colouring): target_number must equal the number
+                $fixIntro = $database->fetchOne(
+                    "SELECT activity_id, activity_data FROM activities WHERE lesson_id = ? AND step_type = 'intro' LIMIT 1",
+                    [$fixLessonId]
+                );
+                if ($fixIntro) {
+                    $fd = json_decode($fixIntro['activity_data'], true) ?: [];
+                    $changed = false;
+                    if (($fd['engine'] ?? '') === 'number_identification') {
+                        if (($fd['target_number'] ?? 0) != $fixN) { $fd['target_number'] = $fixN; $changed = true; }
+                    }
+                    if ($changed) {
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($fd), $fixIntro['activity_id']]);
+                    }
+                    $expAudio = "Let us learn about number $fixN!";
+                    $database->execute("UPDATE activities SET audio_instruction = ? WHERE activity_id = ? AND audio_instruction != ?",
+                        [$expAudio, $fixIntro['activity_id'], $expAudio]);
+                }
+                // Fix shape: target_number must equal the number
+                $fixShape = $database->fetchOne(
+                    "SELECT activity_id, activity_data FROM activities WHERE lesson_id = ? AND step_type = 'shape' LIMIT 1",
+                    [$fixLessonId]
+                );
+                if ($fixShape) {
+                    $fd = json_decode($fixShape['activity_data'], true) ?: [];
+                    $changed = false;
+                    if (($fd['engine'] ?? '') === 'number_identification') {
+                        if (($fd['target_number'] ?? 0) != $fixN) { $fd['target_number'] = $fixN; $changed = true; }
+                    }
+                    if ($changed) {
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($fd), $fixShape['activity_id']]);
+                    }
+                }
+                // Fix tracing: target_number must equal the number
+                $fixTrace = $database->fetchOne(
+                    "SELECT activity_id, activity_data FROM activities WHERE lesson_id = ? AND step_type = 'tracing' LIMIT 1",
+                    [$fixLessonId]
+                );
+                if ($fixTrace) {
+                    $fd = json_decode($fixTrace['activity_data'], true) ?: [];
+                    $changed = false;
+                    if (($fd['engine'] ?? '') === 'number_identification') {
+                        if (($fd['target_number'] ?? 0) != $fixN) { $fd['target_number'] = $fixN; $changed = true; }
+                    }
+                    if ($changed) {
+                        $database->execute("UPDATE activities SET activity_data = ? WHERE activity_id = ?",
+                            [json_encode($fd), $fixTrace['activity_id']]);
+                    }
+                }
+            }
+        }
+
         $universalPatched = true;
     }
 
@@ -1035,7 +1196,7 @@ function ensure_schema_v4_number_groups($database): void {
         $cnt = $database->fetchOne("SELECT COUNT(*) as c FROM activities WHERE lesson_id = ? AND is_active = 1", [$countN1['lesson_id']]);
         if ((int)($cnt['c'] ?? 0) >= 3) {
             // Fix existing activities: add target/target_number to match/find/game activities
-            $objects = [1=>'pencil',2=>'table',3=>'desk',4=>'chair',5=>'butterfly',6=>'rabbit',7=>'book',8=>'eraser',9=>'chicken'];
+            $objects = [1=>'pencil',2=>'table',3=>'book',4=>'chair',5=>'butterfly',6=>'rabbit',7=>'fish',8=>'eraser',9=>'chicken'];
             for ($n = 1; $n <= 9; $n++) {
                 $obj = $objects[$n];
                 // Fix match_quantity activities: add target and object
@@ -1213,17 +1374,17 @@ function ensure_schema_v4_number_groups($database): void {
              '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"poolSize":3,"interaction":"coloring","step_type":"intro","skip_finish":true}',
              "Let us learn about number $num!"],
             ['shape', 1, 'tracing', "Shape of Number $num",
-             "Look at the shape of number $num. It looks $shapeDesc.",
+             "Which object looks like number $num? Tap the right one!",
              '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"poolSize":3,"shape_object":"'.$shapeObjs[$num].'","step_type":"shape","skip_finish":true}',
-             "Number $num looks like a " . $shapeObjs[$num] . "."],
+             "Which object looks like number $num?"],
             ['tracing', 2, 'tracing', "Trace Number $num",
              "Use your finger to trace the number $num. Follow the dotted lines.",
              '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"min":1,"max":3,"mode":"trace","step_type":"tracing","skip_finish":true}',
              "Trace number $num with your finger!"],
             ['find', 3, 'identification', "Find Number $num",
-             "Find and tap the number $num among all the numbers!",
-             '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"min":1,"max":'.$maxCount.',"step_type":"find"}',
-             "Can you find number $num?"],
+             "Find and tap ALL the number $num among all the numbers!",
+             '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"min":1,"max":'.$maxCount.',"step_type":"find","multiple_targets":true,"target_count":2,"poolSize":4}',
+             "Can you find all the number $num?"],
             ['assessment', 4, 'quiz', "Quiz: Number $num",
              "Show what you know about number $num!",
              '{"engine":"mango_counting","difficulty":1,"min":1,"max":'.$maxCount.',"mode":"quiz","step_type":"assessment"}',
@@ -1278,11 +1439,11 @@ function ensure_schema_v4_number_groups($database): void {
              "Count the $obj" . ($num > 1 ? 's' : '') . " with me!"],
             ['match', 1, 'matching', "Match " . ucfirst($numWord) . ' Object' . ($num > 1 ? 's' : ''),
              "Match the number $num to the group with $num $obj" . ($num > 1 ? 's' : '') . ".",
-             '{"engine":"match_quantity","difficulty":1,"target":'.$num.',"object":"'.$obj.'","step_type":"match"}',
+             '{"engine":"match_quantity","difficulty":1,"target":'.$num.',"object":"'.$obj.'","step_type":"match","mixed_fruits":true}',
              "Find the group with $num $obj" . ($num > 1 ? 's' : '') . "!"],
             ['game', 2, 'game', "Number Game: Find $num",
              "Play a fun game! Find number $num as fast as you can!",
-             '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"min":1,"max":'.$maxCount.',"mode":"hunt","step_type":"game"}',
+             '{"engine":"number_identification","difficulty":1,"target_number":'.$num.',"min":1,"max":'.$maxCount.',"mode":"fall","step_type":"game","target_count":5}',
              "Let us play a game! Find number $num!"],
             ['assessment', 3, 'quiz', "Counting Quiz: Number $num",
              "Show how well you can count to $num!",

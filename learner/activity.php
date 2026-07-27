@@ -89,7 +89,10 @@ if ($lesson_id > 0) {
 </head>
 <body class="page-child activity-fullscreen">
     <div class="activity-topbar-simple">
-        <a href="<?php echo htmlspecialchars($back_url); ?>" class="topbar-simple-btn" aria-label="Back">
+        <a href="<?php echo htmlspecialchars($home_url); ?>" class="topbar-simple-btn topbar-home-btn" aria-label="Home" title="Home">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="<?php echo htmlspecialchars($back_url); ?>" class="topbar-simple-btn" aria-label="Back" title="Back to activities">
             <i class="fas fa-arrow-left"></i>
         </a>
         <?php if ($lesson_name && $total_in_lesson > 0): ?>

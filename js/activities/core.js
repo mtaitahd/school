@@ -15,7 +15,7 @@ const ActivityCore = {
         queen: '👑', robot: '🤖', sun: '☀️', truck: '🛻',
         umbrella: '☂️', van: '🚐', watermelon: '🍉', xylophone: '🔔',
         yarn: '🧶', zebra: '🦓',
-        pencil: '✏️', ruler: '📏', eraser: '🧽', desk: '📦',
+        pencil: '✏️', ruler: '📏', eraser: '🧽', desk: '📚',
         chair: '🪑', table: '🍽️', board: '📋', mushroom: '🍄',
         butterfly: '🦋', rabbit: '🐇', goat: '🐐', chicken: '🐔',
         mosquito: '🦟', bee: '🐝', fly: '🪰', stick: '🥢',
@@ -212,6 +212,8 @@ const ActivityCore = {
         const emojiRow = ['⭐', '🌟', '✨', '🏆', '🎉'];
         const starsHtml = '⭐⭐⭐';
 
+        const cfg = window.ACTIVITY_CONFIG || {};
+        const categoriesUrl = 'categories?lang=' + (cfg.lang || 'en');
         display.innerHTML = '<div class="finish-screen text-center">' +
             '<div class="finish-trophy">🏆</div>' +
             '<div class="finish-stars">' + starsHtml + '</div>' +
@@ -219,10 +221,11 @@ const ActivityCore = {
             '<div class="finish-emoji-row">' +
             emojiRow.map(function(e) { return '<span>' + e + '</span>'; }).join('') +
             '</div>' +
-            '<p class="finish-subtitle">You did a great job!</p></div>';
+            '<p class="finish-subtitle">You did a great job!</p>' +
+            '<div class="finish-actions">' +
+            '<a href="' + categoriesUrl + '" class="btn-child btn-child-primary" style="margin-top:12px;text-decoration:none;"><i class="fas fa-home me-2"></i>Home</a>' +
+            '</div></div>';
         options.innerHTML = '';
-
-        const cfg = window.ACTIVITY_CONFIG || {};
 
         const bar = document.getElementById('nextActivityBar');
         if (bar) {
