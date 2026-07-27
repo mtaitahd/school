@@ -24,8 +24,8 @@ const ActivityEngines = {
         }
         const objectName = obj.charAt(0).toUpperCase() + obj.slice(1);
         const prompt = useMixed
-            ? ('Count only the ' + ActivityCore.pluralize(obj, total) + '! Tap each ' + obj + '!')
-            : (config.instruction || ('Tap each ' + obj + ' as you count!'));
+            ? ActivityCore.t('count_only', { obj: ActivityCore.pluralize(obj, total) })
+            : (config.instruction || ActivityCore.t('tap_each', { obj: obj }));
         let tapped = 0;
 
         function reset() {
@@ -63,7 +63,7 @@ const ActivityEngines = {
                         if (btn.classList.contains('tapped')) return;
                         if (!item.isTarget) {
                             btn.classList.add('wrong-tap');
-                            ActivityCore.say("That is not a " + obj + "! Count only " + ActivityCore.pluralize(obj, 2) + ".");
+                            ActivityCore.say(ActivityCore.t('count_only', { obj: ActivityCore.pluralize(obj, 2) }));
                             setTimeout(function () { btn.classList.remove('wrong-tap'); }, 600);
                             return;
                         }
@@ -81,8 +81,8 @@ const ActivityEngines = {
             display.appendChild(grid);
 
             var audioMsg = useMixed
-                ? "Count only the " + ActivityCore.pluralize(obj, total) + ". Tap each one as I say the number."
-                : "Let's count the " + ActivityCore.pluralize(obj, total) + ". Tap each one as I say the number.";
+                ? ActivityCore.t('count_only', { obj: ActivityCore.pluralize(obj, total) })
+                : ActivityCore.t('lets_count', { obj: ActivityCore.pluralize(obj, total) });
             ActivityCore.bindTopbarAudio(function () {
                 ActivityCore.say(audioMsg);
             });
@@ -93,7 +93,7 @@ const ActivityEngines = {
             const options = ActivityCore.getOptions();
             options.innerHTML = '';
             ActivityCore.getDisplay().querySelector('.activity-prompt').textContent =
-                'How many ' + ActivityCore.pluralize(obj, 2) + ' did you count?';
+                ActivityCore.t('how_many', { obj: ActivityCore.pluralize(obj, 2) });
             const choices = ActivityCore.buildMCOptions(total, Math.max(1, total - 2), total + 2);
             ActivityCore.renderMC(choices, (selected, btn) => {
                 if (selected === total) {
@@ -101,10 +101,10 @@ const ActivityEngines = {
                     ActivityCore.finishActivity();
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Good try. Let us count together again.', reset);
+                    ActivityCore.say(ActivityCore.t('good_try'), reset);
                 }
             });
-            ActivityCore.say('Now choose the number we counted.');
+            ActivityCore.say(ActivityCore.t('now_choose'));
         }
 
         runIntro();
@@ -132,7 +132,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt('Count the ' + ActivityCore.pluralize(obj, count) + '!', emoji));
+            display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('count_obj', { obj: ActivityCore.pluralize(obj, count) }), emoji));
             const grid = document.createElement('div');
             grid.className = 'object-count-grid';
             let tapped = 0;
@@ -159,7 +159,7 @@ const ActivityEngines = {
                 grid.appendChild(btn);
             }
             display.appendChild(grid);
-            ActivityCore.say('Row ' + count + ': Count the ' + ActivityCore.pluralize(obj, count) + '!');
+            ActivityCore.say(ActivityCore.t('row_count', { n: count, obj: ActivityCore.pluralize(obj, count) }));
         }
 
         function showFinalAnswer() {
@@ -167,7 +167,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt(config.instruction || 'How many rows did you count?', '🔢'));
+            display.appendChild(ActivityCore.renderPrompt(config.instruction || ActivityCore.t('how_many_rows'), '🔢'));
             const total = totalRows;
             const choices = ActivityCore.buildMCOptions(total, Math.max(1, total - 2), total + 2);
             ActivityCore.renderMC(choices, (selected, btn) => {
@@ -181,10 +181,10 @@ const ActivityEngines = {
                     });
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Try again. Count the rows!');
+                    ActivityCore.say(ActivityCore.t('try_again_rows'));
                 }
             });
-            ActivityCore.say('You counted ' + total + ' rows! Choose the number.');
+            ActivityCore.say(ActivityCore.t('choose_number', { n: total }));
         }
 
         showRow();
@@ -278,8 +278,8 @@ const ActivityEngines = {
             options.innerHTML = '';
 
             const prompt = useMultiTarget
-                ? (config.instruction || ('Find ALL the number ' + target + 's! Tap each one.'))
-                : (config.instruction || ('Find number ' + target));
+                ? (config.instruction || ActivityCore.t('find_all_number', { n: target }))
+                : (config.instruction || ActivityCore.t('find_number', { n: target }));
             display.appendChild(ActivityCore.renderPrompt(prompt, '🔢'));
             const tiles = document.createElement('div');
             tiles.className = 'number-tiles number-tiles-large';
@@ -313,7 +313,7 @@ const ActivityEngines = {
                         }
                     } else {
                         btn.classList.add('incorrect');
-                        ActivityCore.say('Oops! That is not ' + target + '. Try again.');
+                        ActivityCore.say(ActivityCore.t('oops_not', { n: target }));
                         setTimeout(() => {
                             const matchingBtns = [...tiles.children].filter((c) => +c.textContent === target && !c.classList.contains('correct'));
                             if (matchingBtns.length > 0) matchingBtns[0].classList.add('hint-flash');
@@ -360,7 +360,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            const prompt = config.instruction || ('Find the object shaped like number ' + target + '!');
+            const prompt = config.instruction || ActivityCore.t('find_object_shaped', { n: target });
             display.appendChild(ActivityCore.renderPrompt(prompt, correctShape.emoji));
 
             /* show the number large as reference */
@@ -381,10 +381,10 @@ const ActivityEngines = {
                     if (shape.name === correctShape.name) {
                         btn.classList.add('correct');
                         ActivityCore.celebrate();
-                        ActivityCore.say('Yes! Number ' + target + ' looks like a ' + correctShape.name + '!', finishOrNext);
+                        ActivityCore.say(ActivityCore.t('yes_looks_like', { n: target, obj: correctShape.name }), finishOrNext);
                     } else {
                         btn.classList.add('incorrect');
-                        ActivityCore.say('That is a ' + shape.name + '. Try again!');
+                        ActivityCore.say(ActivityCore.t('that_is', { obj: shape.name }));
                         setTimeout(() => btn.classList.remove('incorrect'), 600);
                     }
                 };
@@ -408,7 +408,7 @@ const ActivityEngines = {
                 options.innerHTML = '';
 
                 const traceLabel = 'Trace ' + (tracesDone + 1) + ' of ' + TRACES_NEEDED;
-                const prompt = config.instruction || ('Trace the number ' + target + '!');
+                const prompt = config.instruction || ActivityCore.t('trace_number', { n: target });
                 display.appendChild(ActivityCore.renderPrompt(prompt, '✏️'));
 
                 /* trace counter */
@@ -484,7 +484,7 @@ const ActivityEngines = {
                 /* hint text */
                 const hint = document.createElement('p');
                 hint.style.cssText = 'text-align:center;color:#888;font-size:0.9rem;margin-top:0.3rem;min-height:1.4em;';
-                hint.textContent = 'Draw over the number with your finger!';
+                            hint.textContent = ActivityCore.t('trace_finger');
                 display.appendChild(hint);
 
                 /* progress bar */
@@ -548,12 +548,12 @@ const ActivityEngines = {
                     /* live feedback */
                     const accuracy = childPoints.length > 0 ? onNumberPixels / childPoints.length : 0;
                     if (totalPixels < 30) {
-                        hint.textContent = 'Good! Keep tracing on the line!';
+                        hint.textContent = ActivityCore.t('keep_tracing');
                     } else if (accuracy >= 0.5) {
-                        hint.textContent = 'Great! You are following the number!';
+                        hint.textContent = ActivityCore.t('great_tracing');
                         hint.style.color = '#27ae60';
                     } else {
-                        hint.textContent = 'Try to stay on the dotted line!';
+                        hint.textContent = ActivityCore.t('stay_on_line');
                         hint.style.color = '#e67e22';
                     }
 
@@ -567,7 +567,7 @@ const ActivityEngines = {
                 function finishOneTrace() {
                     if (finished) return;
                     if (totalPixels < 30 || childPoints.length < 20) {
-                        hint.textContent = 'Draw more on the number first!';
+                        hint.textContent = ActivityCore.t('draw_more');
                         hint.style.color = '#e67e22';
                         return;
                     }
@@ -595,7 +595,7 @@ const ActivityEngines = {
 
                         if (tracesDone >= TRACES_NEEDED) {
                             /* all traces done — move to next activity */
-                            hint.textContent = 'Excellent! You traced ' + target + ' perfectly! 🌟';
+                            hint.textContent = ActivityCore.t('excellent_trace', { n: target }) + ' 🌟';
                             hint.style.color = '#27ae60';
                             ActivityCore.celebrate();
                             ActivityCore.sayNumber(target, () => {
@@ -605,7 +605,7 @@ const ActivityEngines = {
                             });
                         } else {
                             /* more traces needed */
-                            hint.textContent = 'Great tracing! Trace it again! (' + tracesDone + '/' + TRACES_NEEDED + ')';
+                            hint.textContent = ActivityCore.t('trace_again', { d: tracesDone, t: TRACES_NEEDED });
                             hint.style.color = '#27ae60';
                             ActivityCore.sayNumber(target, () => {
                                 setTimeout(runOneTrace, 1500);
@@ -615,7 +615,7 @@ const ActivityEngines = {
                         /* poor trace — retry */
                         canvas.style.borderColor = '#e67e22';
                         canvas.style.borderStyle = 'solid';
-                        hint.textContent = 'Hmm, stay on the dotted line! Try again.';
+                        hint.textContent = ActivityCore.t('stay_dotted');
                         hint.style.color = '#e67e22';
                         progressBar.style.background = '#e67e22';
 
@@ -641,7 +641,7 @@ const ActivityEngines = {
 
                             canvas.style.borderColor = 'var(--primary-blue,#4A90E2)';
                             canvas.style.borderStyle = 'dashed';
-                            hint.textContent = 'Draw over the number with your finger!';
+                hint.textContent = ActivityCore.t('trace_finger');
                             hint.style.color = '#888';
                             progressBar.style.width = '0%';
                             progressBar.style.background = 'linear-gradient(90deg,#4A90E2,#27ae60)';
@@ -699,7 +699,7 @@ const ActivityEngines = {
 
             const scoreEl = document.createElement('div');
             scoreEl.style.cssText = 'text-align:center;font-size:1.1rem;font-weight:700;color:var(--primary-blue,#4A90E2);padding:6px 0;';
-            scoreEl.textContent = 'Tap the ' + target + 's!  Score: 0/' + totalTargets;
+                        scoreEl.textContent = ActivityCore.t('find_falling', { n: target }) + '  Score: 0/' + totalTargets;
             display.appendChild(scoreEl);
 
             const arena = document.createElement('div');
@@ -731,7 +731,7 @@ const ActivityEngines = {
                         el.style.transform = 'scale(1.3)';
                         el.style.opacity = '0';
                         ActivityCore.sayNumber(score);
-                        scoreEl.textContent = 'Tap the ' + target + 's!  Score: ' + score + '/' + totalTargets;
+                        scoreEl.textContent = ActivityCore.t('find_falling', { n: target }) + '  Score: ' + score + '/' + totalTargets;
                         setTimeout(function () { el.remove(); }, 200);
                         if (score >= totalTargets) {
                             gameActive = false;
@@ -746,7 +746,7 @@ const ActivityEngines = {
                         el.style.color = '#fff';
                         el.style.transform = 'scale(0.8)';
                         el.style.opacity = '0';
-                        ActivityCore.say('Oops! That is not ' + target + '.');
+                        ActivityCore.say(ActivityCore.t('oops_not', { n: target }));
                         setTimeout(function () { el.remove(); }, 200);
                     }
                 };
@@ -776,12 +776,12 @@ const ActivityEngines = {
                 gameActive = false;
                 clearInterval(spawnTimer);
                 if (score < totalTargets) {
-                    scoreEl.textContent = 'You found ' + score + ' out of ' + totalTargets + ' ' + target + 's!';
-                    ActivityCore.say('You found ' + score + ' ' + ActivityCore.pluralize(target, score) + '! Let us try again.', function () {
+                    scoreEl.textContent = ActivityCore.t('score_message', { s: score, t: totalTargets }) + ' ' + target + 's!';
+                    ActivityCore.say(ActivityCore.t('score_message', { s: score, t: totalTargets }) + ' ' + ActivityCore.pluralize(target, score) + '! ' + ActivityCore.t('try_again'), function () {
                         score = 0;
                         missed = 0;
                         gameActive = true;
-                        scoreEl.textContent = 'Tap the ' + target + 's!  Score: 0/' + totalTargets;
+            scoreEl.textContent = ActivityCore.t('find_falling', { n: target }) + '  Score: 0/' + totalTargets;
                         // restart
                         var restartTimer = setInterval(spawnNumber, spawnInterval);
                         setTimeout(function () {
@@ -797,9 +797,9 @@ const ActivityEngines = {
             }, fallDuration);
 
             ActivityCore.bindTopbarAudio(function () {
-                ActivityCore.say('Tap only the number ' + target + ' as they fall down!');
+                ActivityCore.say(ActivityCore.t('find_falling', { n: target }));
             });
-            ActivityCore.say('Tap only the number ' + target + ' as they fall!');
+            ActivityCore.say(ActivityCore.t('find_falling', { n: target }));
         }
 
         round();
@@ -819,7 +819,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt(config.instruction || ('Put numbers in order from ' + seqMin + ' to ' + seqMax), '🔢'));
+            display.appendChild(ActivityCore.renderPrompt(config.instruction || ActivityCore.t('put_in_order', { min: seqMin, max: seqMax }), '🔢'));
 
             const ws = document.createElement('div');
             ws.className = 'sequence-workspace';
@@ -854,9 +854,9 @@ const ActivityEngines = {
             display.appendChild(ws);
 
             ActivityCore.bindTopbarAudio(() => {
-                ActivityCore.say('Let us put the numbers in order. Drag number one to the first box.');
+                ActivityCore.say(ActivityCore.t('lets_order'));
             });
-            ActivityCore.say('Let us put the numbers in order. Drag number one to the first box.');
+            ActivityCore.say(ActivityCore.t('lets_order'));
         }
 
         let selectedTile = null;
@@ -883,7 +883,7 @@ const ActivityEngines = {
                     selectedTile = null;
                     if (document.querySelectorAll('.sequence-slot.filled').length >= seqMax) {
                         ActivityCore.celebrate();
-                        ActivityCore.say('Good job! You arranged the numbers correctly!', () => {
+                        ActivityCore.say(ActivityCore.t('good_job'), () => {
                             setTimeout(() => ActivityCore.finishActivity(), 1500);
                         });
                     } else {
@@ -891,7 +891,7 @@ const ActivityEngines = {
                     }
                 } else {
                     ActivityCore.sayNumber(val, () => {
-                        ActivityCore.say('Try a different spot. We need number ' + expected + '.');
+                        ActivityCore.say(ActivityCore.t('try_different', { n: expected }));
                     });
                 }
             };
@@ -916,7 +916,7 @@ const ActivityEngines = {
             const { display, options } = ActivityCore.clearStage();
             display.className = 'activity-display activity-stage';
 
-            display.appendChild(ActivityCore.renderPrompt(config.instruction || 'What number is missing?', '❓'));
+            display.appendChild(ActivityCore.renderPrompt(config.instruction || ActivityCore.t('what_missing'), '❓'));
             const row = document.createElement('div');
             row.className = 'number-line-row';
             [seq[0], seq[1], null, seq[2], seq[3]].forEach((n, i) => {
@@ -946,14 +946,14 @@ const ActivityEngines = {
                     });
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Try again. What comes after ' + seq[1] + '?');
+                    ActivityCore.say(ActivityCore.t('try_after', { n: seq[1] }));
                 }
             });
 
             ActivityCore.bindTopbarAudio(() => {
-                ActivityCore.say('What number comes after ' + seq[1] + ' and before ' + seq[2] + '?');
+                ActivityCore.say(ActivityCore.t('what_after', { n1: seq[1], n2: seq[2] }));
             });
-            ActivityCore.say('What number comes after ' + seq[1] + ' and before ' + seq[2] + '?');
+            ActivityCore.say(ActivityCore.t('what_after', { n1: seq[1], n2: seq[2] }));
         }
         round();
     },
@@ -983,7 +983,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt('Find the group with ' + target + ' ' + ActivityCore.pluralize(obj, target), emoji));
+            display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('find_group', { n: target, obj: ActivityCore.pluralize(obj, target) }), emoji));
             const badge = document.createElement('div');
             badge.className = 'target-number-badge';
             badge.textContent = target;
@@ -1033,7 +1033,7 @@ const ActivityEngines = {
                         var wrongEmojiCount = g.querySelectorAll('.objects-row span[aria-label!="empty"]').length;
                         var wrongIsEmpty = g.querySelector('.objects-row span[aria-label="empty"]');
                         var wrongTotal = wrongIsEmpty ? 0 : wrongEmojiCount;
-                        ActivityCore.say('That group has ' + wrongTotal + ' ' + ActivityCore.pluralize(obj, wrongTotal) + '. Find the group with ' + target + ' ' + ActivityCore.pluralize(obj, target) + '!');
+                        ActivityCore.say(ActivityCore.t('group_has', { n: wrongTotal, obj: ActivityCore.pluralize(obj, wrongTotal), t: target }));
                         setTimeout(() => {
                             g.classList.remove('selected-wrong');
                             [...groups.children].forEach((el) => {
@@ -1052,9 +1052,9 @@ const ActivityEngines = {
             display.appendChild(groups);
 
             ActivityCore.bindTopbarAudio(() => {
-                ActivityCore.say('Can you find the group that has ' + target + ' ' + ActivityCore.pluralize(obj, target) + '?');
-            });
-            ActivityCore.say('Can you find the group that has ' + target + ' ' + ActivityCore.pluralize(obj, target) + '?');
+            ActivityCore.say(ActivityCore.t('that_has', { n: target, obj: ActivityCore.pluralize(obj, target) }));
+        });
+        ActivityCore.say(ActivityCore.t('that_has', { n: target, obj: ActivityCore.pluralize(obj, target) }));
         }
         round();
     },
@@ -1075,7 +1075,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt('Find the ' + target, ActivityCore.SHAPE_ICONS[target]));
+            display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('find_the', { obj: target }), ActivityCore.SHAPE_ICONS[target]));
             const grid = document.createElement('div');
             grid.className = 'shapes-grid';
             pool.forEach((s) => {
@@ -1086,22 +1086,22 @@ const ActivityEngines = {
                 btn.onclick = () => {
                     if (s === target) {
                         btn.classList.add('correct');
-                        ActivityCore.say('That is a ' + target + '!');
+                        ActivityCore.say(ActivityCore.t('that_is_the', { obj: target }));
                         correctCount++;
                         if (correctCount >= roundCount) {
                             ActivityCore.celebrate();
-                            ActivityCore.say('You know your shapes!');
+                            ActivityCore.say(ActivityCore.t('well_done'));
                         } else setTimeout(round, 1200);
                     } else {
                         btn.classList.add('wrong');
-                        ActivityCore.say('That is a ' + s + '. Try again.');
+                        ActivityCore.say(ActivityCore.t('that_is', { obj: s }));
                         setTimeout(() => btn.classList.remove('wrong'), 500);
                     }
                 };
                 grid.appendChild(btn);
             });
             display.appendChild(grid);
-            ActivityCore.say('Can you find the ' + target + '? Tap on the ' + target + '.');
+            ActivityCore.say(ActivityCore.t('can_find', { obj: target }));
         }
 
         function runSortBySize() {
@@ -1115,7 +1115,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            display.appendChild(ActivityCore.renderPrompt('Sort the ' + shape + 's by size!', ActivityCore.SHAPE_ICONS[shape]));
+            display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('sort_by_size', { obj: shape }), ActivityCore.SHAPE_ICONS[shape]));
 
             const bins = document.createElement('div');
             bins.className = 'shape-sort-bins';
@@ -1150,14 +1150,14 @@ const ActivityEngines = {
                     }
                     if (bins.querySelectorAll('.sort-item').length >= 3) {
                         ActivityCore.celebrate();
-                        ActivityCore.say('Great sorting! You sorted by size!');
+                        ActivityCore.say(ActivityCore.t('great_sorting'));
                     }
                 };
                 pool.appendChild(item);
             });
             display.appendChild(pool);
 
-            ActivityCore.say('Sort each ' + shape + ' by its size. Small, Medium, or Large.');
+            ActivityCore.say(ActivityCore.t('sort_each', { obj: shape }));
         }
 
         round();
@@ -1176,7 +1176,7 @@ const ActivityEngines = {
 
         const { display, options } = ActivityCore.clearStage();
         display.className = 'activity-display activity-stage';
-        display.appendChild(ActivityCore.renderPrompt('What comes next in the pattern?', '🧩'));
+        display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('what_next_pattern'), '🧩'));
 
         const row = document.createElement('div');
         row.className = 'pattern-row';
@@ -1199,13 +1199,13 @@ const ActivityEngines = {
                 btn.classList.add('correct');
                 row.querySelector('.pattern-slot').textContent = answer;
                 ActivityCore.celebrate();
-                ActivityCore.say('Correct! ' + label + ' comes next!');
+                ActivityCore.say(ActivityCore.t('correct_next', { n: label }));
             } else {
                 btn.classList.add('incorrect');
-                ActivityCore.say('Try again. Look at the pattern carefully.');
+                ActivityCore.say(ActivityCore.t('try_pattern'));
             }
         });
-        ActivityCore.say('Look at the pattern. What comes next?');
+        ActivityCore.say(ActivityCore.t('look_pattern'));
     },
 
     /* ----- Drag-and-drop addition (1–10) ----- */
@@ -1223,7 +1223,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Move all ' + ActivityCore.pluralize(obj, total) + ' into the basket', emoji));
+        display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('move_all', { obj: ActivityCore.pluralize(obj, total) }), emoji));
         const eq = document.createElement('div');
         eq.className = 'addition-eq';
         eq.textContent = a + ' + ' + b + ' = ?';
@@ -1271,7 +1271,7 @@ const ActivityEngines = {
         display.appendChild(layout);
 
         function showAnswer() {
-            display.querySelector('.activity-prompt').textContent = 'How many ' + ActivityCore.pluralize(obj, 2) + ' are in the basket?';
+            display.querySelector('.activity-prompt').textContent = ActivityCore.t('how_many_in_basket', { obj: ActivityCore.pluralize(obj, 2) });
             const choices = ActivityCore.buildMCOptions(total, 1, total + 3);
             ActivityCore.renderMC(choices, (sel, btn) => {
                 if (sel === total) {
@@ -1280,13 +1280,13 @@ const ActivityEngines = {
                     ActivityCore.sayNumber(total, () => ActivityCore.sayEncouragement());
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Count again. How many ' + ActivityCore.pluralize(obj, 2) + '?');
+                    ActivityCore.say(ActivityCore.t('count_again', { obj: ActivityCore.pluralize(obj, 2) }));
                 }
             });
-            ActivityCore.say('How many ' + ActivityCore.pluralize(obj, 2) + ' are in the basket?');
+            ActivityCore.say(ActivityCore.t('how_many_in_basket', { obj: ActivityCore.pluralize(obj, 2) }));
         }
 
-        ActivityCore.say('Let us add the ' + ActivityCore.pluralize(obj, total) + '. Move them into the basket!');
+        ActivityCore.say(ActivityCore.t('lets_add', { obj: ActivityCore.pluralize(obj, total) }));
     },
 
     /* ----- Visual subtraction (objects disappear, count remaining) ----- */
@@ -1304,7 +1304,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Tap ' + remove + ' ' + ActivityCore.pluralize(obj, remove) + ' to take away', emoji));
+        display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('tap_take_away', { n: remove, obj: ActivityCore.pluralize(obj, remove) }), emoji));
         const eq = document.createElement('div');
         eq.className = 'addition-eq';
         eq.textContent = start + ' - ' + remove + ' = ?';
@@ -1335,7 +1335,7 @@ const ActivityEngines = {
         function showAnswer() {
             const remaining = start - remove;
             display.querySelector('.activity-prompt').textContent =
-                'How many ' + ActivityCore.pluralize(obj, 2) + ' are left?';
+                ActivityCore.t('how_many_left', { obj: ActivityCore.pluralize(obj, 2) });
             const choices = ActivityCore.buildMCOptions(answer, 0, start);
             ActivityCore.renderMC(choices, (sel, btn) => {
                 if (sel === answer) {
@@ -1347,16 +1347,16 @@ const ActivityEngines = {
                     ActivityCore.sayNumber(answer, () => ActivityCore.sayEncouragement());
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Count what is left. Try again.');
+                    ActivityCore.say(ActivityCore.t('count_left'));
                 }
             });
-            ActivityCore.say('How many ' + ActivityCore.pluralize(obj, 2) + ' are left?');
+            ActivityCore.say(ActivityCore.t('how_many_left', { obj: ActivityCore.pluralize(obj, 2) }));
         }
 
         ActivityCore.bindTopbarAudio(() => {
-            ActivityCore.say('We have ' + start + ' ' + ActivityCore.pluralize(obj, start) + '. Tap ' + remove + ' to take them away.');
+            ActivityCore.say(ActivityCore.t('lets_subtract', { n: start, obj: ActivityCore.pluralize(obj, start), r: remove }));
         });
-        ActivityCore.say('We have ' + start + ' ' + ActivityCore.pluralize(obj, start) + '. Tap ' + remove + ' to take them away.');
+        ActivityCore.say(ActivityCore.t('lets_subtract', { n: start, obj: ActivityCore.pluralize(obj, start), r: remove }));
     },
 
     /* ----- Object recognition (identify object by name/emoji) ----- */
@@ -1379,7 +1379,7 @@ const ActivityEngines = {
             emojiDisplay.style.fontSize = '6rem';
             display.appendChild(emojiDisplay);
 
-            display.appendChild(ActivityCore.renderPrompt('What is this?', emoji));
+            display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('what_is_this'), emoji));
 
             const choices = document.createElement('div');
             choices.className = 'recognition-choices';
@@ -1394,10 +1394,10 @@ const ActivityEngines = {
                     if (name === target) {
                         btn.classList.add('correct');
                         ActivityCore.celebrate();
-                        ActivityCore.say('That is a ' + target + '!', () => setTimeout(round, 2000));
+                        ActivityCore.say(ActivityCore.t('that_is_the', { obj: target }), () => setTimeout(round, 2000));
                     } else {
                         btn.classList.add('incorrect');
-                        ActivityCore.say('That is a ' + name + '. Try again.');
+                        ActivityCore.say(ActivityCore.t('that_is', { obj: name }));
                         setTimeout(() => btn.classList.remove('incorrect'), 500);
                     }
                 };
@@ -1406,9 +1406,9 @@ const ActivityEngines = {
             display.appendChild(choices);
 
             ActivityCore.bindTopbarAudio(() => {
-                ActivityCore.say('What is this? Tap the correct name.');
+                ActivityCore.say(ActivityCore.t('tap_correct_name'));
             });
-            ActivityCore.say('What is this? Tap the correct name.');
+            ActivityCore.say(ActivityCore.t('tap_correct_name'));
         }
         round();
     },
@@ -1424,10 +1424,10 @@ const ActivityEngines = {
             display.innerHTML = '<div class="finish-screen text-center">' +
                 '<div class="finish-trophy">🏆</div>' +
                 '<div class="finish-stars">⭐⭐⭐</div>' +
-                '<h2 class="finish-title">Great Work!</h2>' +
-                '<p class="finish-subtitle">You are doing amazing!</p></div>';
+                '<h2 class="finish-title">' + ActivityCore.t('amazing_work') + '</h2>' +
+                '<p class="finish-subtitle">' + ActivityCore.t('amazing_work') + '</p></div>';
             ActivityCore.celebrate();
-            ActivityCore.say('Great work! You are doing amazing!');
+            ActivityCore.say(ActivityCore.t('amazing_work'));
             const bar = document.getElementById('nextActivityBar');
             if (bar) {
                 bar.style.display = 'flex';
@@ -1470,7 +1470,7 @@ const ActivityEngines = {
 
             const subtitle = document.createElement('p');
             subtitle.className = 'math-game-subtitle';
-            subtitle.textContent = 'Choose your level!';
+            subtitle.textContent = ActivityCore.t('choose_level');
             display.appendChild(subtitle);
 
             const levelsDiv = document.createElement('div');
@@ -1493,9 +1493,9 @@ const ActivityEngines = {
             display.appendChild(levelsDiv);
 
             ActivityCore.bindTopbarAudio(function () {
-                ActivityCore.say('Welcome to Math Game! Choose a level to start.');
+                ActivityCore.say(ActivityCore.t('welcome_game'));
             });
-            ActivityCore.say('Welcome to Math Game! Choose a level to start.');
+            ActivityCore.say(ActivityCore.t('welcome_game'));
         }
 
         function startRound() {
@@ -1516,7 +1516,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            showRoundHeader(display, 'Count the ' + ActivityCore.pluralize(obj, total) + '!');
+            showRoundHeader(display, ActivityCore.t('count_obj', { obj: ActivityCore.pluralize(obj, total) }));
 
             const grid = document.createElement('div');
             grid.className = 'object-count-grid';
@@ -1540,7 +1540,7 @@ const ActivityEngines = {
             }
             display.appendChild(grid);
 
-            ActivityCore.say('Count the ' + ActivityCore.pluralize(obj, total) + '. Tap each one.');
+            ActivityCore.say(ActivityCore.t('tap_each_one', { obj: ActivityCore.pluralize(obj, total) }));
         }
 
         function startAdditionRound(level) {
@@ -1556,7 +1556,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            showRoundHeader(display, 'Add the ' + ActivityCore.pluralize(obj, total) + '!');
+            showRoundHeader(display, ActivityCore.t('lets_add', { obj: ActivityCore.pluralize(obj, total) }));
             const eq = document.createElement('div');
             eq.className = 'addition-eq';
             eq.textContent = a + ' + ' + b + ' = ?';
@@ -1605,7 +1605,7 @@ const ActivityEngines = {
             layout.appendChild(basket);
             display.appendChild(layout);
 
-            ActivityCore.say('Add the ' + ActivityCore.pluralize(obj, total) + '. Move them into the basket.');
+            ActivityCore.say(ActivityCore.t('lets_add', { obj: ActivityCore.pluralize(obj, total) }));
         }
 
         function startSubtractionRound(level) {
@@ -1620,7 +1620,7 @@ const ActivityEngines = {
             display.className = 'activity-display activity-stage';
             options.innerHTML = '';
 
-            showRoundHeader(display, 'Take away ' + ActivityCore.pluralize(obj, start) + '!');
+            showRoundHeader(display, ActivityCore.t('tap_take_away', { n: remove, obj: ActivityCore.pluralize(obj, remove) }));
             const eq = document.createElement('div');
             eq.className = 'addition-eq';
             eq.textContent = start + ' - ' + remove + ' = ?';
@@ -1647,7 +1647,7 @@ const ActivityEngines = {
             }
             display.appendChild(grid);
 
-            ActivityCore.say('Take away ' + remove + ' ' + ActivityCore.pluralize(obj, remove) + '. Tap them.');
+            ActivityCore.say(ActivityCore.t('lets_subtract', { n: start, obj: ActivityCore.pluralize(obj, start), r: remove }));
         }
 
         function showRoundHeader(display, text) {
@@ -1663,7 +1663,7 @@ const ActivityEngines = {
             const options = ActivityCore.getOptions();
             options.innerHTML = '';
             const promptEl = ActivityCore.getDisplay().querySelector('.activity-prompt');
-            if (promptEl) promptEl.textContent = 'What is the answer?';
+            if (promptEl) promptEl.textContent = ActivityCore.t('what_answer');
 
             const poolMin = Math.max(0, correct - 3);
             const poolMax = correct + 3;
@@ -1672,14 +1672,14 @@ const ActivityEngines = {
                 if (selected === correct) {
                     btn.classList.add('correct');
                     correctCount++;
-                    ActivityCore.say('Correct!');
+                    ActivityCore.say(ActivityCore.t('correct'));
                     setTimeout(nextRound, 1200);
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Try again.');
+                    ActivityCore.say(ActivityCore.t('try_again'));
                 }
             });
-            ActivityCore.say('Choose the correct answer.');
+            ActivityCore.say(ActivityCore.t('choose_answer'));
         }
 
         function nextRound() {
@@ -1699,11 +1699,11 @@ const ActivityEngines = {
 
             display.innerHTML = '<div class="finish-screen text-center">' +
                 '<div class="finish-trophy">' + (correctCount >= ROUNDS_PER_LEVEL ? '🏆' : '🎉') + '</div>' +
-                '<h2 class="finish-title">' + level.name + ' Complete!</h2>' +
-                '<p class="finish-subtitle">You got ' + correctCount + ' out of ' + ROUNDS_PER_LEVEL + ' correct!</p></div>';
+                '<h2 class="finish-title">' + ActivityCore.t('level_complete', { n: level.name }) + '</h2>' +
+                '<p class="finish-subtitle">' + ActivityCore.t('you_got', { c: correctCount, t: ROUNDS_PER_LEVEL }) + '</p></div>';
 
             ActivityCore.celebrate();
-            ActivityCore.say('Great job! You completed ' + level.name + '!');
+            ActivityCore.say(ActivityCore.t('great_job', { n: level.name }));
 
             if (currentLevel < LEVELS.length - 1) {
                 setTimeout(function () {
@@ -1772,7 +1772,7 @@ const ActivityEngines = {
             options.innerHTML = '';
 
             const promptEl = ActivityCore.getDisplay().querySelector('.activity-prompt');
-            if (promptEl) promptEl.textContent = 'Now tap the number ' + correctNumber + '!';
+            if (promptEl) promptEl.textContent = ActivityCore.t('tap_number', { n: correctNumber });
 
             const shuffled = ActivityCore.shuffle([...numbers]);
             shuffled.forEach(function (n) {
@@ -1789,14 +1789,14 @@ const ActivityEngines = {
                         });
                     } else {
                         btn.classList.add('incorrect');
-                        ActivityCore.say('Try again.');
+                        ActivityCore.say(ActivityCore.t('try_again'));
                         setTimeout(function () { btn.classList.remove('incorrect'); }, 600);
                     }
                 };
                 options.appendChild(btn);
             });
 
-            ActivityCore.say('Tap the number ' + correctNumber + '.');
+            ActivityCore.say(ActivityCore.t('tap_number', { n: correctNumber }));
         }
 
         start();
@@ -1809,7 +1809,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Tap the plate with no oranges.', '🍊'));
+        display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('tap_empty_plate'), '🍊'));
 
         const plates = document.createElement('div');
         plates.className = 'plate-container';
@@ -1849,12 +1849,12 @@ const ActivityEngines = {
                     numDisplay.textContent = '0';
                     numDisplay.style.marginTop = '16px';
                     display.appendChild(numDisplay);
-                    ActivityCore.say('There are no oranges. No oranges means zero.', function () {
+                    ActivityCore.say(ActivityCore.t('empty_means_zero'), function () {
                         setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
                     });
                 } else {
                     plate.classList.add('plate-wrong');
-                    ActivityCore.say('Try again.');
+                    ActivityCore.say(ActivityCore.t('try_again'));
                     setTimeout(function () { plate.classList.remove('plate-wrong'); }, 600);
                 }
             };
@@ -1863,9 +1863,9 @@ const ActivityEngines = {
         display.appendChild(plates);
 
         ActivityCore.bindTopbarAudio(function () {
-            ActivityCore.say('Tap the plate with no oranges.');
+            ActivityCore.say(ActivityCore.t('tap_empty_plate'));
         });
-        ActivityCore.say('Tap the plate with no oranges.');
+        ActivityCore.say(ActivityCore.t('tap_empty_plate'));
     },
 
     /* ----- Section 3, Activity 2: Drag pictures with no objects to Zero box ----- */
@@ -1875,7 +1875,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Drag the pictures with no objects to the box labeled Zero.', '0️⃣'));
+        display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('drag_empty_zero'), '0️⃣'));
 
         const workspace = document.createElement('div');
         workspace.className = 'zero-drag-workspace';
@@ -1924,16 +1924,16 @@ const ActivityEngines = {
                     itemsContainer.appendChild(clone);
                     card.style.display = 'none';
                     correctDrops++;
-                    ActivityCore.say('Correct!');
+                    ActivityCore.say(ActivityCore.t('correct'));
                     if (correctDrops >= totalCorrect) {
                         ActivityCore.celebrate();
-                        ActivityCore.say('Well done!', function () {
+                        ActivityCore.say(ActivityCore.t('well_done'), function () {
                             setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
                         });
                     }
                 } else {
                     card.classList.add('shake-wrong');
-                    ActivityCore.say('This has objects. Find the empty ones.');
+                    ActivityCore.say(ActivityCore.t('this_has_objects'));
                     setTimeout(function () { card.classList.remove('shake-wrong'); }, 600);
                 }
             };
@@ -1946,9 +1946,9 @@ const ActivityEngines = {
         display.appendChild(workspace);
 
         ActivityCore.bindTopbarAudio(function () {
-            ActivityCore.say('Drag the empty things to the Zero box.');
+            ActivityCore.say(ActivityCore.t('drag_empty_zero'));
         });
-        ActivityCore.say('Drag the empty things to the Zero box.');
+        ActivityCore.say(ActivityCore.t('drag_empty_zero'));
     },
 
     /* ----- Section 3, Activity 3: Tap number zero ----- */
@@ -1958,7 +1958,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Tap number zero.', '0️⃣'));
+        display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('tap_number_zero'), '0️⃣'));
 
         const numbers = ActivityCore.shuffle([0, 2, 5, 7]);
         const tiles = document.createElement('div');
@@ -1973,12 +1973,12 @@ const ActivityEngines = {
                 if (n === 0) {
                     btn.classList.add('correct');
                     ActivityCore.celebrate();
-                    ActivityCore.say('Well done!', function () {
+                    ActivityCore.say(ActivityCore.t('well_done'), function () {
                         setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
                     });
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Try again.');
+                    ActivityCore.say(ActivityCore.t('try_again'));
                     setTimeout(function () { btn.classList.remove('incorrect'); }, 600);
                 }
             };
@@ -1987,9 +1987,9 @@ const ActivityEngines = {
         display.appendChild(tiles);
 
         ActivityCore.bindTopbarAudio(function () {
-            ActivityCore.say('Tap number zero.');
+            ActivityCore.say(ActivityCore.t('tap_number_zero'));
         });
-        ActivityCore.say('Tap number zero.');
+        ActivityCore.say(ActivityCore.t('tap_number_zero'));
     },
 
     /* ----- Section 4, Activity 1: Tap number ten ----- */
@@ -1999,7 +1999,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Tap number ten.', '🔢'));
+        display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('tap_number_ten'), '🔢'));
 
         const numbers = ActivityCore.shuffle([7, 10, 4, 9]);
         const tiles = document.createElement('div');
@@ -2014,12 +2014,12 @@ const ActivityEngines = {
                 if (n === 10) {
                     btn.classList.add('correct');
                     ActivityCore.celebrate();
-                    ActivityCore.say('Well done!', function () {
+                    ActivityCore.say(ActivityCore.t('well_done'), function () {
                         setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
                     });
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Try again.');
+                    ActivityCore.say(ActivityCore.t('try_again'));
                     setTimeout(function () { btn.classList.remove('incorrect'); }, 600);
                 }
             };
@@ -2028,9 +2028,9 @@ const ActivityEngines = {
         display.appendChild(tiles);
 
         ActivityCore.bindTopbarAudio(function () {
-            ActivityCore.say('Tap number ten.');
+            ActivityCore.say(ActivityCore.t('tap_number_ten'));
         });
-        ActivityCore.say('Tap number ten.');
+        ActivityCore.say(ActivityCore.t('tap_number_ten'));
     },
 
     /* ----- Section 4, Activity 2: Drag number ten into yellow box ----- */
@@ -2040,7 +2040,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Drag number ten into the yellow box.', '🔢'));
+        display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('drag_into_box'), '🔢'));
 
         const workspace = document.createElement('div');
         workspace.className = 'ten-drag-workspace';
@@ -2069,12 +2069,12 @@ const ActivityEngines = {
                     targetBox.appendChild(clone);
                     btn.style.display = 'none';
                     ActivityCore.celebrate();
-                    ActivityCore.say('Well done! Excellent! That is number ten.', function () {
+                    ActivityCore.say(ActivityCore.t('well_done') + '! ' + ActivityCore.t('excellent'), function () {
                         setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
                     });
                 } else {
                     btn.classList.add('incorrect');
-                    ActivityCore.say('Try again.');
+                    ActivityCore.say(ActivityCore.t('try_again'));
                     setTimeout(function () { btn.classList.remove('incorrect'); }, 600);
                 }
             };
@@ -2086,9 +2086,9 @@ const ActivityEngines = {
         display.appendChild(workspace);
 
         ActivityCore.bindTopbarAudio(function () {
-            ActivityCore.say('Drag number ten into the yellow box.');
+            ActivityCore.say(ActivityCore.t('drag_into_box'));
         });
-        ActivityCore.say('Drag number ten into the yellow box.');
+        ActivityCore.say(ActivityCore.t('drag_into_box'));
     },
 
     /* ----- Section 4, Activity 3: Drag numeral 10 to the group of 10 apples ----- */
@@ -2098,7 +2098,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Match number ten with the group that has ten apples.', '🍎'));
+        display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('match_ten_apples'), '🍎'));
 
         const workspace = document.createElement('div');
         workspace.className = 'ten-match-workspace';
@@ -2144,17 +2144,17 @@ const ActivityEngines = {
                         clone.textContent = '10';
                         groupEl.appendChild(clone);
                         ActivityCore.celebrate();
-                        ActivityCore.say('Excellent! That is number ten.', function () {
+                        ActivityCore.say(ActivityCore.t('excellent'), function () {
                             setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
                         });
                     } else {
                         groupEl.classList.add('selected-wrong');
                         draggable10.classList.remove('selected-drag');
-                        ActivityCore.say('Try again. Count the apples.');
+                        ActivityCore.say(ActivityCore.t('try_again'));
                         setTimeout(function () { groupEl.classList.remove('selected-wrong'); }, 600);
                     }
                 } else {
-                    ActivityCore.say('First tap the number 10, then tap the group with ten apples.');
+                    ActivityCore.say(ActivityCore.t('first_tap'));
                 }
             };
             groups.appendChild(groupEl);
@@ -2164,16 +2164,16 @@ const ActivityEngines = {
             if (matched) return;
             document.querySelectorAll('.ten-drag-number').forEach(function (el) { el.classList.remove('selected-drag'); });
             draggable10.classList.add('selected-drag');
-            ActivityCore.say('Now tap the group with ten apples.');
+            ActivityCore.say(ActivityCore.t('match_ten_apples'));
         };
 
         workspace.appendChild(groups);
         display.appendChild(workspace);
 
         ActivityCore.bindTopbarAudio(function () {
-            ActivityCore.say('Match number ten with the group that has ten apples. First tap 10, then tap the group with ten apples.');
+            ActivityCore.say(ActivityCore.t('match_ten_apples'));
         });
-        ActivityCore.say('Match number ten with the group that has ten apples. First tap 10, then tap the group with ten apples.');
+        ActivityCore.say(ActivityCore.t('match_ten_apples'));
     },
 
     /* ----- Section 4, Activity 4: Pop the balloon with number ten ----- */
@@ -2183,7 +2183,7 @@ const ActivityEngines = {
         display.className = 'activity-display activity-stage';
         options.innerHTML = '';
 
-        display.appendChild(ActivityCore.renderPrompt('Pop the balloon with number ten!', '🎈'));
+        display.appendChild(ActivityCore.renderPrompt(ActivityCore.t('pop_balloon', { n: 10 }), '🎈'));
 
         const balloonGrid = document.createElement('div');
         balloonGrid.className = 'balloon-grid';
@@ -2201,12 +2201,12 @@ const ActivityEngines = {
                     balloon.classList.add('popped');
                     balloon.querySelector('.balloon-body').textContent = '💥';
                     ActivityCore.celebrate();
-                    ActivityCore.say('Excellent! That is number ten.', function () {
+                    ActivityCore.say(ActivityCore.t('excellent'), function () {
                         setTimeout(function () { ActivityCore.finishActivity(); }, 1500);
                     });
                 } else {
                     balloon.classList.add('shake-wrong');
-                    ActivityCore.say('Try again. Find the balloon with ten.');
+                    ActivityCore.say(ActivityCore.t('try_again'));
                     setTimeout(function () { balloon.classList.remove('shake-wrong'); }, 600);
                 }
             };
@@ -2215,9 +2215,9 @@ const ActivityEngines = {
         display.appendChild(balloonGrid);
 
         ActivityCore.bindTopbarAudio(function () {
-            ActivityCore.say('Pop the balloon with number ten!');
+            ActivityCore.say(ActivityCore.t('pop_balloon', { n: 10 }));
         });
-        ActivityCore.say('Pop the balloon with number ten!');
+        ActivityCore.say(ActivityCore.t('pop_balloon', { n: 10 }));
     },
 
     /* ----- Legacy simple counting ----- */
