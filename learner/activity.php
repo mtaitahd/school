@@ -100,6 +100,15 @@ if ($lesson_id > 0) {
             <?php echo $activity_position; ?> / <?php echo $total_in_lesson; ?>
         </span>
         <?php endif; ?>
+        <?php
+        $alt_lang = ($current_lang === 'sw') ? 'en' : 'sw';
+        $alt_label = ($current_lang === 'sw') ? 'EN' : 'SW';
+        $alt_lang_page = 'activity.php?activity_id=' . $activity_id . '&lang=' . $alt_lang;
+        ?>
+        <a href="<?php echo htmlspecialchars($alt_lang_page); ?>" class="topbar-simple-btn topbar-lang-btn" aria-label="Switch language" title="<?php echo $current_lang === 'sw' ? 'Switch to English' : 'Badili ku Kiswahili'; ?>">
+            <i class="fas fa-language"></i>
+            <span class="topbar-lang-label"><?php echo $alt_label; ?></span>
+        </a>
     </div>
 
     <?php $instr = $activity_data['instruction'] ?? ''; ?>
