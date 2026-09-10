@@ -1,27 +1,30 @@
 <?php
-require_once __DIR__ . '/php/db_connection.php';
-require_once __DIR__ . '/php/includes/lang.php';
-require_once __DIR__ . '/php/includes/announcements-data.php';
-require_once __DIR__ . '/php/includes/settings.php';
-
 $current_lang = isset($_GET['lang']) ? $_GET['lang'] : 'en';
+$page_title = 'Kona Ya Hisabati | Pre-Primary Mathematics Learning';
+$page_description = 'Kona Ya Hisabati - interactive Pre-Primary mathematics for Tanzania. Teachers, parents, and learners access numeracy activities, lesson plans, and progress tracking.';
 $base_path = '';
 $active_nav = 'home';
 $lang_page = 'index.php';
-$page_title = 'Kona Ya Hisabati | Pre-Primary Mathematics Learning';
-$page_description = 'Kona Ya Hisabati - interactive Pre-Primary mathematics for Tanzania. Teachers, parents, and learners access numeracy activities, lesson plans, and progress tracking.';
 
-// Notes Board data -- latest 3 published notes
-$kyh_notes = $database->fetchAll("SELECT id, title, slug, featured_image, short_description, publish_date, created_at FROM notes WHERE status = 'published' ORDER BY COALESCE(publish_date, created_at) DESC LIMIT 3");
+require_once __DIR__ . '/php/db_connection.php';
+require_once __DIR__ . '/php/includes/lang.php';
+require_once __DIR__ . '/php/includes/settings.php';
 
-// Events Calendar data -- upcoming published events
-$kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_time, event_description FROM events WHERE status = 'published' AND event_date >= CURDATE() ORDER BY event_date ASC LIMIT 5");
+$kyh_notes = [];
+$kyh_events = [];
+$total_students = 0;
+$benefit_cards = [];
 
-// Total registered students count
-$total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE role = 'learner'")['count'] ?? 0;
+try {
+    require_once __DIR__ . '/php/includes/announcements-data.php';
 
-// Benefit cards
-$benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_active = 1 ORDER BY sort_order ASC, id ASC");
+    $kyh_notes = $database->fetchAll("SELECT id, title, slug, featured_image, short_description, publish_date, created_at FROM notes WHERE status = 'published' ORDER BY COALESCE(publish_date, created_at) DESC LIMIT 3");
+    $kyh_events = $database->fetchAll("SELECT id, event_title, event_date, event_time, event_description FROM events WHERE status = 'published' AND event_date >= CURDATE() ORDER BY event_date ASC LIMIT 5");
+    $total_students = $database->fetchOne("SELECT COUNT(*) as count FROM users WHERE role = 'learner'")['count'] ?? 0;
+    $benefit_cards = $database->fetchAll("SELECT * FROM benefit_cards WHERE is_active = 1 ORDER BY sort_order ASC, id ASC");
+} catch (Exception $e) {
+    error_log('Page data load error: ' . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $current_lang === 'sw' ? 'sw' : 'en'; ?>">

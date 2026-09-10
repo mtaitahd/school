@@ -29,6 +29,8 @@ class Database {
         $this->password = $env['DB_PASS'] ?? 'kona2026$';
     }
 
+    private $connected = false;
+
     private function getConnection(): ?PDO {
         if ($this->pdo === null) {
             $dsn = "mysql:host={$this->host};dbname={$this->db_name};charset={$this->charset}";
@@ -40,40 +42,63 @@ class Database {
             ];
             try {
                 $this->pdo = new PDO($dsn, $this->username, $this->password, $options);
+                $this->connected = true;
             } catch (PDOException $e) {
                 error_log('DB connect error: ' . $e->getMessage());
-                throw new RuntimeException('Database connection failed.');
+                $this->connected = false;
+                return null;
             }
         }
         return $this->pdo;
     }
 
+    public function isConnected(): bool {
+        return $this->connected;
+    }
+
     public function query(string $sql, array $params = []) {
         $pdo = $this->getConnection();
+        if ($pdo === null) {
+            throw new RuntimeException('Database connection failed.');
+        }
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt;
     }
 
     public function fetchOne(string $sql, array $params = []): ?array {
-        $stmt = $this->query($sql, $params);
-        $result = $stmt->fetch();
-        return $result !== false ? $result : null;
+        try {
+            $stmt = $this->query($sql, $params);
+            $result = $stmt->fetch();
+            return $result !== false ? $result : null;
+        } catch (RuntimeException $e) {
+            return null;
+        }
     }
 
     public function fetchAll(string $sql, array $params = []): array {
-        $stmt = $this->query($sql, $params);
-        return $stmt->fetchAll();
+        try {
+            $stmt = $this->query($sql, $params);
+            return $stmt->fetchAll();
+        } catch (RuntimeException $e) {
+            return [];
+        }
     }
 
     public function execute(string $sql, array $params = []): bool {
         $pdo = $this->getConnection();
+        if ($pdo === null) {
+            return false;
+        }
         $stmt = $pdo->prepare($sql);
         return $stmt->execute($params);
     }
 
     public function insert(string $sql, array $params = []) {
         $pdo = $this->getConnection();
+        if ($pdo === null) {
+            return 0;
+        }
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         return (int) $pdo->lastInsertId();
